@@ -1,6 +1,6 @@
 /**
  * Adapter Transacional para ProposalRepository
- * 
+ *
  * Permite que o repositório de propostas trabalhe dentro de uma transação
  * gerenciada pelo Unit of Work.
  */
@@ -11,8 +11,16 @@ import { ExtractTablesWithRelations } from 'drizzle-orm';
 import { propostas, ccbs, boletos } from '@shared/schema';
 import * as schema from '@shared/schema';
 import { Proposal, ProposalStatus } from '../../proposal/domain/Proposal';
-import { IProposalRepository, ProposalSearchCriteria } from '../../proposal/domain/IProposalRepository';
-import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
+import {
+  IProposalRepository,
+  ProposalSearchCriteria,
+} from '../../proposal/domain/IProposalRepository';
+import {
+  PaginatedResult,
+  CursorPaginationOptions,
+  RepositoryFilters,
+  CursorUtils,
+} from '@shared/types/pagination';
 import { EventDispatcher } from '../../../infrastructure/events/EventDispatcher';
 
 // Type para transação Drizzle
@@ -72,7 +80,7 @@ export class TransactionalProposalRepository implements IProposalRepository {
           // 🛠️ P2.1 - Campos obrigatórios adicionados para corrigir LSP diagnostic
           taxaJurosAnual: data.taxa_juros_anual?.toString() || (data.taxa_juros * 12).toString(),
           valorTac: data.valor_tac?.toString() || '0',
-          valorIof: data.valor_iof?.toString() || '0', 
+          valorIof: data.valor_iof?.toString() || '0',
           valorTotalFinanciado: data.valor_total_financiado?.toString() || data.valor.toString(),
           produtoId: data.produto_id,
           tabelaComercialId: data.tabela_comercial_id,
@@ -102,11 +110,13 @@ export class TransactionalProposalRepository implements IProposalRepository {
     // Processar eventos de domínio (REMEDIAÇÃO CRÍTICA - Operação Aço Líquido)
     const events = proposal.getUncommittedEvents();
     const eventDispatcher = EventDispatcher.getInstance();
-    
+
     for (const event of events) {
       // Despachar evento para a fila assíncrona
       await eventDispatcher.dispatch(event);
-      console.log(`[TRANSACTIONAL DOMAIN EVENT DISPATCHED] ${event.eventType} for aggregate ${event.aggregateId}`);
+      console.log(
+        `[TRANSACTIONAL DOMAIN EVENT DISPATCHED] ${event.eventType} for aggregate ${event.aggregateId}`
+      );
     }
     proposal.markEventsAsCommitted();
   }
@@ -199,7 +209,10 @@ export class TransactionalProposalRepository implements IProposalRepository {
     return {
       data: proposals,
       pagination: {
-        nextCursor: result.length === (options.limit || 50) ? CursorUtils.createFromItem(result[result.length - 1], 'createdAt') : null,
+        nextCursor:
+          result.length === (options.limit || 50)
+            ? CursorUtils.createFromItem(result[result.length - 1], 'createdAt')
+            : null,
         prevCursor: null,
         pageSize: proposals.length,
         hasNextPage: result.length === (options.limit || 50),
@@ -241,15 +254,11 @@ export class TransactionalProposalRepository implements IProposalRepository {
       .from(propostas)
       .leftJoin(ccbs, eq(propostas.id, ccbs.propostaId))
       .where(
-        and(
-          eq(propostas.status, 'aprovado' as any),
-          isNull(ccbs.id),
-          isNull(propostas.deletedAt)
-        )
+        and(eq(propostas.status, 'aprovado' as any), isNull(ccbs.id), isNull(propostas.deletedAt))
       )
       .orderBy(desc(propostas.createdAt));
 
-    return result.map(r => Proposal.fromDatabase(r.propostas));
+    return result.map((r) => Proposal.fromDatabase(r.propostas));
   }
 
   async findAwaitingBoletoGeneration(): Promise<Proposal[]> {
@@ -266,7 +275,7 @@ export class TransactionalProposalRepository implements IProposalRepository {
       )
       .orderBy(desc(propostas.createdAt));
 
-    return result.map(r => Proposal.fromDatabase(r.propostas));
+    return result.map((r) => Proposal.fromDatabase(r.propostas));
   }
 
   // ========================================================================
@@ -312,12 +321,7 @@ export class TransactionalProposalRepository implements IProposalRepository {
     const result = await this.tx
       .select()
       .from(propostas)
-      .where(
-        and(
-          eq(propostas.status, status as any),
-          isNull(propostas.deletedAt)
-        )
-      )
+      .where(and(eq(propostas.status, status as any), isNull(propostas.deletedAt)))
       .orderBy(desc(propostas.createdAt));
 
     return result.map((r: any) => Proposal.fromDatabase(r));
@@ -327,12 +331,7 @@ export class TransactionalProposalRepository implements IProposalRepository {
     const result = await this.tx
       .select()
       .from(propostas)
-      .where(
-        and(
-          eq(propostas.clienteCpf, cpf),
-          isNull(propostas.deletedAt)
-        )
-      )
+      .where(and(eq(propostas.clienteCpf, cpf), isNull(propostas.deletedAt)))
       .orderBy(desc(propostas.createdAt));
 
     return result.map((r: any) => Proposal.fromDatabase(r));
@@ -342,12 +341,7 @@ export class TransactionalProposalRepository implements IProposalRepository {
     const result = await this.tx
       .select()
       .from(propostas)
-      .where(
-        and(
-          eq(propostas.lojaId, lojaId),
-          isNull(propostas.deletedAt)
-        )
-      )
+      .where(and(eq(propostas.lojaId, lojaId), isNull(propostas.deletedAt)))
       .orderBy(desc(propostas.createdAt));
 
     return result.map((r: any) => Proposal.fromDatabase(r));
@@ -357,12 +351,7 @@ export class TransactionalProposalRepository implements IProposalRepository {
     const result = await this.tx
       .select()
       .from(propostas)
-      .where(
-        and(
-          eq(propostas.userId, atendenteId),
-          isNull(propostas.deletedAt)
-        )
-      )
+      .where(and(eq(propostas.userId, atendenteId), isNull(propostas.deletedAt)))
       .orderBy(desc(propostas.createdAt));
 
     return result.map((r: any) => Proposal.fromDatabase(r));

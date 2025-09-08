@@ -2,13 +2,13 @@
 
 ## 📋 **SECRETS ATUAIS NO SISTEMA**
 
-| Secret | Status | Tipo |
-|--------|--------|------|
-| `INTER_CLIENT_ID` | ✅ Configurado | Sandbox (provavelmente expirado) |
-| `INTER_CLIENT_SECRET` | ✅ Configurado | Sandbox (provavelmente expirado) |
-| `INTER_CERTIFICATE` | ✅ Configurado | Sandbox (formato correto) |
-| `INTER_PRIVATE_KEY` | ✅ Configurado | Sandbox (formato correto) |
-| `INTER_WEBHOOK_SECRET` | ❌ Faltando | Necessário para webhooks |
+| Secret                 | Status         | Tipo                             |
+| ---------------------- | -------------- | -------------------------------- |
+| `INTER_CLIENT_ID`      | ✅ Configurado | Sandbox (provavelmente expirado) |
+| `INTER_CLIENT_SECRET`  | ✅ Configurado | Sandbox (provavelmente expirado) |
+| `INTER_CERTIFICATE`    | ✅ Configurado | Sandbox (formato correto)        |
+| `INTER_PRIVATE_KEY`    | ✅ Configurado | Sandbox (formato correto)        |
+| `INTER_WEBHOOK_SECRET` | ❌ Faltando    | Necessário para webhooks         |
 
 ---
 
@@ -17,6 +17,7 @@
 As credenciais estão **tecnicamente corretas** mas são de **SANDBOX EXPIRADAS**.
 
 ### ❌ **Por que não funcionam:**
+
 1. **Credenciais sandbox têm validade limitada** (normalmente 3-6 meses)
 2. **Conta sandbox pode estar desativada** no portal do Inter
 3. **Certificado sandbox pode ter expirado**
@@ -26,6 +27,7 @@ As credenciais estão **tecnicamente corretas** mas são de **SANDBOX EXPIRADAS*
 ## ✅ **ESTRUTURA CORRETA PARA PRODUÇÃO**
 
 ### **1. INTER_CLIENT_ID**
+
 ```
 Formato: string alfanumérica
 Exemplo: 385d7748-8c5e-4d43-b3f4-a1234567890a
@@ -33,6 +35,7 @@ Origem: Portal developers.inter.co → Criar aplicação → Client ID
 ```
 
 ### **2. INTER_CLIENT_SECRET**
+
 ```
 Formato: string base64 ou alfanumérica
 Exemplo: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -40,9 +43,10 @@ Origem: Portal developers.inter.co → Criar aplicação → Client Secret
 ```
 
 ### **3. INTER_CERTIFICATE**
+
 ```
 Formato: Base64 do arquivo .pem ou conteúdo completo
-Exemplo: 
+Exemplo:
 -----BEGIN CERTIFICATE-----
 MIIDXTCCAkWgAwIBAgIJAKoK/OvqDMGmMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
 ...conteúdo do certificado...
@@ -52,6 +56,7 @@ Origem: Portal Inter → Baixar certificado → Converter .pfx para .pem
 ```
 
 ### **4. INTER_PRIVATE_KEY**
+
 ```
 Formato: Base64 da chave privada ou conteúdo completo
 Exemplo:
@@ -64,6 +69,7 @@ Origem: Gerado junto com o certificado
 ```
 
 ### **5. INTER_WEBHOOK_SECRET** (FALTANDO)
+
 ```
 Formato: string aleatória para validação HMAC
 Exemplo: webhook_secret_12345_production
@@ -75,6 +81,7 @@ Origem: Configurado no portal Inter → Webhooks → Secret
 ## 🔧 **COMO OBTER CREDENCIAIS DE PRODUÇÃO**
 
 ### **Passo 1: Acessar Portal do Inter**
+
 ```
 1. Ir para: https://developers.inter.co
 2. Fazer login com conta empresarial
@@ -83,6 +90,7 @@ Origem: Configurado no portal Inter → Webhooks → Secret
 ```
 
 ### **Passo 2: Configurar Aplicação**
+
 ```
 Nome: Simpix Credit Management System
 Tipo: Server-to-Server (OAuth 2.0)
@@ -94,6 +102,7 @@ Escopos necessários:
 ```
 
 ### **Passo 3: Gerar Certificado**
+
 ```
 1. Baixar CSR (Certificate Signing Request)
 2. Submeter para Autoridade Certificadora
@@ -104,6 +113,7 @@ Escopos necessários:
 ```
 
 ### **Passo 4: Configurar Webhook**
+
 ```
 URL: https://api.dominio.com.br/api/inter/webhook
 Eventos: PIX, BOLETO_COBRANCA, TRANSFERENCIA
@@ -115,6 +125,7 @@ Secret: webhook_secret_production_2025
 ## 🚨 **SOLUÇÃO IMEDIATA**
 
 ### **Opção 1: Verificar Conta Sandbox**
+
 ```bash
 # Acessar portal do Inter e verificar:
 1. Se a conta sandbox ainda está ativa
@@ -123,6 +134,7 @@ Secret: webhook_secret_production_2025
 ```
 
 ### **Opção 2: Solicitar Credenciais de Produção**
+
 ```bash
 # Contatar o Banco Inter:
 - Suporte técnico: developers@inter.co
@@ -134,19 +146,20 @@ Secret: webhook_secret_production_2025
 
 ## 📊 **DIAGNÓSTICO COMPLETO**
 
-| Item | Status Atual | Solução |
-|------|--------------|---------|
-| **Código** | ✅ Perfeito | Nenhuma mudança necessária |
-| **Estrutura Secrets** | ✅ Correta | Adicionar INTER_WEBHOOK_SECRET |
-| **Credenciais** | ❌ Expiradas | Obter credenciais de produção |
-| **Certificado** | ❌ Sandbox | Obter certificado de produção |
-| **Fluxo** | ✅ Funcionando | Pronto para produção |
+| Item                  | Status Atual   | Solução                        |
+| --------------------- | -------------- | ------------------------------ |
+| **Código**            | ✅ Perfeito    | Nenhuma mudança necessária     |
+| **Estrutura Secrets** | ✅ Correta     | Adicionar INTER_WEBHOOK_SECRET |
+| **Credenciais**       | ❌ Expiradas   | Obter credenciais de produção  |
+| **Certificado**       | ❌ Sandbox     | Obter certificado de produção  |
+| **Fluxo**             | ✅ Funcionando | Pronto para produção           |
 
 ---
 
 ## ⚡ **AÇÃO IMEDIATA RECOMENDADA**
 
 1. **Adicionar secret faltante:**
+
    ```
    INTER_WEBHOOK_SECRET=webhook_secret_production_2025
    ```

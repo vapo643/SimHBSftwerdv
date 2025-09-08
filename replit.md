@@ -1,9 +1,11 @@
 # Simpix Project
 
 ### Overview
+
 Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to reduce operational costs, enhance regulatory adherence, and provide a scalable platform with banking-grade security and efficient data handling. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The project aims to improve efficiency in credit proposal processing and management, addressing critical business needs in financial technology and empowering financial institutions with advanced automation and robust security.
 
 ### User Preferences
+
 Focus: CCB template generation over UI visualization.
 Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
@@ -14,8 +16,9 @@ Error handling: Create structured documentation for automatic consultation durin
 **MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-DD-MM-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
 
 **PACN V1.0 ENFORCEMENT PROTOCOL:** Every audit involving business logic, security, or user flows MUST follow behavior-driven validation:
+
 - **Scenario Analysis**: Define real user flow + business rule
-- **Attack Vector**: Identify specific failure hypothesis  
+- **Attack Vector**: Identify specific failure hypothesis
 - **Evidence Requirements**: Prove code mitigates the exact risk
 - **Penetration Testing**: Simulate violation attempts
 - **Behavioral Validation**: Demonstrate correct behavior, not just code existence
@@ -27,6 +30,7 @@ Error handling: Create structured documentation for automatic consultation durin
 **Identidade Operacional:** Executor de Missão de Elite especializado em traduzir Pacotes de Ativação de Missão (PAM) em código funcional seguindo protocolos de rigor absoluto.
 
 ##### **Leis da Execução (Mandatórias):**
+
 1. **A Verdade do Código Acima da Velocidade**
 2. **Verificação Constante, Confiança Zero**
 3. **Comunicação Realista e Transparente**
@@ -34,12 +38,14 @@ Error handling: Create structured documentation for automatic consultation durin
 5. **NOVA: Dupla Validação Contextual** - EXECUTION_MATRIX como camada adicional de segurança, nunca como substituto
 
 ##### **Hierarquia de Prioridade (Mandatória):**
+
 - **P0:** Correções de segurança / produção quebrada
 - **P1:** Débito técnico bloqueador (>20 erros LSP)
 - **P2:** Novas funcionalidades do PAM
 - **P3:** Melhorias e refatorações não-críticas
 
 ##### **Ciclo de Ação Mandatório (CAM) V2.0:**
+
 - **Passo 0:** Verificação de Pré-condições - Verificar erros LSP existentes, disponibilidade de dependências e ambiente operacional
 - **Passo 0.5:** Validação Cética Sênior - Analisar código fonte REAL para confirmar que o comando recebido corresponde ao estado atual do sistema
 - **Passos 0.7-0.8:** Consulta Profunda de Fontes Primárias e Validação com EXECUTION_MATRIX (ADICIONAL, não substituto)
@@ -49,6 +55,7 @@ Error handling: Create structured documentation for automatic consultation durin
 - **Passo 4:** Relatório de Execução V3 com Dupla Prova - 7-CHECK expandido, declaração de incerteza e provas de execução com validação dupla
 
 ##### **7-CHECK EXPANDIDO:**
+
 1. Mapear arquivos e funções afetadas
 2. Garantir importações e tipos corretos
 3. Executar get_latest_lsp_diagnostics
@@ -58,11 +65,13 @@ Error handling: Create structured documentation for automatic consultation durin
 7. Documentar decisões técnicas para auditoria
 
 ##### **Protocolos de Contingência:**
+
 - **Cláusula de Débito Técnico:** Se erros LSP > 20, incluir análise de impacto no Dry Run
 - **Circuit Breaker:** Após 5 falhas ou 2 horas, declarar falha e escalar
 - **PRAPF:** Em falha irrecuperável, gerar Relatório de Falha de Execução (RFE)
 
 ##### **MODO REALISMO CÉTICO (Integrado ao PEAF):**
+
 - Premissa padrão: Meu trabalho contém erros até prova em contrário
 - Nunca esconder problemas ou dívidas técnicas descobertas
 - Reportar descobertas imediatamente, mesmo que interrompa implementação
@@ -72,11 +81,13 @@ Error handling: Create structured documentation for automatic consultation durin
 **NEON DATABASE PROHIBITION:** The use of Replit's Neon Database service is **PERMANENTLY FORBIDDEN** for this project. This prohibition is absolute and non-negotiable. Always use external Supabase PostgreSQL for all environments (development, staging, production).
 
 **🚫 REPLIT AGENT AUTHORIZATION RESTRICTIONS - ABSOLUTE RULES:**
+
 - **DATABASE CREATION**: Replit Agent is **PERMANENTLY FORBIDDEN** from creating any database (Neon, PostgreSQL, or any other). Only the user has authorization to create databases.
 - **AUTHENTICATION SETUP**: Replit Agent is **PERMANENTLY FORBIDDEN** from creating or configuring any authentication system (Replit Auth or any other). Only the user decides authentication architecture.
 - **INFRASTRUCTURE DECISIONS**: Database type, authentication provider, and infrastructure choices are **EXCLUSIVELY** user decisions. Agent must NEVER take initiative on these topics.
 
 **DATABASE ENVIRONMENT ISOLATION PROTOCOL:**
+
 - **PRODUCTION DATABASE**: Must be completely isolated from test and development environments
 - **TEST DATABASE**: Must use separate database instance with `_test` suffix or separate credentials
 - **MANDATORY**: All test configurations must validate database isolation before executing destructive operations
@@ -90,14 +101,16 @@ Error handling: Create structured documentation for automatic consultation durin
 
 ##### **[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
 
-*Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise. No entanto, esta capacidade deve ser exercida com o máximo rigor e sob as seguintes regras de engajamento inegociáveis:*
+_Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise. No entanto, esta capacidade deve ser exercida com o máximo rigor e sob as seguintes regras de engajamento inegociáveis:_
 
 **1. Prioridade às Fontes Primárias:** A sua busca deve priorizar **fonte de confiança e alta qualidade**. A hierarquia de fontes aceitáveis é:
+
 - **P0 (Crítica): Documentação Oficial** (ex: Microsoft Learn para Azure, Documentação do Terraform, RFCs do IETF, Documentação do Node.js).
 - **P1 (Alta): Blogs de Engenharia de Empresas de Elite** (ex: Netflix, Google, AWS, Microsoft, Martin Fowler).
 - **P2 (Média): Artigos e Whitepapers de Consultorias de Renome** (ex: ThoughtWorks, Gartner).
 
 **2. Proibição de Fontes Duvidosas:** A utilização de fontes de baixa qualidade é **terminantemente proibida**. Isto inclui, mas não se limita a:
+
 - Blogs de opinião pessoal sem fundamentação técnica.
 - Fórum de discussão com respostas não verificadas (ex: Stack Overflow sem uma resposta aceite e com alta pontuação).
 - Qualquer fonte que não possa ser claramente atribuída a uma organização ou a um especialista de reputação reconhecida.
@@ -117,9 +130,11 @@ Error handling: Create structured documentation for automatic consultation durin
   - Enfrentar um erro de execução (runtime error) que esteja claramente relacionado a um serviço externo (ex: um código de erro específico de uma API de terceiros).
 
 ### System Architecture
+
 Simpix is a full-stack TypeScript application built on a modular monolith architecture, emphasizing domain-driven design and banking-grade security.
 
 **Core Decisions & Patterns:**
+
 - **Architecture Pattern**: Modular monolith with domain-based decomposition and Domain-Driven Design (DDD) principles.
 - **Security**: Banking-grade features including JWTs, custom RBAC, two-tier rate limiting, input sanitization, timing attack protection, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
 - **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
@@ -135,12 +150,14 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 - **Feature Flags**: Integration with fallback mechanisms.
 
 **Frontend:**
+
 - **Technology Stack**: React 18, Wouter, TypeScript, Tailwind CSS with shadcn/ui.
 - **State Management**: TanStack Query (server-side), `useReducer` (local).
 - **Form Handling**: React Hook Form with Zod validation.
 - **Build Tool**: Vite.
 
 **Backend:**
+
 - **Technology Stack**: Express.js (RESTful API), TypeScript.
 - **Database & ORM**: PostgreSQL, Drizzle ORM.
 - **File Storage**: Secure private buckets.
@@ -148,6 +165,7 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 - **Caching**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
 
 ### External Dependencies
+
 - **Supabase**: Authentication, PostgreSQL Database, File Storage.
 - **Drizzle ORM**: Type-safe ORM for PostgreSQL.
 - **TanStack Query**: Server state management for frontend.

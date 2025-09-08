@@ -1,7 +1,7 @@
 /**
  * Bull-Board Admin Dashboard Routes
  * Provides web UI for monitoring and managing BullMQ queues
- * 
+ *
  * Security: Requires ADMINISTRADOR role access
  * Features: Queue monitoring, job status, worker metrics
  */
@@ -26,11 +26,11 @@ const initializeQueues = async () => {
     getWebhooksQueue(),
     getReportsQueue(),
   ]);
-  
+
   return createBullBoard({
     queues: [
       new BullMQAdapter(paymentsQueue),
-      new BullMQAdapter(webhooksQueue), 
+      new BullMQAdapter(webhooksQueue),
       new BullMQAdapter(reportsQueue),
     ],
     serverAdapter: serverAdapter,
@@ -55,14 +55,14 @@ router.get('/admin/queues/health', requireAdmin, async (req, res) => {
       getWebhooksQueue(),
       getReportsQueue(),
     ]);
-    
+
     const queueHealths = await Promise.all([
       {
         name: 'payments',
         status: await paymentsQueue.getJobCounts(),
       },
       {
-        name: 'webhooks', 
+        name: 'webhooks',
         status: await webhooksQueue.getJobCounts(),
       },
       {

@@ -1,11 +1,12 @@
 # ROADMAP DE REFATORAÇÃO: REDIS SINGLETON PATTERN
+
 ## OPERAÇÃO ESTABILIZAÇÃO CRÍTICA - FASE 1.3 (IMPLEMENTAÇÃO)
 
 **Data de Criação:** 2025-09-01T20:08:00Z  
 **Arquiteto:** PAM V1.0 - Replit Agent  
 **Missão:** Erradicar vazamento de conexões Redis através de padrão Singleton rigoroso  
 **Base:** `docs/diagnostics/REDIS_CONNECTION_LEAK_FORENSIC_REPORT.md`  
-**Prioridade:** CRÍTICA  
+**Prioridade:** CRÍTICA
 
 ---
 
@@ -14,6 +15,7 @@
 Este roadmap define a implementação completa de um gerenciador de conexão Redis centralizado baseado no padrão Singleton, eliminando as **6+ instâncias independentes** identificadas no relatório forense e implementando gestão adequada do ciclo de vida em ambiente de teste.
 
 ### OBJETIVOS ESPECÍFICOS
+
 1. **Centralização Total:** Todas as conexões Redis devem passar pelo `redis-manager.ts`
 2. **Singleton Rigoroso:** Eliminar escape hatch que permite múltiplas instâncias
 3. **Test Lifecycle:** Implementar limpeza adequada em ambiente de teste
@@ -33,11 +35,11 @@ import type { RedisOptions } from 'ioredis';
 
 /**
  * Singleton Redis Connection Manager
- * 
+ *
  * Este módulo implementa um padrão Singleton rigoroso para gerenciar
  * a conexão Redis única em toda a aplicação. Elimina vazamentos de
  * conexão e garante gestão adequada do ciclo de vida.
- * 
+ *
  * ATENÇÃO: Este é o ÚNICO ponto de criação de instâncias Redis.
  * Qualquer uso direto de `new Redis()` fora deste módulo é PROIBIDO.
  */
@@ -97,8 +99,8 @@ class RedisManager {
       // Reconexão automática em erros específicos
       reconnectOnError: (err: Error) => {
         const reconnectErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT'];
-        return reconnectErrors.some(error => err.message.includes(error));
-      }
+        return reconnectErrors.some((error) => err.message.includes(error));
+      },
     };
 
     // Configurações específicas para teste
@@ -108,7 +110,7 @@ class RedisManager {
         connectTimeout: 2000,
         commandTimeout: 1000,
         maxRetriesPerRequest: 1,
-        enableReadyCheck: false
+        enableReadyCheck: false,
       };
     }
 
@@ -116,7 +118,7 @@ class RedisManager {
     if (isProduction) {
       return {
         ...baseConfig,
-        tls: {}
+        tls: {},
       };
     }
 
@@ -139,7 +141,7 @@ class RedisManager {
       console.error('[REDIS MANAGER] ❌ Erro de conexão:', {
         message: err.message,
         code: (err as any).code,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
 
@@ -163,7 +165,7 @@ class RedisManager {
 
   /**
    * Obtém o cliente Redis (método principal de acesso)
-   * 
+   *
    * @returns Promise<Redis> - Cliente Redis conectado
    */
   public async getClient(): Promise<Redis> {
@@ -202,12 +204,12 @@ class RedisManager {
 
     const config = this.createRedisConfig();
     this.client = new Redis(config);
-    
+
     this.setupEventHandlers(this.client);
 
     // Aguarda conexão ser estabelecida
     await this.client.ping();
-    
+
     console.log('[REDIS MANAGER] 🎯 Singleton Redis conectado com sucesso');
     return this.client;
   }
@@ -230,13 +232,13 @@ class RedisManager {
       return {
         status: 'healthy',
         latency,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         error: (error as Error).message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -320,6 +322,7 @@ export type { Redis } from 'ioredis';
 Baseado no relatório forense, os seguintes arquivos requerem refatoração:
 
 #### 2.1.1 CRÍTICO - Violações Diretas
+
 - ✅ `server/worker.ts`
 - ✅ `server/lib/cache-manager.ts`
 - ✅ `server/worker-test-retry.ts`
@@ -327,11 +330,13 @@ Baseado no relatório forense, os seguintes arquivos requerem refatoração:
 - ✅ `server/security/semgrep-mcp-server.ts`
 
 #### 2.1.2 MÉDIO - Refatoração do Sistema Atual
+
 - ✅ `server/lib/redis-config.ts` (DEPRECAR)
 - ✅ `server/lib/queues.ts`
 - ✅ `server/lib/jwt-auth-middleware.ts`
 
 #### 2.1.3 BAIXO - Consumidores Indiretos
+
 - ✅ Arquivos que importam de `redis-config.ts`
 
 ### 2.2 Diffs Detalhados de Refatoração
@@ -342,7 +347,7 @@ Baseado no relatório forense, os seguintes arquivos requerem refatoração:
 - import Redis from 'ioredis';
 + import { getRedisClient } from './lib/redis-manager';
   import { Worker } from 'bullmq';
-  
+
 - // ANTES: Instância independente (VIOLAÇÃO)
 - const redisConnection = new Redis({
 -   host: process.env.REDIS_HOST || 'localhost',
@@ -354,7 +359,7 @@ Baseado no relatório forense, os seguintes arquivos requerem refatoração:
 
 + // DEPOIS: Usa cliente centralizado
 + let redisConnection: any = null;
-+ 
++
 + async function getWorkerRedisConnection() {
 +   if (!redisConnection) {
 +     redisConnection = await getRedisClient();
@@ -368,7 +373,7 @@ Baseado no relatório forense, os seguintes arquivos requerem refatoração:
       // ... lógica do worker
 -   }, { connection: redisConnection });
 +   }, { connection: redis });
-    
+
     return worker;
   }
 ```
@@ -457,7 +462,7 @@ Baseado no relatório forense, os seguintes arquivos requerem refatoração:
   export async function createTestWorker() {
 +   // DEPOIS: Usa Redis centralizado
 +   const redisConnection = await getRedisClient();
-+   
++
     const worker = new Worker('test-retry-queue', async (job) => {
       console.log('Processing retry job:', job.data);
       // ... lógica do worker
@@ -490,7 +495,7 @@ Baseado no relatório forense, os seguintes arquivos requerem refatoração:
 
       await connection.set('test-key', 'test-value');
       const result = await connection.get('test-key');
-      
+
       res.json({ success: true, result });
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -548,7 +553,7 @@ Baseado no relatório forense, os seguintes arquivos requerem refatoração:
   export async function createEmailQueue() {
 -   const redisConfig = getRedisConnectionConfig();
 +   const redisConnection = await getRedisClient();
-    
+
     return new Queue('email-queue', {
 -     connection: redisConfig
 +     connection: redisConnection
@@ -566,7 +571,7 @@ Baseado no relatório forense, os seguintes arquivos requerem refatoração:
     try {
 -     const redis = createRedisClient();
 +     const redis = await getRedisClient();
-      
+
       const cachedToken = await redis.get(`jwt:${token}`);
       // ... validação
     } catch (error) {
@@ -592,17 +597,17 @@ global.fetch = vi.fn();
 // Configuração global do Redis para testes
 beforeAll(async () => {
   console.log('🧪 [TEST SETUP] Inicializando ambiente de teste Redis...');
-  
+
   // Aguarda um momento para garantir que ambiente está pronto
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   console.log('✅ [TEST SETUP] Ambiente de teste Redis pronto');
 }, 10000); // Timeout de 10s para configuração inicial
 
 // Limpeza global após todos os testes
 afterAll(async () => {
   console.log('🧹 [TEST TEARDOWN] Iniciando limpeza do Redis...');
-  
+
   try {
     // Desconecta todas as conexões Redis
     await disconnectRedis();
@@ -610,14 +615,14 @@ afterAll(async () => {
   } catch (error) {
     console.error('❌ [TEST TEARDOWN] Erro ao desconectar Redis:', error);
   }
-  
+
   console.log('🏁 [TEST TEARDOWN] Limpeza concluída');
 }, 10000); // Timeout de 10s para limpeza
 
 // Reset de mocks antes de cada teste
 beforeEach(async () => {
   vi.clearAllMocks();
-  
+
   // Em ambiente de teste, reseta estado do Redis entre testes
   if (process.env.NODE_ENV === 'test') {
     try {
@@ -637,7 +642,7 @@ vi.mock('process', () => ({
     JWT_SECRET: 'test-jwt-secret',
     SESSION_SECRET: 'test-session-secret',
     CSRF_SECRET: 'test-csrf-secret',
-    
+
     // Configuração Redis para testes
     REDIS_HOST: 'localhost',
     REDIS_PORT: '6379',
@@ -679,32 +684,26 @@ describe('Redis Integration Tests', () => {
 
   test('should connect to Redis and perform basic operations', async () => {
     const redis = await getTestRedisClient();
-    
+
     // Test set/get
     await redis.set('test-key', 'test-value');
     const value = await redis.get('test-key');
-    
+
     expect(value).toBe('test-value');
   });
 
   test('should handle concurrent Redis operations', async () => {
     const redis1 = await getTestRedisClient();
     const redis2 = await getTestRedisClient();
-    
+
     // Ambos devem usar a mesma instância (Singleton)
     expect(redis1).toBe(redis2);
-    
+
     // Operações concorrentes
-    await Promise.all([
-      redis1.set('key1', 'value1'),
-      redis2.set('key2', 'value2')
-    ]);
-    
-    const [value1, value2] = await Promise.all([
-      redis1.get('key1'),
-      redis2.get('key2')
-    ]);
-    
+    await Promise.all([redis1.set('key1', 'value1'), redis2.set('key2', 'value2')]);
+
+    const [value1, value2] = await Promise.all([redis1.get('key1'), redis2.get('key2')]);
+
     expect(value1).toBe('value1');
     expect(value2).toBe('value2');
   });
@@ -842,7 +841,7 @@ echo ""
 echo "📍 [VALIDAÇÃO] Verificando existência do redis-manager.ts..."
 if [ -f "server/lib/redis-manager.ts" ]; then
     echo -e "${GREEN}✅ SUCESSO: redis-manager.ts encontrado${NC}"
-    
+
     # Verificar funções essenciais
     FUNCTIONS_CHECK=$(rg "getRedisClient|disconnectRedis|resetRedisForTesting" server/lib/redis-manager.ts | wc -l)
     if [ $FUNCTIONS_CHECK -ge 3 ]; then
@@ -909,14 +908,14 @@ npm test 2>&1 | grep -i "redis\|connection\|client"
 
 **Arquivo:** `docs/bugs-solved/infrastructure/2025-09-01-redis-connection-leak-singleton-refactor.md`
 
-```markdown
+````markdown
 # BUG RESOLVIDO: Vazamento de Conexões Redis - Implementação Singleton
 
 **Data:** 2025-09-01  
 **Severidade:** CRÍTICA  
 **Categoria:** Infraestrutura  
 **Reporter:** PAM V1.0 Forensic Analysis  
-**Implementador:** Replit Agent  
+**Implementador:** Replit Agent
 
 ## Resumo do Problema
 
@@ -927,14 +926,16 @@ npm test 2>&1 | grep -i "redis\|connection\|client"
 ## Evidências Forenses
 
 ### Instâncias Identificadas
+
 1. `server/worker.ts` - Worker principal com instância própria
-2. `server/lib/cache-manager.ts` - Cache manager ignorando sistema centralizado  
+2. `server/lib/cache-manager.ts` - Cache manager ignorando sistema centralizado
 3. `server/worker-test-retry.ts` - Worker de teste criando conexões adicionais
 4. `server/routes/test-retry-original.ts` - Route com instância dedicada
 5. `server/security/semgrep-mcp-server.ts` - Scanner com instância própria
 6. `server/lib/redis-config.ts` - Singleton deficiente com escape hatch
 
 ### Impacto Quantificado
+
 - **22 arquivos** relacionados ao Redis
 - **6+ instâncias** simultâneas por teste
 - **Zero limpeza** em ambiente de teste
@@ -945,8 +946,9 @@ npm test 2>&1 | grep -i "redis\|connection\|client"
 ### 5.1.1 Novo Arquivo: `server/lib/redis-manager.ts`
 
 **Implementação:** Singleton rigoroso com padrão moderno:
+
 - ✅ Construtor privado força uso único
-- ✅ Lazy loading com `lazyConnect: true`  
+- ✅ Lazy loading com `lazyConnect: true`
 - ✅ Configuração separada para ambiente de teste (DB 1)
 - ✅ Event handlers para monitoramento
 - ✅ Estratégia de reconexão exponencial
@@ -954,6 +956,7 @@ npm test 2>&1 | grep -i "redis\|connection\|client"
 - ✅ Métodos de limpeza para testes
 
 **Funcões Públicas:**
+
 - `getRedisClient()` - Acesso principal ao cliente
 - `checkRedisHealth()` - Health check
 - `disconnectRedis()` - Limpeza controlada
@@ -962,12 +965,14 @@ npm test 2>&1 | grep -i "redis\|connection\|client"
 ### 5.1.2 Refatoração Sistemática
 
 **Arquivos Modificados:** 8 arquivos refatorados
+
 - Eliminação de todas as instâncias `new Redis()`
 - Migração para `getRedisClient()`
 - Atualização de imports
 - Gestão assíncrona adequada
 
 **Arquivo Depreciado:** `server/lib/redis-config.ts`
+
 - Sistema anterior tinha escape hatch via `instanceName`
 - Permitia bypass do Singleton
 - Substituído completamente
@@ -975,13 +980,15 @@ npm test 2>&1 | grep -i "redis\|connection\|client"
 ### 5.1.3 Ambiente de Teste
 
 **Setup Configurado:** `tests/setup.ts`
+
 - ✅ `beforeAll()` para inicialização
 - ✅ `afterAll()` para limpeza com `disconnectRedis()`
 - ✅ `beforeEach()` com `resetRedisForTesting()`
 - ✅ DB separado para testes (DB 1)
 - ✅ Timeouts adequados para conexões
 
-**Configuração Vitest:** 
+**Configuração Vitest:**
+
 - Timeout aumentado para 10s
 - Single thread para evitar conflitos
 - Setup files configurados
@@ -991,13 +998,16 @@ npm test 2>&1 | grep -i "redis\|connection\|client"
 ### 5.1.4 Testes de Regressão
 
 **Comando Executado:**
+
 ```bash
 ./scripts/validate-redis-refactor.sh
 ```
+````
 
 **Resultados:**
+
 - ✅ 0 instâncias `new Redis()` fora do manager
-- ✅ 0 imports de `redis-config.ts`  
+- ✅ 0 imports de `redis-config.ts`
 - ✅ 8+ arquivos usando `redis-manager.ts`
 - ✅ Configuração de teste presente
 - ✅ Todas as funções essenciais implementadas
@@ -1008,6 +1018,7 @@ npm test 2>&1 | grep -i "redis\|connection\|client"
 **Depois:** Suíte completa passa sem erros de conexão
 
 **Monitoramento:**
+
 ```bash
 # Conexões antes da correção: 6+ por teste
 # Conexões após correção: 1 total (Singleton)
@@ -1019,6 +1030,7 @@ redis-cli CLIENT LIST | wc -l
 ### 5.1.6 Regras de Código
 
 **Lint Rule Adicionada:**
+
 ```json
 {
   "rules": {
@@ -1031,6 +1043,7 @@ redis-cli CLIENT LIST | wc -l
 ```
 
 **Git Hook:** Pre-commit check
+
 ```bash
 # .git/hooks/pre-commit
 #!/bin/bash
@@ -1043,6 +1056,7 @@ fi
 ### 5.1.7 Documentação Arquitetural
 
 **ADR Criado:** `docs/architecture/ADR-redis-singleton-pattern.md`
+
 - Define redis-manager.ts como fonte única da verdade
 - Proíbe instanciação direta
 - Estabelece padrões para novos módulos
@@ -1050,7 +1064,7 @@ fi
 ## Lições Aprendidas
 
 1. **Singleton Rigoroso:** Escape hatches permitem violações
-2. **Test Lifecycle:** Cleanup é crítico para testes de integração  
+2. **Test Lifecycle:** Cleanup é crítico para testes de integração
 3. **Monitoramento:** Health checks permitem detecção precoce
 4. **Validação:** Scripts automatizados previnem regressão
 
@@ -1058,18 +1072,20 @@ fi
 
 - ✅ **Redução 100%** em vazamentos de conexão
 - ✅ **Eliminação** do erro `max number of clients reached`
-- ✅ **Estabilização** da suíte de testes 
+- ✅ **Estabilização** da suíte de testes
 - ✅ **Centralização** de configuração Redis
 - ✅ **Melhoria** na manutenibilidade do código
 
 **Status:** ✅ RESOLVIDO  
 **Verified by:** Validation script + Test suite  
-**Follow-up:** Monitoramento contínuo de conexões ativas  
+**Follow-up:** Monitoramento contínuo de conexões ativas
 
 ---
-*Classificação: INFRAESTRUTURA - CRÍTICA*  
-*Protocolo: PAM V1.0 - Operação Estabilização Crítica*
-```
+
+_Classificação: INFRAESTRUTURA - CRÍTICA_  
+_Protocolo: PAM V1.0 - Operação Estabilização Crítica_
+
+````
 
 ### 5.2 Documentação de Arquitetura
 
@@ -1078,11 +1094,11 @@ fi
 ```markdown
 # ADR: Redis Singleton Pattern Implementation
 
-**Status:** ACCEPTED  
-**Date:** 2025-09-01  
-**Deciders:** Technical Team  
-**Consulted:** Infrastructure Team  
-**Informed:** All Developers  
+**Status:** ACCEPTED
+**Date:** 2025-09-01
+**Deciders:** Technical Team
+**Consulted:** Infrastructure Team
+**Informed:** All Developers
 
 ## Context
 
@@ -1100,7 +1116,7 @@ Implement strict Singleton pattern via `server/lib/redis-manager.ts` as the sing
 - Improves test reliability
 - Enables proper lifecycle management
 
-### Negative  
+### Negative
 - Adds async complexity to previously sync code
 - Requires training team on new patterns
 
@@ -1110,9 +1126,10 @@ All modules MUST use:
 ```typescript
 import { getRedisClient } from './lib/redis-manager';
 const redis = await getRedisClient();
-```
+````
 
 FORBIDDEN:
+
 ```typescript
 import Redis from 'ioredis';
 const redis = new Redis(config); // ❌ NEVER DO THIS
@@ -1123,6 +1140,7 @@ const redis = new Redis(config); // ❌ NEVER DO THIS
 - Automated validation via pre-commit hooks
 - Connection count monitoring
 - Health checks at `/health/redis`
+
 ```
 
 ---
@@ -1138,7 +1156,7 @@ const redis = new Redis(config); // ❌ NEVER DO THIS
 
 #### **FASE 2: Refatoração Core (2h)**
 - [ ] Modificar `server/worker.ts`
-- [ ] Modificar `server/lib/cache-manager.ts`  
+- [ ] Modificar `server/lib/cache-manager.ts`
 - [ ] Modificar `server/worker-test-retry.ts`
 - [ ] Testar cada modificação individualmente
 
@@ -1169,7 +1187,7 @@ const redis = new Redis(config); // ❌ NEVER DO THIS
 ### 6.2 Critérios de Sucesso
 
 1. **Zero Violações:** Validação script retorna 0 erros
-2. **Testes Passam:** Suíte completa executa sem falhas Redis  
+2. **Testes Passam:** Suíte completa executa sem falhas Redis
 3. **Conexão Única:** Monitoramento confirma 1 conexão ativa
 4. **Health Check:** Endpoint `/health/redis` funcional
 5. **Documentação:** Bug documentado conforme protocolo
@@ -1195,7 +1213,7 @@ const redis = new Redis(config); // ❌ NEVER DO THIS
 
 **Métricas Críticas:**
 - Número de conexões Redis ativas
-- Latência de operações Redis  
+- Latência de operações Redis
 - Taxa de erro em operações Redis
 - Tempo de execução da suíte de testes
 
@@ -1211,17 +1229,18 @@ const redis = new Redis(config); // ❌ NEVER DO THIS
 
 Este roadmap define a implementação completa de um padrão Singleton rigoroso para eliminação dos vazamentos de conexão Redis identificados no relatório forense. A execução seguindo este plano garante:
 
-✅ **Eliminação Total** dos 6+ pontos de vazamento  
-✅ **Centralização Rigorosa** via `redis-manager.ts`  
-✅ **Gestão Adequada** do ciclo de vida em testes  
-✅ **Validação Automatizada** para prevenir regressão  
-✅ **Documentação Completa** para transferência de conhecimento  
+✅ **Eliminação Total** dos 6+ pontos de vazamento
+✅ **Centralização Rigorosa** via `redis-manager.ts`
+✅ **Gestão Adequada** do ciclo de vida em testes
+✅ **Validação Automatizada** para prevenir regressão
+✅ **Documentação Completa** para transferência de conhecimento
 
 **PRÓXIMO PASSO:** Execução da FASE 1.3 - Implementação conforme este roadmap.
 
 ---
 **[FIM DO ROADMAP]**
 
-*Protocolo PAM V1.0 - Operação Estabilização Crítica*  
-*Classificação: IMPLEMENTAÇÃO READY*  
+*Protocolo PAM V1.0 - Operação Estabilização Crítica*
+*Classificação: IMPLEMENTAÇÃO READY*
 *Aprovação: Arquiteto Técnico*
+```

@@ -13,6 +13,7 @@
 **Localização:** `server/routes/cobrancas.ts`, linha 40-43
 
 **Código Atual:**
+
 ```typescript
 let whereConditions = and(
   sql`${propostas.deletedAt} IS NULL`,
@@ -21,13 +22,14 @@ let whereConditions = and(
 ```
 
 **Status Elegíveis Definidos:**
+
 ```typescript
 const statusElegiveis = [
-  "BOLETOS_EMITIDOS",       // Principal status para cobranças
-  "PAGAMENTO_PENDENTE",     // Aguardando pagamento
-  "PAGAMENTO_PARCIAL",      // Pagamento parcial recebido
-  "PAGAMENTO_CONFIRMADO",   // Pagamento total confirmado
-  "pronto_pagamento",       // Status legado
+  'BOLETOS_EMITIDOS', // Principal status para cobranças
+  'PAGAMENTO_PENDENTE', // Aguardando pagamento
+  'PAGAMENTO_PARCIAL', // Pagamento parcial recebido
+  'PAGAMENTO_CONFIRMADO', // Pagamento total confirmado
+  'pronto_pagamento', // Status legado
 ];
 ```
 
@@ -36,11 +38,13 @@ const statusElegiveis = [
 **STATUS: `[🔴 PARCIALMENTE NÃO CONFORME]`**
 
 **Conformidades Identificadas:**
+
 - ✅ Filtragem por `deletedAt IS NULL` (soft delete implementado)
 - ✅ Uso de array de status elegíveis
 - ✅ Query baseada em status da proposta (conforme PAM V1.0)
 
 **Não Conformidades Identificadas:**
+
 1. **AUSÊNCIA DE REDUNDÂNCIA**: Não há verificação redundante adicional além do status
 2. **FILTROS DINÂMICOS LIMITADOS**: Sistema aceita filtros de query string mas implementação é básica
 3. **VALIDAÇÃO DE REGRAS DE NEGÓCIO**: Não há validação se o status está em uma sequência lógica válida
@@ -54,19 +58,16 @@ const statusElegiveis = [
 **Localização:** `server/routes/cobrancas.ts`, linha 317-388
 
 **Código da Query KPIs:**
+
 ```typescript
 const propostasData = await db
   .select()
   .from(propostas)
-  .where(
-    and(
-      sql`${propostas.deletedAt} IS NULL`,
-      inArray(propostas.status, statusElegiveis)
-    )
-  );
+  .where(and(sql`${propostas.deletedAt} IS NULL`, inArray(propostas.status, statusElegiveis)));
 ```
 
 **KPIs Calculados:**
+
 - `valorTotalEmAtraso`
 - `quantidadeContratosEmAtraso`
 - `valorTotalCarteira`
@@ -78,6 +79,7 @@ const propostasData = await db
 **Localização:** `server/routes/cobrancas.ts`, linha 121
 
 **Código Atual:**
+
 ```typescript
 .orderBy(desc(propostas.createdAt));
 ```
@@ -88,7 +90,7 @@ const propostasData = await db
 
 **Não Conformidades Críticas:**
 
-1. **ORDENAÇÃO SIMPLISTA**: 
+1. **ORDENAÇÃO SIMPLISTA**:
    - ❌ Não implementa priorização multinível (Inadimplentes > Próximos a Vencer > Outros)
    - ❌ Não há sub-ordenação por valor
    - ❌ Usa apenas `ORDER BY created_at DESC`
@@ -107,13 +109,14 @@ const propostasData = await db
 **Localização:** `server/routes/cobrancas.ts`, linha 1048
 
 **Implementação Atual:**
+
 ```typescript
 router.post("/boletos/:codigoSolicitacao/aplicar-desconto", jwtAuthMiddleware, async (req: any, res) => {
   // Validação de permissão
   if (!userRole || !["ADMINISTRADOR", "COBRANCA", "GERENTE"].includes(userRole)) {
-    return res.status(403).json({ 
+    return res.status(403).json({
       error: "Acesso negado",
-      message: "Você não tem permissão para aplicar descontos" 
+      message: "Você não tem permissão para aplicar descontos"
     });
   }
   // ... execução direta
@@ -125,13 +128,14 @@ router.post("/boletos/:codigoSolicitacao/aplicar-desconto", jwtAuthMiddleware, a
 **Localização:** `server/routes/cobrancas.ts`, linha ~920-1042
 
 **Implementação Atual:**
+
 ```typescript
 router.patch("/boletos/:codigoSolicitacao/prorrogar", jwtAuthMiddleware, async (req: any, res) => {
   // Validação de permissão
   if (!userRole || !["ADMINISTRADOR", "COBRANCA", "GERENTE"].includes(userRole)) {
-    return res.status(403).json({ 
+    return res.status(403).json({
       error: "Acesso negado",
-      message: "Você não tem permissão para prorrogar vencimentos" 
+      message: "Você não tem permissão para prorrogar vencimentos"
     });
   }
   // ... execução direta via InterBankService
@@ -166,11 +170,11 @@ router.patch("/boletos/:codigoSolicitacao/prorrogar", jwtAuthMiddleware, async (
 
 A Tela de Cobranças possui **implementação funcional básica**, mas apresenta **lacunas críticas** em relação ao Blueprint V2.0:
 
-| Componente | Status | Conformidade |
-|------------|--------|--------------|
-| Regra de Entrada | 🟡 Parcial | 60% |
-| KPIs e Ordenação | 🔴 Crítico | 30% |
-| Workflows de Aprovação | 🔴 Crítico | 15% |
+| Componente             | Status     | Conformidade |
+| ---------------------- | ---------- | ------------ |
+| Regra de Entrada       | 🟡 Parcial | 60%          |
+| KPIs e Ordenação       | 🔴 Crítico | 30%          |
+| Workflows de Aprovação | 🔴 Crítico | 15%          |
 
 ### **AÇÕES PRIORITÁRIAS NECESSÁRIAS**
 
@@ -182,6 +186,7 @@ A Tela de Cobranças possui **implementação funcional básica**, mas apresenta
 ### **EVIDÊNCIAS DE CÓDIGO DOCUMENTADAS**
 
 Este relatório baseou-se em análise estática dos seguintes arquivos:
+
 - `server/routes/cobrancas.ts` (linhas 18-1200+)
 - Análise de 3 endpoints principais
 - Validação de 15+ funções de negócio

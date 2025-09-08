@@ -13,16 +13,19 @@ API RESTful para gerenciamento de contratos (CCBs assinados) com controle rigoro
 ## 🔐 Segurança e Controle de Acesso
 
 ### Roles Autorizados
+
 - ✅ **ADMINISTRADOR** - Acesso completo a todos os contratos
 - ✅ **DIRETOR** - Acesso completo a todos os contratos
 
 ### Roles Bloqueados (403 Forbidden)
+
 - ❌ **GERENTE** - Sem acesso
-- ❌ **ATENDENTE** - Sem acesso  
+- ❌ **ATENDENTE** - Sem acesso
 - ❌ **ANALISTA** - Sem acesso
 - ❌ **FINANCEIRO** - Sem acesso
 
 ### Fluxo de Autenticação
+
 1. Token JWT obrigatório no header `Authorization: Bearer {token}`
 2. Validação do token via Supabase Auth
 3. Verificação do role no banco de dados (profiles table)
@@ -33,11 +36,13 @@ API RESTful para gerenciamento de contratos (CCBs assinados) com controle rigoro
 ## 📡 Endpoints Disponíveis
 
 ### 1. Listar Contratos
+
 **GET** `/api/contratos`
 
 Retorna lista de todos os contratos assinados com informações completas.
 
 #### Query Parameters (opcionais):
+
 ```typescript
 {
   status?: string;       // Filtrar por status específico
@@ -49,6 +54,7 @@ Retorna lista de todos os contratos assinados com informações completas.
 ```
 
 #### Response (200 OK):
+
 ```json
 {
   "success": true,
@@ -79,8 +85,8 @@ Retorna lista de todos os contratos assinados com informações completas.
     "totalContratos": 45,
     "aguardandoPagamento": 5,
     "pagos": 40,
-    "valorTotalContratado": 675000.00,
-    "valorTotalLiberado": 600000.00
+    "valorTotalContratado": 675000.0,
+    "valorTotalLiberado": 600000.0
   },
   "filtrosAplicados": {
     "status": null,
@@ -93,6 +99,7 @@ Retorna lista de todos os contratos assinados com informações completas.
 ```
 
 #### Response (403 Forbidden - Role não autorizado):
+
 ```json
 {
   "message": "Acesso negado. Permissões insuficientes.",
@@ -102,11 +109,13 @@ Retorna lista de todos os contratos assinados com informações completas.
 ```
 
 ### 2. Buscar Contrato Específico
+
 **GET** `/api/contratos/:id`
 
 Retorna detalhes completos de um contrato específico incluindo histórico.
 
 #### Response (200 OK):
+
 ```json
 {
   "success": true,
@@ -156,6 +165,7 @@ Retorna detalhes completos de um contrato específico incluindo histórico.
 ### Campos Principais Retornados
 
 #### Dados do Cliente
+
 - `clienteNome` - Nome completo
 - `clienteCpf` - CPF formatado
 - `clienteEmail` - Email
@@ -165,6 +175,7 @@ Retorna detalhes completos de um contrato específico incluindo histórico.
 - `clienteCnpj` - CNPJ (se PJ)
 
 #### Dados do Empréstimo
+
 - `valor` - Valor principal
 - `prazo` - Número de parcelas
 - `valorTotalFinanciado` - Valor total com juros
@@ -174,6 +185,7 @@ Retorna detalhes completos de um contrato específico incluindo histórico.
 - `valorIof` - IOF
 
 #### Status de Formalização
+
 - `ccbGerado` - Se CCB foi gerado
 - `ccbGeradoEm` - Data/hora de geração
 - `assinaturaEletronicaConcluida` - Se foi assinado
@@ -181,21 +193,25 @@ Retorna detalhes completos de um contrato específico incluindo histórico.
 - `dataPagamento` - Data do pagamento
 
 #### Integração ClickSign
+
 - `clicksignDocumentKey` - Chave do documento
 - `clicksignStatus` - Status (pending/signed/cancelled)
 - `clicksignSignUrl` - URL para assinatura
 - `clicksignSignedAt` - Data/hora da assinatura
 
 #### URLs de Documentos
+
 - `urlCcbAssinado` - URL do CCB assinado
 - `urlComprovantePagamento` - URL do comprovante
 
 #### Indicadores Calculados
+
 - `diasDesdeAssinatura` - Dias desde a assinatura
 - `aguardandoPagamento` - Boolean se aguarda pagamento
 - `statusFormalizacao` - Status consolidado
 
 ### Status de Formalização Possíveis
+
 - `PENDENTE_GERACAO` - CCB não gerado
 - `AGUARDANDO_ASSINATURA` - CCB gerado mas não assinado
 - `AGUARDANDO_PAGAMENTO` - Assinado mas não pago
@@ -219,6 +235,7 @@ npx tsx server/tests/test-gestao-contratos.ts
 ### Teste Manual via cURL
 
 #### Teste 1: Acesso Autorizado (ADMIN)
+
 ```bash
 curl -X GET "http://localhost:5000/api/contratos" \
   -H "Authorization: Bearer SEU_TOKEN_ADMIN" \
@@ -226,6 +243,7 @@ curl -X GET "http://localhost:5000/api/contratos" \
 ```
 
 #### Teste 2: Acesso Negado (GERENTE)
+
 ```bash
 curl -X GET "http://localhost:5000/api/contratos" \
   -H "Authorization: Bearer SEU_TOKEN_GERENTE" \
@@ -234,6 +252,7 @@ curl -X GET "http://localhost:5000/api/contratos" \
 ```
 
 #### Teste 3: Com Filtros
+
 ```bash
 curl -X GET "http://localhost:5000/api/contratos?dataInicio=2025-01-01&dataFim=2025-01-31&limite=10" \
   -H "Authorization: Bearer SEU_TOKEN_DIRETOR" \
@@ -245,14 +264,17 @@ curl -X GET "http://localhost:5000/api/contratos?dataInicio=2025-01-01&dataFim=2
 ## 🏗️ Arquitetura de Implementação
 
 ### Arquivos Criados
+
 1. **`server/routes/gestao-contratos.ts`** - Implementação completa da API
 2. **`server/tests/test-gestao-contratos.ts`** - Suite de testes automatizados
 3. **`docs/GESTAO_CONTRATOS_API.md`** - Esta documentação
 
 ### Modificações em Arquivos Existentes
+
 1. **`server/routes.ts`** - Adicionado import e registro da nova rota
 
 ### Tecnologias Utilizadas
+
 - **Express.js** - Framework web
 - **Drizzle ORM** - Acesso ao banco de dados
 - **JWT** - Autenticação
@@ -260,6 +282,7 @@ curl -X GET "http://localhost:5000/api/contratos?dataInicio=2025-01-01&dataFim=2
 - **TypeScript** - Type safety
 
 ### Segurança Implementada
+
 - ✅ Autenticação JWT obrigatória
 - ✅ Verificação de roles com guard específico
 - ✅ Soft delete filtering
@@ -272,8 +295,9 @@ curl -X GET "http://localhost:5000/api/contratos?dataInicio=2025-01-01&dataFim=2
 ## 📊 Queries de Banco de Dados
 
 ### Query Principal (Simplificada)
+
 ```sql
-SELECT 
+SELECT
   p.*,
   l.nome_loja,
   pa.razao_social,
@@ -282,7 +306,7 @@ FROM propostas p
 LEFT JOIN lojas l ON p.loja_id = l.id
 LEFT JOIN parceiros pa ON l.parceiro_id = pa.id
 LEFT JOIN produtos pr ON p.produto_id = pr.id
-WHERE 
+WHERE
   p.assinatura_eletronica_concluida = true
   AND p.caminho_ccb_assinado IS NOT NULL
   AND p.deleted_at IS NULL
@@ -302,12 +326,14 @@ LIMIT 100;
    - Usar nos testes
 
 2. **Verificar Bucket Supabase**
+
    ```sql
    -- Verificar se bucket 'documents' existe
    SELECT * FROM storage.buckets WHERE id = 'documents';
    ```
 
 3. **Criar Índices no Banco**
+
    ```sql
    -- Índices para performance
    CREATE INDEX idx_propostas_assinatura ON propostas(assinatura_eletronica_concluida);
@@ -339,6 +365,7 @@ LIMIT 100;
 ## 🆘 Suporte
 
 Para problemas ou dúvidas:
+
 1. Verificar logs em `server/logs/security.log`
 2. Testar com arquivo `test-gestao-contratos.ts`
 3. Verificar roles no banco: `SELECT * FROM profiles WHERE role IN ('ADMINISTRADOR', 'DIRETOR');`

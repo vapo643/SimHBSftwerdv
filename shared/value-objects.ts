@@ -1,9 +1,9 @@
 /**
  * Domain Value Objects - Sprint 2 Data Layer Enhancement
- * 
+ *
  * Implements Domain-Driven Design value objects for business rules validation
  * Provides type-safe validation for critical business data
- * 
+ *
  * Date: 2025-08-28
  * Author: GEM-07 AI Specialist System
  */
@@ -19,21 +19,21 @@ export class CPF {
 
   static create(cpf: string): CPF | null {
     const cleaned = cpf.replace(/\D/g, '');
-    
+
     if (!CPF.isValid(cleaned)) {
       return null;
     }
-    
+
     return new CPF(cleaned);
   }
 
   static isValid(cpf: string): boolean {
     const cleaned = cpf.replace(/\D/g, '');
-    
+
     // Basic length and format validation
     if (cleaned.length !== 11) return false;
     if (/^(\d)\1{10}$/.test(cleaned)) return false; // All same digits
-    
+
     // Calculate check digits
     let sum = 0;
     for (let i = 0; i < 9; i++) {
@@ -41,16 +41,16 @@ export class CPF {
     }
     let remainder = (sum * 10) % 11;
     let checkDigit1 = remainder === 10 ? 0 : remainder;
-    
+
     if (checkDigit1 !== parseInt(cleaned.charAt(9))) return false;
-    
+
     sum = 0;
     for (let i = 0; i < 10; i++) {
       sum += parseInt(cleaned.charAt(i)) * (11 - i);
     }
     remainder = (sum * 10) % 11;
     let checkDigit2 = remainder === 10 ? 0 : remainder;
-    
+
     return checkDigit2 === parseInt(cleaned.charAt(10));
   }
 
@@ -72,8 +72,9 @@ export class CPF {
   }
 
   // Zod schema for form validation
-  static readonly schema = z.string()
-    .transform(val => val.replace(/\D/g, ''))
+  static readonly schema = z
+    .string()
+    .transform((val) => val.replace(/\D/g, ''))
     .refine(CPF.isValid, { message: 'CPF inválido' });
 }
 
@@ -86,20 +87,20 @@ export class CNPJ {
 
   static create(cnpj: string): CNPJ | null {
     const cleaned = cnpj.replace(/\D/g, '');
-    
+
     if (!CNPJ.isValid(cleaned)) {
       return null;
     }
-    
+
     return new CNPJ(cleaned);
   }
 
   static isValid(cnpj: string): boolean {
     const cleaned = cnpj.replace(/\D/g, '');
-    
+
     if (cleaned.length !== 14) return false;
     if (/^(\d)\1{13}$/.test(cleaned)) return false; // All same digits
-    
+
     // Calculate first check digit
     let sum = 0;
     const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
@@ -108,9 +109,9 @@ export class CNPJ {
     }
     let remainder = sum % 11;
     let checkDigit1 = remainder < 2 ? 0 : 11 - remainder;
-    
+
     if (checkDigit1 !== parseInt(cleaned.charAt(12))) return false;
-    
+
     // Calculate second check digit
     sum = 0;
     const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
@@ -119,7 +120,7 @@ export class CNPJ {
     }
     remainder = sum % 11;
     let checkDigit2 = remainder < 2 ? 0 : 11 - remainder;
-    
+
     return checkDigit2 === parseInt(cleaned.charAt(13));
   }
 
@@ -141,8 +142,9 @@ export class CNPJ {
   }
 
   // Zod schema for form validation
-  static readonly schema = z.string()
-    .transform(val => val.replace(/\D/g, ''))
+  static readonly schema = z
+    .string()
+    .transform((val) => val.replace(/\D/g, ''))
     .refine(CNPJ.isValid, { message: 'CNPJ inválido' });
 }
 
@@ -170,9 +172,9 @@ export class Money {
     const cleaned = value
       .replace(/[R$\s]/g, '') // Remove R$ and spaces
       .trim();
-    
+
     let normalizedValue: string;
-    
+
     // Check if it has both . and , (Brazilian format with thousands)
     if (cleaned.includes('.') && cleaned.includes(',')) {
       // Format: 1.234,56 -> remove dots, replace comma with dot
@@ -184,12 +186,12 @@ export class Money {
       // Format: 1234.56 or 1234 -> use as is
       normalizedValue = cleaned;
     }
-    
+
     const parsed = parseFloat(normalizedValue);
     if (isNaN(parsed) || parsed < 0) {
       return null;
     }
-    
+
     return Money.fromReais(parsed);
   }
 
@@ -266,11 +268,11 @@ export class Money {
   // Zod schema for form validation
   static readonly schema = z.union([
     z.number().min(0, 'Valor deve ser positivo'),
-    z.string().transform(val => {
+    z.string().transform((val) => {
       const money = Money.fromString(val);
       if (!money) throw new Error('Formato de valor monetário inválido');
       return money.getReais();
-    })
+    }),
   ]);
 }
 
@@ -290,16 +292,17 @@ export class Email {
 
   static isValid(email: string): boolean {
     // More comprehensive email validation
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-    
+    const emailRegex =
+      /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
     if (!emailRegex.test(email) || email.length > 254) {
       return false;
     }
-    
+
     // Additional checks for edge cases
     if (email.includes('..')) return false; // Consecutive dots
     if (email.startsWith('.') || email.endsWith('.')) return false; // Starts or ends with dot
-    
+
     return true;
   }
 
@@ -324,10 +327,11 @@ export class Email {
   }
 
   // Zod schema for form validation
-  static readonly schema = z.string()
+  static readonly schema = z
+    .string()
     .email('Email inválido')
     .max(254, 'Email muito longo')
-    .transform(val => val.toLowerCase().trim());
+    .transform((val) => val.toLowerCase().trim());
 }
 
 /**
@@ -338,17 +342,17 @@ export class PhoneNumber {
 
   static create(phone: string): PhoneNumber | null {
     const cleaned = phone.replace(/\D/g, '');
-    
+
     if (!PhoneNumber.isValid(cleaned)) {
       return null;
     }
-    
+
     return new PhoneNumber(cleaned);
   }
 
   static isValid(phone: string): boolean {
     const cleaned = phone.replace(/\D/g, '');
-    
+
     // Brazilian phone validation: (XX) 9XXXX-XXXX or (XX) XXXX-XXXX
     if (cleaned.length === 11) {
       // Mobile: starts with 9 after area code
@@ -357,7 +361,7 @@ export class PhoneNumber {
       // Landline
       return /^[1-9]{2}[2-9][0-9]{7}$/.test(cleaned);
     }
-    
+
     return false;
   }
 
@@ -387,8 +391,9 @@ export class PhoneNumber {
   }
 
   // Zod schema for form validation
-  static readonly schema = z.string()
-    .transform(val => val.replace(/\D/g, ''))
+  static readonly schema = z
+    .string()
+    .transform((val) => val.replace(/\D/g, ''))
     .refine(PhoneNumber.isValid, { message: 'Número de telefone inválido' });
 }
 
@@ -400,11 +405,11 @@ export class CEP {
 
   static create(cep: string): CEP | null {
     const cleaned = cep.replace(/\D/g, '');
-    
+
     if (!CEP.isValid(cleaned)) {
       return null;
     }
-    
+
     return new CEP(cleaned);
   }
 
@@ -430,10 +435,11 @@ export class CEP {
   }
 
   // Zod schema for form validation
-  static readonly schema = z.string()
-    .transform(val => val.replace(/\D/g, ''))
+  static readonly schema = z
+    .string()
+    .transform((val) => val.replace(/\D/g, ''))
     .refine(CEP.isValid, { message: 'CEP inválido' })
-    .transform(val => new CEP(val));
+    .transform((val) => new CEP(val));
 }
 
 // Export all value objects and their schemas for use in forms and validation

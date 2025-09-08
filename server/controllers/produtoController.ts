@@ -5,9 +5,9 @@ import { eq, desc } from 'drizzle-orm';
 // PAM V4.2 PERF-F3-001: Cache-aside pattern implementation
 export const buscarTodosProdutos = async () => {
   const { CachedQueries } = await import('../lib/cache-manager');
-  
+
   console.log('🔍 [PAM V4.2] Buscando produtos com cache-aside pattern...');
-  
+
   return await CachedQueries.getProducts(async () => {
     console.log('🔍 [PAM V4.2] CACHE MISS - Buscando produtos no banco de dados...');
     const { isNull } = await import('drizzle-orm');
@@ -37,12 +37,12 @@ export const criarProduto = async (data: {
       tacAtivaParaClientesExistentes: data.tacAtivaParaClientesExistentes ?? true,
     })
     .returning();
-  
+
   // PAM V4.2 PERF-F3-001: Cache invalidation após escrita
   const cacheManager = await import('../lib/cache-manager');
   await cacheManager.default.invalidate('products:all', 'products');
   console.log('🔥 [PAM V4.2] CACHE INVALIDATED: products após criação');
-  
+
   return novoProduto;
 };
 
@@ -67,12 +67,12 @@ export const atualizarProduto = async (
     })
     .where(eq(produtos.id, parseInt(id)))
     .returning();
-  
+
   // PAM V4.2 PERF-F3-001: Cache invalidation após atualização
   const cacheManager = await import('../lib/cache-manager');
   await cacheManager.default.invalidate('products:all', 'products');
   console.log('🔥 [PAM V4.2] CACHE INVALIDATED: products após atualização');
-  
+
   return produtoAtualizado;
 };
 
@@ -100,7 +100,7 @@ export const deletarProduto = async (id: string, deletedBy?: string) => {
 
   // Soft delete implementation - set deleted_at timestamp
   await db.update(produtos).set({ deletedAt: new Date() }).where(eq(produtos.id, produtoId));
-  
+
   // PAM V4.2 PERF-F3-001: Cache invalidation após exclusão
   const cacheManager = await import('../lib/cache-manager');
   await cacheManager.default.invalidate('products:all', 'products');

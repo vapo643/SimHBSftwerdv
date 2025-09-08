@@ -125,7 +125,7 @@ router.get('/queues/metrics', async (req: Request, res: Response) => {
     const queueMetrics = metricsService.getAllMetrics();
     const serviceHealth = metricsService.getServiceHealth();
     const queuesHealth = await checkQueuesHealth();
-    
+
     const response = {
       success: true,
       data: {
@@ -135,7 +135,7 @@ router.get('/queues/metrics', async (req: Request, res: Response) => {
           totalQueuesMonitored: queueMetrics.length,
           lastUpdated: new Date().toISOString(),
         },
-        queues: queueMetrics.map(metrics => ({
+        queues: queueMetrics.map((metrics) => ({
           queueName: metrics.queueName,
           counters: {
             totalJobs: metrics.totalJobs,
@@ -155,13 +155,13 @@ router.get('/queues/metrics', async (req: Request, res: Response) => {
             highFailureRate: metrics.failureRate > 5, // 5% threshold
             slowProcessing: metrics.avgProcessingTime > 30000, // 30s threshold
             highDLQSize: metrics.dlqSize >= 10, // 10 jobs threshold
-          }
+          },
         })),
         systemHealth: queuesHealth,
         timestamp: new Date().toISOString(),
-      }
+      },
     };
-    
+
     res.json(response);
   } catch (error: any) {
     console.error('[MONITORING] Error fetching queue metrics:', error);
@@ -180,14 +180,14 @@ router.get('/queues/:queueName/metrics', async (req: Request, res: Response) => 
   try {
     const { queueName } = req.params;
     const queueMetrics = metricsService.getQueueMetrics(queueName);
-    
+
     if (!queueMetrics) {
       return res.status(404).json({
         success: false,
         error: `Queue '${queueName}' not found or not being monitored`,
       });
     }
-    
+
     const response = {
       success: true,
       data: {
@@ -212,12 +212,12 @@ router.get('/queues/:queueName/metrics', async (req: Request, res: Response) => 
             highFailureRate: queueMetrics.failureRate > 5,
             slowProcessing: queueMetrics.avgProcessingTime > 30000,
             highDLQSize: queueMetrics.dlqSize >= 10,
-          }
+          },
         },
         timestamp: new Date().toISOString(),
-      }
+      },
     };
-    
+
     res.json(response);
   } catch (error: any) {
     console.error('[MONITORING] Error fetching queue metrics:', error);
@@ -235,16 +235,16 @@ router.get('/queues/:queueName/metrics', async (req: Request, res: Response) => 
 router.post('/queues/reset-metrics', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { queueName } = req.body;
-    
+
     if (!queueName) {
       return res.status(400).json({
         success: false,
         error: 'queueName is required',
       });
     }
-    
+
     metricsService.resetMetrics(queueName);
-    
+
     res.json({
       success: true,
       message: `Metrics reset for queue '${queueName}'`,

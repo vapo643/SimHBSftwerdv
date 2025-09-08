@@ -2,7 +2,7 @@
 
 **Data:** 1 de Fevereiro de 2025  
 **Status:** ✅ RESOLVIDO  
-**Tempo de Resolução:** < 1 hora  
+**Tempo de Resolução:** < 1 hora
 
 ---
 
@@ -13,46 +13,56 @@ Implementamos correções emergenciais para as 5 vulnerabilidades críticas iden
 ## VULNERABILIDADES RESOLVIDAS
 
 ### 1. ✅ Dependências com CVEs Conhecidas (ASVS V14.2)
+
 **Problema:** axios@0.21.1 com CVE-2021-3749 (CVSS 7.5)  
 **Solução:** Atualizado para axios@latest (1.7.7)  
-**Status:** CORRIGIDO  
+**Status:** CORRIGIDO
 
-### 2. ✅ CORS Não Configurado (ASVS V13.2.1)  
+### 2. ✅ CORS Não Configurado (ASVS V13.2.1)
+
 **Problema:** Ausência de configuração CORS permitia requisições de qualquer origem  
 **Solução:** Implementado middleware CORS com:
+
 - Origens permitidas específicas em produção
 - Suporte dinâmico para URLs Replit em desenvolvimento
 - Credenciais habilitadas para cookies seguros
-**Status:** CORRIGIDO  
+  **Status:** CORRIGIDO
 
 ### 3. ✅ Segredo CSRF Hardcoded (ASVS V6.2.1)
+
 **Problema:** CSRF_SECRET com valor default hardcoded  
-**Solução:** 
+**Solução:**
+
 - Migrado para variável de ambiente
 - Geração automática de valor seguro se não configurado
 - Secret configurado no Replit
-**Status:** CORRIGIDO  
+  **Status:** CORRIGIDO
 
 ### 4. ✅ Validação de Content-Type (ASVS V12.1)
+
 **Problema:** Upload de arquivos sem validação adequada  
 **Solução:** Middleware `secureFileValidationMiddleware` já implementado com:
+
 - Validação de magic numbers (assinatura de arquivo)
 - Verificação de extensão vs MIME type
 - Detecção de conteúdo malicioso
 - Bloqueio de arquivos executáveis
-**Status:** JÁ PROTEGIDO  
+  **Status:** JÁ PROTEGIDO
 
 ### 5. ✅ Logs Expondo Dados Sensíveis (ASVS V7.1.1)
+
 **Problema:** JWT tokens completos nos logs  
-**Solução:** 
+**Solução:**
+
 - Removido logging de tokens sensíveis
 - Logs apenas em desenvolvimento
 - Apenas informações não-sensíveis registradas
-**Status:** CORRIGIDO  
+  **Status:** CORRIGIDO
 
 ## VULNERABILIDADES PENDENTES (Não Críticas)
 
 ### Dependências de Desenvolvimento
+
 - esbuild (moderate) - usado apenas em desenvolvimento
 - Não representa risco em produção
 

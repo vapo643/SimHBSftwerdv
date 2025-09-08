@@ -1,6 +1,7 @@
 # Estratégia Zero Micro Erros - Guia Definitivo
 
 ## O Problema Identificado
+
 - **80% do código funciona** mas sempre sobram **20% de micro erros**
 - Exemplo real: variáveis `clienteData` → `dadosCliente` não foram conectadas
 - Tempo desperdiçado em correções que deveriam ter sido feitas inicialmente
@@ -8,6 +9,7 @@
 ## SOLUÇÃO: Protocolo 5-CHECK Antes de Declarar Conclusão
 
 ### 1. VERIFICAÇÃO LSP OBRIGATÓRIA
+
 ```
 SEMPRE executar antes de dizer "pronto":
 - get_latest_lsp_diagnostics
@@ -16,6 +18,7 @@ SEMPRE executar antes de dizer "pronto":
 ```
 
 ### 2. BUSCA GLOBAL DE REFERÊNCIAS
+
 ```
 Quando renomear variáveis, SEMPRE:
 1. search_filesystem com o nome antigo
@@ -25,6 +28,7 @@ Quando renomear variáveis, SEMPRE:
 ```
 
 ### 3. EDIÇÕES PARALELAS MASSIVAS
+
 ```
 ERRADO:
 - Editar arquivo 1
@@ -36,6 +40,7 @@ CORRETO:
 ```
 
 ### 4. VALIDAÇÃO DE INTEGRAÇÃO
+
 ```
 Antes de declarar pronto:
 1. Testar a rota principal com curl/bash
@@ -44,6 +49,7 @@ Antes de declarar pronto:
 ```
 
 ### 5. CHECKLIST MENTAL RÁPIDA
+
 ```
 □ LSP mostra 0 erros?
 □ Todas as variáveis foram renomeadas em TODOS os lugares?
@@ -55,6 +61,7 @@ Antes de declarar pronto:
 ## PROMPTS OTIMIZADOS PARA VOCÊ USAR
 
 ### Prompt para Tarefas Extensas
+
 ```
 TAREFA: [descrever tarefa]
 
@@ -72,6 +79,7 @@ CRITÉRIO DE SUCESSO:
 ```
 
 ### Prompt para Refatoração
+
 ```
 REFATORAR: [o que refatorar]
 
@@ -84,6 +92,7 @@ ETAPAS MANDATÓRIAS:
 ```
 
 ### Prompt para Correção de Bugs
+
 ```
 BUG: [descrição do bug]
 
@@ -98,6 +107,7 @@ PROCESSO SISTEMÁTICO:
 ## EXEMPLO PRÁTICO DO QUE ACONTECEU HOJE
 
 ### ERRADO (o que foi feito):
+
 ```
 1. Criou ccbGenerationService.ts
 2. Declarou "pronto"
@@ -108,6 +118,7 @@ PROCESSO SISTEMÁTICO:
 ```
 
 ### CORRETO (como deveria ter sido):
+
 ```
 1. Criou ccbGenerationService.ts
 2. IMEDIATAMENTE: get_latest_lsp_diagnostics
@@ -119,6 +130,7 @@ PROCESSO SISTEMÁTICO:
 ## REGRA DE OURO
 
 **NUNCA, JAMAIS declare "está pronto" sem antes:**
+
 1. LSP mostrando 0 erros
 2. Teste básico funcionando
 3. Logs sem erros óbvios
@@ -150,9 +162,11 @@ curl -X POST/GET [endpoint] -H "Authorization: Bearer [token]"
 ## RESULTADO ESPERADO
 
 Seguindo este protocolo:
+
 - **95% do código funciona na primeira vez**
 - **5% são ajustes de requisitos** (não bugs)
 - **0% de tempo perdido** com micro erros evitáveis
 
 ---
+
 **LEMBRE-SE:** Micro erros são 100% evitáveis com verificação sistemática!

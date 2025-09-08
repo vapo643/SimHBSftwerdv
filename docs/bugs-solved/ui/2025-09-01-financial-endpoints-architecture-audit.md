@@ -4,17 +4,20 @@
 **Protocolo:** PACN V1.0 (Protocolo de Auditoria de Cenário de Negócio)  
 **Tipo:** Análise de Conformidade Arquitetural  
 **Status:** ✅ CONFORME - Arquitetura Validada  
-**Nível de Risco:** BAIXO  
+**Nível de Risco:** BAIXO
 
 ---
 
 ## 📋 SUMÁRIO EXECUTIVO
 
 ### **Missão da Auditoria**
+
 Validar a conformidade arquitetural dos endpoints especializados `/api/cobrancas` e `/api/pagamentos` quanto à segregação de responsabilidades, filtros por role de usuário e integridade dos dados financeiros.
 
 ### **Resultado Final**
+
 ✅ **ARQUITETURA CONFORME** - Os endpoints financeiros estão corretamente implementados com:
+
 - Segregação clara de responsabilidades entre Cobranças e Pagamentos
 - Filtros adequados por role de usuário (COBRANÇA, FINANCEIRO, ADMINISTRADOR)
 - Camadas de serviço e repositório bem estruturadas
@@ -36,6 +39,7 @@ Apenas usuários com roles específicos (`COBRANÇA`, `ADMINISTRADOR`, `FINANCEI
 Usuário sem permissão poderia acessar dados financeiros sensíveis ou executar operações não autorizadas.
 
 **Evidência de Conformidade:**
+
 ```typescript
 // Arquivo: server/routes/cobrancas.ts (linha 21)
 const userRole = req.user?.role || '';
@@ -57,6 +61,7 @@ O código implementa verificação explícita de roles em todas as operações c
 
 **Fluxo do Usuário:**  
 Sistema precisa distinguir entre:
+
 - **Cobranças:** Propostas com parcelas vencidas que precisam de ação de cobrança
 - **Pagamentos:** Propostas aprovadas prontas para liberação de recursos
 
@@ -69,6 +74,7 @@ Mistura de responsabilidades poderia causar vazamento de dados entre contextos o
 **Evidência de Conformidade:**
 
 **Endpoint de Cobranças (`/api/cobrancas`):**
+
 ```typescript
 // Arquivo: server/services/cobrancasService.ts (linha 23-24)
 const propostas = await cobrancasRepository.getPropostasCobranca(filters);
@@ -76,7 +82,7 @@ const propostas = await cobrancasRepository.getPropostasCobranca(filters);
 // Arquivo: server/repositories/cobrancas.repository.ts (linha 30-38)
 const statusElegiveis = [
   'BOLETOS_EMITIDOS',
-  'PAGAMENTO_PENDENTE', 
+  'PAGAMENTO_PENDENTE',
   'PAGAMENTO_PARCIAL',
   'PAGAMENTO_CONFIRMADO',
   'pronto_pagamento', // Legacy
@@ -84,6 +90,7 @@ const statusElegiveis = [
 ```
 
 **Endpoint de Pagamentos (`/api/pagamentos`):**
+
 ```typescript
 // Arquivo: server/services/pagamentoService.ts (linha 53)
 const proposals = await pagamentoRepository.getProposalsReadyForPayment({
@@ -116,6 +123,7 @@ Toda alteração financeira deve ser auditada e validada antes da execução.
 Dados financeiros poderiam ser corrompidos ou alterados sem rastreabilidade.
 
 **Evidência de Conformidade:**
+
 ```typescript
 // Arquivo: server/services/pagamentoService.ts (linha 217-222)
 await pagamentoRepository.auditPaymentAction(validated.propostaId, userId, 'PAGAMENTO_CRIADO', {
@@ -146,21 +154,23 @@ Todas as operações financeiras são auditadas com logs detalhados incluindo us
 
 ### **Estrutura dos Endpoints**
 
-| Componente | Endpoint Cobranças | Endpoint Pagamentos |
-|------------|-------------------|---------------------|
-| **Route** | `server/routes/cobrancas.ts` | `server/routes/pagamentos/index.ts` |
-| **Service** | `server/services/cobrancasService.ts` | `server/services/pagamentoService.ts` |
-| **Repository** | `server/repositories/cobrancas.repository.ts` | `server/repositories/pagamento.repository.ts` |
-| **Frontend** | `client/src/pages/financeiro/cobrancas.tsx`<br>`client/src/pages/financeiro/CobrancasPage.tsx` | `client/src/pages/financeiro/pagamentos.tsx`<br>`client/src/pages/pagamentos.tsx` |
+| Componente     | Endpoint Cobranças                                                                             | Endpoint Pagamentos                                                               |
+| -------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Route**      | `server/routes/cobrancas.ts`                                                                   | `server/routes/pagamentos/index.ts`                                               |
+| **Service**    | `server/services/cobrancasService.ts`                                                          | `server/services/pagamentoService.ts`                                             |
+| **Repository** | `server/repositories/cobrancas.repository.ts`                                                  | `server/repositories/pagamento.repository.ts`                                     |
+| **Frontend**   | `client/src/pages/financeiro/cobrancas.tsx`<br>`client/src/pages/financeiro/CobrancasPage.tsx` | `client/src/pages/financeiro/pagamentos.tsx`<br>`client/src/pages/pagamentos.tsx` |
 
 ### **Validação de Permissions**
 
 ✅ **Cobranças:**
+
 - Roles permitidos: `'COBRANÇA'`, `'ADMINISTRADOR'`, `'FINANCEIRO'`
 - Verificação no frontend: `client/src/pages/financeiro/CobrancasPage.tsx` (linha 45-47)
 - Verificação no backend: `server/routes/cobrancas.ts` (middleware JWT)
 
 ✅ **Pagamentos:**
+
 - Roles permitidos: `'ADMINISTRADOR'`, `'FINANCEIRO'`, `'GERENTE'`
 - Verificação explícita: `server/routes/pagamentos/index.ts` (linha 101-104)
 - Validação adicional para export: `'ADMINISTRADOR'`, `'GERENTE'` apenas
@@ -168,6 +178,7 @@ Todas as operações financeiras são auditadas com logs detalhados incluindo us
 ### **Filtros e Query Parameters**
 
 **Cobranças:**
+
 ```typescript
 const { status, atraso } = req.query;
 const userRole = req.user?.role || '';
@@ -180,6 +191,7 @@ const propostas = await cobrancasService.getPropostasCobranca({
 ```
 
 **Pagamentos:**
+
 ```typescript
 const { status, periodo, incluir_pagos } = req.query;
 const userId = req.user?.id;
@@ -207,6 +219,7 @@ Tentativa de usuário com role `CLIENTE` acessar endpoints financeiros.
 Error 403 (Forbidden) em todas as tentativas.
 
 **Evidência de Proteção:**
+
 - Middleware JWT obrigatório em todas as rotas
 - Verificação explícita de roles antes de processar requests
 - Retorno de erro padronizado para usuários não autorizados
@@ -220,6 +233,7 @@ Tentativa de alterar valores financeiros sem permissão adequada.
 Validação Zod bloqueia dados inválidos + audit log registra tentativa.
 
 **Evidência de Proteção:**
+
 ```typescript
 // Arquivo: server/services/pagamentoService.ts (linha 95-96)
 const validated = pagamentoSchema.parse(paymentData);
@@ -229,25 +243,27 @@ const validated = pagamentoSchema.parse(paymentData);
 
 ## 📊 MÉTRICAS DE CONFORMIDADE
 
-| Critério | Status | Evidência |
-|----------|--------|-----------|
-| Segregação de Responsabilidades | ✅ CONFORME | Endpoints especializados com services próprios |
-| Controle de Acesso por Role | ✅ CONFORME | Verificação explícita em rotas críticas |
-| Auditoria de Operações | ✅ CONFORME | Logs detalhados em todas as operações financeiras |
-| Validação de Dados | ✅ CONFORME | Schema Zod + validações de negócio |
-| Proteção contra IDOR | ✅ CONFORME | UserId/UserRole sempre verificados |
-| Tratamento de Erros | ✅ CONFORME | Responses padronizados com status codes apropriados |
+| Critério                        | Status      | Evidência                                           |
+| ------------------------------- | ----------- | --------------------------------------------------- |
+| Segregação de Responsabilidades | ✅ CONFORME | Endpoints especializados com services próprios      |
+| Controle de Acesso por Role     | ✅ CONFORME | Verificação explícita em rotas críticas             |
+| Auditoria de Operações          | ✅ CONFORME | Logs detalhados em todas as operações financeiras   |
+| Validação de Dados              | ✅ CONFORME | Schema Zod + validações de negócio                  |
+| Proteção contra IDOR            | ✅ CONFORME | UserId/UserRole sempre verificados                  |
+| Tratamento de Erros             | ✅ CONFORME | Responses padronizados com status codes apropriados |
 
 ---
 
 ## 🎯 RECOMENDAÇÕES ESTRATÉGICAS
 
 ### **Mantidas (Boas Práticas Identificadas)**
+
 1. **Arquitetura em Camadas:** Manter a separação clara entre Routes → Services → Repositories
 2. **Validação Dupla:** Continuar validação tanto no frontend quanto no backend
 3. **Auditoria Completa:** Manter logs detalhados de todas as operações financeiras
 
 ### **Futuras Melhorias (Não Críticas)**
+
 1. **Centralização de Permissions:** Criar middleware especializado para verificação de roles
 2. **Cache de Filtros:** Implementar cache para filtros frequentemente usados
 3. **Rate Limiting Específico:** Aplicar limites mais rigorosos em endpoints financeiros

@@ -1,4 +1,5 @@
 # TEMPLATE - LOOPS DE ERROS DO MAPEAMENTO DE COORDENADAS CCB
+
 **Status:** RESOLVIDO PARCIALMENTE
 **Data:** 08/08/2025
 **Prioridade:** CRÍTICA
@@ -11,6 +12,7 @@ Este documento mapeia TODOS os erros e loops enfrentados durante o processo de m
 ## 🎯 Proposta de Teste: #6492cfeb-8b66-4fa7-beb6-c7998be61b78
 
 Proposta utilizada para testes com dados completos injetados:
+
 - Cliente: João Silva Santos
 - CPF: 12345678901
 - Valor: R$ 15.000,00
@@ -23,18 +25,22 @@ Proposta utilizada para testes com dados completos injetados:
 ## [COORD_001] JWT Token Authentication Error - PRIMEIRO LOOP
 
 ### 🚨 Sintoma
+
 ```
 ❌ POST /api/formalizacao/6492cfeb-8b66-4fa7-beb6-c7998be61b78/ccb-url
 Status: 401 - Token inválido ou expirado
 ```
 
 ### 🔍 Causa Raiz
+
 - Tentativa de testar geração de CCB via API diretamente
 - Sistema de autenticação JWT bloqueando acesso sem token válido
 - Falta de token de sessão ativo para testes
 
 ### ✅ Solução Aplicada
+
 1. **Criação de endpoint de teste sem autenticação:**
+
 ```typescript
 // server/routes.ts
 router.post('/test/generate-ccb/:proposalId', async (req: Request, res: Response) => {
@@ -46,11 +52,13 @@ router.post('/test/generate-ccb/:proposalId', async (req: Request, res: Response
 ```
 
 2. **Teste direto via curl:**
+
 ```bash
 curl -X POST "https://[domain]/api/test/generate-ccb/6492cfeb-8b66-4fa7-beb6-c7998be61b78"
 ```
 
 ### 🛡️ Prevenção
+
 - Manter endpoints de teste separados para debugging
 - Implementar flag de desenvolvimento para bypassing de auth em testes
 
@@ -61,6 +69,7 @@ curl -X POST "https://[domain]/api/test/generate-ccb/6492cfeb-8b66-4fa7-beb6-c79
 ## [COORD_002] Incorrect Coordinate Positioning - LOOP PRINCIPAL
 
 ### 🚨 Sintoma
+
 ```
 ✅ CCB gerado com sucesso
 ❌ Mas campos aparecendo em posições incorretas no PDF
@@ -69,12 +78,15 @@ curl -X POST "https://[domain]/api/test/generate-ccb/6492cfeb-8b66-4fa7-beb6-c79
 ```
 
 ### 🔍 Causa Raiz
+
 - Coordenadas em `ccbFieldMapping.ts` baseadas em estimativas
 - Sistema de coordenadas Y invertido (PDF usa origem no canto inferior esquerdo)
 - Template Simpix tem layout específico não mapeado corretamente
 
 ### ✅ Solução Aplicada
+
 **Tentativa 1 - Sistema automático de ajuste:**
+
 ```typescript
 // ccbCoordinateMapper.ts - FALHOU
 export const COORDINATE_ADJUSTMENTS = {
@@ -85,6 +97,7 @@ export const COORDINATE_ADJUSTMENTS = {
 ```
 
 **Tentativa 2 - Gerador de grade visual:**
+
 ```typescript
 // ccbGridGenerator.ts - CRIADO
 async generateWithGrid(): Promise<{ success: boolean; pdfPath?: string }> {
@@ -94,10 +107,12 @@ async generateWithGrid(): Promise<{ success: boolean; pdfPath?: string }> {
 ```
 
 **Conclusão: NECESSÁRIO MAPEAMENTO MANUAL**
+
 - Usuário: "AINDA ESTA ERRADO"
 - Usuário: "ESTOU CONVENCIDO QUE VOU TER QUE MAPEAR 1 POR 1 MESMO MANUAL"
 
 ### 🛡️ Prevenção
+
 - Para templates novos: sempre fazer mapeamento manual primeiro
 - Criar ferramenta de grid como padrão para novos templates
 - Documentar coordenadas exatas de templates conhecidos
@@ -109,6 +124,7 @@ async generateWithGrid(): Promise<{ success: boolean; pdfPath?: string }> {
 ## [COORD_003] ES Module Import Error - LOOP TÉCNICO
 
 ### 🚨 Sintoma
+
 ```
 ❌ ReferenceError: require is not defined in ES module scope
 ❌ Arquivo: ccb-coordinate-mapper.js
@@ -116,11 +132,13 @@ async generateWithGrid(): Promise<{ success: boolean; pdfPath?: string }> {
 ```
 
 ### 🔍 Causa Raiz
+
 - Projeto configurado como ES Modules (type: "module")
 - Script de teste usando sintaxe CommonJS (require)
 - Incompatibilidade entre sistemas de módulos
 
 ### ✅ Solução Aplicada
+
 ```typescript
 // REMOVIDO arquivo problemático
 // rm ccb-coordinate-mapper.js
@@ -132,6 +150,7 @@ import { PDFDocument } from 'pdf-lib';
 ```
 
 ### 🛡️ Prevenção
+
 - Manter consistência: apenas ES modules no projeto
 - Scripts de teste em TypeScript, não JavaScript vanilla
 - Configurar ESLint para detectar problemas de módulos
@@ -143,17 +162,20 @@ import { PDFDocument } from 'pdf-lib';
 ## [COORD_004] PDF Emoji Encoding Error - LOOP DE RENDERIZAÇÃO
 
 ### 🚨 Sintoma
+
 ```
 ❌ Error: The font "Helvetica" (WinAnsi) cannot encode the character "🎯" (0x1f3af)
 ❌ Falha na geração do grid template
 ```
 
 ### 🔍 Causa Raiz
+
 - Font padrão Helvetica não suporta emojis Unicode
 - Uso de emojis em strings de texto do PDF
 - WinAnsi encoding limitado a caracteres básicos
 
 ### ✅ Solução Aplicada
+
 ```typescript
 // ANTES (FALHOU):
 firstPage.drawText('🎯 [CCB GRID] Gerando template...', {
@@ -169,6 +191,7 @@ firstPage.drawText('CCB TEMPLATE COM GRADE DE COORDENADAS', {
 ```
 
 ### 🛡️ Prevenção
+
 - Evitar emojis em textos de PDF
 - Usar apenas caracteres ASCII em labels de debug
 - Se necessário, usar fonts que suportam Unicode completo
@@ -180,17 +203,20 @@ firstPage.drawText('CCB TEMPLATE COM GRADE DE COORDENADAS', {
 ## [COORD_005] Storage Bucket 404 Error - LOOP DE INFRAESTRUTURA
 
 ### 🚨 Sintoma
+
 ```
 ❌ GET https://[storage-url]/documents/ccb/grid/ccb_grid_[timestamp].pdf
 ❌ {"statusCode":"404","error":"Bucket not found","message":"Bucket not found"}
 ```
 
 ### 🔍 Causa Raiz
+
 - Configuração do bucket Supabase Storage
 - Possível problema de permissões ou configuração RLS
 - URL gerada incorretamente
 
 ### ✅ Solução Identificada (NÃO APLICADA)
+
 ```typescript
 // VERIFICAR: Configuração do bucket
 const { data } = supabaseAdmin.storage
@@ -204,6 +230,7 @@ const { data } = supabaseAdmin.storage
 ```
 
 ### 🛡️ Prevenção
+
 - Validar configuração de storage antes do deploy
 - Implementar fallback para URLs que falham
 - Logs detalhados de upload e acesso a arquivos
@@ -215,6 +242,7 @@ const { data } = supabaseAdmin.storage
 ## [COORD_006] Template File Critical Issue - BREAKTHROUGH RESOLUTION
 
 ### 🚨 Sintoma
+
 ```
 ✅ PDF gerado sem erros
 ❌ Mas aparência genérica, sem logo Simpix
@@ -222,11 +250,13 @@ const { data } = supabaseAdmin.storage
 ```
 
 ### 🔍 Causa Raiz
+
 - **DESCOBERTA CRÍTICA:** Arquivo template era genérico de 16KB
 - Template correto Simpix tem 564KB (com logo e layout específico)
 - Diferença de ~3400% no tamanho do arquivo
 
 ### ✅ Solução Aplicada
+
 ```bash
 # VERIFICAÇÃO DO PROBLEMA:
 ls -la server/templates/template_ccb.pdf
@@ -239,6 +269,7 @@ ls -la server/templates/template_ccb.pdf
 ```
 
 ### 🛡️ Prevenção
+
 - **SEMPRE verificar tamanho do arquivo template**
 - Validar presença de logo/branding específico
 - Backup automático de templates corretos
@@ -251,6 +282,7 @@ ls -la server/templates/template_ccb.pdf
 ## [COORD_007] URL Routing Malformation - LOOP DE INTEGRAÇÃO
 
 ### 🚨 Sintoma
+
 ```
 ❌ Frontend: "Erro ao carregar status do CCB"
 ❌ API calls com URLs malformadas
@@ -258,11 +290,13 @@ ls -la server/templates/template_ccb.pdf
 ```
 
 ### 🔍 Causa Raiz
+
 - Template rendering inconsistente no frontend
 - URL construction com interpolação incorreta
 - Backend esperando endpoint específico não mapeado
 
 ### ✅ Solução Aplicada
+
 ```typescript
 // ANTES (PROBLEMAS):
 const url = `/api/formalizacao/${id}/ccb-status`;
@@ -279,6 +313,7 @@ if (!ccbData.ccb_gerado) {
 ```
 
 ### 🛡️ Prevenção
+
 - Padronizar endpoints de API
 - Validação de tipos TypeScript em URLs
 - Testes automatizados de rotas críticas
@@ -290,6 +325,7 @@ if (!ccbData.ccb_gerado) {
 # 🎯 CONCLUSÕES E PRÓXIMOS PASSOS
 
 ## ✅ Problemas Resolvidos
+
 1. **JWT Auth** - Endpoint de teste criado
 2. **ES Modules** - Padronização de imports
 3. **PDF Encoding** - Remoção de emojis
@@ -297,6 +333,7 @@ if (!ccbData.ccb_gerado) {
 5. **URL Routing** - Padronização de endpoints
 
 ## 🔄 Problemas Parcialmente Resolvidos
+
 1. **Coordinate Mapping** - Ferramentas criadas, aguardando coordenadas manuais
 2. **Storage Bucket** - URL funcional identificada, acesso ainda com problemas
 
@@ -305,6 +342,7 @@ if (!ccbData.ccb_gerado) {
 Com base no template structure fornecido pelo usuário, estes são TODOS os campos que precisam de mapeamento:
 
 ### Dados Pessoais
+
 - `nomeCompleto` - Nome completo do cliente
 - `cpf` - CPF formatado (xxx.xxx.xxx-xx)
 - `rg` - RG do cliente
@@ -314,6 +352,7 @@ Com base no template structure fornecido pelo usuário, estes são TODOS os camp
 - `localNascimento` - Local de nascimento
 
 ### Endereço Completo
+
 - `logradouro` - Tipo e nome da rua
 - `numeroEndereco` - Número do endereço
 - `complemento` - Complemento (apt, casa, etc.)
@@ -323,6 +362,7 @@ Com base no template structure fornecido pelo usuário, estes são TODOS os camp
 - `cep` - CEP formatado (xxxxx-xxx)
 
 ### Dados do Empréstimo
+
 - `valorEmprestimo` - Valor principal (R$ x.xxx,xx)
 - `numeroParcelas` - Quantidade de parcelas
 - `valorParcela` - Valor de cada parcela (R$ x.xxx,xx)
@@ -335,19 +375,23 @@ Com base no template structure fornecido pelo usuário, estes são TODOS os camp
 - `localEmissao` - Local de emissão
 
 ### Dados Bancários (se pagamento via conta)
+
 - `codigoBanco` - Código do banco
 - `nomeBanco` - Nome do banco
 - `agencia` - Agência (com dígito)
 - `conta` - Conta corrente (com dígito)
 
 ### Dados da Empresa (PJ)
+
 - `razaoSocial` - Razão social
 - `cnpj` - CNPJ formatado (xx.xxx.xxx/xxxx-xx)
 
 ### Dados PIX (se pagamento via PIX)
+
 - `chavePix` - Chave PIX do cliente
 
 ### Campos Administrativos
+
 - `numeroDocumento` - Número do documento CCB
 - `serie` - Série do documento
 - `dataAssinatura` - Data da assinatura
@@ -357,6 +401,7 @@ Com base no template structure fornecido pelo usuário, estes são TODOS os camp
 **AGUARDANDO:** Usuário enviar coordenadas exatas para todos os campos listados acima.
 
 **FORMATO ESPERADO:**
+
 ```typescript
 export const SIMPIX_CCB_MAPPING_CORRETO = {
   nomeCompleto: { x: XXX, y: YYY, size: ZZ },

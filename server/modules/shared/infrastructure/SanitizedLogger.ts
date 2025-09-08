@@ -1,17 +1,35 @@
 /**
  * Sanitized Logger - P0.2 GREEN CORRECTION
  * Remove PII (Personally Identifiable Information) dos logs
- * 
+ *
  * Elimina violação de segurança identificada pelo advisor
  */
 
 const PII_FIELDS = [
-  'cpf', 'cliente_cpf', 'clienteCpf', 'cpfCliente',
-  'email', 'cliente_email', 'clienteEmail', 'emailCliente',
-  'telefone', 'cliente_telefone', 'clienteTelefone', 'telefoneCliente',
-  'nome', 'cliente_nome', 'clienteNome', 'nomeCliente', 'nomeCompleto',
-  'rg', 'cnpj', 'endereco', 'cep',
-  'password', 'token', 'authorization'
+  'cpf',
+  'cliente_cpf',
+  'clienteCpf',
+  'cpfCliente',
+  'email',
+  'cliente_email',
+  'clienteEmail',
+  'emailCliente',
+  'telefone',
+  'cliente_telefone',
+  'clienteTelefone',
+  'telefoneCliente',
+  'nome',
+  'cliente_nome',
+  'clienteNome',
+  'nomeCliente',
+  'nomeCompleto',
+  'rg',
+  'cnpj',
+  'endereco',
+  'cep',
+  'password',
+  'token',
+  'authorization',
 ];
 
 /**
@@ -27,12 +45,12 @@ export function sanitizeForLog(obj: any): any {
   }
 
   const sanitized: any = {};
-  
+
   for (const [key, value] of Object.entries(obj)) {
     const lowerKey = key.toLowerCase();
-    
+
     // Verificar se é campo PII
-    if (PII_FIELDS.some(field => lowerKey.includes(field.toLowerCase()))) {
+    if (PII_FIELDS.some((field) => lowerKey.includes(field.toLowerCase()))) {
       if (typeof value === 'string' && value.length > 3) {
         // Mascarar dados sensíveis - mostrar apenas primeiros e últimos caracteres
         sanitized[key] = `${value.substring(0, 2)}***${value.substring(value.length - 2)}`;
@@ -45,7 +63,7 @@ export function sanitizeForLog(obj: any): any {
       sanitized[key] = value;
     }
   }
-  
+
   return sanitized;
 }
 

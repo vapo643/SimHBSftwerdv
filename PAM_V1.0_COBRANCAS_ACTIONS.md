@@ -3,11 +3,13 @@
 ## 📋 Status: IMPLEMENTAÇÃO COMPLETA
 
 ### 🎯 Missão Cumprida
+
 Implementação completa das funcionalidades de **"Prorrogar Vencimento"** e **"Aplicar Desconto"** na Tela de Cobranças, com integração total com a API do Banco Inter.
 
 ### ✅ Funcionalidades Implementadas
 
 #### 1. **Prorrogar Vencimento**
+
 - **Endpoint**: `PATCH /api/inter/collections/batch-extend`
 - **Permissões**: ADMINISTRADOR e FINANCEIRO
 - **Funcionalidades**:
@@ -18,6 +20,7 @@ Implementação completa das funcionalidades de **"Prorrogar Vencimento"** e **"
   - Logs de auditoria completos
 
 #### 2. **Aplicar Desconto de Quitação**
+
 - **Endpoint**: `POST /api/inter/collections/settlement-discount`
 - **Permissões**: ADMINISTRADOR e FINANCEIRO
 - **Funcionalidades**:
@@ -31,6 +34,7 @@ Implementação completa das funcionalidades de **"Prorrogar Vencimento"** e **"
 ### 🔧 Arquitetura Implementada
 
 #### Backend
+
 ```typescript
 // Validação de Permissões
 if (req.user?.role !== "ADMINISTRADOR" && req.user?.role !== "FINANCEIRO") {
@@ -45,21 +49,24 @@ await db.update(interCollections).set({ ... });
 ```
 
 #### Frontend
+
 ```typescript
 // Mutation para Prorrogar
 const prorrogarMutation = useMutation({
-  mutationFn: (data) => apiRequest("/api/inter/collections/batch-extend", {
-    method: "PATCH",
-    body: JSON.stringify(data)
-  })
+  mutationFn: (data) =>
+    apiRequest('/api/inter/collections/batch-extend', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 });
 
 // Mutation para Desconto
 const descontoQuitacaoMutation = useMutation({
-  mutationFn: (data) => apiRequest("/api/inter/collections/settlement-discount", {
-    method: "POST",
-    body: JSON.stringify(data)
-  })
+  mutationFn: (data) =>
+    apiRequest('/api/inter/collections/settlement-discount', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 });
 ```
 
@@ -87,6 +94,7 @@ graph TD
 ### 🔍 Logs de Auditoria
 
 Cada operação registra:
+
 - **Timestamp** da operação
 - **Usuário** que executou
 - **Dados anteriores** (para comparação)

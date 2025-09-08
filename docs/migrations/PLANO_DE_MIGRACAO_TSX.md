@@ -3,15 +3,16 @@
 **Status:** PLANO APROVADO ✅  
 **Prioridade:** P1 - CRÍTICA (Vulnerabilidade de Segurança)  
 **Data:** 26/08/2025  
-**Arquiteto:** Replit Agent V10  
+**Arquiteto:** Replit Agent V10
 
 ---
 
 ## 1. ANÁLISE DE IMPACTO
 
 ### 1.1 Estado Atual da Dependência
+
 - **Pacote Principal:** `tsx@4.20.5` (✅ Já instalado como devDependency)
-- **Pacotes Problemáticos:** 
+- **Pacotes Problemáticos:**
   - `@esbuild-kit/core-utils@3.3.2` (🚨 VULNERÁVEL)
   - `@esbuild-kit/esm-loader@2.6.5` (🚨 DEPRECATED)
 - **Fonte da Vulnerabilidade:** `drizzle-kit@0.30.6` (dependência transitiva)
@@ -19,12 +20,14 @@
 ### 1.2 Pontos de Uso Identificados
 
 #### ✅ Scripts package.json (Já Migrados)
+
 ```json
 "dev": "NODE_ENV=development tsx server/index.ts"  // ✅ Já usa tsx
 "build": "vite build && esbuild server/index.ts ..." // ✅ Usa esbuild diretamente
 ```
 
 #### 🚨 Dependências Transitivas Problemáticas
+
 ```
 drizzle-kit@0.30.6
 └─┬ @esbuild-kit/esm-loader@2.6.5  (DEPRECATED)
@@ -32,6 +35,7 @@ drizzle-kit@0.30.6
 ```
 
 ### 1.3 Arquivos NÃO Afetados
+
 - ✅ Nenhum código-fonte do projeto usa diretamente `@esbuild-kit`
 - ✅ Configurações do Vite não dependem de `@esbuild-kit`
 - ✅ Scripts de build já usam `tsx` ou `esbuild` diretamente
@@ -43,6 +47,7 @@ drizzle-kit@0.30.6
 ### FASE 1: PREPARAÇÃO E VALIDAÇÃO (Risco: BAIXO)
 
 #### Passo 1.1: Backup de Segurança
+
 ```bash
 # Fazer backup do estado atual
 git add -A
@@ -52,6 +57,7 @@ cp package-lock.json package-lock.json.backup
 ```
 
 #### Passo 1.2: Verificação de Compatibilidade
+
 ```bash
 # Verificar versão atual do tsx
 npm list tsx
@@ -68,6 +74,7 @@ npx vitest run server/tests/health.test.ts --reporter=verbose
 ### FASE 2: MIGRAÇÃO DRIZZLE-KIT (Risco: MÉDIO)
 
 #### Passo 2.1: Tentativa de Atualização Drizzle-Kit
+
 ```bash
 # Verificar se há nova versão disponível que eliminou @esbuild-kit
 npm view drizzle-kit versions --json | tail -10
@@ -80,6 +87,7 @@ npm list @esbuild-kit/core-utils @esbuild-kit/esm-loader
 ```
 
 #### Passo 2.2: Validação Funcional Drizzle-Kit
+
 ```bash
 # Testar comandos drizzle-kit essenciais
 npm run db:push  # Deve executar sem erros
@@ -91,6 +99,7 @@ npx drizzle-kit generate
 ### FASE 3: LIMPEZA E OTIMIZAÇÃO (Risco: BAIXO)
 
 #### Passo 3.1: Auditoria de Segurança
+
 ```bash
 # Verificar se vulnerabilidade foi eliminada
 npm audit --audit-level=moderate
@@ -99,6 +108,7 @@ npm audit --audit-level=moderate
 ```
 
 #### Passo 3.2: Otimização Final
+
 ```bash
 # Limpeza de cache
 npm cache clean --force
@@ -119,6 +129,7 @@ npm list --depth=3 | grep -i esbuild-kit
 ### 3.1 Testes Funcionais Mandatórios
 
 #### ✅ Validação de Servidor
+
 ```bash
 # 1. Inicialização do servidor
 npm run dev
@@ -134,6 +145,7 @@ npx vitest run server/tests/health.test.ts --reporter=verbose
 ```
 
 #### ✅ Validação de Build
+
 ```bash
 # Build de produção
 npm run build
@@ -145,6 +157,7 @@ npm run start
 ```
 
 #### ✅ Validação de Database
+
 ```bash
 # Comandos drizzle-kit críticos
 npm run db:push
@@ -155,9 +168,10 @@ npx drizzle-kit generate
 ```
 
 ### 3.2 Critérios de Sucesso
+
 1. **Segurança:** `npm audit` reporta 0 moderate vulnerabilities
 2. **Funcionalidade:** Smoke test 100% aprovado (2/2 tests)
-3. **Performance:** Server response time ≤ 30ms  
+3. **Performance:** Server response time ≤ 30ms
 4. **Compatibilidade:** Todos os scripts package.json funcionais
 5. **Database:** Drizzle-kit operando normalmente
 
@@ -166,6 +180,7 @@ npx drizzle-kit generate
 ## 4. PLANO DE ROLLBACK
 
 ### 4.1 Rollback Rápido (< 2 minutos)
+
 ```bash
 # Em caso de falha crítica imediata
 git reset --hard HEAD~1
@@ -174,6 +189,7 @@ npm run dev
 ```
 
 ### 4.2 Rollback Completo (< 5 minutos)
+
 ```bash
 # Restaurar backups
 cp package.json.backup package.json
@@ -189,6 +205,7 @@ npx vitest run server/tests/health.test.ts
 ```
 
 ### 4.3 Rollback de Emergência - Versão Específica
+
 ```bash
 # Voltar para versão segura conhecida
 npm install drizzle-kit@0.30.6 --save-dev --save-exact
@@ -207,16 +224,17 @@ npm run dev
 
 ### 5.1 Riscos Identificados
 
-| Risco | Probabilidade | Impacto | Mitigação |
-|-------|---------------|---------|-----------|
-| **Drizzle-kit quebra após atualização** | MÉDIO | ALTO | Backup + rollback automático |
-| **Nova versão drizzle-kit indisponível** | ALTO | MÉDIO | Aguardar release ou usar fork |
-| **Dependências conflitantes** | BAIXO | MÉDIO | Lock file + npm ci |
-| **Regressão funcional** | BAIXO | ALTO | Smoke tests obrigatórios |
+| Risco                                    | Probabilidade | Impacto | Mitigação                     |
+| ---------------------------------------- | ------------- | ------- | ----------------------------- |
+| **Drizzle-kit quebra após atualização**  | MÉDIO         | ALTO    | Backup + rollback automático  |
+| **Nova versão drizzle-kit indisponível** | ALTO          | MÉDIO   | Aguardar release ou usar fork |
+| **Dependências conflitantes**            | BAIXO         | MÉDIO   | Lock file + npm ci            |
+| **Regressão funcional**                  | BAIXO         | ALTO    | Smoke tests obrigatórios      |
 
 ### 5.2 Plano de Contingência
 
 #### Se drizzle-kit > 0.30.6 não disponível:
+
 1. **Opção A:** Aguardar PR #4430 do drizzle-team/drizzle-orm
 2. **Opção B:** Usar fork temporário com patch de segurança
 3. **Opção C:** Substituir drizzle-kit por solução alternativa
@@ -226,12 +244,14 @@ npm run dev
 ## 6. CRONOGRAMA E RECURSOS
 
 ### 6.1 Tempo Estimado
+
 - **Preparação:** 15 minutos
-- **Execução:** 30 minutos  
+- **Execução:** 30 minutos
 - **Validação:** 15 minutos
 - **Total:** ~60 minutos
 
 ### 6.2 Janela de Manutenção
+
 - **Recomendado:** Horário de baixo tráfego
 - **Rollback:** Disponível em < 2 minutos
 - **Impacto:** Mínimo (apenas restart do servidor)
@@ -241,11 +261,13 @@ npm run dev
 ## 7. PÓS-MIGRAÇÃO
 
 ### 7.1 Monitoramento
+
 - **48h:** Observar logs de erro relacionados a TypeScript execution
 - **72h:** Monitorar performance de inicialização
 - **1 semana:** Validar estabilidade geral do sistema
 
 ### 7.2 Documentação
+
 - Atualizar `replit.md` com nova arquitetura de dependências
 - Registrar decisões técnicas em ADR se necessário
 - Comunicar migração bem-sucedida para stakeholders
@@ -258,4 +280,4 @@ Este plano elimina a vulnerabilidade de segurança **@esbuild-kit/core-utils** a
 
 **Aprovação:** ✅ PLANO PRONTO PARA EXECUÇÃO  
 **Responsável pela Execução:** A ser designado  
-**Revisão:** Engenheiro Sênior V10  
+**Revisão:** Engenheiro Sênior V10

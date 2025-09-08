@@ -15,6 +15,7 @@ A ClickSign migrou de "Listas" para "Envelopes" na API v2, oferecendo mais contr
 ## 🚀 Fluxo Completo de Assinatura
 
 ### 1️⃣ Criar Envelope
+
 ```javascript
 POST /api/v2/envelopes
 {
@@ -30,6 +31,7 @@ POST /api/v2/envelopes
 ```
 
 ### 2️⃣ Adicionar Documento ao Envelope
+
 ```javascript
 POST /api/v2/envelopes/{envelope_id}/documents
 {
@@ -42,6 +44,7 @@ POST /api/v2/envelopes/{envelope_id}/documents
 ```
 
 ### 3️⃣ Criar Signatário
+
 ```javascript
 POST /api/v2/signers
 {
@@ -56,6 +59,7 @@ POST /api/v2/signers
 ```
 
 ### 4️⃣ Adicionar Signatário ao Envelope
+
 ```javascript
 POST /api/v2/envelopes/{envelope_id}/signers
 {
@@ -67,6 +71,7 @@ POST /api/v2/envelopes/{envelope_id}/signers
 ```
 
 ### 5️⃣ Adicionar Requisitos (Opcional)
+
 ```javascript
 // Autenticação por Selfie
 POST /api/v2/envelopes/{envelope_id}/requirements
@@ -88,13 +93,15 @@ POST /api/v2/envelopes/{envelope_id}/requirements
 ```
 
 ### 6️⃣ Finalizar Envelope
+
 ```javascript
-POST /api/v2/envelopes/{envelope_id}/finish
+POST / api / v2 / envelopes / { envelope_id } / finish;
 ```
 
 ## 🔔 Webhooks - Eventos Críticos
 
 ### Configuração de Webhook
+
 ```javascript
 POST /api/v2/webhooks
 {
@@ -102,7 +109,7 @@ POST /api/v2/webhooks
     "url": "https://seu-dominio.com/api/clicksign/webhook",
     "events": [
       "envelope.created",
-      "envelope.updated", 
+      "envelope.updated",
       "envelope.finished",
       "envelope.cancelled",
       "envelope.expired",
@@ -118,6 +125,7 @@ POST /api/v2/webhooks
 ```
 
 ### Estrutura do Payload de Webhook
+
 ```json
 {
   "event": {
@@ -131,17 +139,21 @@ POST /api/v2/webhooks
         "created_at": "2025-01-31T09:00:00-03:00",
         "updated_at": "2025-01-31T10:00:00-03:00",
         "finished_at": "2025-01-31T10:00:00-03:00",
-        "documents": [{
-          "id": "doc_uuid",
-          "filename": "ccb_proposta_12345.pdf",
-          "signed_at": "2025-01-31T09:55:00-03:00"
-        }],
-        "signers": [{
-          "id": "signer_uuid",
-          "name": "João Silva",
-          "email": "joao@email.com",
-          "signed_at": "2025-01-31T09:55:00-03:00"
-        }]
+        "documents": [
+          {
+            "id": "doc_uuid",
+            "filename": "ccb_proposta_12345.pdf",
+            "signed_at": "2025-01-31T09:55:00-03:00"
+          }
+        ],
+        "signers": [
+          {
+            "id": "signer_uuid",
+            "name": "João Silva",
+            "email": "joao@email.com",
+            "signed_at": "2025-01-31T09:55:00-03:00"
+          }
+        ]
       }
     }
   },
@@ -159,17 +171,15 @@ function validateWebhook(payload, signature, secret) {
     .createHmac('sha256', secret)
     .update(JSON.stringify(payload))
     .digest('hex');
-  
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  );
+
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
 }
 ```
 
 ## 📱 Aceite via WhatsApp
 
 ### Configurar WhatsApp
+
 ```javascript
 POST /api/v2/envelopes/{envelope_id}/signers/{signer_id}/whatsapp
 {
@@ -181,23 +191,26 @@ POST /api/v2/envelopes/{envelope_id}/signers/{signer_id}/whatsapp
 ## 🖼️ Widget Embedded
 
 ### Integração no Frontend
+
 ```html
-<iframe 
+<iframe
   src="https://app.clicksign.com/widget/{envelope_id}?signer_key={signer_key}&theme=light"
-  width="100%" 
+  width="100%"
   height="600"
-  frameborder="0">
+  frameborder="0"
+>
 </iframe>
 ```
 
 ### Eventos do Widget
+
 ```javascript
 window.addEventListener('message', (event) => {
   if (event.origin !== 'https://app.clicksign.com') return;
-  
+
   const { type, data } = event.data;
-  
-  switch(type) {
+
+  switch (type) {
     case 'signature:success':
       console.log('Documento assinado com sucesso!');
       break;
@@ -214,6 +227,7 @@ window.addEventListener('message', (event) => {
 ## 🏢 Assinatura Presencial
 
 ### Criar Sessão Presencial
+
 ```javascript
 POST /api/v2/envelopes/{envelope_id}/in_person_sessions
 {
@@ -226,6 +240,7 @@ POST /api/v2/envelopes/{envelope_id}/in_person_sessions
 ```
 
 ### Validar Token
+
 ```javascript
 POST /api/v2/in_person_sessions/{session_id}/validate
 {
@@ -236,18 +251,21 @@ POST /api/v2/in_person_sessions/{session_id}/validate
 ## ⚠️ Pontos Críticos de Atenção
 
 ### 1. Limites da API
+
 - **Rate Limit**: 300 requisições/minuto
 - **Tamanho máximo PDF**: 20MB
 - **Documentos por envelope**: 100
 - **Signatários por envelope**: 30
 
 ### 2. Validações Obrigatórias
+
 - CPF válido (11 dígitos)
 - Email válido
 - Telefone com DDD
 - Data de nascimento formato ISO
 
 ### 3. Status do Envelope
+
 - `draft` - Rascunho
 - `running` - Em andamento
 - `finished` - Finalizado
@@ -255,6 +273,7 @@ POST /api/v2/in_person_sessions/{session_id}/validate
 - `expired` - Expirado
 
 ### 4. Erros Comuns
+
 ```json
 {
   "errors": [
@@ -283,9 +302,11 @@ async function sendToClickSignWithRetry(data, maxRetries = 3) {
       const response = await clickSignAPI.post(data);
       return response;
     } catch (error) {
-      if (error.status === 429) { // Rate limit
+      if (error.status === 429) {
+        // Rate limit
         await sleep(60000); // Espera 1 minuto
-      } else if (error.status >= 500) { // Erro servidor
+      } else if (error.status >= 500) {
+        // Erro servidor
         await sleep(5000 * (i + 1)); // Backoff exponencial
       } else {
         throw error; // Erro cliente, não retry
@@ -299,6 +320,7 @@ async function sendToClickSignWithRetry(data, maxRetries = 3) {
 ## 📊 Monitoramento e Logs
 
 ### Log de Sucesso
+
 ```
 [CLICKSIGN] ✅ Envelope created: env_123abc
 [CLICKSIGN] ✅ Document uploaded: doc_456def
@@ -308,6 +330,7 @@ async function sendToClickSignWithRetry(data, maxRetries = 3) {
 ```
 
 ### Log de Erro
+
 ```
 [CLICKSIGN] ❌ Failed to create envelope: Invalid CPF
 [CLICKSIGN] ⚠️ Rate limit reached, waiting 60s

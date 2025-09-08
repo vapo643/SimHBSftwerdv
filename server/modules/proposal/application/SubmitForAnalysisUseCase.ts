@@ -27,7 +27,7 @@ export class SubmitForAnalysisUseCase {
 
     // 3. Persistir as alterações
     await this.proposalRepository.save(proposal);
-    
+
     // 4. (Opcional, mas recomendado) Despachar eventos de domínio aqui no futuro
   }
 }

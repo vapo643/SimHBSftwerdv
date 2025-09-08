@@ -1,10 +1,11 @@
 # RELATÓRIO FORENSE: VAZAMENTO DE CONEXÕES REDIS
+
 ## PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0 - OPERAÇÃO ESTABILIZAÇÃO CRÍTICA
 
 **Data da Auditoria:** 2025-09-01T19:59:00Z  
 **Investigador:** Replit Agent  
 **Missão:** Diagnóstico forense do erro `ReplyError: ERR max number of clients reached`  
-**Severidade:** CRÍTICA - Sistema comprometido  
+**Severidade:** CRÍTICA - Sistema comprometido
 
 ---
 
@@ -23,6 +24,7 @@
 ### 1.1 Instâncias Redis Identificadas
 
 **EVIDÊNCIA 1.1.1 - Arquivo: `server/lib/redis-config.ts`**
+
 ```typescript
 // Linha 115: Singleton PARCIAL com brecha
 const client = new Redis(config);
@@ -30,9 +32,11 @@ const client = new Redis(config);
 // Linha 165: Health check cria nova instância
 const client = sharedRedisClient || createRedisClient('health-check');
 ```
+
 **Análise:** Implementação de Singleton **DEFICIENTE**. Permite criação de múltiplas instâncias via parâmetro `instanceName`.
 
 **EVIDÊNCIA 1.1.2 - Arquivo: `server/worker.ts`**
+
 ```typescript
 // Linha 16: Instância independente do BullMQ Worker
 const redisConnection = new Redis({
@@ -43,9 +47,11 @@ const redisConnection = new Redis({
   enableReadyCheck: false,
 });
 ```
+
 **Análise:** **VIOLAÇÃO CRÍTICA** - Worker principal cria conexão própria ao invés de reutilizar o Singleton.
 
 **EVIDÊNCIA 1.1.3 - Arquivo: `server/lib/cache-manager.ts`**
+
 ```typescript
 // Linha 40: Cache Manager com instância própria
 this.redis = new Redis(redisUrl, {
@@ -56,9 +62,11 @@ this.redis = new Redis(redisUrl, {
   commandTimeout: 1000,
 });
 ```
+
 **Análise:** Sistema de cache **ignora completamente** o módulo centralizado de configuração.
 
 **EVIDÊNCIA 1.1.4 - Arquivo: `server/worker-test-retry.ts`**
+
 ```typescript
 // Linha 11: Worker de teste com instância dedicada
 const redisConnection = new Redis({
@@ -69,9 +77,11 @@ const redisConnection = new Redis({
   enableReadyCheck: false,
 });
 ```
+
 **Análise:** Worker de teste **agrava o problema** criando conexões adicionais durante execução de testes.
 
 **EVIDÊNCIA 1.1.5 - Arquivo: `server/routes/test-retry-original.ts`**
+
 ```typescript
 // Linha 61: Instância para route de teste
 const connection = new Redis({
@@ -82,6 +92,7 @@ const connection = new Redis({
 ```
 
 **EVIDÊNCIA 1.1.6 - Arquivo: `server/security/semgrep-mcp-server.ts`**
+
 ```typescript
 // Linha 91: Scanner de segurança com instância própria
 this.redis = new Redis({
@@ -92,6 +103,7 @@ this.redis = new Redis({
 ```
 
 ### 1.2 Auditoria Quantitativa
+
 - **Total de arquivos com referencias Redis:** 22 arquivos
 - **Instâncias diretas identificadas:** 6+ instâncias
 - **Padrão arquitetural:** **ANTI-PATTERN** - Multiple instances, no central management
@@ -113,15 +125,15 @@ export function createRedisClient(instanceName = 'default'): Redis {
   if (sharedRedisClient && instanceName === 'default') {
     return sharedRedisClient;
   }
-  
+
   // FALHA CRÍTICA: Permite criação de múltiplas instâncias
   const config = createRedisConfig();
   const client = new Redis(config);
-  
+
   if (instanceName === 'default') {
     sharedRedisClient = client;
   }
-  
+
   return client;
 }
 ```
@@ -131,8 +143,9 @@ export function createRedisClient(instanceName = 'default'): Redis {
 ### 2.2 Violações do Padrão Centralizado
 
 **EVIDÊNCIA 2.2.1:** 83% dos módulos **IGNORAM** o sistema centralizado:
+
 - `server/worker.ts` - Cria `new Redis()` diretamente
-- `server/cache-manager.ts` - Cria `new Redis()` diretamente  
+- `server/cache-manager.ts` - Cria `new Redis()` diretamente
 - `server/worker-test-retry.ts` - Cria `new Redis()` diretamente
 - `server/routes/test-retry-original.ts` - Cria `new Redis()` diretamente
 - `server/security/semgrep-mcp-server.ts` - Cria `new Redis()` diretamente
@@ -146,6 +159,7 @@ export function createRedisClient(instanceName = 'default'): Redis {
 ### 3.1 Configuração do Ambiente de Teste
 
 **EVIDÊNCIA 3.1.1 - Arquivo: `vitest.config.ts`**
+
 ```typescript
 export default defineConfig({
   plugins: [],
@@ -157,9 +171,11 @@ export default defineConfig({
   },
 });
 ```
+
 **Análise:** **AUSÊNCIA TOTAL** de configuração para gerenciamento de conexões Redis.
 
 **EVIDÊNCIA 3.1.2 - Arquivo: `tests/setup.ts`**
+
 ```typescript
 import { beforeEach, vi } from 'vitest';
 import '@testing-library/jest-dom';
@@ -172,18 +188,22 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 ```
+
 **Análise CRÍTICA:** Setup de teste **PRIMITIVO**. Não contém:
+
 - ❌ Inicialização de Redis
-- ❌ Limpeza de conexões (`afterEach`/`afterAll`)  
+- ❌ Limpeza de conexões (`afterEach`/`afterAll`)
 - ❌ Configuração de timeout
 - ❌ Gestão de pool de conexões
 
 ### 3.2 Auditoria de Hooks de Limpeza
 
 **BUSCA EXECUTADA:**
+
 ```bash
 grep -r ".quit()\|.disconnect()\|.close()" tests/ --include="*.ts" --include="*.js"
 ```
+
 **RESULTADO:** **ZERO ocorrências encontradas**
 
 **CONCLUSÃO FORENSE:** Os testes **NUNCA** fecham conexões Redis, resultando em acúmulo exponencial durante execução da suíte.
@@ -191,13 +211,15 @@ grep -r ".quit()\|.disconnect()\|.close()" tests/ --include="*.ts" --include="*.
 ### 3.3 Simulação do Cenário de Falha
 
 **CENÁRIO DE EXECUÇÃO:**
+
 1. **Início do teste:** Cada módulo cria sua instância Redis
 2. **Durante teste:** 6+ conexões simultâneas abertas por teste
-3. **Paralelização:** Vitest executa múltiplos testes em paralelo 
+3. **Paralelização:** Vitest executa múltiplos testes em paralelo
 4. **Acúmulo:** 6 conexões × N testes × M workers = Pool exhaustion
 5. **Falha:** `ERR max number of clients reached` quando limite atingido
 
 **MATH FORENSE:**
+
 - Default maxclients Redis: ~10,000
 - Conexões por teste: 6+
 - Testes paralelos: 30+
@@ -211,6 +233,7 @@ grep -r ".quit()\|.disconnect()\|.close()" tests/ --include="*.ts" --include="*.
 ### 4.1 Configuração Redis Detectada
 
 **EVIDÊNCIA 4.1.1 - Arquivo: `.env`**
+
 ```bash
 REDIS_HOST=localhost
 REDIS_PORT=6379
@@ -220,6 +243,7 @@ REDIS_TLS_ENABLED=false
 ```
 
 **EVIDÊNCIA 4.1.2 - Configuração padrão detectada:**
+
 - **Host:** localhost (Redis local)
 - **Port:** 6379 (padrão)
 - **Configuração `maxclients`:** **NÃO CONFIGURADA** (usa padrão do sistema)
@@ -227,6 +251,7 @@ REDIS_TLS_ENABLED=false
 ### 4.2 Método de Obtenção do `maxclients`
 
 **Como obter o valor atual:**
+
 ```bash
 # Método 1: Redis CLI
 redis-cli CONFIG GET maxclients
@@ -245,7 +270,7 @@ await client.quit();
 
 ### 5.1 Validação da Hipótese Original
 
-**HIPÓTESE:** *"O código está a instanciar novos clientes Redis de forma descentralizada (`new Redis()`) para cada operação ou teste, sem garantir o seu fecho (`.quit()`) subsequente."*
+**HIPÓTESE:** _"O código está a instanciar novos clientes Redis de forma descentralizada (`new Redis()`) para cada operação ou teste, sem garantir o seu fecho (`.quit()`) subsequente."_
 
 **VALIDAÇÃO:** ✅ **CONFIRMADA INTEGRALMENTE**
 
@@ -269,13 +294,13 @@ await client.quit();
 
 ## 6. CLASSIFICAÇÃO DE RISCO
 
-| Aspecto | Severidade | Impacto |
-|---------|------------|---------|
-| **Disponibilidade** | CRÍTICA | Sistema de testes inoperante |
-| **Performance** | ALTA | Degradação progressiva |
-| **Escalabilidade** | CRÍTICA | Bloqueio para crescimento |
-| **Manutenibilidade** | ALTA | Debugging complexo |
-| **Segurança** | MÉDIA | DoS potencial |
+| Aspecto              | Severidade | Impacto                      |
+| -------------------- | ---------- | ---------------------------- |
+| **Disponibilidade**  | CRÍTICA    | Sistema de testes inoperante |
+| **Performance**      | ALTA       | Degradação progressiva       |
+| **Escalabilidade**   | CRÍTICA    | Bloqueio para crescimento    |
+| **Manutenibilidade** | ALTA       | Debugging complexo           |
+| **Segurança**        | MÉDIA      | DoS potencial                |
 
 ---
 
@@ -284,6 +309,7 @@ await client.quit();
 **⚠️ IMPORTANTE:** Este relatório é estritamente de **DIAGNÓSTICO**. As correções serão implementadas em missão separada.
 
 **ROADMAP DE CORREÇÃO:**
+
 1. **Centralização:** Refatorar todas as instâncias para usar `redis-config.ts`
 2. **Singleton Rigoroso:** Eliminar escape hatch do `instanceName`
 3. **Test Lifecycle:** Implementar cleanup em `tests/setup.ts`
@@ -301,8 +327,9 @@ A auditoria forense confirma **VAZAMENTO MASSIVO DE CONEXÕES REDIS** como causa
 **RESOLUÇÃO:** Requer refatoração coordenada de múltiplos módulos seguindo PAM V1.0 Phase 2.
 
 ---
+
 **[FIM DO RELATÓRIO FORENSE]**
 
-*Protocolo PAM V1.0 - Operação Estabilização Crítica*  
-*Classificação: CONFIDENCIAL*  
-*Distribuição: Equipe de Arquitetura*
+_Protocolo PAM V1.0 - Operação Estabilização Crítica_  
+_Classificação: CONFIDENCIAL_  
+_Distribuição: Equipe de Arquitetura_

@@ -23,10 +23,12 @@ O Sistema Simpix implementa um modelo de segurança híbrido com duas camadas:
 ### Estrutura de Perfis
 
 #### 1. ATENDENTE
+
 **Responsabilidades**: Criação e edição de propostas de crédito
 **Escopo de Acesso**: Limitado à sua loja
 
 **Permissões de Funcionalidades**:
+
 - ✅ Criar novas propostas
 - ✅ Editar propostas pendentes
 - ✅ Visualizar suas próprias propostas
@@ -36,6 +38,7 @@ O Sistema Simpix implementa um modelo de segurança híbrido com duas camadas:
 - ❌ Acessar painel administrativo
 
 **Permissões de Dados (RLS)**:
+
 - **Propostas**: SELECT, INSERT, UPDATE (apenas sua loja)
 - **Clientes**: SELECT, INSERT, UPDATE (apenas sua loja)
 - **Documentos**: SELECT, INSERT (apenas sua loja)
@@ -43,10 +46,12 @@ O Sistema Simpix implementa um modelo de segurança híbrido com duas camadas:
 - **Tabelas Comerciais**: SELECT (apenas sua loja)
 
 #### 2. ANALISTA
+
 **Responsabilidades**: Análise e decisão sobre propostas de crédito
 **Escopo de Acesso**: Multi-loja (conforme configuração)
 
 **Permissões de Funcionalidades**:
+
 - ✅ Visualizar fila de análise
 - ✅ Analisar propostas individualmente
 - ✅ Aprovar/rejeitar/pender propostas
@@ -56,15 +61,18 @@ O Sistema Simpix implementa um modelo de segurança híbrido com duas camadas:
 - ❌ Acessar painel administrativo
 
 **Permissões de Dados (RLS)**:
+
 - **Propostas**: SELECT, UPDATE (status e observações)
 - **Logs de Comunicação**: SELECT, INSERT
 - **Documentos**: SELECT (visualização para análise)
 
 #### 3. GERENTE
+
 **Responsabilidades**: Gestão operacional e supervisão
 **Escopo de Acesso**: Limitado às suas lojas
 
 **Permissões de Funcionalidades**:
+
 - ✅ Todas as permissões de ATENDENTE
 - ✅ Visualizar relatórios gerenciais
 - ✅ Gerenciar equipe de atendentes
@@ -74,16 +82,19 @@ O Sistema Simpix implementa um modelo de segurança híbrido com duas camadas:
 - ❌ Acessar configurações globais
 
 **Permissões de Dados (RLS)**:
+
 - **Propostas**: SELECT, INSERT, UPDATE (suas lojas)
 - **Usuários**: SELECT (apenas sua equipe)
 - **Tabelas Comerciais**: SELECT, INSERT, UPDATE, DELETE (suas lojas)
 - **Produtos**: SELECT, INSERT, UPDATE, DELETE (suas lojas)
 
 #### 4. ADMINISTRADOR
+
 **Responsabilidades**: Administração completa do sistema
 **Escopo de Acesso**: Global (todas as lojas)
 
 **Permissões de Funcionalidades**:
+
 - ✅ Acesso total a todas as funcionalidades
 - ✅ Gerenciamento de usuários
 - ✅ Configurações do sistema
@@ -92,6 +103,7 @@ O Sistema Simpix implementa um modelo de segurança híbrido com duas camadas:
 - ✅ Gestão de parceiros e lojas
 
 **Permissões de Dados (RLS)**:
+
 - **Bypass de RLS**: Acesso irrestrito para operações administrativas
 - **Todas as Tabelas**: SELECT, INSERT, UPDATE, DELETE (global)
 - **Logs de Segurança**: SELECT, INSERT (monitoramento)
@@ -103,18 +115,21 @@ O Sistema Simpix implementa um modelo de segurança híbrido com duas camadas:
 **Arquivo**: `server/lib/role-guards.ts`
 
 **requireAdmin()**
+
 ```javascript
 // Requer perfil ADMINISTRADOR
 // Aplicado em: /api/admin/*, /api/security/*, /api/owasp/*
 ```
 
 **requireManagerOrAdmin()**
+
 ```javascript
 // Requer perfil GERENTE ou ADMINISTRADOR
 // Aplicado em: gestão de produtos, tabelas comerciais
 ```
 
 **requireAnyRole()**
+
 ```javascript
 // Requer qualquer perfil válido (ATENDENTE, GERENTE, ADMINISTRADOR)
 // Aplicado em: endpoints básicos da aplicação
@@ -125,6 +140,7 @@ O Sistema Simpix implementa um modelo de segurança híbrido com duas camadas:
 **Arquivo**: `drizzle/migrations/0001_multi_tenant_rls.sql`
 
 ##### Função Principal
+
 ```sql
 get_current_user_loja_id()
 -- Retorna loja_id do usuário autenticado baseado no JWT
@@ -133,36 +149,42 @@ get_current_user_loja_id()
 ##### Políticas por Tabela
 
 **Propostas**:
+
 - SELECT: `loja_id = get_current_user_loja_id()`
 - INSERT: `loja_id = get_current_user_loja_id()`
 - UPDATE: `loja_id = get_current_user_loja_id()`
 - DELETE: `false` (bloqueado - soft delete apenas)
 
 **Tabelas Comerciais**:
+
 - SELECT: `loja_id = get_current_user_loja_id()`
 - INSERT: `loja_id = get_current_user_loja_id()`
 - UPDATE: `loja_id = get_current_user_loja_id()`
 - DELETE: `loja_id = get_current_user_loja_id()`
 
 **Produtos**:
+
 - SELECT: `loja_id = get_current_user_loja_id()`
 - INSERT: `loja_id = get_current_user_loja_id()`
 - UPDATE: `loja_id = get_current_user_loja_id()`
 - DELETE: `loja_id = get_current_user_loja_id()`
 
 **Logs de Comunicação**:
+
 - SELECT: `loja_id = get_current_user_loja_id()`
 - INSERT: `loja_id = get_current_user_loja_id()`
 - UPDATE: `false` (imutável para auditoria)
 - DELETE: `false` (imutável para auditoria)
 
 **Parceiros**:
+
 - SELECT: Apenas parceiro da própria loja
 - INSERT: `false` (controlado na aplicação)
 - UPDATE: Apenas próprio parceiro
 - DELETE: `false` (bloqueado)
 
 **Lojas**:
+
 - SELECT: `id = get_current_user_loja_id()`
 - INSERT: Controlado na aplicação
 - UPDATE: `id = get_current_user_loja_id()`
@@ -170,39 +192,42 @@ get_current_user_loja_id()
 
 ### Matriz de Permissões
 
-| Recurso | ATENDENTE | ANALISTA | GERENTE | ADMINISTRADOR |
-|---------|-----------|----------|---------|---------------|
-| **Propostas** |
-| Criar | ✅ (sua loja) | ❌ | ✅ (suas lojas) | ✅ (global) |
-| Visualizar | ✅ (sua loja) | ✅ (conforme config) | ✅ (suas lojas) | ✅ (global) |
-| Editar | ✅ (pendentes) | ✅ (status/obs) | ✅ (suas lojas) | ✅ (global) |
-| Aprovar/Rejeitar | ❌ | ✅ | ✅ | ✅ |
-| **Usuários** |
-| Visualizar | ❌ | ❌ | ✅ (sua equipe) | ✅ (global) |
-| Criar | ❌ | ❌ | ❌ | ✅ |
-| Editar | ❌ | ❌ | ❌ | ✅ |
-| Desativar | ❌ | ❌ | ❌ | ✅ |
-| **Produtos** |
-| Visualizar | ✅ (sua loja) | ❌ | ✅ (suas lojas) | ✅ (global) |
-| Gerenciar | ❌ | ❌ | ✅ (suas lojas) | ✅ (global) |
-| **Configurações** |
-| Tabelas Comerciais | ❌ | ❌ | ✅ (suas lojas) | ✅ (global) |
-| Sistema | ❌ | ❌ | ❌ | ✅ |
-| Segurança | ❌ | ❌ | ❌ | ✅ |
+| Recurso            | ATENDENTE      | ANALISTA             | GERENTE         | ADMINISTRADOR |
+| ------------------ | -------------- | -------------------- | --------------- | ------------- |
+| **Propostas**      |
+| Criar              | ✅ (sua loja)  | ❌                   | ✅ (suas lojas) | ✅ (global)   |
+| Visualizar         | ✅ (sua loja)  | ✅ (conforme config) | ✅ (suas lojas) | ✅ (global)   |
+| Editar             | ✅ (pendentes) | ✅ (status/obs)      | ✅ (suas lojas) | ✅ (global)   |
+| Aprovar/Rejeitar   | ❌             | ✅                   | ✅              | ✅            |
+| **Usuários**       |
+| Visualizar         | ❌             | ❌                   | ✅ (sua equipe) | ✅ (global)   |
+| Criar              | ❌             | ❌                   | ❌              | ✅            |
+| Editar             | ❌             | ❌                   | ❌              | ✅            |
+| Desativar          | ❌             | ❌                   | ❌              | ✅            |
+| **Produtos**       |
+| Visualizar         | ✅ (sua loja)  | ❌                   | ✅ (suas lojas) | ✅ (global)   |
+| Gerenciar          | ❌             | ❌                   | ✅ (suas lojas) | ✅ (global)   |
+| **Configurações**  |
+| Tabelas Comerciais | ❌             | ❌                   | ✅ (suas lojas) | ✅ (global)   |
+| Sistema            | ❌             | ❌                   | ❌              | ✅            |
+| Segurança          | ❌             | ❌                   | ❌              | ✅            |
 
 ### Controles de Segurança Adicionais
 
 #### 1. Isolamento Multi-Tenant
+
 - Todos os dados são isolados por `loja_id`
 - Usuários não podem acessar dados de outras lojas
 - Exceção: ADMINISTRADOR tem acesso global
 
 #### 2. Auditoria e Logs
+
 - Logs de comunicação são imutáveis
 - Todas as ações são registradas
 - Eventos de segurança são monitorados
 
 #### 3. Prevenção de Bypass
+
 - RLS não pode ser desabilitado por usuários
 - Políticas aplicadas automaticamente no banco
 - Validação dupla: aplicação + banco de dados
@@ -210,15 +235,18 @@ get_current_user_loja_id()
 ### Processo de Revisão
 
 #### Frequência
+
 - **Revisão Trimestral**: Verificação de políticas e permissões
 - **Revisão Anual**: Avaliação completa da arquitetura de segurança
 
 #### Responsáveis
+
 - **Administrador de Sistema**: Implementação técnica
 - **Gerente de Segurança**: Aprovação de mudanças
 - **Auditor Interno**: Verificação de conformidade
 
 #### Checklist de Revisão
+
 - [ ] Verificar se RLS está ativo em todas as tabelas
 - [ ] Testar isolamento entre lojas
 - [ ] Validar role guards em novos endpoints
@@ -228,14 +256,17 @@ get_current_user_loja_id()
 ### Exceções e Casos Especiais
 
 #### 1. Operações do Sistema
+
 - Usuário `simpix_system` pode bypassar RLS para operações automatizadas
 - Migrations e manutenção usam privilégios elevados temporários
 
 #### 2. Usuários Órfãos
+
 - Usuários sem loja_id são bloqueados automaticamente
 - Middleware valida existência de perfil válido
 
 #### 3. Desativação de Conta
+
 - Todos os tokens são invalidados imediatamente
 - Sessões ativas são terminadas
 - Logs de segurança registram a ação

@@ -197,21 +197,23 @@ log('✅ IoC Container initialized successfully');
   // Simplified graceful shutdown handler (workers are lazy-loaded)
   process.on('SIGTERM', async () => {
     console.log('[SERVER] 🛑 SIGTERM received, closing workers...');
-    
+
     try {
       console.log('[SERVER] ℹ️  Specialized workers use lazy initialization (no cleanup needed)');
-      
+
       // Close formalization worker if it exists
       if (formalizationWorker) {
         console.log('[SERVER] 📡 Closing formalization worker...');
         await formalizationWorker.stop();
         console.log('[SERVER] ✅ Formalization worker closed gracefully');
       }
-      
     } catch (error) {
-      console.error('[SERVER] ❌ Error during graceful shutdown:', error instanceof Error ? error.message : String(error));
+      console.error(
+        '[SERVER] ❌ Error during graceful shutdown:',
+        error instanceof Error ? error.message : String(error)
+      );
     }
-    
+
     console.log('[SERVER] 🏁 Graceful shutdown complete');
     process.exit(0);
   });

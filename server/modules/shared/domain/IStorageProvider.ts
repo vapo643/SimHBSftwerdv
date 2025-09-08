@@ -1,6 +1,6 @@
 /**
  * Abstração para Provedor de Armazenamento de Ficheiros
- * 
+ *
  * Aplica o Princípio de Inversão de Dependência (SOLID "D")
  * Permite desacoplar a lógica de negócio da implementação específica de storage
  */

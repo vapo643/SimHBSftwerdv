@@ -83,12 +83,8 @@
           "name": "audit_delete_log_deleted_by_profiles_id_fk",
           "tableFrom": "audit_delete_log",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "deleted_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -96,12 +92,8 @@
           "name": "audit_delete_log_restored_by_profiles_id_fk",
           "tableFrom": "audit_delete_log",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "restored_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["restored_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -166,12 +158,8 @@
           "name": "comunicacao_logs_proposta_id_propostas_id_fk",
           "tableFrom": "comunicacao_logs",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -179,12 +167,8 @@
           "name": "comunicacao_logs_loja_id_lojas_id_fk",
           "tableFrom": "comunicacao_logs",
           "tableTo": "lojas",
-          "columnsFrom": [
-            "loja_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["loja_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -192,12 +176,8 @@
           "name": "comunicacao_logs_user_id_users_id_fk",
           "tableFrom": "comunicacao_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -348,12 +328,8 @@
           "name": "gerente_lojas_gerente_id_users_id_fk",
           "tableFrom": "gerente_lojas",
           "tableTo": "users",
-          "columnsFrom": [
-            "gerente_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["gerente_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -361,12 +337,8 @@
           "name": "gerente_lojas_loja_id_lojas_id_fk",
           "tableFrom": "gerente_lojas",
           "tableTo": "lojas",
-          "columnsFrom": [
-            "loja_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["loja_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -374,10 +346,7 @@
       "compositePrimaryKeys": {
         "gerente_lojas_gerente_id_loja_id_pk": {
           "name": "gerente_lojas_gerente_id_loja_id_pk",
-          "columns": [
-            "gerente_id",
-            "loja_id"
-          ]
+          "columns": ["gerente_id", "loja_id"]
         }
       },
       "uniqueConstraints": {},
@@ -459,12 +428,8 @@
           "name": "historico_execucoes_alertas_regra_id_regras_alertas_id_fk",
           "tableFrom": "historico_execucoes_alertas",
           "tableTo": "regras_alertas",
-          "columnsFrom": [
-            "regra_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["regra_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -530,12 +495,8 @@
           "name": "historico_observacoes_cobranca_proposta_id_propostas_id_fk",
           "tableFrom": "historico_observacoes_cobranca",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -774,12 +735,8 @@
           "name": "inter_collections_proposta_id_propostas_id_fk",
           "tableFrom": "inter_collections",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -789,9 +746,7 @@
         "inter_collections_codigo_solicitacao_unique": {
           "name": "inter_collections_codigo_solicitacao_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "codigo_solicitacao"
-          ]
+          "columns": ["codigo_solicitacao"]
         }
       },
       "policies": {},
@@ -905,12 +860,8 @@
           "name": "lojas_parceiro_id_parceiros_id_fk",
           "tableFrom": "lojas",
           "tableTo": "parceiros",
-          "columnsFrom": [
-            "parceiro_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parceiro_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1106,12 +1057,8 @@
           "name": "observacoes_cobranca_proposta_id_propostas_id_fk",
           "tableFrom": "observacoes_cobranca",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1119,12 +1066,8 @@
           "name": "observacoes_cobranca_user_id_profiles_id_fk",
           "tableFrom": "observacoes_cobranca",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1190,9 +1133,7 @@
         "parceiros_cnpj_unique": {
           "name": "parceiros_cnpj_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "cnpj"
-          ]
+          "columns": ["cnpj"]
         }
       },
       "policies": {},
@@ -1303,12 +1244,8 @@
           "name": "parcelas_proposta_id_propostas_id_fk",
           "tableFrom": "parcelas",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1355,12 +1292,8 @@
           "name": "produto_tabela_comercial_produto_id_produtos_id_fk",
           "tableFrom": "produto_tabela_comercial",
           "tableTo": "produtos",
-          "columnsFrom": [
-            "produto_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["produto_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1368,12 +1301,8 @@
           "name": "produto_tabela_comercial_tabela_comercial_id_tabelas_comerciais_id_fk",
           "tableFrom": "produto_tabela_comercial",
           "tableTo": "tabelas_comerciais",
-          "columnsFrom": [
-            "tabela_comercial_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tabela_comercial_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1533,12 +1462,8 @@
           "name": "profiles_loja_id_lojas_id_fk",
           "tableFrom": "profiles",
           "tableTo": "lojas",
-          "columnsFrom": [
-            "loja_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["loja_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1603,12 +1528,8 @@
           "name": "proposta_documentos_proposta_id_propostas_id_fk",
           "tableFrom": "proposta_documentos",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1673,12 +1594,8 @@
           "name": "proposta_logs_proposta_id_propostas_id_fk",
           "tableFrom": "proposta_logs",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2317,12 +2234,8 @@
           "name": "propostas_produto_id_produtos_id_fk",
           "tableFrom": "propostas",
           "tableTo": "produtos",
-          "columnsFrom": [
-            "produto_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["produto_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2330,12 +2243,8 @@
           "name": "propostas_tabela_comercial_id_tabelas_comerciais_id_fk",
           "tableFrom": "propostas",
           "tableTo": "tabelas_comerciais",
-          "columnsFrom": [
-            "tabela_comercial_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tabela_comercial_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2345,9 +2254,7 @@
         "propostas_numero_proposta_unique": {
           "name": "propostas_numero_proposta_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "numero_proposta"
-          ]
+          "columns": ["numero_proposta"]
         }
       },
       "policies": {},
@@ -2402,12 +2309,8 @@
           "name": "referencia_pessoal_proposta_id_propostas_id_fk",
           "tableFrom": "referencia_pessoal",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2519,9 +2422,7 @@
         "regras_alertas_nome_unique": {
           "name": "regras_alertas_nome_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "nome"
-          ]
+          "columns": ["nome"]
         }
       },
       "policies": {},
@@ -2738,12 +2639,8 @@
           "name": "solicitacoes_modificacao_proposta_id_propostas_id_fk",
           "tableFrom": "solicitacoes_modificacao",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2751,12 +2648,8 @@
           "name": "solicitacoes_modificacao_solicitado_por_id_profiles_id_fk",
           "tableFrom": "solicitacoes_modificacao",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "solicitado_por_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["solicitado_por_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2764,12 +2657,8 @@
           "name": "solicitacoes_modificacao_aprovado_por_id_profiles_id_fk",
           "tableFrom": "solicitacoes_modificacao",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "aprovado_por_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["aprovado_por_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2846,12 +2735,8 @@
           "name": "status_contextuais_proposta_id_propostas_id_fk",
           "tableFrom": "status_contextuais",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2934,12 +2819,8 @@
           "name": "status_transitions_proposta_id_propostas_id_fk",
           "tableFrom": "status_transitions",
           "tableTo": "propostas",
-          "columnsFrom": [
-            "proposta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposta_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3029,12 +2910,8 @@
           "name": "tabelas_comerciais_parceiro_id_parceiros_id_fk",
           "tableFrom": "tabelas_comerciais",
           "tableTo": "parceiros",
-          "columnsFrom": [
-            "parceiro_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parceiro_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3119,12 +2996,8 @@
           "name": "user_sessions_user_id_profiles_id_fk",
           "tableFrom": "user_sessions",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3185,9 +3058,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},

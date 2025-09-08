@@ -48,16 +48,16 @@ import { maskCPF, maskEmail } from '@/server/utils/masking';
 // Em um endpoint GET
 router.get('/api/clientes/:id', async (req, res) => {
   const cliente = await getCliente(req.params.id);
-  
+
   // Mascarar dados sensíveis antes de retornar
   const clienteMasked = {
     ...cliente,
     cpf: maskCPF(cliente.cpf),
     email: maskEmail(cliente.email),
     rg: maskRG(cliente.rg),
-    telefone: maskTelefone(cliente.telefone)
+    telefone: maskTelefone(cliente.telefone),
   };
-  
+
   res.json(clienteMasked);
 });
 ```
@@ -73,7 +73,7 @@ const maskedData = maskBatch({
   cpf: '123.456.789-00',
   email: 'user@domain.com',
   rg: '12.345.678-9',
-  telefone: '(11) 98765-4321'
+  telefone: '(11) 98765-4321',
 });
 ```
 

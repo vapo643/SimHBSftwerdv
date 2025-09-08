@@ -1,7 +1,7 @@
 /**
  * Service Registry - CONFIGURAÇÃO P0.2 PLANO SOBERANIA
  * Registra todas as dependências no IoC Container
- * 
+ *
  * Substitui exports diretos por injeção de dependência apropriada
  */
 
@@ -30,46 +30,54 @@ export function configureContainer(): Container {
   // ========================================================================
   // REPOSITORIES (Singletons)
   // ========================================================================
-  
+
   const proposalRepository = new ProposalRepository();
   container.register(TOKENS.PROPOSAL_REPOSITORY, proposalRepository);
 
   // ========================================================================
   // USE CASES (Factories with DI)
   // ========================================================================
-  
+
   // Factory functions que recebem dependências injetadas
-  container.registerFactory(TOKENS.CREATE_PROPOSAL_USE_CASE, () => 
-    new CreateProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  container.registerFactory(
+    TOKENS.CREATE_PROPOSAL_USE_CASE,
+    () => new CreateProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
   );
 
-  container.registerFactory(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE, () => 
-    new GetProposalByIdUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  container.registerFactory(
+    TOKENS.GET_PROPOSAL_BY_ID_USE_CASE,
+    () => new GetProposalByIdUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
   );
 
-  container.registerFactory(TOKENS.APPROVE_PROPOSAL_USE_CASE, () => 
-    new ApproveProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  container.registerFactory(
+    TOKENS.APPROVE_PROPOSAL_USE_CASE,
+    () => new ApproveProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
   );
 
-  container.registerFactory(TOKENS.REJECT_PROPOSAL_USE_CASE, () => 
-    new RejectProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  container.registerFactory(
+    TOKENS.REJECT_PROPOSAL_USE_CASE,
+    () => new RejectProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
   );
 
-  container.registerFactory(TOKENS.PENDENCIAR_PROPOSTA_USE_CASE, () => 
-    new PendenciarPropostaUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  container.registerFactory(
+    TOKENS.PENDENCIAR_PROPOSTA_USE_CASE,
+    () => new PendenciarPropostaUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
   );
 
-  container.registerFactory(TOKENS.SUBMIT_FOR_ANALYSIS_USE_CASE, () => 
-    new SubmitForAnalysisUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  container.registerFactory(
+    TOKENS.SUBMIT_FOR_ANALYSIS_USE_CASE,
+    () => new SubmitForAnalysisUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
   );
 
   // 🏡 P0.2 GREEN - Registrar novos use cases para eliminar DIP leakage
-  container.registerFactory(TOKENS.LIST_PROPOSALS_BY_CRITERIA_USE_CASE, () => 
-    new ListProposalsByCriteriaUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  container.registerFactory(
+    TOKENS.LIST_PROPOSALS_BY_CRITERIA_USE_CASE,
+    () => new ListProposalsByCriteriaUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
   );
 
-  container.registerFactory(TOKENS.RESUBMIT_PENDING_PROPOSAL_USE_CASE, () => 
-    new ResubmitPendingProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  container.registerFactory(
+    TOKENS.RESUBMIT_PENDING_PROPOSAL_USE_CASE,
+    () => new ResubmitPendingProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
   );
 
   return container;

@@ -34,11 +34,11 @@ interface ProdutoTacConfig {
  */
 class NewClientTacStrategy implements ITacCalculationStrategy {
   async calculateTac(valorEmprestimo: number): Promise<number> {
-    const tacCalculada = valorEmprestimo * 0.10; // 10% fixo
+    const tacCalculada = valorEmprestimo * 0.1; // 10% fixo
     console.log(`[TAC_NEW_CLIENT] TAC 10% aplicada: R$ ${tacCalculada.toFixed(2)}`);
     return Math.round(tacCalculada * 100) / 100; // Arredondar 2 casas
   }
-  
+
   getStrategyName(): string {
     return 'NEW_CLIENT_10_PERCENT';
   }
@@ -53,27 +53,31 @@ class ExistingClientTacStrategy implements ITacCalculationStrategy {
       console.warn('[TAC_EXISTING_CLIENT] Configuração produto ausente, aplicando 0');
       return 0;
     }
-    
+
     const { tacValor, tacTipo, tacAtivaParaClientesExistentes } = produtoConfig;
-    
+
     // NOVA REGRA: Se TAC desativada para clientes existentes, retorna 0 (isento)
     if (!tacAtivaParaClientesExistentes) {
-      console.log('[TAC_EXISTING_CLIENT] TAC desativada para clientes existentes neste produto - isento');
+      console.log(
+        '[TAC_EXISTING_CLIENT] TAC desativada para clientes existentes neste produto - isento'
+      );
       return 0;
     }
-    
+
     if (tacTipo === 'fixo') {
       console.log(`[TAC_EXISTING_CLIENT] TAC fixa aplicada: R$ ${tacValor}`);
       return tacValor;
     } else if (tacTipo === 'percentual') {
       const tacCalculada = (valorEmprestimo * tacValor) / 100;
-      console.log(`[TAC_EXISTING_CLIENT] TAC percentual ${tacValor}% aplicada: R$ ${tacCalculada.toFixed(2)}`);
+      console.log(
+        `[TAC_EXISTING_CLIENT] TAC percentual ${tacValor}% aplicada: R$ ${tacCalculada.toFixed(2)}`
+      );
       return Math.round(tacCalculada * 100) / 100;
     }
-    
+
     return 0;
   }
-  
+
   getStrategyName(): string {
     return 'EXISTING_CLIENT_PRODUCT_BASED';
   }
@@ -87,7 +91,7 @@ export class TacCalculationService {
   /**
    * NOVO MÉTODO PRINCIPAL - Strategy Pattern + Nova Regra
    * Implementa nova regra: 10% TAC para clientes novos, produto-based para existentes
-   * 
+   *
    * @param produtoId - ID do produto associado à proposta
    * @param valorEmprestimo - Valor total do empréstimo solicitado
    * @param clienteCpf - CPF do cliente para verificação de cadastro existente
@@ -101,41 +105,44 @@ export class TacCalculationService {
     try {
       // Passo 1: Verificar se cliente é novo ou existente
       const isClienteNovo = !(await this.isClienteCadastrado(clienteCpf));
-      
+
       // Passo 2: Selecionar estratégia baseada no status do cliente
       let strategy: ITacCalculationStrategy;
       let produtoConfig: ProdutoTacConfig | undefined;
-      
+
       if (isClienteNovo) {
         strategy = new NewClientTacStrategy();
         console.log(`[TAC_SERVICE] Cliente ${clienteCpf} é NOVO - aplicando estratégia 10%`);
       } else {
         strategy = new ExistingClientTacStrategy();
         produtoConfig = await this.getProdutoTacConfig(produtoId);
-        console.log(`[TAC_SERVICE] Cliente ${clienteCpf} é EXISTENTE - aplicando estratégia por produto`);
+        console.log(
+          `[TAC_SERVICE] Cliente ${clienteCpf} é EXISTENTE - aplicando estratégia por produto`
+        );
       }
-      
+
       // Passo 3: Executar cálculo via estratégia selecionada
       const valorTac = await strategy.calculateTac(valorEmprestimo, produtoConfig);
-      
+
       return {
         valorTac,
-        estrategiaUsada: strategy.getStrategyName()
+        estrategiaUsada: strategy.getStrategyName(),
       };
-      
     } catch (error) {
       console.error(`[TAC_SERVICE] Erro ao calcular TAC com novas regras:`, error);
       return { valorTac: 0, estrategiaUsada: 'ERROR_FALLBACK' };
     }
   }
-  
+
   /**
    * MÉTODO AUXILIAR - Buscar configuração TAC do produto
-   * 
+   *
    * @param produtoId - ID do produto
    * @returns Configuração TAC do produto ou undefined se não encontrado
    */
-  private static async getProdutoTacConfig(produtoId: number): Promise<ProdutoTacConfig | undefined> {
+  private static async getProdutoTacConfig(
+    produtoId: number
+  ): Promise<ProdutoTacConfig | undefined> {
     try {
       const produto = await db
         .select({
@@ -154,8 +161,8 @@ export class TacCalculationService {
 
       return {
         tacValor: parseFloat(produto[0].tacValor || '0'),
-        tacTipo: produto[0].tacTipo as 'fixo' | 'percentual' || 'fixo',
-        tacAtivaParaClientesExistentes: produto[0].tacAtivaParaClientesExistentes ?? true
+        tacTipo: (produto[0].tacTipo as 'fixo' | 'percentual') || 'fixo',
+        tacAtivaParaClientesExistentes: produto[0].tacAtivaParaClientesExistentes ?? true,
       };
     } catch (error) {
       console.error(`[TAC_SERVICE] Erro ao buscar config produto ${produtoId}:`, error);
@@ -164,7 +171,7 @@ export class TacCalculationService {
   }
   /**
    * MÉTODO LEGACY (DEPRECATED) - Manter para compatibilidade
-   * 
+   *
    * @deprecated Use calculateTacWithNewRules instead
    * @param produtoId - ID do produto associado à proposta
    * @param valorEmprestimo - Valor total do empréstimo solicitado

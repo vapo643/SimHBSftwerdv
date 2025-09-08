@@ -3,10 +3,12 @@
 ## ⚡ MUDANÇAS CRÍTICAS NA API v3
 
 ### 1. Lists → Envelopes
+
 - **ANTES**: Criava Lista → Adicionava Documento → Adicionava Signatário
 - **AGORA**: Cria Envelope → Adiciona Documento → Cria Signatário → Vincula ao Envelope
 
 ### 2. Estrutura de Webhooks MUDOU COMPLETAMENTE
+
 ```json
 // ANTES (v1)
 {
@@ -30,15 +32,19 @@
 ## 🔴 ERROS QUE MATAM A INTEGRAÇÃO
 
 ### 1. CPF/CNPJ Inválido
+
 - **ERRO FATAL**: API rejeita CPF com formatação
 - **SOLUÇÃO**: SEMPRE remover pontos, traços e barras
+
 ```javascript
-cpf: clientData.cpf.replace(/\D/g, '') // OBRIGATÓRIO!
+cpf: clientData.cpf.replace(/\D/g, ''); // OBRIGATÓRIO!
 ```
 
 ### 2. Rate Limit (300 req/min)
+
 - **ERRO FATAL**: 429 Too Many Requests
 - **SOLUÇÃO**: Implementar retry com backoff exponencial
+
 ```javascript
 if (error.status === 429) {
   await sleep(60000); // Espera 1 minuto
@@ -46,6 +52,7 @@ if (error.status === 429) {
 ```
 
 ### 3. Envelope Já Finalizado
+
 - **ERRO FATAL**: Tentar adicionar signatário após finalizar
 - **SOLUÇÃO**: SEMPRE seguir ordem:
   1. Criar envelope
@@ -54,8 +61,10 @@ if (error.status === 429) {
   4. Só então finalizar
 
 ### 4. Documento Corrompido
+
 - **ERRO FATAL**: PDF inválido ou > 20MB
 - **SOLUÇÃO**: Validar antes de enviar
+
 ```javascript
 if (pdfSize > 20 * 1024 * 1024) {
   throw new Error('PDF maior que 20MB');
@@ -68,37 +77,37 @@ if (pdfSize > 20 * 1024 * 1024) {
 // 1. CRIAR ENVELOPE
 const envelope = await api.post('/envelopes', {
   envelope: {
-    name: "CCB - Proposta 12345",
-    locale: "pt-BR",
+    name: 'CCB - Proposta 12345',
+    locale: 'pt-BR',
     auto_close: true,
-    deadline_at: "2025-08-31T23:59:59-03:00"
-  }
+    deadline_at: '2025-08-31T23:59:59-03:00',
+  },
 });
 
 // 2. ADICIONAR DOCUMENTO
 const document = await api.post(`/envelopes/${envelope.id}/documents`, {
   document: {
-    type: "upload",
+    type: 'upload',
     content: base64PDF,
-    filename: "ccb.pdf"
-  }
+    filename: 'ccb.pdf',
+  },
 });
 
 // 3. CRIAR SIGNATÁRIO
 const signer = await api.post('/signers', {
   signer: {
-    name: "João Silva",
-    email: "joao@email.com",
-    phone: "11999999999",
-    documentation: "12345678900" // SEM FORMATAÇÃO!
-  }
+    name: 'João Silva',
+    email: 'joao@email.com',
+    phone: '11999999999',
+    documentation: '12345678900', // SEM FORMATAÇÃO!
+  },
 });
 
 // 4. VINCULAR SIGNATÁRIO
 await api.post(`/envelopes/${envelope.id}/signers`, {
   signer_id: signer.id,
-  sign_as: "party",
-  refusable: false
+  sign_as: 'party',
+  refusable: false,
 });
 
 // 5. FINALIZAR (ENVIAR)
@@ -108,12 +117,10 @@ await api.post(`/envelopes/${envelope.id}/finish`);
 ## 🔒 SEGURANÇA OBRIGATÓRIA
 
 ### 1. Validação HMAC em Webhooks
+
 ```javascript
 const payload = JSON.stringify(event);
-const expectedHmac = crypto
-  .createHmac('sha256', WEBHOOK_SECRET)
-  .update(payload)
-  .digest('hex');
+const expectedHmac = crypto.createHmac('sha256', WEBHOOK_SECRET).update(payload).digest('hex');
 
 if (hmac !== expectedHmac) {
   throw new Error('HMAC inválido - possível ataque!');
@@ -121,19 +128,21 @@ if (hmac !== expectedHmac) {
 ```
 
 ### 2. Autenticação por Selfie
+
 ```javascript
 // SEMPRE adicionar para contratos financeiros
 await api.post(`/envelopes/${envelope.id}/requirements`, {
   requirement: {
-    type: "selfie",
-    signer_id: signer.id
-  }
+    type: 'selfie',
+    signer_id: signer.id,
+  },
 });
 ```
 
 ## 📊 MONITORAMENTO ESSENCIAL
 
 ### Logs Obrigatórios
+
 ```
 [CLICKSIGN] ✅ Envelope criado: env_123
 [CLICKSIGN] ✅ Documento adicionado: doc_456
@@ -144,6 +153,7 @@ await api.post(`/envelopes/${envelope.id}/requirements`, {
 ```
 
 ### Métricas para Dashboard
+
 1. Taxa de sucesso de criação de envelopes
 2. Tempo médio para assinatura
 3. Taxa de recusa

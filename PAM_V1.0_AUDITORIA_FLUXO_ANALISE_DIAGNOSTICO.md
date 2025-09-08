@@ -1,4 +1,5 @@
 # Relatório de Diagnóstico de Fluxo de Dados - Dashboard para Análise
+
 **Data:** 2025-08-21  
 **Auditor:** GEM-07 (AI Specialist)  
 **Status:** Diagnóstico Completo  
@@ -9,6 +10,7 @@
 ## 1. Análise do Ponto de Partida (Dashboard - `dashboard.tsx`)
 
 **Prova:**
+
 ```tsx
 // Linha 591-596 de client/src/pages/dashboard.tsx
 <Link to={`/credito/analise/${proposta.id}`}>
@@ -26,6 +28,7 @@
 ## 2. Análise do Ponto de Chegada (Página de Análise - `analise.tsx`)
 
 **Prova:**
+
 ```tsx
 // Linha 89 de client/src/pages/credito/analise.tsx
 const [match, params] = useRoute("/credito/analise/:id");
@@ -61,6 +64,7 @@ const fetchProposta = async (id: string | undefined) => {
 **Análise:** A página de análise está recebendo corretamente o ID da URL e fazendo a chamada para `/api/propostas/${id}`. A função `fetchProposta` extrai corretamente o objeto `data` da resposta.
 
 **Problema Identificado na Renderização:**
+
 ```tsx
 // Linhas 183-223 - Tentativas múltiplas de acessar os dados do cliente
 <p>
@@ -79,6 +83,7 @@ A página está tentando múltiplas variações de propriedades porque não tem 
 ## 3. Análise do Ponto de Recepção (API do Backend)
 
 **Prova:**
+
 ```typescript
 // Linha 35 de server/routes/propostas/core.ts
 router.get("/:id", auth, (req: any, res: any) => controller.getById(req, res));
@@ -88,16 +93,16 @@ async getById(req: Request, res: Response): Promise<Response> {
   try {
     const { id } = req.params;
     const useCase = new GetProposalByIdUseCase(this.repository);
-    
+
     const proposal = await useCase.execute(id);
-    
+
     if (!proposal) {
       return res.status(404).json({
         success: false,
         error: 'Proposta não encontrada'
       });
     }
-    
+
     // Serializar agregado para resposta
     const data = {
       id: proposal.id,
@@ -119,7 +124,7 @@ async getById(req: Request, res: Response): Promise<Response> {
       valor_parcela: proposal.calculateMonthlyPayment(),
       valor_total: proposal.calculateTotalAmount()
     };
-    
+
     return res.json({
       success: true,
       data
@@ -144,12 +149,13 @@ async getById(req: Request, res: Response): Promise<Response> {
 ### Detalhamento do Problema:
 
 1. **Backend envia:**
+
    ```json
    {
      "cliente_data": {
        "nome": "João Silva",
        "cpf": "12345678900",
-       "email": "joao@email.com",
+       "email": "joao@email.com"
        // ... outros campos
      }
    }
@@ -163,6 +169,7 @@ async getById(req: Request, res: Response): Promise<Response> {
 3. **Problema adicional:** O frontend tem um sistema de transformação dual-key no `apiClient` que adiciona aliases camelCase para snake_case, mas isso não funciona para objetos aninhados como `cliente_data`.
 
 ### Impacto:
+
 - Os dados existem e são retornados corretamente pelo backend
 - A página de análise recebe os dados mas não consegue exibi-los porque está procurando nas propriedades erradas
 - O fallback para `proposta.clienteData?.nome` deveria funcionar, mas depende da transformação correta de `cliente_data` para `clienteData`
@@ -171,12 +178,12 @@ async getById(req: Request, res: Response): Promise<Response> {
 
 ## DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO)
 
-* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
-* **RISCOS IDENTIFICADOS:** CRÍTICO - Funcionalidade essencial de análise de propostas está quebrada
-* **DECISÕES TÉCNICAS ASSUMIDAS:** 
+- **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+- **RISCOS IDENTIFICADOS:** CRÍTICO - Funcionalidade essencial de análise de propostas está quebrada
+- **DECISÕES TÉCNICAS ASSUMIDAS:**
   - Assumi que o sistema de dual-key transformation no apiClient deveria transformar `cliente_data` em `clienteData`
   - Assumi que a nova arquitetura DDD está ativa e substituindo as rotas legacy
-* **VALIDAÇÃO PENDENTE:** Necessário testar se a transformação dual-key está funcionando para objetos aninhados
+- **VALIDAÇÃO PENDENTE:** Necessário testar se a transformação dual-key está funcionando para objetos aninhados
 
 ---
 
@@ -195,7 +202,9 @@ async getById(req: Request, res: Response): Promise<Response> {
 ## Solução Recomendada
 
 ### Opção 1: Ajustar o Backend (Mais Simples)
+
 Modificar o `ProposalController.getById` para retornar dados planos compatíveis com o frontend existente:
+
 ```typescript
 const data = {
   id: proposal.id,
@@ -205,18 +214,21 @@ const data = {
   cliente_cpf: proposal.clienteData.cpf,
   cliente_email: proposal.clienteData.email,
   // ... outros campos
-}
+};
 ```
 
 ### Opção 2: Ajustar o Frontend (Mais Correto)
+
 Atualizar a página de análise para usar consistentemente `proposta.cliente_data`:
+
 ```tsx
 <p>
-  <strong>Nome:</strong> {proposta.cliente_data?.nome || "N/A"}
+  <strong>Nome:</strong> {proposta.cliente_data?.nome || 'N/A'}
 </p>
 ```
 
 ### Opção 3: Adicionar Transformação (Mais Robusta)
+
 Criar uma função de transformação no `fetchProposta` que normalize os dados.
 
 **Recomendação:** Opção 1 para correção imediata, seguida de refatoração gradual para Opção 2.

@@ -23,6 +23,7 @@ Este documento registra as correções implementadas para as 5 vulnerabilidades 
 **Situação**: MFA requer configuração no Supabase Dashboard.
 
 **Passos para Implementar**:
+
 1. Acessar Supabase Dashboard → Authentication → Providers
 2. Habilitar "Enable Multi-Factor Authentication"
 3. Configurar métodos: TOTP (Time-based One-Time Password)
@@ -35,10 +36,12 @@ Este documento registra as correções implementadas para as 5 vulnerabilidades 
 ### 3. ✅ Integridade de Downloads (ASVS V12.4.1)
 
 **Arquivos Criados**:
+
 - `server/lib/file-integrity.ts` - Serviço de geração e verificação de hashes
 - `server/middleware/file-integrity.ts` - Middleware para adicionar hashes aos downloads
 
 **Funcionalidades Implementadas**:
+
 ```typescript
 // Headers adicionados aos downloads
 X-Content-SHA256: <hash>
@@ -47,11 +50,13 @@ X-Content-Size: <size>
 ```
 
 **Verificação de Integridade**:
+
 - Endpoint: POST `/api/verify-integrity`
 - Suporta SHA-256, SHA-512 e verificação de tamanho
 - Logs de violação de integridade
 
 **Como Usar**:
+
 ```javascript
 // Cliente verifica integridade após download
 const response = await fetch('/api/propostas/123/download-ccb');
@@ -61,7 +66,7 @@ const fileBuffer = await response.arrayBuffer();
 // Verificar hash localmente
 const hash = await crypto.subtle.digest('SHA-256', fileBuffer);
 const hashHex = Array.from(new Uint8Array(hash))
-  .map(b => b.toString(16).padStart(2, '0'))
+  .map((b) => b.toString(16).padStart(2, '0'))
   .join('');
 
 if (hashHex !== sha256) {
@@ -76,6 +81,7 @@ if (hashHex !== sha256) {
 **Arquivo Criado**: `server/lib/password-policy.ts`
 
 **Novos Requisitos Além do zxcvbn**:
+
 - Mínimo 12 caracteres (NIST recomenda 8, usamos 12)
 - Máximo 128 caracteres
 - Sem padrões comuns (password, 123456, qwerty)
@@ -85,6 +91,7 @@ if (hashHex !== sha256) {
 - Sem sequências (abc, 123)
 
 **Integração Necessária**:
+
 ```typescript
 // Em server/routes.ts - endpoint de registro
 import { validatePasswordPolicy } from './lib/password-policy';
@@ -95,7 +102,7 @@ if (!policyResult.isValid) {
   return res.status(400).json({
     message: policyResult.message,
     requirements: policyResult.requirements,
-    suggestions: policyResult.suggestions
+    suggestions: policyResult.suggestions,
   });
 }
 ```
@@ -107,11 +114,13 @@ if (!policyResult.isValid) {
 **Arquivo Criado**: `server/lib/security-alerts.ts`
 
 **Sistema de Alertas Automáticos**:
+
 - Monitor executa verificações a cada minuto
 - Detecta padrões suspeitos automaticamente
 - Gera alertas com severidade (LOW, MEDIUM, HIGH, CRITICAL)
 
 **Tipos de Alertas Implementados**:
+
 1. **Força Bruta**: >5 logins falhos por IP/hora
 2. **Abuso de Rate Limit**: >10 violações por IP/hora
 3. **Padrões Suspeitos**: Acesso em horários incomuns (0h-6h)
@@ -119,17 +128,19 @@ if (!policyResult.isValid) {
 5. **Anomalias de Autenticação**: >5 sessões concorrentes
 
 **Limiares Configuráveis**:
+
 ```typescript
 const ALERT_THRESHOLDS = {
   FAILED_LOGINS_PER_HOUR: 10,
   FAILED_LOGINS_PER_IP_PER_HOUR: 5,
   RATE_LIMIT_VIOLATIONS_PER_HOUR: 20,
   LARGE_DATA_EXPORT_SIZE_MB: 100,
-  MAX_CONCURRENT_SESSIONS_PER_USER: 5
+  MAX_CONCURRENT_SESSIONS_PER_USER: 5,
 };
 ```
 
 **APIs do Monitor**:
+
 ```typescript
 // Obter alertas ativos
 GET /api/security/alerts/active
@@ -148,22 +159,25 @@ POST /api/security/alerts/:id/resolve
 ### Para Ativar Completamente os Recursos:
 
 1. **File Integrity Middleware**:
+
 ```typescript
 // Em server/routes.ts - rotas de download
 import { fileIntegrityMiddleware } from './middleware/file-integrity';
 
-app.get('/api/propostas/:id/download-ccb', 
-  jwtAuthMiddleware, 
+app.get('/api/propostas/:id/download-ccb',
+  jwtAuthMiddleware,
   fileIntegrityMiddleware, // Adicionar aqui
   async (req, res) => { ... }
 );
 ```
 
 2. **Password Policy**:
+
 - Integrar em `/api/auth/register`
 - Integrar em `/api/auth/change-password`
 
 3. **Security Monitor**:
+
 - Criar endpoints de API para dashboard
 - Configurar notificações (email/Slack)
 
@@ -172,12 +186,14 @@ app.get('/api/propostas/:id/download-ccb',
 ## MÉTRICAS DE SEGURANÇA
 
 ### Antes das Correções
+
 - Sem verificação de integridade em downloads
 - Política de senhas básica (apenas zxcvbn)
 - Sem monitoramento automatizado
 - Sem detecção de padrões suspeitos
 
 ### Após as Correções
+
 - Hashes SHA-256/512 em todos os downloads
 - Política de senhas alinhada com NIST 800-63B
 - Monitor de segurança com 10 tipos de detecção

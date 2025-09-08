@@ -38,6 +38,7 @@
 ### ⚡ Pendências para Produção
 
 1. **Configuração de Certificados**
+
    ```bash
    # Adicionar ao .env.production
    INTER_CLIENT_ID=seu_client_id_producao
@@ -47,6 +48,7 @@
    ```
 
 2. **URL do Webhook**
+
    ```bash
    # Configurar no painel do Banco Inter
    https://api.simpix.com.br/api/inter/webhook
@@ -65,6 +67,7 @@
    - Gerar certificado digital
 
 2. **Configurar Ambiente**
+
    ```env
    # .env.production
    NODE_ENV=production
@@ -105,12 +108,14 @@
 ### 📱 Interface do Atendente
 
 **Já Disponível:**
+
 - Ver boletos gerados
 - Baixar PDF
 - Consultar status
 - Reenviar por email
 
 **A Implementar:**
+
 - [ ] Botão "Enviar por WhatsApp"
 - [ ] Dashboard de pagamentos
 - [ ] Relatório de inadimplência
@@ -144,6 +149,7 @@
 **A integração está pronta para produção!**
 
 Apenas necessário:
+
 1. Credenciais de produção
 2. Certificado digital
 3. Configurar webhook no painel

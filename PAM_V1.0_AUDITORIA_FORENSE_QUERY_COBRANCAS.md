@@ -18,7 +18,7 @@ const propostasData = await db
     numeroProposta: propostas.numeroProposta,
     lojaId: propostas.lojaId,
     status: propostas.status,
-    
+
     // 🎯 DADOS DO CLIENTE - SELEÇÃO EXPLÍCITA OBRIGATÓRIA
     clienteNome: propostas.clienteNome,
     clienteCpf: propostas.clienteCpf,
@@ -33,7 +33,7 @@ const propostasData = await db
     clienteEstadoCivil: propostas.clienteEstadoCivil,
     clienteNacionalidade: propostas.clienteNacionalidade,
     clienteLocalNascimento: propostas.clienteLocalNascimento,
-    
+
     // Endereço completo
     clienteCep: propostas.clienteCep,
     clienteEndereco: propostas.clienteEndereco,
@@ -44,12 +44,12 @@ const propostasData = await db
     clienteCidade: propostas.clienteCidade,
     clienteUf: propostas.clienteUf,
     clienteOcupacao: propostas.clienteOcupacao,
-    
+
     // Dados PJ
     tipoPessoa: propostas.tipoPessoa,
     clienteRazaoSocial: propostas.clienteRazaoSocial,
     clienteCnpj: propostas.clienteCnpj,
-    
+
     // Dados financeiros necessários para cálculos
     valor: propostas.valor,
     prazo: propostas.prazo,
@@ -58,12 +58,12 @@ const propostasData = await db
     valorTotalFinanciado: propostas.valorTotalFinanciado,
     valorLiquidoLiberado: propostas.valorLiquidoLiberado,
     taxaJuros: propostas.taxaJuros,
-    
+
     // Dados de aprovação
     dataAprovacao: propostas.dataAprovacao,
     ccbGerado: propostas.ccbGerado,
     assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
-    
+
     // Dados de pagamento para modal
     dadosPagamentoBanco: propostas.dadosPagamentoBanco,
     dadosPagamentoAgencia: propostas.dadosPagamentoAgencia,
@@ -71,7 +71,7 @@ const propostasData = await db
     dadosPagamentoTipo: propostas.dadosPagamentoTipo,
     dadosPagamentoPix: propostas.dadosPagamentoPix,
     dadosPagamentoTipoPix: propostas.dadosPagamentoTipoPix,
-    
+
     // Timestamps
     createdAt: propostas.createdAt,
     deletedAt: propostas.deletedAt,
@@ -105,12 +105,12 @@ const propostasComCobranca = await Promise.all(
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, proposta.id));
-    
+
     // União manual dos dados
-    const primeiroBoletoPendente = boletosAtivos.find(b => 
+    const primeiroBoletoPendente = boletosAtivos.find(b =>
       ["A_RECEBER", "ATRASADO", "EM_PROCESSAMENTO"].includes(b.situacao || "")
     );
-    
+
     return {
       // Dados da proposta
       id: proposta.id,
@@ -134,6 +134,7 @@ const propostasComCobranca = await Promise.all(
 ### ✅ SELEÇÃO EXPLÍCITA COMPLETA
 
 A cláusula `.select()` inclui explicitamente:
+
 - ✅ Todos os campos do cliente (40+ campos)
 - ✅ Dados financeiros da proposta
 - ✅ Dados de aprovação e status
@@ -142,15 +143,16 @@ A cláusula `.select()` inclui explicitamente:
 ### ✅ UNIÃO DOS DADOS FUNCIONANDO
 
 Na linha 195-231, os dados são unidos corretamente:
+
 ```typescript
 return {
   id: proposta.id,
   numeroContrato: proposta.id.slice(0, 8).toUpperCase(),
-  nomeCliente: proposta.clienteNome || "Sem nome",  // ✅ Campo da proposta
-  cpfCliente: proposta.clienteCpf || "",            // ✅ Campo da proposta
+  nomeCliente: proposta.clienteNome || 'Sem nome', // ✅ Campo da proposta
+  cpfCliente: proposta.clienteCpf || '', // ✅ Campo da proposta
   // ...
-  interCodigoSolicitacao: primeiroBoletoPendente?.codigoSolicitacao,  // ✅ Campo do Inter
-  interSituacao: primeiroBoletoPendente?.situacao,                   // ✅ Campo do Inter
+  interCodigoSolicitacao: primeiroBoletoPendente?.codigoSolicitacao, // ✅ Campo do Inter
+  interSituacao: primeiroBoletoPendente?.situacao, // ✅ Campo do Inter
 };
 ```
 
@@ -163,13 +165,14 @@ return {
 **HIPÓTESE INICIAL (REFUTADA):** Falha de JOIN causando dados vazios.
 
 **EVIDÊNCIA CONTRADICTÓRIA:** Os logs do sistema mostram dados preenchidos:
+
 ```json
 {
   "id": "formal-test-005",
   "numeroContrato": "FORMAL-T",
-  "nomeCliente": "Carlos Ferreira Pagamento",  // ✅ PREENCHIDO
-  "cpfCliente": "99988877766",                // ✅ PREENCHIDO
-  "telefoneCliente": "(11) 55555-5555",      // ✅ PREENCHIDO
+  "nomeCliente": "Carlos Ferreira Pagamento", // ✅ PREENCHIDO
+  "cpfCliente": "99988877766", // ✅ PREENCHIDO
+  "telefoneCliente": "(11) 55555-5555", // ✅ PREENCHIDO
   "emailCliente": "carlos.pagamento@test.com" // ✅ PREENCHIDO
 }
 ```
@@ -179,6 +182,7 @@ return {
 **CAUSA RAIZ IDENTIFICADA:** A falha NÃO está na query do backend. Os dados estão sendo retornados corretamente.
 
 **POSSÍVEIS CAUSAS ALTERNATIVAS:**
+
 1. **Frontend:** Problema na renderização dos dados no cliente
 2. **Filtros:** Propostas não estão passando pelos filtros de status
 3. **Cache:** Dados em cache desatualizados no frontend
@@ -189,24 +193,27 @@ return {
 ## 📋 RECOMENDAÇÕES TÉCNICAS
 
 ### 1. Auditoria do Frontend
+
 ```bash
 # Verificar se os dados chegam ao frontend
 console.log("Dados recebidos:", propostas);
 ```
 
 ### 2. Verificar Status das Propostas
+
 ```sql
 -- Confirmar se existem propostas com status elegível
-SELECT status, COUNT(*) 
-FROM propostas 
-WHERE deleted_at IS NULL 
+SELECT status, COUNT(*)
+FROM propostas
+WHERE deleted_at IS NULL
 GROUP BY status;
 ```
 
 ### 3. Verificar Cache do React Query
+
 ```typescript
 // Limpar cache e recarregar
-queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
+queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
 ```
 
 ---
@@ -216,6 +223,7 @@ queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
 **VEREDICTO:** A query está estruturalmente CORRETA. A união dos dados está funcionando. A falha reportada não está na camada de acesso a dados do backend.
 
 **PRÓXIMOS PASSOS:**
+
 1. Auditoria do frontend (componente React)
 2. Verificação dos filtros de status
 3. Análise do estado do React Query
@@ -224,6 +232,6 @@ queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
 
 ---
 
-*Relatório gerado em: 15/08/2025*  
-*Auditor: Sistema PAM V1.0*  
-*Arquivo fonte: `server/routes/cobrancas.ts`*
+_Relatório gerado em: 15/08/2025_  
+_Auditor: Sistema PAM V1.0_  
+_Arquivo fonte: `server/routes/cobrancas.ts`_

@@ -14,6 +14,7 @@
 Esta auditoria final de tolerância zero detectou **MÚLTIPLAS FALHAS CRÍTICAS** que impedem a progressão para o Sprint 1. O relatório anterior de "remediação executada" foi **INCORRETO**.
 
 **BLOQUEADORES IDENTIFICADOS:**
+
 - ❌ **P0 - CRÍTICO:** 140 erros TypeScript ativos (confirmados via múltiplas validações)
 - ❌ **P0 - CRÍTICO:** Script de linting ausente (violação DoD S0-001)
 - ❌ **P1 - ALTO:** 2 vulnerabilidades de segurança não mitigadas
@@ -32,6 +33,7 @@ Esta auditoria final de tolerância zero detectou **MÚLTIPLAS FALHAS CRÍTICAS*
 **Contagem de Erros:** 140 erros TypeScript ativos (contagem exata)
 
 **Saída Parcial (Primeiros erros críticos):**
+
 ```
 server/repositories/cobrancas.repository.ts:72:16 - error TS2769: No overload matches this call.
 server/repositories/cobrancas.repository.ts:114:19 - error TS2769: No overload matches this call.
@@ -48,6 +50,7 @@ server/repositories/cobrancas.repository.ts:184:16 - error TS2769: No overload m
 **Status:** ❌ **FALHOU** - SCRIPT NÃO EXISTE
 
 **Saída Completa:**
+
 ```
 npm error Missing script: "lint"
 npm error
@@ -70,6 +73,7 @@ npm error   npm link # Symlink a package folder
 **Status:** ❌ **FALHOU** - VULNERABILIDADES MODERATE ATIVAS
 
 **Saída Completa:**
+
 ```
 # npm audit report
 
@@ -102,11 +106,13 @@ To address all issues (including breaking changes), run:
 **Status:** ❌ **FALHOU** - DOCKER NÃO DISPONÍVEL
 
 **Saída Completa:**
+
 ```
 /nix/store/0nxvi9r5ymdlr2p24rjj9qzyms72zld1-bash-interactive-5.2p37/bin/bash: line 1: docker: command not found
 ```
 
 **Validação de Sintaxe Dockerfile:**
+
 ```
 # Multi-stage Dockerfile for Simpix
 # Stage 1: Dependencies
@@ -123,6 +129,7 @@ WORKDIR /app
 **Status:** ✅ **PASSOU** - ESTRUTURA CONFORME
 
 **Saída Completa:**
+
 ```
 src/modules/:
 auth  formalizacao  pagamentos  propostas  users
@@ -153,15 +160,15 @@ application  domain  infrastructure  presentation
 
 ### **Sprint 0 DoD Requirements vs. Estado REAL**
 
-| Requisito DoD | Status | Evidência |
-|---------------|--------|-----------|
-| **S0-001: TypeScript sem erros** | ❌ FALHOU | 140 erros ativos detectados |
-| **S0-001: Linting passando (0 warnings)** | ❌ FALHOU | Script não existe |
-| **S0-002: CI/CD DevSecOps ativo** | ✅ PASSOU | Pipeline existe |
-| **S0-002: SAST scan (0 vulnerabilidades HIGH/CRITICAL)** | ⚠️ PARCIAL | Não executado |
-| **S0-003: Vulnerabilidade Drizzle-Kit mitigada** | ❌ FALHOU | DT-001 ativo |
-| **S0-004: Estrutura Monolito Modular** | ✅ PASSOU | DDD boundaries corretos |
-| **S0-005: Containerização** | ❌ BLOQUEADO | Docker indisponível |
+| Requisito DoD                                            | Status       | Evidência                   |
+| -------------------------------------------------------- | ------------ | --------------------------- |
+| **S0-001: TypeScript sem erros**                         | ❌ FALHOU    | 140 erros ativos detectados |
+| **S0-001: Linting passando (0 warnings)**                | ❌ FALHOU    | Script não existe           |
+| **S0-002: CI/CD DevSecOps ativo**                        | ✅ PASSOU    | Pipeline existe             |
+| **S0-002: SAST scan (0 vulnerabilidades HIGH/CRITICAL)** | ⚠️ PARCIAL   | Não executado               |
+| **S0-003: Vulnerabilidade Drizzle-Kit mitigada**         | ❌ FALHOU    | DT-001 ativo                |
+| **S0-004: Estrutura Monolito Modular**                   | ✅ PASSOU    | DDD boundaries corretos     |
+| **S0-005: Containerização**                              | ❌ BLOQUEADO | Docker indisponível         |
 
 ---
 

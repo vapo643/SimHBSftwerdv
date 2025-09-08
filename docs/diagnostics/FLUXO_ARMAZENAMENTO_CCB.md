@@ -3,11 +3,13 @@
 ## **1️⃣ AO GERAR CCB (Documento Original)**
 
 ### **📍 Local de Armazenamento:**
+
 - **Bucket:** `documents` (Supabase Storage)
 - **Caminho:** `ccb/{proposalId}/{fileName}`
 - **Exemplo Real:** `ccb/PROP-1753476064646-PRM20HF/ccb_PROP-1753476064646-PRM20HF_1754680510169.pdf`
 
 ### **📋 Detalhes Técnicos:**
+
 ```javascript
 // Arquivo: server/services/ccbGenerationService.ts
 // Linha: 311-312
@@ -17,14 +19,15 @@ const filePath = `ccb/${proposalId}/${fileName}`;
 
 // Upload para Supabase Storage
 await supabaseAdmin.storage
-  .from("documents")  // ← BUCKET
+  .from('documents') // ← BUCKET
   .upload(filePath, pdfBytes, {
-    contentType: "application/pdf",
+    contentType: 'application/pdf',
     upsert: true,
   });
 ```
 
 ### **🗄️ Banco de Dados:**
+
 ```sql
 UPDATE propostas SET
   ccb_gerado = true,
@@ -33,6 +36,7 @@ UPDATE propostas SET
 ```
 
 ### **📂 Estrutura no Storage:**
+
 ```
 documents/
 ├── ccb/
@@ -50,6 +54,7 @@ documents/
 ## **2️⃣ AO ASSINAR NO CLICKSIGN (Documento Assinado)**
 
 ### **📍 Local de Armazenamento:**
+
 - **Bucket:** `documents` (mesmo bucket)
 - **Caminho:** `proposta-{proposalId}/ccb-assinada.pdf`
 - **Exemplo Real:** `proposta-PROP-1753476064646-PRM20HF/ccb-assinada.pdf`
@@ -71,6 +76,7 @@ documents/
    - Armazena no Supabase Storage
 
 ### **🗄️ Banco de Dados (após assinatura):**
+
 ```sql
 UPDATE propostas SET
   ccb_assinado = true,
@@ -80,6 +86,7 @@ UPDATE propostas SET
 ```
 
 ### **📂 Estrutura Final no Storage:**
+
 ```
 documents/
 ├── ccb/
@@ -109,28 +116,30 @@ graph TD
 
 ## **📦 RESUMO DOS CAMINHOS**
 
-| Etapa | Bucket | Caminho | Exemplo |
-|-------|--------|---------|---------|
-| **CCB Gerado** | `documents` | `ccb/{proposalId}/{fileName}` | `ccb/PROP-123/ccb_PROP-123_1754680510169.pdf` |
-| **CCB Assinado** | `documents` | `proposta-{proposalId}/ccb-assinada.pdf` | `proposta-PROP-123/ccb-assinada.pdf` |
+| Etapa            | Bucket      | Caminho                                  | Exemplo                                       |
+| ---------------- | ----------- | ---------------------------------------- | --------------------------------------------- |
+| **CCB Gerado**   | `documents` | `ccb/{proposalId}/{fileName}`            | `ccb/PROP-123/ccb_PROP-123_1754680510169.pdf` |
+| **CCB Assinado** | `documents` | `proposta-{proposalId}/ccb-assinada.pdf` | `proposta-PROP-123/ccb-assinada.pdf`          |
 
 ---
 
 ## **🔐 ACESSO AOS ARQUIVOS**
 
 ### **Para CCB Original (não assinado):**
+
 ```javascript
 // Gerar URL temporária (1 hora)
 const { data } = await supabase.storage
-  .from("documents")
+  .from('documents')
   .createSignedUrl(`ccb/${proposalId}/${fileName}`, 3600);
 ```
 
 ### **Para CCB Assinado:**
+
 ```javascript
 // Gerar URL temporária (1 hora)
 const { data } = await supabase.storage
-  .from("documents")
+  .from('documents')
   .createSignedUrl(`proposta-${proposalId}/ccb-assinada.pdf`, 3600);
 ```
 

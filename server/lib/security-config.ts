@@ -50,7 +50,7 @@ export const generalApiLimiter = rateLimit({
   windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
   max: isDevelopment ? 10000 : 100, // 10k dev, 100 prod
   message: {
-    error: isDevelopment 
+    error: isDevelopment
       ? 'Rate limit atingido (modo desenvolvimento - limites altos)'
       : 'Muitas requisições da API. Tente novamente em 15 minutos.',
     retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
@@ -65,7 +65,7 @@ export const generalApiLimiter = rateLimit({
   handler: (req, res) => {
     log(`⚠️ Rate limit exceeded for IP: ${req.ip} on ${req.path} (ENV: ${process.env.NODE_ENV})`);
     res.status(429).json({
-      error: isDevelopment 
+      error: isDevelopment
         ? 'Rate limit atingido (modo desenvolvimento - limites altos)'
         : 'Muitas requisições da API. Tente novamente em 15 minutos.',
       retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
@@ -95,7 +95,9 @@ export const authApiLimiter = rateLimit({
   handler: (req, res) => {
     const email = req.body?.email;
     const limit = isDevelopment ? 1000 : 100;
-    log(`🚨 Auth rate limit exceeded for IP: ${req.ip}${email ? `, email: ${email}` : ''} (${limit} req limit) ENV: ${process.env.NODE_ENV}`);
+    log(
+      `🚨 Auth rate limit exceeded for IP: ${req.ip}${email ? `, email: ${email}` : ''} (${limit} req limit) ENV: ${process.env.NODE_ENV}`
+    );
     res.status(429).json({
       error: isDevelopment
         ? 'Rate limit auth atingido (modo desenvolvimento)'

@@ -10,11 +10,11 @@ export const ProposalOutputSchema = z.object({
     id: z.string(),
     numero_proposta: z.number().optional(),
     status: z.string(),
-    
+
     // Dados do cliente - JSON aninhado
     cliente_data: z.any(), // Pode ser string JSON ou objeto
-    clienteData: z.any(),  // Duplicado para compatibilidade
-    
+    clienteData: z.any(), // Duplicado para compatibilidade
+
     // Dados financeiros
     valor: z.any(),
     prazo: z.any(),
@@ -25,7 +25,7 @@ export const ProposalOutputSchema = z.object({
     valor_total_financiado: z.any().optional(),
     finalidade: z.string().optional(),
     garantia: z.string().optional(),
-    
+
     // Dados relacionados
     loja_id: z.number().optional(),
     loja_nome: z.string().optional(),
@@ -34,7 +34,7 @@ export const ProposalOutputSchema = z.object({
     tabela_comercial_id: z.number().optional(),
     tabela_comercial_nome: z.string().optional(),
     tabela_comercial_taxa: z.number().optional(),
-    
+
     // Metadados
     created_at: z.string().optional(),
     createdAt: z.string().optional(),
@@ -45,18 +45,18 @@ export const ProposalOutputSchema = z.object({
     motivo_rejeicao: z.string().optional(),
     motivoRejeicao: z.string().optional(),
     observacoes: z.string().optional(),
-    
+
     // Campos calculados
     valor_parcela: z.number().optional(),
     valor_total: z.number().optional(),
-    
+
     // Outros
     atendente_id: z.string().optional(),
     dados_pagamento: z.any().optional(),
     ccb_url: z.string().optional(),
     ccbUrl: z.string().optional(),
     documentos: z.array(z.any()).optional(),
-  })
+  }),
 });
 
 export type ProposalOutput = z.infer<typeof ProposalOutputSchema>;

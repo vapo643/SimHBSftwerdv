@@ -1,9 +1,9 @@
 /**
  * Query Optimization and Eager Loading - Sprint 2
- * 
+ *
  * Implements high-performance query patterns and eager loading strategies
  * Optimizes database interactions for P95 < 500ms SLA compliance
- * 
+ *
  * Date: 2025-08-28
  * Author: GEM-07 AI Specialist System
  */
@@ -27,7 +27,7 @@ export interface QueryMetrics {
  */
 export class OptimizedQueryBuilder {
   private metrics: QueryMetrics[] = [];
-  
+
   /**
    * High-performance proposal loading with related data
    * Implements eager loading to minimize N+1 queries
@@ -40,7 +40,7 @@ export class OptimizedQueryBuilder {
     offset?: number;
   }): Promise<any[]> {
     const startTime = Date.now();
-    
+
     try {
       // Single optimized query with joins instead of multiple queries
       const query = db
@@ -105,25 +105,25 @@ export class OptimizedQueryBuilder {
         .orderBy(desc(schema.propostas.createdAt))
         .limit(filters?.limit || 50)
         .offset(filters?.offset || 0);
-      
+
       const results = await query;
-      
+
       this.recordMetrics('getPropostasWithRelations', startTime, results.length);
-      
+
       return results;
     } catch (error) {
       this.recordMetrics('getPropostasWithRelations', startTime, 0, error);
       throw error;
     }
   }
-  
+
   /**
    * Optimized proposal detail loading with all related entities
    * Single query with all necessary data for proposal view
    */
   async getPropostaDetailOptimized(propostaId: string): Promise<any> {
     const startTime = Date.now();
-    
+
     try {
       // Main proposal data with relations
       const mainQuery = db
@@ -165,7 +165,7 @@ export class OptimizedQueryBuilder {
         .leftJoin(schema.produtos, eq(schema.propostas.produtoId, schema.produtos.id))
         .where(eq(schema.propostas.id, propostaId))
         .limit(1);
-      
+
       // Related data queries (parallel execution)
       const [proposal, logs, documents, ccbs, statusHistory] = await Promise.all([
         mainQuery,
@@ -174,12 +174,12 @@ export class OptimizedQueryBuilder {
         this.getPropostaCCBs(propostaId),
         this.getStatusHistory(propostaId),
       ]);
-      
+
       if (!proposal || proposal.length === 0) {
         this.recordMetrics('getPropostaDetailOptimized', startTime, 0);
         return null;
       }
-      
+
       const result = {
         ...proposal[0],
         logs,
@@ -187,16 +187,16 @@ export class OptimizedQueryBuilder {
         ccbs,
         statusHistory,
       };
-      
+
       this.recordMetrics('getPropostaDetailOptimized', startTime, 1);
-      
+
       return result;
     } catch (error) {
       this.recordMetrics('getPropostaDetailOptimized', startTime, 0, error);
       throw error;
     }
   }
-  
+
   /**
    * Optimized logs retrieval with pagination
    */
@@ -215,7 +215,7 @@ export class OptimizedQueryBuilder {
       .orderBy(desc(schema.propostaLogs.createdAt))
       .limit(limit);
   }
-  
+
   /**
    * Optimized documents retrieval
    */
@@ -238,7 +238,7 @@ export class OptimizedQueryBuilder {
       )
       .orderBy(desc(schema.propostaDocumentos.createdAt));
   }
-  
+
   /**
    * Optimized CCBs retrieval with boletos
    */
@@ -260,15 +260,10 @@ export class OptimizedQueryBuilder {
         )`,
       })
       .from(schema.ccbs)
-      .where(
-        and(
-          eq(schema.ccbs.propostaId, propostaId),
-          isNull(schema.ccbs.deletedAt)
-        )
-      )
+      .where(and(eq(schema.ccbs.propostaId, propostaId), isNull(schema.ccbs.deletedAt)))
       .orderBy(desc(schema.ccbs.createdAt));
   }
-  
+
   /**
    * Status history with contextual information
    */
@@ -287,7 +282,7 @@ export class OptimizedQueryBuilder {
       .orderBy(desc(schema.statusContextuais.atualizadoEm))
       .limit(20);
   }
-  
+
   /**
    * Dashboard analytics with optimized aggregations
    */
@@ -299,26 +294,21 @@ export class OptimizedQueryBuilder {
     proposatasRecentes: number;
   }> {
     const startTime = Date.now();
-    
+
     try {
       const baseCondition = and(
         isNull(schema.propostas.deletedAt),
         lojaId ? eq(schema.propostas.lojaId, lojaId) : undefined
       );
-      
+
       // Parallel aggregation queries for performance
-      const [
-        totalCount,
-        statusCounts,
-        valueAggregations,
-        recentCount,
-      ] = await Promise.all([
+      const [totalCount, statusCounts, valueAggregations, recentCount] = await Promise.all([
         // Total proposals count
         db
           .select({ count: sql<number>`COUNT(*)` })
           .from(schema.propostas)
           .where(baseCondition),
-        
+
         // Proposals by status
         db
           .select({
@@ -328,7 +318,7 @@ export class OptimizedQueryBuilder {
           .from(schema.propostas)
           .where(baseCondition)
           .groupBy(schema.propostas.status),
-        
+
         // Value aggregations (using JSON field)
         db
           .select({
@@ -337,19 +327,16 @@ export class OptimizedQueryBuilder {
           })
           .from(schema.propostas)
           .where(baseCondition),
-        
+
         // Recent proposals (last 7 days)
         db
           .select({ count: sql<number>`COUNT(*)` })
           .from(schema.propostas)
           .where(
-            and(
-              baseCondition,
-              sql`${schema.propostas.createdAt} >= NOW() - INTERVAL '7 days'`
-            )
+            and(baseCondition, sql`${schema.propostas.createdAt} >= NOW() - INTERVAL '7 days'`)
           ),
       ]);
-      
+
       const result = {
         totalPropostas: totalCount[0]?.count || 0,
         proposatasPorStatus: statusCounts,
@@ -357,39 +344,44 @@ export class OptimizedQueryBuilder {
         mediaValor: valueAggregations[0]?.avgValue || 0,
         proposatasRecentes: recentCount[0]?.count || 0,
       };
-      
+
       this.recordMetrics('getDashboardMetrics', startTime, 1);
-      
+
       return result;
     } catch (error) {
       this.recordMetrics('getDashboardMetrics', startTime, 0, error);
       throw error;
     }
   }
-  
+
   /**
    * Performance monitoring
    */
-  private recordMetrics(queryName: string, startTime: number, rowsReturned: number, error?: any): void {
+  private recordMetrics(
+    queryName: string,
+    startTime: number,
+    rowsReturned: number,
+    error?: any
+  ): void {
     const duration = Date.now() - startTime;
-    
+
     this.metrics.push({
       queryName,
       duration,
       rowsReturned,
     });
-    
+
     // Log slow queries (> 1000ms)
     if (duration > 1000) {
       console.warn(`[SLOW QUERY] ${queryName}: ${duration}ms`, { error });
     }
-    
+
     // Keep only last 100 metrics
     if (this.metrics.length > 100) {
       this.metrics = this.metrics.slice(-100);
     }
   }
-  
+
   /**
    * Get query performance statistics
    */
@@ -399,15 +391,15 @@ export class OptimizedQueryBuilder {
     totalQueries: number;
   } {
     const totalDuration = this.metrics.reduce((sum, m) => sum + m.duration, 0);
-    const slowQueries = this.metrics.filter(m => m.duration > 500);
-    
+    const slowQueries = this.metrics.filter((m) => m.duration > 500);
+
     return {
       averageDuration: this.metrics.length ? totalDuration / this.metrics.length : 0,
       slowQueries,
       totalQueries: this.metrics.length,
     };
   }
-  
+
   /**
    * Clear performance metrics
    */
@@ -423,25 +415,24 @@ export const optimizedQuery = new OptimizedQueryBuilder();
  * Query optimization utilities
  */
 export class QueryOptimizer {
-  
   /**
    * Build optimal WHERE conditions with proper indexing
    */
   static buildOptimalFilters(filters: any) {
     const conditions = [];
-    
+
     // Always filter deleted records first (indexed column)
     conditions.push(isNull(schema.propostas.deletedAt));
-    
+
     // Indexed filters should come first
     if (filters.lojaId) {
       conditions.push(eq(schema.propostas.lojaId, filters.lojaId));
     }
-    
+
     if (filters.status) {
       conditions.push(inArray(schema.propostas.status, filters.status));
     }
-    
+
     // Date range filters (if indexed)
     if (filters.dateRange) {
       conditions.push(
@@ -451,21 +442,21 @@ export class QueryOptimizer {
         )
       );
     }
-    
+
     return and(...conditions);
   }
-  
+
   /**
    * Optimize pagination with cursor-based approach
    */
   static buildCursorPagination(cursor?: string, limit = 20) {
     const conditions = [];
-    
+
     if (cursor) {
       // Cursor-based pagination is more efficient than OFFSET
       conditions.push(sql`${schema.propostas.createdAt} < ${cursor}`);
     }
-    
+
     return {
       where: and(...conditions),
       limit: limit + 1, // Fetch one extra to check if there's more

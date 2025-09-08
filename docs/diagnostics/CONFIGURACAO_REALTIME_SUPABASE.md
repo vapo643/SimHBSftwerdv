@@ -10,7 +10,7 @@
 4. **ATIVE** o toggle "Enable Realtime" para esta tabela
 5. Marque as opções:
    - ✅ **INSERT** (para novos registros)
-   - ✅ **UPDATE** (para atualizações de status) 
+   - ✅ **UPDATE** (para atualizações de status)
    - ✅ **DELETE** (para exclusões)
 
 ### 2. VERIFICAR PUBLICAÇÃO
@@ -27,8 +27,8 @@ CREATE PUBLICATION supabase_realtime FOR TABLE propostas;
 ALTER PUBLICATION supabase_realtime ADD TABLE propostas;
 
 -- Verificar se está configurado
-SELECT * FROM pg_publication_tables 
-WHERE pubname = 'supabase_realtime' 
+SELECT * FROM pg_publication_tables
+WHERE pubname = 'supabase_realtime'
 AND tablename = 'propostas';
 ```
 
@@ -38,7 +38,7 @@ Execute no SQL Editor para testar:
 
 ```sql
 -- Criar um update de teste
-UPDATE propostas 
+UPDATE propostas
 SET status = 'contratos_assinados',
     atualizado_em = NOW()
 WHERE id = 'SEU_ID_DE_TESTE'

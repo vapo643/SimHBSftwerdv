@@ -86,8 +86,9 @@ class ClickSignSecurityService {
   private cryptoService: CryptoService;
 
   constructor() {
-    const encryptionKey = process.env.CLICKSIGN_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
-    
+    const encryptionKey =
+      process.env.CLICKSIGN_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
+
     this.config = {
       encryptionKey,
       allowedIPs: (process.env.CLICKSIGN_ALLOWED_IPS || '').split(',').filter(Boolean),

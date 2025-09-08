@@ -26,12 +26,14 @@
 2. **`/api/webhooks/clicksign`** (server/routes/webhooks.ts:53)
 
 **Eventos Processados:**
+
 - `document.signed` - Documento assinado
-- `document.finished` - Documento finalizado  
+- `document.finished` - Documento finalizado
 - `auto_close` - Fechamento automático
 - `sign` - Assinatura (endpoint v1)
 
 **Ações Executadas ao Receber Evento:**
+
 ```typescript
 // 1. Validação HMAC de segurança
 // 2. Busca proposta por clicksign_document_id
@@ -44,6 +46,7 @@
 ```
 
 **✅ SEGURANÇA VALIDADA:**
+
 - HMAC SHA256 signature validation ✅
 - Timestamp validation (5 min window) ✅
 - Event deduplication ✅
@@ -54,22 +57,25 @@
 **DESCOBERTA CRÍTICA:** O sistema **NÃO usa Supabase Realtime**
 
 **Método Atual:**
+
 - Frontend usa **polling manual** via `queryClient.invalidateQueries()`
 - Timeline é atualizada quando usuário recarrega ou navega
 - **NÃO há** notificação automática em tempo real
 
 **Evidência:**
+
 ```typescript
 // formalizacao.tsx:474-481
 queryClient.invalidateQueries({
-  queryKey: ["/api/propostas", propostaId],
+  queryKey: ['/api/propostas', propostaId],
 });
 queryClient.invalidateQueries({
-  queryKey: ["/api/propostas/formalizacao"],
+  queryKey: ['/api/propostas/formalizacao'],
 });
 ```
 
 **Status da Tabela `propostas`:**
+
 - Realtime **NÃO configurado** no Supabase
 - Updates via webhook funcionam ✅
 - Frontend precisa refresh manual ⚠️
@@ -83,28 +89,30 @@ queryClient.invalidateQueries({
 **Localização:** `server/services/interBankService.ts`
 
 **Fluxo de Implementação:**
+
 ```typescript
 async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
   // ETAPA 1: Buscar dados da cobrança via API Inter
   const collectionDetails = await this.recuperarCobranca(codigoSolicitacao);
-  
+
   // ETAPA 2: Buscar PDF em múltiplos campos possíveis
   // - collectionDetails.pdf
-  // - collectionDetails.pdfBase64  
+  // - collectionDetails.pdfBase64
   // - collectionDetails.boleto.pdf
   // - collectionDetails.arquivoPdf
-  
+
   // ETAPA 3: Decodificar base64 → Buffer
   const pdfBuffer = Buffer.from(pdfBase64, "base64");
-  
+
   // ETAPA 4: Validar formato PDF (magic bytes)
   if (!pdfMagic.startsWith("%PDF")) throw Error();
-  
+
   return pdfBuffer; // ✅ Buffer pronto para download
 }
 ```
 
 **✅ CONFIGURAÇÃO VALIDADA:**
+
 - Token de autorização incluído ✅
 - Header `x-conta-corrente` configurado ✅
 - mTLS certificate/privateKey configurados ✅
@@ -115,6 +123,7 @@ async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
 **✅ ROTA DE DOWNLOAD LOCALIZADA:** `server/routes/inter-collections.ts:151`
 
 **Fluxo Completo do Download:**
+
 ```typescript
 // 1. Frontend chama endpoint específico
 GET /api/inter/collections/:id/pdf
@@ -129,15 +138,17 @@ res.send(pdfBuffer);
 ```
 
 **✅ CONFIGURAÇÃO VALIDADA:**
+
 - `Content-Type: application/pdf` configurado ✅
 - `Content-Disposition: attachment` para download ✅
 - Buffer validation com magic bytes ✅
 - Error handling para boletos inexistentes ✅
 
 **Evidência de Headers:**
+
 ```typescript
 // inter-collections.ts:151
-res.setHeader("Content-Type", "application/pdf");
+res.setHeader('Content-Type', 'application/pdf');
 ```
 
 ---
@@ -160,24 +171,22 @@ res.setHeader("Content-Type", "application/pdf");
 ### 🔧 RECOMENDAÇÕES TÉCNICAS
 
 **PRIORIDADE ALTA:**
+
 1. Implementar Supabase Realtime na tabela `propostas`
 2. Consolidar webhooks em um único endpoint
 
-**PRIORIDADE MÉDIA:**
-3. Adicionar notificação toast quando webhook atualizar status
-4. Melhorar mensagens de erro específicas para PDF download
-5. Implementar retry logic para falhas de download
+**PRIORIDADE MÉDIA:** 3. Adicionar notificação toast quando webhook atualizar status 4. Melhorar mensagens de erro específicas para PDF download 5. Implementar retry logic para falhas de download
 
 ---
 
 ## 📊 STATUS FINAL DA AUDITORIA
 
-| Componente | Status | Funcionalidade | Segurança |
-|------------|--------|----------------|-----------|
-| ClickSign Webhook | ✅ APROVADO | 100% | Excelente |
-| Timeline Updates | ⚠️ MANUAL | 70% | N/A |
-| PDF Download | ✅ APROVADO | 95% | Excelente |
-| **GERAL** | **✅ FUNCIONAL** | **88%** | **Excelente** |
+| Componente        | Status           | Funcionalidade | Segurança     |
+| ----------------- | ---------------- | -------------- | ------------- |
+| ClickSign Webhook | ✅ APROVADO      | 100%           | Excelente     |
+| Timeline Updates  | ⚠️ MANUAL        | 70%            | N/A           |
+| PDF Download      | ✅ APROVADO      | 95%            | Excelente     |
+| **GERAL**         | **✅ FUNCIONAL** | **88%**        | **Excelente** |
 
 **✅ VEREDICTO:** Sistema em condições de produção, com melhorias recomendadas para UX em tempo real.
 

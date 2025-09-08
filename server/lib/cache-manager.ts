@@ -1,7 +1,7 @@
 /**
- * Redis Cache Manager - PAM V4.0 
+ * Redis Cache Manager - PAM V4.0
  * High-performance caching system for critical data
- * 
+ *
  * Features:
  * - Cache-aside pattern with TTL
  * - Smart invalidation strategies
@@ -38,10 +38,9 @@ class CacheManager {
       this.redis = await getRedisClient();
       this.isRedisAvailable = true;
       console.log('[CACHE] ✅ Redis conectado via Redis Manager centralizado');
-      
+
       // Test connection
       await this.redis.ping();
-      
     } catch (error) {
       this.isRedisAvailable = false;
       this.stats.errors++;
@@ -59,11 +58,7 @@ class CacheManager {
   /**
    * Get data from cache with fallback to fetcher function
    */
-  async get<T>(
-    key: string, 
-    fetcher: () => Promise<T>, 
-    options: CacheOptions = {}
-  ): Promise<T> {
+  async get<T>(key: string, fetcher: () => Promise<T>, options: CacheOptions = {}): Promise<T> {
     const { ttl = 3600, namespace } = options; // Default 1 hour TTL
     const cacheKey = this.generateKey(key, namespace);
     const startTime = performance.now();
@@ -72,14 +67,14 @@ class CacheManager {
       // Try to get from cache first
       if (this.isRedisAvailable && this.redis) {
         const cached = await this.redis.get(cacheKey);
-        
+
         if (cached) {
           this.stats.hits++;
           this.updateHitRate();
-          
+
           const duration = performance.now() - startTime;
           console.log(`[CACHE] HIT: ${key} (${Math.round(duration)}ms)`);
-          
+
           return JSON.parse(cached);
         }
       }
@@ -87,7 +82,7 @@ class CacheManager {
       // Cache miss - fetch from source
       this.stats.misses++;
       this.updateHitRate();
-      
+
       console.log(`[CACHE] MISS: ${key} - fetching from source`);
       const data = await fetcher();
 
@@ -100,11 +95,10 @@ class CacheManager {
       console.log(`[CACHE] STORED: ${key} (TTL: ${ttl}s, ${Math.round(duration)}ms)`);
 
       return data;
-
     } catch (error) {
       this.stats.errors++;
       console.error(`[CACHE] Error for key ${key}:`, error);
-      
+
       // Fallback to fetcher on any cache error
       return fetcher();
     }
@@ -201,14 +195,13 @@ const cacheManager = new CacheManager();
 
 // Cached data fetchers for common operations
 export class CachedQueries {
-  
   /**
    * Cache dashboard stats with 5-minute TTL
    */
   static async getDashboardStats(fetcher: () => Promise<any>) {
-    return cacheManager.get('dashboard:stats', fetcher, { 
+    return cacheManager.get('dashboard:stats', fetcher, {
       ttl: 300, // 5 minutes
-      namespace: 'dashboard' 
+      namespace: 'dashboard',
     });
   }
 
@@ -216,9 +209,9 @@ export class CachedQueries {
    * Cache commercial tables with 1-hour TTL
    */
   static async getCommercialTables(fetcher: () => Promise<any>) {
-    return cacheManager.get('commercial:tables', fetcher, { 
+    return cacheManager.get('commercial:tables', fetcher, {
       ttl: 3600, // 1 hour
-      namespace: 'commercial' 
+      namespace: 'commercial',
     });
   }
 
@@ -226,9 +219,9 @@ export class CachedQueries {
    * Cache product data with 30-minute TTL
    */
   static async getProducts(fetcher: () => Promise<any>) {
-    return cacheManager.get('products:all', fetcher, { 
+    return cacheManager.get('products:all', fetcher, {
       ttl: 1800, // 30 minutes
-      namespace: 'products' 
+      namespace: 'products',
     });
   }
 
@@ -236,9 +229,9 @@ export class CachedQueries {
    * Cache user profile with 15-minute TTL
    */
   static async getUserProfile(userId: string, fetcher: () => Promise<any>) {
-    return cacheManager.get(`user:${userId}`, fetcher, { 
+    return cacheManager.get(`user:${userId}`, fetcher, {
       ttl: 900, // 15 minutes
-      namespace: 'users' 
+      namespace: 'users',
     });
   }
 
@@ -246,9 +239,9 @@ export class CachedQueries {
    * Cache simulation parameters with 2-hour TTL
    */
   static async getSimulationParams(fetcher: () => Promise<any>) {
-    return cacheManager.get('simulation:params', fetcher, { 
+    return cacheManager.get('simulation:params', fetcher, {
       ttl: 7200, // 2 hours
-      namespace: 'simulation' 
+      namespace: 'simulation',
     });
   }
 

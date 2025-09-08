@@ -7,12 +7,14 @@ O Projeto Cérbero é um "sistema imunológico" avançado de segurança que inte
 ## 📊 Status de Implementação
 
 ### ✅ Fase 1 - OWASP Dependency-Check (COMPLETA)
+
 - **Sistema de Exceções de Vulnerabilidades**: Implementado com YAML configurável
 - **Integração CI/CD**: GitHub Actions executando análise automatizada
 - **Gestão de Dívida Técnica**: Exceções com data de expiração e justificativa
 - **Threshold de Segurança**: CVSS ≥ 7.0 falha automaticamente
 
 ### 🚀 Fase 2 - Semgrep MCP Server (COMPLETA)
+
 - **Servidor TypeScript**: Análise em tempo real com cache Redis/memória
 - **API RESTful**: Endpoints completos para análise de segurança
 - **Regras Customizadas**: 10+ regras específicas para sistema de crédito
@@ -89,6 +91,7 @@ GET /api/security/mcp/rules
 #### Autenticação
 
 Todos os endpoints requerem token JWT:
+
 ```bash
 Authorization: Bearer <jwt-token>
 ```
@@ -96,30 +99,35 @@ Authorization: Bearer <jwt-token>
 ### OWASP Dependency-Check
 
 #### Executar análise local
+
 ```bash
 cd .security
 ./run-dependency-check.sh
 ```
 
 #### Gerenciar exceções
+
 Editar `.security/vulnerability-exceptions.yml`:
+
 ```yaml
 exceptions:
-  - cve_id: "CVE-2023-12345"
-    justification: "Falso positivo - não afeta nossa implementação"
-    expires: "2025-06-30"
+  - cve_id: 'CVE-2023-12345'
+    justification: 'Falso positivo - não afeta nossa implementação'
+    expires: '2025-06-30'
     cvss_threshold: 7.0
 ```
 
 ## 📈 Métricas de Segurança
 
 ### Cobertura Atual
+
 - **Análise Estática (SAST)**: 100% do código TypeScript/JavaScript
 - **Análise de Dependências (SCA)**: 100% das dependências npm
 - **Regras Customizadas**: 10+ regras específicas para crédito
 - **Tempo de Resposta**: <500ms para análise incremental
 
 ### Vulnerabilidades Detectadas
+
 - SQL Injection em queries de propostas
 - Exposição de dados PII (CPF/CNPJ) em logs
 - Upload de arquivos sem validação adequada
@@ -138,12 +146,14 @@ exceptions:
 ## 🚀 Próximos Passos
 
 ### Fase 3 - Integração Completa (Planejada)
+
 - [ ] Dashboard unificado de segurança
 - [ ] Integração com IDE (VS Code extension)
 - [ ] Machine Learning para detecção de anomalias
 - [ ] Automação de correções simples
 
 ### Fase 4 - Expansão (Futura)
+
 - [ ] DAST (Dynamic Application Security Testing)
 - [ ] Container scanning
 - [ ] Infrastructure as Code scanning

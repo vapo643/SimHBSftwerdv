@@ -140,176 +140,187 @@ export const statusEnum = pgEnum('status', [
   'suspensa',
 ]);
 
-export const propostas = pgTable('propostas', {
-  id: text('id').primaryKey(), // UUID string format - used internally
-  numeroProposta: integer('numero_proposta').notNull().unique(), // User-facing sequential number starting at 300001
-  lojaId: integer('loja_id').notNull(), // Multi-tenant key
+export const propostas = pgTable(
+  'propostas',
+  {
+    id: text('id').primaryKey(), // UUID string format - used internally
+    numeroProposta: integer('numero_proposta').notNull().unique(), // User-facing sequential number starting at 300001
+    lojaId: integer('loja_id').notNull(), // Multi-tenant key
 
-  // Relacionamentos de negócio
-  produtoId: integer('produto_id').references(() => produtos.id).notNull(),
-  tabelaComercialId: integer('tabela_comercial_id').references(() => tabelasComerciais.id).notNull(),
+    // Relacionamentos de negócio
+    produtoId: integer('produto_id')
+      .references(() => produtos.id)
+      .notNull(),
+    tabelaComercialId: integer('tabela_comercial_id')
+      .references(() => tabelasComerciais.id)
+      .notNull(),
 
-  // Cliente dados básicos (mantendo campos existentes para compatibilidade)
-  clienteNome: text('cliente_nome').notNull(),
-  clienteCpf: text('cliente_cpf').notNull(),
-  clienteEmail: text('cliente_email'),
-  clienteTelefone: text('cliente_telefone'),
-  clienteDataNascimento: text('cliente_data_nascimento'),
-  clienteRenda: text('cliente_renda'),
+    // Cliente dados básicos (mantendo campos existentes para compatibilidade)
+    clienteNome: text('cliente_nome').notNull(),
+    clienteCpf: text('cliente_cpf').notNull(),
+    clienteEmail: text('cliente_email'),
+    clienteTelefone: text('cliente_telefone'),
+    clienteDataNascimento: text('cliente_data_nascimento'),
+    clienteRenda: text('cliente_renda'),
 
-  // Cliente dados adicionais (novos campos normalizados)
-  clienteRg: text('cliente_rg'),
-  clienteOrgaoEmissor: text('cliente_orgao_emissor'),
-  clienteRgUf: text('cliente_rg_uf'),
-  clienteRgDataEmissao: text('cliente_rg_data_emissao'),
-  clienteEstadoCivil: text('cliente_estado_civil'),
-  clienteNacionalidade: text('cliente_nacionalidade').default('Brasileira'),
-  clienteLocalNascimento: text('cliente_local_nascimento'),
+    // Cliente dados adicionais (novos campos normalizados)
+    clienteRg: text('cliente_rg'),
+    clienteOrgaoEmissor: text('cliente_orgao_emissor'),
+    clienteRgUf: text('cliente_rg_uf'),
+    clienteRgDataEmissao: text('cliente_rg_data_emissao'),
+    clienteEstadoCivil: text('cliente_estado_civil'),
+    clienteNacionalidade: text('cliente_nacionalidade').default('Brasileira'),
+    clienteLocalNascimento: text('cliente_local_nascimento'),
 
-  // Endereço detalhado
-  clienteCep: text('cliente_cep'),
-  clienteEndereco: text('cliente_endereco'), // Campo legado - mantido para compatibilidade
-  clienteLogradouro: text('cliente_logradouro'),
-  clienteNumero: text('cliente_numero'),
-  clienteComplemento: text('cliente_complemento'),
-  clienteBairro: text('cliente_bairro'),
-  clienteCidade: text('cliente_cidade'),
-  clienteUf: text('cliente_uf'),
-  clienteOcupacao: text('cliente_ocupacao'),
+    // Endereço detalhado
+    clienteCep: text('cliente_cep'),
+    clienteEndereco: text('cliente_endereco'), // Campo legado - mantido para compatibilidade
+    clienteLogradouro: text('cliente_logradouro'),
+    clienteNumero: text('cliente_numero'),
+    clienteComplemento: text('cliente_complemento'),
+    clienteBairro: text('cliente_bairro'),
+    clienteCidade: text('cliente_cidade'),
+    clienteUf: text('cliente_uf'),
+    clienteOcupacao: text('cliente_ocupacao'),
 
-  // Dados para Pessoa Jurídica
-  tipoPessoa: text('tipo_pessoa').default('PF'), // PF ou PJ
-  clienteRazaoSocial: text('cliente_razao_social'),
-  clienteCnpj: text('cliente_cnpj'),
+    // Dados para Pessoa Jurídica
+    tipoPessoa: text('tipo_pessoa').default('PF'), // PF ou PJ
+    clienteRazaoSocial: text('cliente_razao_social'),
+    clienteCnpj: text('cliente_cnpj'),
 
-  // Empréstimo dados
-  valor: decimal('valor', { precision: 15, scale: 2 }).notNull(),
-  prazo: integer('prazo').notNull(),
-  finalidade: text('finalidade'),
-  garantia: text('garantia'),
+    // Empréstimo dados
+    valor: decimal('valor', { precision: 15, scale: 2 }).notNull(),
+    prazo: integer('prazo').notNull(),
+    finalidade: text('finalidade'),
+    garantia: text('garantia'),
 
-  // Valores calculados
-  valorTac: decimal('valor_tac', { precision: 10, scale: 2 }).notNull(),
-  valorIof: decimal('valor_iof', { precision: 10, scale: 2 }).notNull(),
-  valorTotalFinanciado: decimal('valor_total_financiado', { precision: 15, scale: 2 }).notNull(),
-  valorLiquidoLiberado: decimal('valor_liquido_liberado', { precision: 15, scale: 2 }),
+    // Valores calculados
+    valorTac: decimal('valor_tac', { precision: 10, scale: 2 }).notNull(),
+    valorIof: decimal('valor_iof', { precision: 10, scale: 2 }).notNull(),
+    valorTotalFinanciado: decimal('valor_total_financiado', { precision: 15, scale: 2 }).notNull(),
+    valorLiquidoLiberado: decimal('valor_liquido_liberado', { precision: 15, scale: 2 }),
 
-  // Dados financeiros detalhados
-  jurosModalidade: text('juros_modalidade').default('pre_fixado'), // pre_fixado ou pos_fixado
-  periodicidadeCapitalizacao: text('periodicidade_capitalizacao').default('mensal'),
-  taxaJurosAnual: decimal('taxa_juros_anual', { precision: 5, scale: 2 }).notNull(),
-  pracaPagamento: text('praca_pagamento').default('São Paulo'),
-  formaPagamento: text('forma_pagamento').default('boleto'), // boleto, pix, debito
-  anoBase: integer('ano_base').default(365),
-  tarifaTed: decimal('tarifa_ted', { precision: 10, scale: 2 }).default('10.00'),
-  taxaCredito: decimal('taxa_credito', { precision: 10, scale: 2 }),
-  dataLiberacao: timestamp('data_liberacao'),
-  formaLiberacao: text('forma_liberacao').default('deposito'), // deposito, ted, pix
-  calculoEncargos: text('calculo_encargos'),
+    // Dados financeiros detalhados
+    jurosModalidade: text('juros_modalidade').default('pre_fixado'), // pre_fixado ou pos_fixado
+    periodicidadeCapitalizacao: text('periodicidade_capitalizacao').default('mensal'),
+    taxaJurosAnual: decimal('taxa_juros_anual', { precision: 5, scale: 2 }).notNull(),
+    pracaPagamento: text('praca_pagamento').default('São Paulo'),
+    formaPagamento: text('forma_pagamento').default('boleto'), // boleto, pix, debito
+    anoBase: integer('ano_base').default(365),
+    tarifaTed: decimal('tarifa_ted', { precision: 10, scale: 2 }).default('10.00'),
+    taxaCredito: decimal('taxa_credito', { precision: 10, scale: 2 }),
+    dataLiberacao: timestamp('data_liberacao'),
+    formaLiberacao: text('forma_liberacao').default('deposito'), // deposito, ted, pix
+    calculoEncargos: text('calculo_encargos'),
 
-  // Status e análise
-  status: text('status').notNull(),
-  analistaId: text('analista_id').notNull(),
-  dataAnalise: timestamp('data_analise'),
-  motivoPendencia: text('motivo_pendencia'),
-  valorAprovado: decimal('valor_aprovado', { precision: 15, scale: 2 }),
-  taxaJuros: decimal('taxa_juros', { precision: 5, scale: 2 }).notNull(),
-  observacoes: text('observacoes'),
+    // Status e análise
+    status: text('status').notNull(),
+    analistaId: text('analista_id').notNull(),
+    dataAnalise: timestamp('data_analise'),
+    motivoPendencia: text('motivo_pendencia'),
+    valorAprovado: decimal('valor_aprovado', { precision: 15, scale: 2 }),
+    taxaJuros: decimal('taxa_juros', { precision: 5, scale: 2 }).notNull(),
+    observacoes: text('observacoes'),
 
-  // Documentos (mantendo campos legados)
-  documentos: text('documentos').array(),
-  ccbDocumentoUrl: text('ccb_documento_url').notNull(),
+    // Documentos (mantendo campos legados)
+    documentos: text('documentos').array(),
+    ccbDocumentoUrl: text('ccb_documento_url').notNull(),
 
-  // Formalização - Enhanced fields
-  dataAprovacao: timestamp('data_aprovacao'),
-  documentosAdicionais: text('documentos_adicionais').array(),
-  contratoGerado: boolean('contrato_gerado').default(false),
-  contratoAssinado: boolean('contrato_assinado').default(false),
-  dataAssinatura: timestamp('data_assinatura'),
-  dataPagamento: timestamp('data_pagamento'),
-  observacoesFormalização: text('observacoes_formalizacao'),
+    // Formalização - Enhanced fields
+    dataAprovacao: timestamp('data_aprovacao'),
+    documentosAdicionais: text('documentos_adicionais').array(),
+    contratoGerado: boolean('contrato_gerado').default(false),
+    contratoAssinado: boolean('contrato_assinado').default(false),
+    dataAssinatura: timestamp('data_assinatura'),
+    dataPagamento: timestamp('data_pagamento'),
+    observacoesFormalização: text('observacoes_formalizacao'),
 
-  // New formalization tracking fields (January 29, 2025)
-  ccbGerado: boolean('ccb_gerado').notNull().default(false),
-  caminhoCcb: text('caminho_ccb'), // Caminho do CCB gerado
-  ccbGeradoEm: timestamp('ccb_gerado_em'), // Data de geração do CCB
-  assinaturaEletronicaConcluida: boolean('assinatura_eletronica_concluida')
-    .notNull()
-    .default(false),
-  biometriaConcluida: boolean('biometria_concluida').notNull().default(false),
-  caminhoCcbAssinado: text('caminho_ccb_assinado'),
+    // New formalization tracking fields (January 29, 2025)
+    ccbGerado: boolean('ccb_gerado').notNull().default(false),
+    caminhoCcb: text('caminho_ccb'), // Caminho do CCB gerado
+    ccbGeradoEm: timestamp('ccb_gerado_em'), // Data de geração do CCB
+    assinaturaEletronicaConcluida: boolean('assinatura_eletronica_concluida')
+      .notNull()
+      .default(false),
+    biometriaConcluida: boolean('biometria_concluida').notNull().default(false),
+    caminhoCcbAssinado: text('caminho_ccb_assinado'),
 
-  // ClickSign Integration Fields (January 29, 2025)
-  clicksignDocumentKey: text('clicksign_document_key'),
-  clicksignSignerKey: text('clicksign_signer_key'),
-  clicksignListKey: text('clicksign_list_key'),
-  clicksignStatus: text('clicksign_status'), // 'pending', 'signed', 'cancelled', 'expired'
-  clicksignSignUrl: text('clicksign_sign_url'),
-  clicksignSentAt: timestamp('clicksign_sent_at'),
-  clicksignSignedAt: timestamp('clicksign_signed_at'),
+    // ClickSign Integration Fields (January 29, 2025)
+    clicksignDocumentKey: text('clicksign_document_key'),
+    clicksignSignerKey: text('clicksign_signer_key'),
+    clicksignListKey: text('clicksign_list_key'),
+    clicksignStatus: text('clicksign_status'), // 'pending', 'signed', 'cancelled', 'expired'
+    clicksignSignUrl: text('clicksign_sign_url'),
+    clicksignSentAt: timestamp('clicksign_sent_at'),
+    clicksignSignedAt: timestamp('clicksign_signed_at'),
 
-  // Dados de Pagamento (Destino do empréstimo) - Added August 5, 2025
-  // Opção 1: Dados Bancários
-  dadosPagamentoBanco: text('dados_pagamento_banco').notNull(),
-  dadosPagamentoCodigoBanco: text('dados_pagamento_codigo_banco'), // Código do banco (001, 237, etc)
-  dadosPagamentoAgencia: text('dados_pagamento_agencia'),
-  dadosPagamentoConta: text('dados_pagamento_conta'),
-  dadosPagamentoDigito: text('dados_pagamento_digito'), // Dígito da conta
-  dadosPagamentoTipo: text('dados_pagamento_tipo'), // 'conta_corrente', 'conta_poupanca'
-  dadosPagamentoNomeTitular: text('dados_pagamento_nome_titular'),
-  dadosPagamentoCpfTitular: text('dados_pagamento_cpf_titular'),
+    // Dados de Pagamento (Destino do empréstimo) - Added August 5, 2025
+    // Opção 1: Dados Bancários
+    dadosPagamentoBanco: text('dados_pagamento_banco').notNull(),
+    dadosPagamentoCodigoBanco: text('dados_pagamento_codigo_banco'), // Código do banco (001, 237, etc)
+    dadosPagamentoAgencia: text('dados_pagamento_agencia'),
+    dadosPagamentoConta: text('dados_pagamento_conta'),
+    dadosPagamentoDigito: text('dados_pagamento_digito'), // Dígito da conta
+    dadosPagamentoTipo: text('dados_pagamento_tipo'), // 'conta_corrente', 'conta_poupanca'
+    dadosPagamentoNomeTitular: text('dados_pagamento_nome_titular'),
+    dadosPagamentoCpfTitular: text('dados_pagamento_cpf_titular'),
 
-  // Opção 2: PIX (relacionado à conta bancária)
-  dadosPagamentoPix: text('dados_pagamento_pix'), // Chave PIX
-  dadosPagamentoTipoPix: text('dados_pagamento_tipo_pix'), // CPF, CNPJ, Email, Telefone, Aleatória
-  dadosPagamentoPixBanco: text('dados_pagamento_pix_banco'), // Banco do PIX
-  dadosPagamentoPixNomeTitular: text('dados_pagamento_pix_nome_titular'), // Nome do titular do PIX
-  dadosPagamentoPixCpfTitular: text('dados_pagamento_pix_cpf_titular'), // CPF do titular do PIX
+    // Opção 2: PIX (relacionado à conta bancária)
+    dadosPagamentoPix: text('dados_pagamento_pix'), // Chave PIX
+    dadosPagamentoTipoPix: text('dados_pagamento_tipo_pix'), // CPF, CNPJ, Email, Telefone, Aleatória
+    dadosPagamentoPixBanco: text('dados_pagamento_pix_banco'), // Banco do PIX
+    dadosPagamentoPixNomeTitular: text('dados_pagamento_pix_nome_titular'), // Nome do titular do PIX
+    dadosPagamentoPixCpfTitular: text('dados_pagamento_pix_cpf_titular'), // CPF do titular do PIX
 
-  // Método escolhido
-  metodoPagamento: text('metodo_pagamento').default('conta_bancaria'), // conta_bancaria ou pix
+    // Método escolhido
+    metodoPagamento: text('metodo_pagamento').default('conta_bancaria'), // conta_bancaria ou pix
 
-  // Comprovante de Pagamento - Added August 6, 2025
-  urlComprovantePagamento: text('url_comprovante_pagamento'), // URL do comprovante no Supabase Storage
+    // Comprovante de Pagamento - Added August 6, 2025
+    urlComprovantePagamento: text('url_comprovante_pagamento'), // URL do comprovante no Supabase Storage
 
-  // Tracking de boletos do Banco Inter - Added August 12, 2025
-  interBoletoGerado: boolean('inter_boleto_gerado').default(false),
-  interBoletoGeradoEm: timestamp('inter_boleto_gerado_em'),
+    // Tracking de boletos do Banco Inter - Added August 12, 2025
+    interBoletoGerado: boolean('inter_boleto_gerado').default(false),
+    interBoletoGeradoEm: timestamp('inter_boleto_gerado_em'),
 
-  // Campos JSONB legados (mantidos para compatibilidade)
-  clienteData: text('cliente_data'),
-  condicoesData: text('condicoes_data'),
+    // Campos JSONB legados (mantidos para compatibilidade)
+    clienteData: text('cliente_data'),
+    condicoesData: text('condicoes_data'),
 
-  // Novos campos de Empregador - Added August 20, 2025
-  clienteEmpresaNome: text('cliente_empresa_nome'), // NULLABLE para retrocompatibilidade
-  clienteEmpresaCnpj: text('cliente_empresa_cnpj'), // NULLABLE
-  clienteCargoFuncao: text('cliente_cargo_funcao'), // NULLABLE
-  clienteTempoEmprego: text('cliente_tempo_emprego'), // NULLABLE - Ex: "2 anos", "6 meses"
-  // clienteDataAdmissao: timestamp('cliente_data_admissao'), // NULLABLE - Data específica de admissão - TEMPORARIAMENTE COMENTADO
-  clienteRendaComprovada: boolean('cliente_renda_comprovada').default(false), // NOT NULL com default
+    // Novos campos de Empregador - Added August 20, 2025
+    clienteEmpresaNome: text('cliente_empresa_nome'), // NULLABLE para retrocompatibilidade
+    clienteEmpresaCnpj: text('cliente_empresa_cnpj'), // NULLABLE
+    clienteCargoFuncao: text('cliente_cargo_funcao'), // NULLABLE
+    clienteTempoEmprego: text('cliente_tempo_emprego'), // NULLABLE - Ex: "2 anos", "6 meses"
+    // clienteDataAdmissao: timestamp('cliente_data_admissao'), // NULLABLE - Data específica de admissão - TEMPORARIAMENTE COMENTADO
+    clienteRendaComprovada: boolean('cliente_renda_comprovada').default(false), // NOT NULL com default
 
-  // Novos campos Financeiros - Added August 20, 2025
-  clienteDividasExistentes: decimal('cliente_dividas_existentes', { precision: 12, scale: 2 }), // NULLABLE
-  clienteComprometimentoRenda: decimal('cliente_comprometimento_renda', { precision: 6, scale: 2 }).notNull(), // NOT NULL - Até 9999.99%
-  clienteScoreSerasa: integer('cliente_score_serasa'), // NULLABLE - Score de crédito
-  clienteRestricoesCpf: boolean('cliente_restricoes_cpf').default(false), // NOT NULL com default
+    // Novos campos Financeiros - Added August 20, 2025
+    clienteDividasExistentes: decimal('cliente_dividas_existentes', { precision: 12, scale: 2 }), // NULLABLE
+    clienteComprometimentoRenda: decimal('cliente_comprometimento_renda', {
+      precision: 6,
+      scale: 2,
+    }).notNull(), // NOT NULL - Até 9999.99%
+    clienteScoreSerasa: integer('cliente_score_serasa'), // NULLABLE - Score de crédito
+    clienteRestricoesCpf: boolean('cliente_restricoes_cpf').default(false), // NOT NULL com default
 
-  // Auditoria
-  userId: text('user_id'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-  deletedAt: timestamp('deleted_at'), // Soft delete column
-}, (table) => {
-  return {
-    // Índices de performance crítica para queries de listagem
-    statusPerformanceIdx: index('idx_propostas_status_performance')
-      .on(table.status, table.createdAt.desc(), table.deletedAt)
-      .where(sql`deleted_at IS NULL`),
-    cpfStatusIdx: index('idx_propostas_cpf_status')
-      .on(table.clienteCpf, table.status)
-      .where(sql`deleted_at IS NULL`),
-  };
-});
+    // Auditoria
+    userId: text('user_id'),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+    deletedAt: timestamp('deleted_at'), // Soft delete column
+  },
+  (table) => {
+    return {
+      // Índices de performance crítica para queries de listagem
+      statusPerformanceIdx: index('idx_propostas_status_performance')
+        .on(table.status, table.createdAt.desc(), table.deletedAt)
+        .where(sql`deleted_at IS NULL`),
+      cpfStatusIdx: index('idx_propostas_cpf_status')
+        .on(table.clienteCpf, table.status)
+        .where(sql`deleted_at IS NULL`),
+    };
+  }
+);
 
 // Tabelas Comerciais (estrutura N:N)
 export const tabelasComerciais = pgTable('tabelas_comerciais', {
@@ -345,7 +356,9 @@ export const produtos = pgTable('produtos', {
   isActive: boolean('is_active').notNull().default(true),
   tacValor: decimal('tac_valor', { precision: 10, scale: 2 }).default('0'),
   tacTipo: text('tac_tipo').notNull().default('fixo'),
-  tacAtivaParaClientesExistentes: boolean('tac_ativa_para_clientes_existentes').notNull().default(true),
+  tacAtivaParaClientesExistentes: boolean('tac_ativa_para_clientes_existentes')
+    .notNull()
+    .default(true),
 
   // Novos campos para CCB
   modalidadeJuros: text('modalidade_juros').default('pre_fixado'), // pre_fixado ou pos_fixado
@@ -1053,39 +1066,39 @@ export const ccbs = pgTable('ccbs', {
   propostaId: text('proposta_id')
     .references(() => propostas.id, { onDelete: 'cascade' })
     .notNull(),
-  
+
   // Identificação do documento
   numeroCCB: text('numero_ccb').notNull().unique(), // Número único da CCB
   valorCCB: decimal('valor_ccb', { precision: 15, scale: 2 }).notNull(),
-  
+
   // Estados do ciclo de vida da CCB
   status: text('status').notNull().default('gerada'), // gerada, enviada_assinatura, assinada, cancelada
-  
+
   // Dados do documento original
   caminhoDocumentoOriginal: text('caminho_documento_original'), // CCB gerada (PDF)
   urlDocumentoOriginal: text('url_documento_original'), // URL do storage
-  
+
   // Dados do documento assinado
   caminhoDocumentoAssinado: text('caminho_documento_assinado'), // CCB assinada (PDF)
   urlDocumentoAssinado: text('url_documento_assinado'), // URL do storage
-  
+
   // Integração ClickSign
   clicksignDocumentKey: text('clicksign_document_key'), // Chave do documento no ClickSign
   clicksignSignerKey: text('clicksign_signer_key'), // Chave do signatário
   clicksignListKey: text('clicksign_list_key'), // Chave da lista
   clicksignSignUrl: text('clicksign_sign_url'), // URL de assinatura
   clicksignStatus: text('clicksign_status'), // Status no ClickSign
-  
+
   // Controle de tempo
   dataEnvioAssinatura: timestamp('data_envio_assinatura'),
   dataAssinaturaConcluida: timestamp('data_assinatura_concluida'),
   prazoAssinatura: timestamp('prazo_assinatura'), // Prazo limite para assinatura
-  
+
   // Metadados
   tamanhoArquivo: integer('tamanho_arquivo'), // Tamanho em bytes
   hashDocumento: text('hash_documento'), // Hash SHA-256 para integridade
   versaoTemplate: text('versao_template').default('1.0'), // Controle de versão do template
-  
+
   // Auditoria e soft delete
   criadoPor: uuid('criado_por').references(() => profiles.id),
   observacoes: text('observacoes'),
@@ -1100,49 +1113,48 @@ export const boletos = pgTable('boletos', {
   propostaId: text('proposta_id')
     .references(() => propostas.id, { onDelete: 'cascade' })
     .notNull(),
-  ccbId: uuid('ccb_id')
-    .references(() => ccbs.id, { onDelete: 'cascade' }),
-  
+  ccbId: uuid('ccb_id').references(() => ccbs.id, { onDelete: 'cascade' }),
+
   // Identificação do boleto
   numeroBoleto: text('numero_boleto').notNull(), // Número sequencial único
   numeroParcela: integer('numero_parcela').notNull(), // 1, 2, 3...
   totalParcelas: integer('total_parcelas').notNull(),
-  
+
   // Dados financeiros
   valorPrincipal: decimal('valor_principal', { precision: 12, scale: 2 }).notNull(),
   valorJuros: decimal('valor_juros', { precision: 10, scale: 2 }).default('0.00'),
   valorMulta: decimal('valor_multa', { precision: 10, scale: 2 }).default('0.00'),
   valorTotal: decimal('valor_total', { precision: 12, scale: 2 }).notNull(),
-  
+
   // Datas importantes
   dataVencimento: text('data_vencimento').notNull(), // YYYY-MM-DD
   dataEmissao: text('data_emissao').notNull(), // YYYY-MM-DD
   dataPagamento: text('data_pagamento'), // YYYY-MM-DD quando pago
-  
+
   // Status e controle
   status: text('status').notNull().default('emitido'), // emitido, vencido, pago, cancelado
   formaPagamento: text('forma_pagamento'), // boleto, pix, transferencia
-  
+
   // Integração bancária (Inter ou outros)
   bancoOrigemId: text('banco_origem_id'), // Identificador no banco
   codigoBarras: text('codigo_barras'),
   linhaDigitavel: text('linha_digitavel'),
   nossoNumero: text('nosso_numero'), // Número de controle do banco
-  
+
   // PIX (se disponível)
   pixTxid: text('pix_txid'),
   pixCopiaECola: text('pix_copia_e_cola'),
   qrCodePix: text('qr_code_pix'), // Base64 ou URL
-  
+
   // Documentos e comprovantes
   urlBoleto: text('url_boleto'), // URL do boleto em PDF
   urlComprovantePagamento: text('url_comprovante_pagamento'),
-  
+
   // Histórico de tentativas
   tentativasEnvio: integer('tentativas_envio').default(0),
   ultimoEnvio: timestamp('ultimo_envio'),
   motivoCancelamento: text('motivo_cancelamento'),
-  
+
   // Auditoria e soft delete
   geradoPor: uuid('gerado_por').references(() => profiles.id),
   observacoes: text('observacoes'),
@@ -1150,7 +1162,6 @@ export const boletos = pgTable('boletos', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'), // Soft delete
 });
-
 
 // ========================================================================
 // SCHEMAS ZOD PARA VALIDAÇÃO DAS NOVAS ENTIDADES
@@ -1232,4 +1243,3 @@ export type InsertRegraAlerta = z.infer<typeof insertRegraAlertaSchema>;
 export type RegraAlerta = typeof regrasAlertas.$inferSelect;
 export type InsertHistoricoExecucaoAlerta = z.infer<typeof insertHistoricoExecucaoAlertaSchema>;
 export type HistoricoExecucaoAlerta = typeof historicoExecucoesAlertas.$inferSelect;
-

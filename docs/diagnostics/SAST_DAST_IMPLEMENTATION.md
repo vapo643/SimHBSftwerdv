@@ -1,9 +1,11 @@
 # SAST/DAST Pipeline Implementation Report
 
 ## Overview
+
 This report documents the implementation of a comprehensive Static Application Security Testing (SAST) and Dynamic Application Security Testing (DAST) pipeline for the Simpix Credit Management System.
 
 ## Implementation Date
+
 January 31, 2025
 
 ## Security Testing Architecture
@@ -61,6 +63,7 @@ January 31, 2025
 ## Pipeline Workflow
 
 ### Trigger Conditions
+
 - Pull requests to main/develop branches
 - Direct pushes to protected branches
 - Daily scheduled scans at 2 AM UTC
@@ -103,6 +106,7 @@ graph TD
 ## Tool Configuration
 
 ### ESLint Security Rules
+
 ```javascript
 'security/detect-non-literal-fs-filename': 'error'
 'security/detect-unsafe-regex': 'error'
@@ -111,12 +115,14 @@ graph TD
 ```
 
 ### OWASP ZAP Configuration
+
 - SQL Injection: HIGH threshold, HIGH strength
 - XSS: HIGH threshold, HIGH strength
 - Authentication issues: MEDIUM threshold
 - Information disclosure: MEDIUM threshold
 
 ### SonarCloud Settings
+
 - Security hotspots: 0 tolerance
 - Quality gate: A rating required
 - Coverage exclusions for config files
@@ -125,6 +131,7 @@ graph TD
 ## Integration with Development Workflow
 
 ### Pre-commit Hooks
+
 ```bash
 # Run before every commit
 npm run lint:security
@@ -132,12 +139,14 @@ npm audit --audit-level=high
 ```
 
 ### CI/CD Integration
+
 - Automated on every PR
 - Blocks merge if security gate fails
 - Results posted as PR comments
 - Security reports archived for 90 days
 
 ### Developer Feedback
+
 - Real-time security feedback in IDE (ESLint)
 - PR comments with security summary
 - Detailed reports in GitHub Security tab
@@ -146,12 +155,14 @@ npm audit --audit-level=high
 ## Security Metrics and Reporting
 
 ### Key Performance Indicators (KPIs)
+
 1. **Mean Time to Detect (MTTD)**: <5 minutes
 2. **Vulnerability Resolution Time**: <24 hours for critical
 3. **False Positive Rate**: <5%
 4. **Scan Coverage**: 100% of codebase
 
 ### Dashboard Integration
+
 - Real-time security metrics in admin dashboard
 - Historical vulnerability trends
 - Compliance status tracking
@@ -160,11 +171,13 @@ npm audit --audit-level=high
 ## Compliance Alignment
 
 ### OWASP Standards
+
 - OWASP Top 10 2021: Full coverage
 - OWASP ASVS: Level 2 compliance
 - OWASP SAMM: Security testing practices
 
 ### Financial Regulations
+
 - PCI DSS: Vulnerability scanning requirements
 - LGPD: Data protection validation
 - SOX: Code integrity verification
@@ -172,11 +185,13 @@ npm audit --audit-level=high
 ## Continuous Improvement
 
 ### Scheduled Reviews
+
 - Weekly: Review and triage new vulnerabilities
 - Monthly: Update security rules and patterns
 - Quarterly: Security tool evaluation and updates
 
 ### Feedback Loop
+
 1. Developer training on common vulnerabilities
 2. Security champions program
 3. Vulnerability pattern analysis

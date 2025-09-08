@@ -16,11 +16,11 @@ export interface ProposalCreationProps {
   tabelaComercialId: number;
   lojaId: number;
   analistaId: string;
-  
+
   // Dados do cliente (obrigatórios)
   clienteNome: string;
   clienteCpf: string;
-  
+
   // Valores financeiros calculados
   valor: number;
   prazo: number;
@@ -29,18 +29,18 @@ export interface ProposalCreationProps {
   valorTotalFinanciado: number;
   taxaJuros: number;
   taxaJurosAnual: number;
-  
+
   // Dados de pagamento e documentos
   dadosPagamentoBanco: string;
   ccbDocumentoUrl: string;
   clienteComprometimentoRenda: number;
-  
+
   // Dados adicionais do cliente (opcionais)
   clienteData?: ClienteData;
   dadosPagamento?: DadosPagamento;
   atendenteId?: string;
   observacoes?: string;
-  
+
   // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia
   finalidade?: string;
   garantia?: string;
@@ -54,13 +54,13 @@ export interface ClienteData {
   tipoPessoa?: string;
   razaoSocial?: string;
   cnpj?: string;
-  
+
   // Documentação RG completa
   rg?: string;
   orgaoEmissor?: string;
   rgUf?: string;
   rgDataEmissao?: string;
-  
+
   // Dados pessoais
   email?: Email;
   telefone?: PhoneNumber;
@@ -68,7 +68,7 @@ export interface ClienteData {
   localNascimento?: string;
   estadoCivil?: string;
   nacionalidade?: string;
-  
+
   // Endereço detalhado
   cep?: CEP;
   logradouro?: string;
@@ -78,12 +78,12 @@ export interface ClienteData {
   cidade?: string;
   uf?: string;
   endereco?: string; // Campo concatenado para compatibilidade
-  
+
   // Dados profissionais
   ocupacao?: string;
   rendaMensal?: Money;
   telefoneEmpresa?: string;
-  
+
   // Compatibilidade com campos antigos
   data_nascimento?: string; // Alias para dataNascimento
   estado?: string; // Alias para uf
@@ -95,21 +95,21 @@ export interface ClienteData {
 
 export interface DadosPagamento {
   metodo: 'boleto' | 'pix' | 'transferencia' | 'conta_bancaria';
-  
+
   // Dados bancários
   banco?: string;
   agencia?: string;
   conta?: string;
   digito?: string;
   tipo_conta?: string;
-  
+
   // Dados PIX
   pixChave?: string;
   pixTipo?: string;
   pixBanco?: string;
   pixNomeTitular?: string;
   pixCpfTitular?: string;
-  
+
   // Compatibilidade com campos antigos
   pix_chave?: string; // Alias para pixChave
   pix_tipo?: string; // Alias para pixTipo
@@ -234,7 +234,7 @@ export class Proposal {
   private _valor: Money;
   private _prazo: number;
   private _taxaJuros: number;
-  
+
   // Campos críticos obrigatórios (blindados)
   private _produtoId: number;
   private _tabelaComercialId: number;
@@ -247,7 +247,7 @@ export class Proposal {
   private _ccbUrl: string;
   private _dadosPagamentoBanco: string;
   private _clienteComprometimentoRenda: number;
-  
+
   // Campos opcionais mantidos
   private _parceiroId?: number;
   private _atendenteId?: string;
@@ -290,7 +290,7 @@ export class Proposal {
     this._status = ProposalStatus.RASCUNHO;
     this._createdAt = new Date();
     this._updatedAt = new Date();
-    
+
     // Novos campos obrigatórios armazenados como propriedades privadas
     this._analistaId = analistaId;
     this._valorTac = valorTac;
@@ -309,16 +309,16 @@ export class Proposal {
   static create(props: ProposalCreationProps): Proposal {
     // VALIDAÇÃO CENTRALIZADA - Todos os 14 campos críticos obrigatórios
     this.validateCreationProps(props);
-    
+
     const id = uuidv4();
-    
+
     // Criando ClienteData básico baseado nos campos obrigatórios
     const clienteData: ClienteData = {
       nome: props.clienteNome,
       cpf: CPF.create(props.clienteCpf)!,
-      ...(props.clienteData || {})
+      ...(props.clienteData || {}),
     };
-    
+
     const proposal = new Proposal(
       id,
       clienteData,
@@ -338,7 +338,7 @@ export class Proposal {
       props.clienteComprometimentoRenda,
       props.atendenteId
     );
-    
+
     // CORREÇÃO MANDATÓRIA PAM V1.0: Definir finalidade e garantia
     if (props.finalidade) {
       proposal._finalidade = props.finalidade;
@@ -360,11 +360,11 @@ export class Proposal {
 
     return proposal;
   }
-  
+
   // VALIDAÇÃO CENTRALIZADA - Implementação das regras de negócio críticas
   private static validateCreationProps(props: ProposalCreationProps): void {
     const errors: string[] = [];
-    
+
     // Validação de campos obrigatórios (14 campos críticos)
     const requiredFields = [
       { field: 'produtoId', value: props.produtoId },
@@ -384,30 +384,38 @@ export class Proposal {
       { field: 'dadosPagamentoBanco', value: props.dadosPagamentoBanco },
       { field: 'clienteComprometimentoRenda', value: props.clienteComprometimentoRenda },
     ];
-    
+
     requiredFields.forEach(({ field, value }) => {
       if (value === undefined || value === null || value === '') {
         errors.push(`Campo crítico '${field}' é obrigatório`);
       }
     });
-    
+
     // Validação de regras de negócio
-    if (props.valor && (props.valor < VALOR_MINIMO_EMPRESTIMO || props.valor > VALOR_MAXIMO_EMPRESTIMO)) {
-      errors.push(`Valor deve estar entre R$ ${VALOR_MINIMO_EMPRESTIMO} e R$ ${VALOR_MAXIMO_EMPRESTIMO}`);
+    if (
+      props.valor &&
+      (props.valor < VALOR_MINIMO_EMPRESTIMO || props.valor > VALOR_MAXIMO_EMPRESTIMO)
+    ) {
+      errors.push(
+        `Valor deve estar entre R$ ${VALOR_MINIMO_EMPRESTIMO} e R$ ${VALOR_MAXIMO_EMPRESTIMO}`
+      );
     }
-    
+
     if (props.prazo && (props.prazo < PRAZO_MINIMO_MESES || props.prazo > PRAZO_MAXIMO_MESES)) {
       errors.push(`Prazo deve estar entre ${PRAZO_MINIMO_MESES} e ${PRAZO_MAXIMO_MESES} meses`);
     }
-    
-    if (props.taxaJuros && (props.taxaJuros < TAXA_JUROS_MINIMA || props.taxaJuros > TAXA_JUROS_MAXIMA)) {
+
+    if (
+      props.taxaJuros &&
+      (props.taxaJuros < TAXA_JUROS_MINIMA || props.taxaJuros > TAXA_JUROS_MAXIMA)
+    ) {
       errors.push(`Taxa de juros deve estar entre ${TAXA_JUROS_MINIMA}% e ${TAXA_JUROS_MAXIMA}%`);
     }
-    
+
     if (props.clienteComprometimentoRenda && props.clienteComprometimentoRenda > 40) {
       errors.push('Comprometimento de renda não pode exceder 40%');
     }
-    
+
     if (errors.length > 0) {
       throw new DomainException(`Falha na validação da proposta: ${errors.join('; ')}`);
     }
@@ -420,10 +428,16 @@ export class Proposal {
       ...data.cliente_data,
       cpf: CPF.create(data.cliente_data.cpf)!,
       email: data.cliente_data.email ? Email.create(data.cliente_data.email) : undefined,
-      telefone: data.cliente_data.telefone ? PhoneNumber.create(data.cliente_data.telefone) : undefined,
+      telefone: data.cliente_data.telefone
+        ? PhoneNumber.create(data.cliente_data.telefone)
+        : undefined,
       cep: data.cliente_data.cep ? CEP.create(data.cliente_data.cep) : undefined,
-      renda_mensal: data.cliente_data.renda_mensal ? Money.fromReais(data.cliente_data.renda_mensal) : undefined,
-      dividas_existentes: data.cliente_data.dividas_existentes ? Money.fromReais(data.cliente_data.dividas_existentes) : undefined,
+      renda_mensal: data.cliente_data.renda_mensal
+        ? Money.fromReais(data.cliente_data.renda_mensal)
+        : undefined,
+      dividas_existentes: data.cliente_data.dividas_existentes
+        ? Money.fromReais(data.cliente_data.dividas_existentes)
+        : undefined,
     };
 
     const proposal = new Proposal(
@@ -432,7 +446,7 @@ export class Proposal {
       Money.fromReais(data.valor),
       data.prazo,
       data.taxa_juros,
-      data.produto_id || 0,  // Valores padrão para compatibilidade
+      data.produto_id || 0, // Valores padrão para compatibilidade
       data.tabela_comercial_id || 0,
       data.loja_id || 0,
       data.analista_id || 'e647afc0-03fa-482d-8293-d824dcab0399', // UUID padrão do sistema
@@ -472,7 +486,9 @@ export class Proposal {
 
     // Invariante 2: Prazo deve estar dentro dos limites
     if (this._prazo < PRAZO_MINIMO_MESES || this._prazo > PRAZO_MAXIMO_MESES) {
-      throw new DomainException(`Prazo deve estar entre ${PRAZO_MINIMO_MESES} e ${PRAZO_MAXIMO_MESES} meses`);
+      throw new DomainException(
+        `Prazo deve estar entre ${PRAZO_MINIMO_MESES} e ${PRAZO_MAXIMO_MESES} meses`
+      );
     }
 
     // Invariante 3: Taxa de juros deve estar dentro dos limites
@@ -485,7 +501,6 @@ export class Proposal {
     // Invariante 4: CPF é sempre válido devido ao Value Object
     // O CPF é validado na criação do Value Object
   }
-
 
   // ========== COMANDOS (MÉTODOS DE NEGÓCIO) ==========
 
@@ -512,7 +527,9 @@ export class Proposal {
    */
   resubmitFromPending(): void {
     if (this._status !== ProposalStatus.PENDENCIADO) {
-      throw new DomainException('Apenas propostas com status PENDENCIADO podem ser reenviadas para análise');
+      throw new DomainException(
+        'Apenas propostas com status PENDENCIADO podem ser reenviadas para análise'
+      );
     }
 
     this._status = ProposalStatus.EM_ANALISE;
@@ -536,7 +553,9 @@ export class Proposal {
     // Verificar comprometimento de renda antes de aprovar
     if (this._clienteData.renda_mensal && this._clienteData.dividas_existentes !== undefined) {
       const valorParcela = this.calculateMonthlyPayment();
-      const comprometimentoTotal = this._clienteData.dividas_existentes.add(Money.fromReais(valorParcela));
+      const comprometimentoTotal = this._clienteData.dividas_existentes.add(
+        Money.fromReais(valorParcela)
+      );
       const percentualComprometimento =
         (comprometimentoTotal.getReais() / this._clienteData.renda_mensal.getReais()) * 100;
 
@@ -610,16 +629,20 @@ export class Proposal {
   /**
    * Atualiza dados após pendência
    */
-  updateAfterPending(newData: Partial<{
-    clienteData: ClienteData;
-    valor: Money;
-    prazo: number;
-    taxaJuros: number;
-    dadosPagamento: DadosPagamento;
-    observacoes: string;
-  }>): void {
+  updateAfterPending(
+    newData: Partial<{
+      clienteData: ClienteData;
+      valor: Money;
+      prazo: number;
+      taxaJuros: number;
+      dadosPagamento: DadosPagamento;
+      observacoes: string;
+    }>
+  ): void {
     if (this._status !== ProposalStatus.PENDENCIADO) {
-      throw new DomainException('Apenas propostas com status PENDENCIADO podem ter dados atualizados');
+      throw new DomainException(
+        'Apenas propostas com status PENDENCIADO podem ter dados atualizados'
+      );
     }
 
     const previousData = {
@@ -628,7 +651,7 @@ export class Proposal {
       prazo: this._prazo,
       taxaJuros: this._taxaJuros,
       dadosPagamento: this._dadosPagamento,
-      observacoes: this._observacoes
+      observacoes: this._observacoes,
     };
 
     // Atualizar dados fornecidos
@@ -663,7 +686,7 @@ export class Proposal {
       new ProposalUpdatedAfterPendingEvent(this._id, 'ProposalUpdatedAfterPending', {
         previousData,
         newData,
-        updatedAt: this._updatedAt
+        updatedAt: this._updatedAt,
       })
     );
   }
@@ -683,7 +706,7 @@ export class Proposal {
     this.addEvent(
       new ProposalCcbGeneratedEvent(this._id, 'ProposalCcbGenerated', {
         ccbUrl,
-        generatedAt: this._updatedAt
+        generatedAt: this._updatedAt,
       })
     );
   }
@@ -713,7 +736,7 @@ export class Proposal {
 
     this.addEvent(
       new ProposalSignatureCompletedEvent(this._id, 'ProposalSignatureCompleted', {
-        completedAt: this._updatedAt
+        completedAt: this._updatedAt,
       })
     );
   }
@@ -781,16 +804,24 @@ export class Proposal {
    * Calcula o valor da parcela mensal
    */
   calculateMonthlyPayment(): number {
-    return Proposal.calculateMonthlyPaymentStatic(this._valor.getReais(), this._taxaJuros, this._prazo);
+    return Proposal.calculateMonthlyPaymentStatic(
+      this._valor.getReais(),
+      this._taxaJuros,
+      this._prazo
+    );
   }
 
   /**
    * MÉTODO ESTÁTICO: Cálculo de parcela mensal para uso em contextos de performance
    * PAM P2.1.1 - Centraliza lógica no domínio mas permite uso sem instanciação
    */
-  static calculateMonthlyPaymentStatic(principal: number, monthlyRate: number, numberOfPayments: number): number {
+  static calculateMonthlyPaymentStatic(
+    principal: number,
+    monthlyRate: number,
+    numberOfPayments: number
+  ): number {
     const rate = monthlyRate / 100;
-    
+
     if (rate === 0) {
       return principal / numberOfPayments;
     }
@@ -937,12 +968,24 @@ export class Proposal {
     // Adicionar verificação defensiva para tipos mistos
     const clienteDataPersistence = {
       ...this._clienteData,
-      cpf: this._clienteData.cpf?.getValue ? this._clienteData.cpf.getValue() : this._clienteData.cpf,
-      email: this._clienteData.email?.getValue ? this._clienteData.email.getValue() : this._clienteData.email,
-      telefone: this._clienteData.telefone?.getValue ? this._clienteData.telefone.getValue() : this._clienteData.telefone,
-      cep: this._clienteData.cep?.getValue ? this._clienteData.cep.getValue() : this._clienteData.cep,
-      renda_mensal: this._clienteData.renda_mensal?.getReais ? this._clienteData.renda_mensal.getReais() : this._clienteData.renda_mensal,
-      dividas_existentes: this._clienteData.dividas_existentes?.getReais ? this._clienteData.dividas_existentes.getReais() : this._clienteData.dividas_existentes,
+      cpf: this._clienteData.cpf?.getValue
+        ? this._clienteData.cpf.getValue()
+        : this._clienteData.cpf,
+      email: this._clienteData.email?.getValue
+        ? this._clienteData.email.getValue()
+        : this._clienteData.email,
+      telefone: this._clienteData.telefone?.getValue
+        ? this._clienteData.telefone.getValue()
+        : this._clienteData.telefone,
+      cep: this._clienteData.cep?.getValue
+        ? this._clienteData.cep.getValue()
+        : this._clienteData.cep,
+      renda_mensal: this._clienteData.renda_mensal?.getReais
+        ? this._clienteData.renda_mensal.getReais()
+        : this._clienteData.renda_mensal,
+      dividas_existentes: this._clienteData.dividas_existentes?.getReais
+        ? this._clienteData.dividas_existentes.getReais()
+        : this._clienteData.dividas_existentes,
     };
 
     return {
@@ -952,7 +995,7 @@ export class Proposal {
       valor: this._valor.getReais(),
       prazo: this._prazo,
       taxa_juros: this._taxaJuros,
-      
+
       // Campos críticos obrigatórios
       produto_id: this._produtoId,
       tabela_comercial_id: this._tabelaComercialId,
@@ -965,7 +1008,7 @@ export class Proposal {
       ccb_documento_url: this._ccbUrl,
       dados_pagamento_banco: this._dadosPagamentoBanco,
       cliente_comprometimento_renda: this._clienteComprometimentoRenda,
-      
+
       // Campos opcionais mantidos
       parceiro_id: this._parceiroId,
       atendente_id: this._atendenteId,

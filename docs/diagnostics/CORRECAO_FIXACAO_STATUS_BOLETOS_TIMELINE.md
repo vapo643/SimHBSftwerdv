@@ -3,15 +3,19 @@
 ## ✅ STATUS: IMPLEMENTADO
 
 ### 📋 PROBLEMA IDENTIFICADO
+
 A timeline não estava salvando o status quando boletos eram gerados pelo Banco Inter, fazendo com que propostas com boletos já criados continuassem exibindo a opção "Gerar Boletos".
 
 ### 🔍 CAUSA RAIZ
+
 O sistema não estava atualizando o campo `interBoletoGerado` na tabela de propostas após a criação bem-sucedida dos boletos.
 
 ### ✅ SOLUÇÃO IMPLEMENTADA
 
 #### 1. **Schema Database** (`shared/schema.ts`)
+
 Adicionados novos campos na tabela `propostas`:
+
 ```typescript
 // Tracking de boletos do Banco Inter
 interBoletoGerado: boolean("inter_boleto_gerado").default(false),
@@ -19,36 +23,41 @@ interBoletoGeradoEm: timestamp("inter_boleto_gerado_em"),
 ```
 
 #### 2. **Backend** (`server/routes/inter.ts`)
+
 Após criar boletos com sucesso:
+
 ```typescript
 // Atualizar proposta marcando que boletos foram gerados
 if (createdCollections.length > 0) {
-  await db.update(propostas)
-    .set({ 
+  await db
+    .update(propostas)
+    .set({
       interBoletoGerado: true,
-      interBoletoGeradoEm: new Date(getBrasiliaTimestamp())
+      interBoletoGeradoEm: new Date(getBrasiliaTimestamp()),
     })
     .where(eq(propostas.id, parseInt(validatedData.proposalId)));
-  
+
   // Criar log da operação
   await storage.createPropostaLog({
     propostaId: validatedData.proposalId,
-    autorId: req.user?.id || "sistema",
+    autorId: req.user?.id || 'sistema',
     statusAnterior: proposta.status,
     statusNovo: proposta.status,
-    observacao: `✅ ${createdCollections.length} boletos gerados com sucesso`
+    observacao: `✅ ${createdCollections.length} boletos gerados com sucesso`,
   });
 }
 ```
 
 #### 3. **Frontend** (`client/src/pages/formalizacao.tsx`)
+
 Invalidação de queries para atualizar timeline:
+
 ```typescript
 // Recarregar dados da proposta e timeline
 await Promise.all([
   refetch(), // Recarregar dados da proposta
   queryClient.invalidateQueries({
-    queryKey: ["/api/inter/collections", proposta.id],
+    queryKey: ['/api/inter/collections', proposta.id],
   }),
   queryClient.invalidateQueries({
     queryKey: [`/api/propostas/${proposta.id}/formalizacao`],

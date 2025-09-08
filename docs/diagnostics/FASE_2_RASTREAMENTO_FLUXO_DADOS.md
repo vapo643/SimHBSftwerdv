@@ -10,9 +10,10 @@
 **Proposta Analisada:** `proposta-ouro-2-0-final-test`  
 **ID:** `7ede3ba4-8d3e-4adb-a8de-c40c33e61d64`  
 **Status:** CCB_GERADA (CCB gerada com sucesso)  
-**Dados Críticos NULL:** 
+**Dados Críticos NULL:**
+
 - `tabela_comercial_id`: NULL ❌
-- `produto_id`: NULL ❌  
+- `produto_id`: NULL ❌
 - `cliente_email`: NULL ❌
 - `cliente_telefone`: NULL ❌
 - `taxa_juros_anual`: NULL ❌
@@ -24,15 +25,16 @@
 **Arquivo:** `client/src/pages/nova-proposta.tsx`
 
 **Campos Enviados Correctamente:**
+
 ```typescript
 const formData = {
-  produtoId: selectedProduct?.id,           // ✅ Enviado
+  produtoId: selectedProduct?.id, // ✅ Enviado
   tabelaComercialId: selectedComercialTable?.id, // ✅ Enviado
-  clienteEmail: formValues.email,           // ✅ Enviado
-  clienteTelefone: formValues.telefone,     // ✅ Enviado
-  taxaJuros: rate,                          // ✅ Enviado
+  clienteEmail: formValues.email, // ✅ Enviado
+  clienteTelefone: formValues.telefone, // ✅ Enviado
+  taxaJuros: rate, // ✅ Enviado
   // ... outros campos
-}
+};
 ```
 
 **Método de Envio:** POST `/api/propostas` via `apiRequest()`
@@ -45,15 +47,16 @@ const formData = {
 **Arquivo:** `server/modules/proposal/presentation/proposalController.ts`
 
 **Mapeamento DTO (CORRETO):**
+
 ```typescript
 const dto = {
-  produtoId: req.body.produtoId,              // ✅ Mapeado
-  tabelaComercialId: req.body.tabelaComercialId, // ✅ Mapeado  
-  clienteEmail: req.body.clienteEmail,        // ✅ Mapeado
-  clienteTelefone: req.body.clienteTelefone,  // ✅ Mapeado
-  taxaJuros: req.body.taxaJuros || 2.5,       // ✅ Mapeado
+  produtoId: req.body.produtoId, // ✅ Mapeado
+  tabelaComercialId: req.body.tabelaComercialId, // ✅ Mapeado
+  clienteEmail: req.body.clienteEmail, // ✅ Mapeado
+  clienteTelefone: req.body.clienteTelefone, // ✅ Mapeado
+  taxaJuros: req.body.taxaJuros || 2.5, // ✅ Mapeado
   // ... outros campos
-}
+};
 ```
 
 ### 3. USE CASE - CreateProposalUseCase (⚠️ PROBLEMA IDENTIFICADO)
@@ -61,6 +64,7 @@ const dto = {
 **Arquivo:** `server/modules/proposal/application/CreateProposalUseCase.ts`
 
 **ERRO 1 - Factory Method Incompleto:**
+
 ```typescript
 // ❌ PROBLEMA: factory method não aceita tabelaComercialId
 const proposal = Proposal.create(
@@ -68,7 +72,7 @@ const proposal = Proposal.create(
   Money.fromReais(dto.valor),
   dto.prazo,
   dto.taxaJuros || 2.5,
-  dto.produtoId,           // ✅ Passado corretamente
+  dto.produtoId, // ✅ Passado corretamente
   dto.lojaId,
   dto.atendenteId
   // ❌ tabelaComercialId NÃO É PASSADO para factory
@@ -85,6 +89,7 @@ if (dto.tabelaComercialId) {
 **Arquivo:** `server/modules/proposal/domain/Proposal.ts`
 
 **PROBLEMA NO FACTORY METHOD:**
+
 ```typescript
 // ❌ FACTORY METHOD INCOMPLETO
 static create(
@@ -100,6 +105,7 @@ static create(
 ```
 
 **CONSTRUCTOR TAMBÉM INCOMPLETO:**
+
 ```typescript
 constructor(
   id: string,
@@ -123,12 +129,15 @@ constructor(
 **Arquivo:** `server/modules/proposal/infrastructure/ProposalRepository.ts`
 
 **Persiste Correctamente (mas recebe NULL):**
+
 ```typescript
-await db.insert(propostas).values([{
-  produtoId: data.produto_id,                    // ✅ Persiste
-  tabelaComercialId: data.tabela_comercial_id,   // ❌ Recebe NULL do domínio
-  // ... outros campos
-}]);
+await db.insert(propostas).values([
+  {
+    produtoId: data.produto_id, // ✅ Persiste
+    tabelaComercialId: data.tabela_comercial_id, // ❌ Recebe NULL do domínio
+    // ... outros campos
+  },
+]);
 ```
 
 ## CAUSA RAIZ IDENTIFICADA
@@ -144,12 +153,14 @@ await db.insert(propostas).values([{
 ### 🔧 SOLUÇÃO PALIATIVA ATUAL (FRÁGIL)
 
 O `CreateProposalUseCase` tenta contornar o problema com:
+
 ```typescript
 // ⚠️ WORKAROUND: Acesso direto a propriedade privada
 (proposal as any)._tabelaComercialId = dto.tabelaComercialId;
 ```
 
 **Problemas da Solução Paliativa:**
+
 1. Viola encapsulamento do domínio
 2. Não é type-safe
 3. Pode falhar silenciosamente
@@ -159,20 +170,22 @@ O `CreateProposalUseCase` tenta contornar o problema com:
 ## EVIDÊNCIAS COLETADAS
 
 ### 1. Dados da Proposta Real
+
 ```sql
-SELECT 
-  id, 
-  tabela_comercial_id, 
-  produto_id, 
-  cliente_email, 
-  cliente_telefone, 
+SELECT
+  id,
+  tabela_comercial_id,
+  produto_id,
+  cliente_email,
+  cliente_telefone,
   taxa_juros_anual,
   ccb_documento_url
-FROM propostas 
+FROM propostas
 WHERE id = '7ede3ba4-8d3e-4adb-a8de-c40c33e61d64';
 ```
 
 **Resultado:**
+
 - `tabela_comercial_id`: NULL ❌
 - `produto_id`: NULL ❌
 - `cliente_email`: NULL ❌
@@ -183,6 +196,7 @@ WHERE id = '7ede3ba4-8d3e-4adb-a8de-c40c33e61d64';
 ### 2. Logs de Debug Identificados
 
 No controller há logs de debug que confirmariam o problema:
+
 ```typescript
 console.log('[ProposalController.create] Raw request body:', JSON.stringify(req.body, null, 2));
 console.log('[ProposalController.create] Mapped DTO:', JSON.stringify(dto, null, 2));
@@ -198,7 +212,8 @@ Campos permitem NULL (configuração correcta, problema é na lógica de negóci
 ### FASE 3 - HARDENING E CORREÇÃO
 
 **Objetivos:**
-1. Corrigir factory method `Proposal.create()` 
+
+1. Corrigir factory method `Proposal.create()`
 2. Actualizar constructor para aceitar todos os campos obrigatórios
 3. Remover workarounds frágeis do UseCase
 4. Implementar validações de domínio para campos obrigatórios
@@ -207,6 +222,7 @@ Campos permitem NULL (configuração correcta, problema é na lógica de negóci
 ### FASE 4 - CERTIFICAÇÃO FINAL
 
 **Objetivos:**
+
 1. Executar testes de regressão
 2. Validar criação de propostas com dados completos
 3. Certificar geração de CCB com dados correctos

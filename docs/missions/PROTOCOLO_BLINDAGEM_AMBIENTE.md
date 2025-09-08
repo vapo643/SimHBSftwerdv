@@ -1,4 +1,5 @@
 # OPERAÇÃO GUARDIÃO DO COFRE V1.0 - FASE 3
+
 ## PROTOCOLO DE BLINDAGEM DE AMBIENTE DE BANCO DE DADOS
 
 **Data:** 02 de Setembro de 2025  
@@ -20,21 +21,23 @@
 
 ## 🎯 MAPEAMENTO VETOR → CAMADA DE DEFESA
 
-| Vetor de Falha | Camada de Mitigação | Nível de Proteção |
-|----------------|---------------------|-------------------|
-| **VETOR 1:** drizzle.config.ts sem validação | 🔸 **Camada 1** - Blindagem da Configuração | **CRÍTICO** |
-| **VETOR 2:** Scripts npm sem confirmação | 🔸 **Camada 2** - Blindagem dos Scripts | **CRÍTICO** |
-| **VETOR 3:** Salvaguardas de teste insuficientes | 🔸 **Camada 3** - Blindagem dos Helpers | **ALTO** |
-| **VETOR 4:** Ausência de isolamento no DB | 🔸 **Camada 4** - Blindagem do Banco | **FUNDAMENTAL** |
+| Vetor de Falha                                   | Camada de Mitigação                         | Nível de Proteção |
+| ------------------------------------------------ | ------------------------------------------- | ----------------- |
+| **VETOR 1:** drizzle.config.ts sem validação     | 🔸 **Camada 1** - Blindagem da Configuração | **CRÍTICO**       |
+| **VETOR 2:** Scripts npm sem confirmação         | 🔸 **Camada 2** - Blindagem dos Scripts     | **CRÍTICO**       |
+| **VETOR 3:** Salvaguardas de teste insuficientes | 🔸 **Camada 3** - Blindagem dos Helpers     | **ALTO**          |
+| **VETOR 4:** Ausência de isolamento no DB        | 🔸 **Camada 4** - Blindagem do Banco        | **FUNDAMENTAL**   |
 
 ---
 
 ## 🔸 CAMADA 1: BLINDAGEM DA CONFIGURAÇÃO (`drizzle.config.ts`)
 
 ### 🎯 **OBJETIVO**
+
 Transformar o `drizzle.config.ts` de um **ponto de vulnerabilidade crítica** em uma **fortaleza de validação** que impede qualquer conexão não autorizada ao banco de produção.
 
 ### 📋 **VETORES MITIGADOS**
+
 - **VETOR 1:** `drizzle.config.ts` lê `DATABASE_URL` diretamente sem validação de ambiente
 - **EVIDÊNCIA A1:** Ausência total de verificação de ambiente antes da conexão
 
@@ -51,7 +54,7 @@ import path from 'path';
 // 🛡️ STEP 1: CARREGAMENTO EXPLÍCITO E INTELIGENTE DE .env
 function loadEnvironmentConfig(): void {
   const nodeEnv = process.env.NODE_ENV;
-  
+
   // Determinar qual arquivo .env carregar
   let envFile: string;
   switch (nodeEnv) {
@@ -67,20 +70,18 @@ function loadEnvironmentConfig(): void {
     default:
       throw new Error(
         `🚨 FATAL: NODE_ENV inválido ou não definido: '${nodeEnv}'. ` +
-        `Valores permitidos: 'test', 'development', 'production'`
+          `Valores permitidos: 'test', 'development', 'production'`
       );
   }
-  
+
   // Carregar arquivo .env específico
   const envPath = path.resolve(process.cwd(), envFile);
   const result = loadEnv({ path: envPath });
-  
+
   if (result.error) {
-    throw new Error(
-      `🚨 FATAL: Falha ao carregar ${envFile}: ${result.error.message}`
-    );
+    throw new Error(`🚨 FATAL: Falha ao carregar ${envFile}: ${result.error.message}`);
   }
-  
+
   console.log(`✅ [DRIZZLE CONFIG] Arquivo carregado: ${envFile}`);
 }
 
@@ -88,7 +89,7 @@ function loadEnvironmentConfig(): void {
 function validateEnvironmentSafety(): string {
   const nodeEnv = process.env.NODE_ENV;
   let databaseUrl: string;
-  
+
   // Lógica específica por ambiente
   switch (nodeEnv) {
     case 'test':
@@ -96,10 +97,10 @@ function validateEnvironmentSafety(): string {
       if (!databaseUrl) {
         throw new Error(
           '🚨 FATAL: TEST_DATABASE_URL obrigatória para NODE_ENV=test. ' +
-          'Configure no arquivo .env.test'
+            'Configure no arquivo .env.test'
         );
       }
-      
+
       // Validação adicional: Nome do banco DEVE terminar com '-test'
       try {
         const url = new URL(databaseUrl);
@@ -107,23 +108,23 @@ function validateEnvironmentSafety(): string {
         if (!dbName.endsWith('-test') && !['postgres'].includes(dbName)) {
           throw new Error(
             `🚨 FATAL: Banco '${dbName}' não é seguro para testes. ` +
-            `Nome deve terminar com '-test' ou ser 'postgres'`
+              `Nome deve terminar com '-test' ou ser 'postgres'`
           );
         }
       } catch (urlError) {
         throw new Error(`🚨 FATAL: TEST_DATABASE_URL inválida: ${urlError.message}`);
       }
       break;
-      
+
     case 'development':
       databaseUrl = process.env.DEV_DATABASE_URL || process.env.DATABASE_URL || '';
       if (!databaseUrl) {
         throw new Error(
           '🚨 FATAL: DEV_DATABASE_URL ou DATABASE_URL obrigatória para development. ' +
-          'Configure no arquivo .env.development'
+            'Configure no arquivo .env.development'
         );
       }
-      
+
       // Validação: Banco de desenvolvimento não pode conter 'prod' no nome
       try {
         const url = new URL(databaseUrl);
@@ -131,27 +132,25 @@ function validateEnvironmentSafety(): string {
         if (hostname.includes('prod') || hostname.includes('production')) {
           throw new Error(
             `🚨 FATAL: Hostname '${hostname}' sugere ambiente de produção. ` +
-            `Não é seguro para desenvolvimento.`
+              `Não é seguro para desenvolvimento.`
           );
         }
       } catch (urlError) {
         throw new Error(`🚨 FATAL: DATABASE_URL inválida: ${urlError.message}`);
       }
       break;
-      
+
     case 'production':
       databaseUrl = process.env.PROD_DATABASE_URL || process.env.DATABASE_URL || '';
       if (!databaseUrl) {
-        throw new Error(
-          '🚨 FATAL: PROD_DATABASE_URL ou DATABASE_URL obrigatória para production'
-        );
+        throw new Error('🚨 FATAL: PROD_DATABASE_URL ou DATABASE_URL obrigatória para production');
       }
       break;
-      
+
     default:
       throw new Error(`🚨 FATAL: NODE_ENV não suportado: '${nodeEnv}'`);
   }
-  
+
   return databaseUrl;
 }
 
@@ -159,27 +158,27 @@ function validateEnvironmentSafety(): string {
 function validateDestructiveOperations(): void {
   const nodeEnv = process.env.NODE_ENV;
   const command = process.argv.join(' ');
-  
+
   // Lista de comandos destrutivos
   const destructiveCommands = ['push', 'drop', 'reset', 'migrate:reset'];
-  const isDestructiveCommand = destructiveCommands.some(cmd => command.includes(cmd));
-  
+  const isDestructiveCommand = destructiveCommands.some((cmd) => command.includes(cmd));
+
   if (isDestructiveCommand) {
     // PROIBIR comandos destrutivos em produção
     if (nodeEnv === 'production') {
       throw new Error(
         `🚨 FATAL: Comando destrutivo detectado em PRODUÇÃO: '${command}'. ` +
-        `Operação NEGADA por segurança.`
+          `Operação NEGADA por segurança.`
       );
     }
-    
+
     // EXIGIR confirmação explícita para desenvolvimento
     if (nodeEnv === 'development') {
       const confirmVar = process.env.DRIZZLE_CONFIRM_DESTRUCTIVE;
       if (confirmVar !== 'YES_I_UNDERSTAND_THE_RISKS') {
         throw new Error(
           `🚨 ATENÇÃO: Comando destrutivo detectado: '${command}'. ` +
-          `Para prosseguir, defina: DRIZZLE_CONFIRM_DESTRUCTIVE=YES_I_UNDERSTAND_THE_RISKS`
+            `Para prosseguir, defina: DRIZZLE_CONFIRM_DESTRUCTIVE=YES_I_UNDERSTAND_THE_RISKS`
         );
       }
     }
@@ -191,19 +190,18 @@ try {
   loadEnvironmentConfig();
   const databaseUrl = validateEnvironmentSafety();
   validateDestructiveOperations();
-  
+
   console.log(`✅ [DRIZZLE CONFIG] Validações aprovadas para NODE_ENV=${process.env.NODE_ENV}`);
-  
+
   // Configuração final segura
   export default defineConfig({
-    out: "./migrations",
-    schema: "./shared/schema.ts",
-    dialect: "postgresql",
+    out: './migrations',
+    schema: './shared/schema.ts',
+    dialect: 'postgresql',
     dbCredentials: {
       url: databaseUrl,
     },
   });
-  
 } catch (error) {
   console.error('❌ [DRIZZLE CONFIG] Falha de segurança:', error.message);
   process.exit(1);
@@ -216,16 +214,18 @@ try {
 ✅ **Validação de Nome de Banco:** Impede conexão acidental a bancos de produção  
 ✅ **Proteção Contra Comandos Destrutivos:** Bloqueia `drizzle-kit push` em produção  
 ✅ **Confirmação Explícita:** Exige variável de ambiente para operações perigosas  
-✅ **Falha Rápida:** Erro fatal na primeira validação que falhar  
+✅ **Falha Rápida:** Erro fatal na primeira validação que falhar
 
 ---
 
 ## 🔸 CAMADA 2: BLINDAGEM DOS SCRIPTS (`package.json`)
 
 ### 🎯 **OBJETIVO**
+
 Substituir scripts genéricos e perigosos por **scripts específicos por ambiente** com **confirmação interativa obrigatória** para operações destrutivas.
 
 ### 📋 **VETORES MITIGADOS**
+
 - **VETOR 2:** Scripts npm executam sem confirmação ou validação de ambiente
 - **EVIDÊNCIA C1:** `npm run db:push` executa diretamente sem salvaguardas
 
@@ -240,19 +240,19 @@ Substituir scripts genéricos e perigosos por **scripts específicos por ambient
     "db:push:dev": "cross-env NODE_ENV=development DRIZZLE_CONFIRM_DESTRUCTIVE=YES_I_UNDERSTAND_THE_RISKS drizzle-kit push",
     "db:push:test": "cross-env NODE_ENV=test drizzle-kit push",
     "db:push:prod": "echo '🚨 ERRO: Use db:migrate:prod para produção, nunca push direto' && exit 1",
-    
+
     // 🛡️ SCRIPTS INTERATIVOS COM CONFIRMAÇÃO
     "db:push:dev:safe": "scripts/confirm-destructive.sh development 'DATABASE PUSH' && npm run db:push:dev",
     "db:reset:dev": "scripts/confirm-destructive.sh development 'DATABASE RESET' && drizzle-kit drop && npm run db:push:dev",
-    
+
     // 🛡️ SCRIPTS DE MIGRAÇÃO (PRODUÇÃO)
     "db:migrate:prod": "cross-env NODE_ENV=production drizzle-kit migrate",
     "db:migrate:staging": "cross-env NODE_ENV=staging drizzle-kit migrate",
-    
+
     // 🛡️ SCRIPTS DE TESTE ISOLADOS
     "test:db:setup": "cross-env NODE_ENV=test npm run db:push:test",
-    "test:db:clean": "cross-env NODE_ENV=test node scripts/clean-test-db.js",
-    
+    "test:db:clean": "cross-env NODE_ENV=test node scripts/clean-test-db.js"
+
     // 🚨 REMOVER SCRIPTS PERIGOSOS
     // "db:push": "drizzle-kit push", // ❌ REMOVIDO - Era o vetor de ataque principal
     // "db:drop": "drizzle-kit drop"  // ❌ REMOVIDO - Muito perigoso sem confirmação
@@ -338,16 +338,18 @@ exit 0
 ✅ **Confirmação Dupla:** Usuário deve confirmar ambiente + operação  
 ✅ **Bloqueio de Produção:** Scripts destrutivos proibidos em produção  
 ✅ **Auditoria:** Log de todas as operações destrutivas  
-✅ **Fallback Seguro:** Erro por padrão, execução apenas com confirmação  
+✅ **Fallback Seguro:** Erro por padrão, execução apenas com confirmação
 
 ---
 
 ## 🔸 CAMADA 3: BLINDAGEM DOS HELPERS DE TESTE (`tests/lib/db-helper.ts`)
 
 ### 🎯 **OBJETIVO**
+
 Fortalecer as salvaguardas existentes na função `cleanTestDatabase()` e torná-las **inquebráveis** mesmo em cenários de falha de mock ou configuração incorreta.
 
 ### 📋 **VETORES MITIGADOS**
+
 - **VETOR 3:** Salvaguardas de teste podem ser contornadas em alguns cenários
 - **EVIDÊNCIA B1:** Mocks do Vitest podem falhar em alguns contextos
 
@@ -365,13 +367,16 @@ export async function cleanTestDatabase(): Promise<void> {
   // 🛡️ CAMADA 1: VALIDAÇÃO ABSOLUTA DE NODE_ENV
   const nodeEnv = process.env.NODE_ENV;
   if (nodeEnv !== 'test') {
-    const errorMsg = `🚨 FATAL SECURITY VIOLATION: cleanTestDatabase() chamada com NODE_ENV='${nodeEnv}'. ` +
-                    `Esta função SOMENTE pode executar com NODE_ENV='test'. OPERAÇÃO NEGADA.`;
-    
+    const errorMsg =
+      `🚨 FATAL SECURITY VIOLATION: cleanTestDatabase() chamada com NODE_ENV='${nodeEnv}'. ` +
+      `Esta função SOMENTE pode executar com NODE_ENV='test'. OPERAÇÃO NEGADA.`;
+
     // Log crítico de segurança
     console.error(errorMsg);
-    console.error(`🚨 SECURITY LOG: ${new Date().toISOString()} - ${process.env.USER || 'unknown'} - ${process.cwd()}`);
-    
+    console.error(
+      `🚨 SECURITY LOG: ${new Date().toISOString()} - ${process.env.USER || 'unknown'} - ${process.cwd()}`
+    );
+
     throw new Error(errorMsg);
   }
 
@@ -380,7 +385,7 @@ export async function cleanTestDatabase(): Promise<void> {
   if (envResult.error) {
     throw new Error(
       `🚨 FATAL: Falha ao carregar .env.test: ${envResult.error.message}. ` +
-      `Arquivo .env.test é obrigatório para testes de banco.`
+        `Arquivo .env.test é obrigatório para testes de banco.`
     );
   }
 
@@ -389,7 +394,7 @@ export async function cleanTestDatabase(): Promise<void> {
   if (!testDatabaseUrl) {
     throw new Error(
       '🚨 FATAL: TEST_DATABASE_URL não definida. Esta função NUNCA pode usar DATABASE_URL de produção. ' +
-      'Configure TEST_DATABASE_URL no arquivo .env.test'
+        'Configure TEST_DATABASE_URL no arquivo .env.test'
     );
   }
 
@@ -410,48 +415,40 @@ export async function cleanTestDatabase(): Promise<void> {
     'prod.supabase.co',
     'production.supabase.co',
     'prod-db.domain.com',
-    'main.supabase.co'
+    'main.supabase.co',
   ];
 
-  const isProhibitedHost = prohibitedHostnames.some(prohibited => 
-    hostname.includes(prohibited)
-  );
+  const isProhibitedHost = prohibitedHostnames.some((prohibited) => hostname.includes(prohibited));
 
   if (isProhibitedHost) {
     throw new Error(
       `🚨 FATAL: Hostname '${hostname}' é um ambiente de PRODUÇÃO. ` +
-      `OPERAÇÃO NEGADA por segurança.`
+        `OPERAÇÃO NEGADA por segurança.`
     );
   }
 
   // 🛡️ CAMADA 5: VALIDAÇÃO DE NOME DE BANCO SEGURO
-  const allowedTestDatabases = [
-    'postgres',
-    'test',
-    'testing'
-  ];
+  const allowedTestDatabases = ['postgres', 'test', 'testing'];
 
-  const isTestDatabase = dbName.endsWith('-test') || 
-                         dbName.endsWith('_test') || 
-                         allowedTestDatabases.includes(dbName);
+  const isTestDatabase =
+    dbName.endsWith('-test') || dbName.endsWith('_test') || allowedTestDatabases.includes(dbName);
 
   if (!isTestDatabase) {
     throw new Error(
       `🚨 FATAL: Nome do banco '${dbName}' não é reconhecido como seguro para testes. ` +
-      `Banco deve terminar com '-test' ou '_test', ou ser um dos permitidos: ${allowedTestDatabases.join(', ')}`
+        `Banco deve terminar com '-test' ou '_test', ou ser um dos permitidos: ${allowedTestDatabases.join(', ')}`
     );
   }
 
   // 🛡️ CAMADA 6: VALIDAÇÃO DE CONTEXTO DE EXECUÇÃO
   const stackTrace = new Error().stack || '';
-  const isCalledFromTest = stackTrace.includes('vitest') || 
-                          stackTrace.includes('.test.') || 
-                          stackTrace.includes('.spec.');
+  const isCalledFromTest =
+    stackTrace.includes('vitest') || stackTrace.includes('.test.') || stackTrace.includes('.spec.');
 
   if (!isCalledFromTest) {
     console.warn(
       `⚠️  WARNING: cleanTestDatabase() não foi chamada de um contexto de teste reconhecido. ` +
-      `Stack trace: ${stackTrace.split('\n')[1]}`
+        `Stack trace: ${stackTrace.split('\n')[1]}`
     );
   }
 
@@ -462,12 +459,11 @@ export async function cleanTestDatabase(): Promise<void> {
       max: 1,
       idle_timeout: 5,
       connect_timeout: 10,
-      ssl: 'require'
+      ssl: 'require',
     });
 
     // Teste de conectividade
     await directDb`SELECT 1 as test`;
-    
   } catch (error) {
     throw new Error(`🚨 FATAL: Falha na conexão com banco de teste: ${error.message}`);
   }
@@ -499,7 +495,7 @@ export async function cleanTestDatabase(): Promise<void> {
       'gerente_lojas',
       'lojas',
       'parceiros',
-      'security_logs'
+      'security_logs',
     ];
 
     // Limpeza individual para controle total
@@ -513,7 +509,6 @@ export async function cleanTestDatabase(): Promise<void> {
     }
 
     console.log(`✅ [TEST DB CLEAN] Limpeza concluída com sucesso`);
-
   } finally {
     await directDb.end();
   }
@@ -531,10 +526,12 @@ export function validateTestEnvironmentSafety(): boolean {
 
     const url = new URL(testDatabaseUrl);
     const dbName = url.pathname.substring(1);
-    
-    return dbName.endsWith('-test') || dbName.endsWith('_test') || 
-           ['postgres', 'test', 'testing'].includes(dbName);
-    
+
+    return (
+      dbName.endsWith('-test') ||
+      dbName.endsWith('_test') ||
+      ['postgres', 'test', 'testing'].includes(dbName)
+    );
   } catch {
     return false;
   }
@@ -547,16 +544,18 @@ export function validateTestEnvironmentSafety(): boolean {
 ✅ **Carregamento Forçado:** Sempre carrega .env.test explicitamente  
 ✅ **Blacklist de Hostnames:** Impede conexão a servidores de produção  
 ✅ **Contexto de Execução:** Verifica se está sendo chamada de teste  
-✅ **Limpeza Controlada:** Lista explícita de tabelas, não TRUNCATE CASCADE  
+✅ **Limpeza Controlada:** Lista explícita de tabelas, não TRUNCATE CASCADE
 
 ---
 
 ## 🔸 CAMADA 4: BLINDAGEM DO BANCO DE DADOS (Política "Menos Privilegiado")
 
 ### 🎯 **OBJETIVO**
+
 Implementar **isolamento físico** no PostgreSQL através de roles com permissões mínimas, garantindo que mesmo se todas as outras camadas falharem, o banco de dados se defenda sozinho.
 
 ### 📋 **VETORES MITIGADOS**
+
 - **VETOR 4:** Ausência de isolamento físico no banco de dados
 - **Fundamento:** Princípio de "Least Privilege" - usuário da aplicação não deve ter poder destrutivo
 
@@ -637,10 +636,10 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO simpix_readonly_role;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO simpix_readonly_role;
 
 -- 🔹 Permissões futuras (objetos criados depois)
-ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
 GRANT SELECT ON TABLES TO simpix_readonly_role;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
 GRANT USAGE, SELECT ON SEQUENCES TO simpix_readonly_role;
 
 -- =====================================================
@@ -661,10 +660,10 @@ GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO simpix_app_role
 -- 🚨 IMPORTANTE: NÃO CONCEDER DROP, TRUNCATE, ALTER
 
 -- 🔹 Permissões futuras
-ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO simpix_app_role;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
 GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO simpix_app_role;
 
 -- =====================================================
@@ -684,13 +683,13 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO simpix_migration_role;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO simpix_migration_role;
 
 -- 🔹 Permissões futuras
-ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
 GRANT ALL ON TABLES TO simpix_migration_role;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
 GRANT ALL ON SEQUENCES TO simpix_migration_role;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
 GRANT ALL ON FUNCTIONS TO simpix_migration_role;
 
 -- =====================================================
@@ -698,24 +697,24 @@ GRANT ALL ON FUNCTIONS TO simpix_migration_role;
 -- =====================================================
 
 -- 🔍 Verificar permissões do app_role (não deve ter DDL)
-SELECT 
+SELECT
     table_name,
     privilege_type,
     is_grantable
-FROM information_schema.role_table_grants 
+FROM information_schema.role_table_grants
 WHERE grantee = 'simpix_app_role'
 ORDER BY table_name, privilege_type;
 
 -- 🔍 Verificar que app_role NÃO tem permissões perigosas
-SELECT 
+SELECT
     routine_name,
     privilege_type
-FROM information_schema.role_routine_grants 
+FROM information_schema.role_routine_grants
 WHERE grantee = 'simpix_app_role'
 AND privilege_type IN ('EXECUTE');
 
 -- 🔍 Listar todos os usuários e seus roles
-SELECT 
+SELECT
     r.rolname as username,
     ARRAY_AGG(m.rolname) as roles
 FROM pg_roles r
@@ -733,7 +732,7 @@ ORDER BY r.rolname;
 DATABASE_URL=postgresql://simpix_app_prod:STRONG_PASSWORD@prod-host:5432/simpix
 MIGRATION_DATABASE_URL=postgresql://simpix_migration_cicd:STRONG_PASSWORD@prod-host:5432/simpix
 
-# .env.development  
+# .env.development
 DATABASE_URL=postgresql://simpix_app_dev:DEV_PASSWORD@dev-host:5432/simpix_dev
 MIGRATION_DATABASE_URL=postgresql://simpix_app_dev:DEV_PASSWORD@dev-host:5432/simpix_dev
 
@@ -748,28 +747,32 @@ MIGRATION_DATABASE_URL=postgresql://simpix_app_test:TEST_PASSWORD@test-host:5432
 ✅ **Princípio Menos Privilegiado:** Cada role tem apenas permissões necessárias  
 ✅ **Separação de Responsabilidades:** Migração ≠ Aplicação ≠ Relatórios  
 ✅ **Defesa Final:** Mesmo se código falhar, banco se protege  
-✅ **Auditoria:** Todas as operações são rastreáveis por usuário  
+✅ **Auditoria:** Todas as operações são rastreáveis por usuário
 
 ---
 
 ## 🛡️ ESTRATÉGIA DE IMPLEMENTAÇÃO SEQUENCIAL
 
 ### **FASE 1: Preparação (Semana 1)**
+
 1. Backup completo do banco de produção
 2. Teste de todas as validações em ambiente de desenvolvimento
 3. Criação de roles e usuários no banco de teste
 
-### **FASE 2: Blindagem Progressiva (Semana 2)**  
+### **FASE 2: Blindagem Progressiva (Semana 2)**
+
 1. Implementar Camada 1 (drizzle.config.ts)
 2. Implementar Camada 2 (scripts npm)
 3. Teste extensivo em desenvolvimento
 
 ### **FASE 3: Segurança de Banco (Semana 3)**
+
 1. Implementar Camada 4 (roles PostgreSQL)
 2. Atualizar connection strings
 3. Teste de permissões
 
 ### **FASE 4: Finalização (Semana 4)**
+
 1. Implementar Camada 3 (helpers de teste)
 2. Teste de integração completo
 3. Deploy em produção
@@ -778,12 +781,12 @@ MIGRATION_DATABASE_URL=postgresql://simpix_app_test:TEST_PASSWORD@test-host:5432
 
 ## 🎯 MATRIZ DE VALIDAÇÃO DE EFICÁCIA
 
-| Cenário de Teste | Camada 1 | Camada 2 | Camada 3 | Camada 4 | Status |
-|------------------|----------|----------|----------|----------|---------|
-| `npm run db:push` em prod | ✅ Bloqueia | ✅ Bloqueia | N/A | ✅ Bloqueia | **PROTEGIDO** |
-| `cleanTestDatabase()` em prod | N/A | N/A | ✅ Bloqueia | ✅ Bloqueia | **PROTEGIDO** |
-| drizzle.config.ts com prod URL | ✅ Bloqueia | N/A | N/A | ✅ Bloqueia | **PROTEGIDO** |
-| Scripts sem confirmação | N/A | ✅ Bloqueia | N/A | N/A | **PROTEGIDO** |
+| Cenário de Teste               | Camada 1    | Camada 2    | Camada 3    | Camada 4    | Status        |
+| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ------------- |
+| `npm run db:push` em prod      | ✅ Bloqueia | ✅ Bloqueia | N/A         | ✅ Bloqueia | **PROTEGIDO** |
+| `cleanTestDatabase()` em prod  | N/A         | N/A         | ✅ Bloqueia | ✅ Bloqueia | **PROTEGIDO** |
+| drizzle.config.ts com prod URL | ✅ Bloqueia | N/A         | N/A         | ✅ Bloqueia | **PROTEGIDO** |
+| Scripts sem confirmação        | N/A         | ✅ Bloqueia | N/A         | N/A         | **PROTEGIDO** |
 
 **RESULTADO:** Sistema com **redundância tripla** - qualquer camada pode parar um ataque sozinha.
 
@@ -799,8 +802,9 @@ MIGRATION_DATABASE_URL=postgresql://simpix_app_test:TEST_PASSWORD@test-host:5432
 
 ---
 
-*Arquitetura de Segurança projetada pela Operação Guardião do Cofre V1.0 - PAM*  
-*Data: 02/09/2025 | Arquiteto: Sistema de Defesa em Profundidade | Classificação: CONFIDENCIAL*
+_Arquitetura de Segurança projetada pela Operação Guardião do Cofre V1.0 - PAM_  
+_Data: 02/09/2025 | Arquiteto: Sistema de Defesa em Profundidade | Classificação: CONFIDENCIAL_
+
 ---
 
 ## 🎯 STATUS ATUAL - OPERAÇÃO GUARDIÃO DO COFRE V1.0
@@ -830,6 +834,7 @@ MIGRATION_DATABASE_URL=postgresql://simpix_app_test:TEST_PASSWORD@test-host:5432
 **OPERAÇÃO GUARDIÃO DO COFRE - MISSÃO CONCLUÍDA COM SUCESSO**
 
 A implementação da arquitetura de segurança em 4 camadas está **100% funcional**:
+
 - 🛡️ Camada 1: Database Helper com 8 validações independentes
 - 🛡️ Camada 2: Scripts de confirmação alternativos
 - 🛡️ Camada 3: Validação de ambiente de teste

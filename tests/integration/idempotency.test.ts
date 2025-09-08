@@ -20,14 +20,14 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
 
   beforeEach(async () => {
     console.log('[IDEMPOTENCY TEST] 🧹 Cleaning and pausing payments queue...');
-    
+
     // Clean any existing jobs in the paymentsQueue to start fresh
     const paymentsQueue = await getPaymentsQueue();
     await paymentsQueue.obliterate({ force: true });
-    
+
     // CRITICAL: Pause queue to prevent automatic job processing during test
     await paymentsQueue.pause();
-    
+
     console.log('[IDEMPOTENCY TEST] ✅ Queue cleaned and paused for testing');
   });
 
@@ -56,10 +56,10 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
           nomeCliente: 'Cliente Teste',
           cpfCliente: '12345678901',
           valorLiquido: 4000,
-          formaPagamento: 'ted'
+          formaPagamento: 'ted',
         },
         userId: 'test-user-456',
-        timestamp: 1234567890
+        timestamp: 1234567890,
       };
 
       console.log(`[IDEMPOTENCY TEST] 📞 First job addition with jobId: ${jobId}`);
@@ -96,13 +96,18 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
       const totalJobsInQueue = waitingJobs.length;
 
       console.log(`[IDEMPOTENCY TEST] 📊 Total jobs in queue: ${totalJobsInQueue}`);
-      console.log(`[IDEMPOTENCY TEST] 🎯 Job details:`, waitingJobs.map(j => ({ id: j.id, name: j.name, data: j.data.propostaId })));
+      console.log(
+        `[IDEMPOTENCY TEST] 🎯 Job details:`,
+        waitingJobs.map((j) => ({ id: j.id, name: j.name, data: j.data.propostaId }))
+      );
 
       // CRITICAL ASSERTION: Only one job should exist (idempotency working)
       expect(totalJobsInQueue).toBe(1);
       expect(waitingJobs[0].data.propostaId).toBe(propostaId);
 
-      console.log('[IDEMPOTENCY TEST] 🎉 IDEMPOTENCY VALIDATION SUCCESSFUL - Duplicate jobs prevented');
+      console.log(
+        '[IDEMPOTENCY TEST] 🎉 IDEMPOTENCY VALIDATION SUCCESSFUL - Duplicate jobs prevented'
+      );
     }, 15000);
 
     it('deve permitir jobs diferentes com jobIds únicos', async () => {
@@ -118,7 +123,7 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
         propostaId: propostaId1,
         paymentData: { propostaId: propostaId1, numeroContrato: 'TEST-001', valorLiquido: 1000 },
         userId: 'test-user-456',
-        timestamp: 1111111111
+        timestamp: 1111111111,
       };
 
       const paymentData2 = {
@@ -126,7 +131,7 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
         propostaId: propostaId2,
         paymentData: { propostaId: propostaId2, numeroContrato: 'TEST-002', valorLiquido: 2000 },
         userId: 'test-user-789',
-        timestamp: 2222222222
+        timestamp: 2222222222,
       };
 
       // Add two different jobs with unique jobIds
@@ -142,10 +147,12 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
       const totalJobsInQueue = waitingJobs.length;
 
       expect(totalJobsInQueue).toBe(2);
-      expect(waitingJobs.some(j => j.data.propostaId === propostaId1)).toBe(true);
-      expect(waitingJobs.some(j => j.data.propostaId === propostaId2)).toBe(true);
+      expect(waitingJobs.some((j) => j.data.propostaId === propostaId1)).toBe(true);
+      expect(waitingJobs.some((j) => j.data.propostaId === propostaId2)).toBe(true);
 
-      console.log('[IDEMPOTENCY TEST] 🎉 UNIQUE JOBS VALIDATION SUCCESSFUL - Different jobs allowed');
+      console.log(
+        '[IDEMPOTENCY TEST] 🎉 UNIQUE JOBS VALIDATION SUCCESSFUL - Different jobs allowed'
+      );
     }, 15000);
 
     it('deve gerar jobIds determinísticos para mesma proposta', async () => {

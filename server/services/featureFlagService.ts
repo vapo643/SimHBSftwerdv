@@ -102,7 +102,11 @@ class FeatureFlagService {
 
     try {
       // Em modo teste, desenvolvimento ou quando UNLEASH_DISABLED=true, usa apenas fallback
-      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development' || process.env.UNLEASH_DISABLED === 'true') {
+      if (
+        process.env.NODE_ENV === 'test' ||
+        process.env.NODE_ENV === 'development' ||
+        process.env.UNLEASH_DISABLED === 'true'
+      ) {
         logger.info('Feature flags running in fallback mode');
         this.initialized = true;
         return;
@@ -175,7 +179,11 @@ class FeatureFlagService {
 
     try {
       // Em modo fallback, retorna valor do mapa
-      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development' || process.env.UNLEASH_DISABLED === 'true') {
+      if (
+        process.env.NODE_ENV === 'test' ||
+        process.env.NODE_ENV === 'development' ||
+        process.env.UNLEASH_DISABLED === 'true'
+      ) {
         const fallbackValue = this.fallbackFlags.get(flagName) ?? false;
         logger.debug(`Flag ${flagName} (fallback): ${fallbackValue}`);
         return fallbackValue;
@@ -231,7 +239,11 @@ class FeatureFlagService {
     };
 
     try {
-      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development' || process.env.UNLEASH_DISABLED === 'true') {
+      if (
+        process.env.NODE_ENV === 'test' ||
+        process.env.NODE_ENV === 'development' ||
+        process.env.UNLEASH_DISABLED === 'true'
+      ) {
         return { name: 'disabled', enabled: false };
       }
 

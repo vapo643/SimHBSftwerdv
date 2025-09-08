@@ -1,7 +1,7 @@
 /**
  * Centralized Crypto Service
  * Generic encryption/decryption service following DRY principles
- * 
+ *
  * Implements AES-256-GCM encryption for sensitive data protection
  * - Secure key management through dependency injection
  * - Authenticated encryption with integrity verification
@@ -21,12 +21,12 @@ class CryptoService {
     if (!config.encryptionKey) {
       throw new Error('Encryption key is required for CryptoService');
     }
-    
+
     // Validate key length for AES-256 (32 bytes = 64 hex characters)
     if (Buffer.from(config.encryptionKey, 'hex').length !== 32) {
       throw new Error('Encryption key must be 32 bytes (64 hex characters) for AES-256');
     }
-    
+
     this.config = config;
   }
 
@@ -56,11 +56,11 @@ class CryptoService {
    */
   decryptSensitiveData(encryptedData: string): string {
     const parts = encryptedData.split(':');
-    
+
     if (parts.length !== 3) {
       throw new Error('Invalid encrypted data format. Expected: iv:authTag:encryptedData');
     }
-    
+
     const iv = Buffer.from(parts[0], 'hex');
     const authTag = Buffer.from(parts[1], 'hex');
     const encrypted = parts[2];

@@ -10,6 +10,7 @@ A API de simulação de empréstimo foi completamente re-arquitetada, substituin
 ## 🎯 O QUE FOI IMPLEMENTADO
 
 ### 1. **Serviço de Cálculos Financeiros** (`server/services/financeService.ts`)
+
 - ✅ **Cálculo de Parcela:** Fórmula Tabela Price implementada
 - ✅ **Cálculo IOF:** Alíquotas oficiais (0.0082% diário + 0.38% adicional)
 - ✅ **Cálculo TAC:** Suporte para valores fixos e percentuais
@@ -17,6 +18,7 @@ A API de simulação de empréstimo foi completamente re-arquitetada, substituin
 - ✅ **Cronograma de Pagamento:** Geração completa com juros e amortização
 
 ### 2. **Endpoint Refatorado** (`POST /api/simular`)
+
 - ✅ **Busca Dinâmica no Banco:** Consulta tabelas `parceiros`, `produtos`, `tabelas_comerciais`
 - ✅ **Hierarquia de Fallback Implementada:**
   1. Tabela específica do parceiro (se existir)
@@ -29,6 +31,7 @@ A API de simulação de empréstimo foi completamente re-arquitetada, substituin
 ### 3. **Testes Executados com Sucesso**
 
 #### **Cenário 1: Simulação R$ 10.000 em 12 meses**
+
 ```
 • Taxa Juros: 1.8% ao mês (do banco de dados)
 • IOF Total: R$ 333.20
@@ -37,6 +40,7 @@ A API de simulação de empréstimo foi completamente re-arquitetada, substituin
 ```
 
 #### **Cenário 2: Fallback para Produto**
+
 ```
 • Simulação sem parceiro específico
 • Sistema utilizou configurações do produto
@@ -44,6 +48,7 @@ A API de simulação de empréstimo foi completamente re-arquitetada, substituin
 ```
 
 #### **Cenário 3: Validação de Entrada**
+
 ```
 • Valores inválidos corretamente rejeitados
 • Mensagens de erro claras retornadas
@@ -52,12 +57,14 @@ A API de simulação de empréstimo foi completamente re-arquitetada, substituin
 ## 📈 RESULTADOS TÉCNICOS
 
 ### **Antes (Mock):**
+
 - Taxas hardcoded: 5% e 7.5%
 - IOF fixo: 0.38%
 - TAC fixo: R$ 150
 - CET simplificado: taxa × 12 × 1.1
 
 ### **Depois (Produção):**
+
 - Taxas dinâmicas do banco de dados
 - IOF calculado conforme regulação brasileira
 - TAC configurável por produto
@@ -100,13 +107,13 @@ A API de simulação de empréstimo foi completamente re-arquitetada, substituin
   "taxaJurosAnual": 23.87,
   "valorParcela": 965.14,
   "iof": {
-    "diario": 295.20,
-    "adicional": 38.00,
-    "total": 333.20
+    "diario": 295.2,
+    "adicional": 38.0,
+    "total": 333.2
   },
   "tac": 0,
   "cetAnual": 40.86,
-  "valorTotalFinanciado": 10333.20,
+  "valorTotalFinanciado": 10333.2,
   "valorTotalAPagar": 11581.68,
   "custoTotalOperacao": 1581.68,
   "comissao": {
@@ -118,7 +125,7 @@ A API de simulação de empréstimo foi completamente re-arquitetada, substituin
       "parcela": 1,
       "dataVencimento": "2025-09-11",
       "valorParcela": 965.14,
-      "valorJuros": 186.00,
+      "valorJuros": 186.0,
       "valorAmortizacao": 779.14,
       "saldoDevedor": 9554.06
     }

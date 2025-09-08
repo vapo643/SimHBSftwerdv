@@ -1,4 +1,5 @@
 # OPERAÇÃO GUARDIÃO DO COFRE V1.0 - FASE 2
+
 ## ANÁLISE FORENSE DA CAUSA RAIZ: DELEÇÃO ACIDENTAL DO BANCO DE DADOS
 
 **Data:** 02 de Setembro de 2025  
@@ -21,12 +22,12 @@
 
 **Arquivos de Configuração Identificados:**
 
-| Arquivo | DATABASE_URL Configurado | Observações |
-|---------|--------------------------|-------------|
-| `.env.development` | ❌ **AUSENTE** | Apenas `NODE_ENV=development` |
-| `.env.test` | ✅ **TEST_DATABASE_URL** | Placeholder não configurado |
-| `.env.example` | ✅ **DATABASE_URL** | Template de exemplo |
-| `drizzle.config.ts` | ⚠️ **DATABASE_URL direta** | **VULNERABILIDADE CRÍTICA** |
+| Arquivo             | DATABASE_URL Configurado   | Observações                   |
+| ------------------- | -------------------------- | ----------------------------- |
+| `.env.development`  | ❌ **AUSENTE**             | Apenas `NODE_ENV=development` |
+| `.env.test`         | ✅ **TEST_DATABASE_URL**   | Placeholder não configurado   |
+| `.env.example`      | ✅ **DATABASE_URL**        | Template de exemplo           |
+| `drizzle.config.ts` | ⚠️ **DATABASE_URL direta** | **VULNERABILIDADE CRÍTICA**   |
 
 ### 1.2 Fluxo de Carregamento - Análise Forense
 
@@ -35,7 +36,7 @@
 ```typescript
 // drizzle.config.ts (EVIDÊNCIA A1)
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL, ensure the database is provisioned");
+  throw new Error('DATABASE_URL, ensure the database is provisioned');
 }
 
 export default defineConfig({
@@ -46,6 +47,7 @@ export default defineConfig({
 ```
 
 **CENÁRIO DE FALHA:**
+
 1. Desenvolvedor executa `npm run db:push`
 2. `drizzle-kit` lê `process.env.DATABASE_URL` diretamente
 3. **Se `DATABASE_URL` = produção → DESTRUIÇÃO TOTAL**
@@ -54,7 +56,7 @@ export default defineConfig({
 ### 1.3 Configuração do Vitest (EVIDÊNCIA A2)
 
 ```typescript
-// vitest.config.ts 
+// vitest.config.ts
 test: {
   env: {
     NODE_ENV: 'test',
@@ -109,15 +111,14 @@ export async function cleanTestDatabase(): Promise<void> {
   // Proteção 3: VERIFICAÇÃO DO NOME DO BANCO
   const url = new URL(databaseUrl);
   const dbName = url.pathname.substring(1);
-  
+
   const allowedTestDbs = ['postgres', 'simpix-test'];
-  const isDevelopmentDb = allowedTestDbs.some(allowed => 
-    dbName === allowed || dbName.endsWith('-test'));
-  
+  const isDevelopmentDb = allowedTestDbs.some(
+    (allowed) => dbName === allowed || dbName.endsWith('-test')
+  );
+
   if (!isDevelopmentDb) {
-    throw new Error(
-      `FATAL: Nome do banco '${dbName}' não é um banco de teste reconhecido.`
-    );
+    throw new Error(`FATAL: Nome do banco '${dbName}' não é um banco de teste reconhecido.`);
   }
 }
 ```
@@ -132,6 +133,7 @@ export async function cleanTestDatabase(): Promise<void> {
    - **MAS:** Se por algum motivo a verificação falha ou é bypassed, o sistema pode prosseguir
 
 2. **Mock de process.env nos Testes:**
+
    ```typescript
    // tests/setup.ts (EVIDÊNCIA B2)
    vi.mock('process', () => ({
@@ -141,7 +143,7 @@ export async function cleanTestDatabase(): Promise<void> {
      },
    }));
    ```
-   
+
    **VULNERABILIDADE:** O mock pode não funcionar corretamente em todos os contextos, especialmente se outros módulos já importaram `process.env` antes do mock ser aplicado.
 
 3. **Dependência do Carregamento do dotenv:**
@@ -155,6 +157,7 @@ export async function cleanTestDatabase(): Promise<void> {
 ### 3.1 Análise do Script `db:push`
 
 **EVIDÊNCIA C1:**
+
 ```json
 // package.json
 {
@@ -198,10 +201,11 @@ export default defineConfig({
 ### 3.4 Evidência de Vulnerabilidade no CI/CD
 
 **EVIDÊNCIA C3:**
+
 ```yaml
 # .github/workflows/ci.yml (LINHA 121)
 - name: Run database migrations
-  run: npm run db:push --force  # ⚠️ FLAG --force IGNORA AVISOS
+  run: npm run db:push --force # ⚠️ FLAG --force IGNORA AVISOS
 ```
 
 **OBSERVAÇÃO:** O CI/CD usa `--force` que ignora todos os avisos de segurança do drizzle-kit.
@@ -224,16 +228,19 @@ export default defineConfig({
 ### 4.2 Vetores de Falha Específicos
 
 **VETOR 1 - Configuração de Ambiente:**
+
 - `.env.test` contém placeholder não configurado
 - Ausência de dotenv explícito nos pontos críticos
 - Sistema usa variáveis de produção como fallback
 
 **VETOR 2 - drizzle-kit Sem Validação:**
+
 - `drizzle.config.ts` não valida ambiente antes de conectar
 - Comando `npm run db:push` executa sem confirmações
 - Flag `--force` no CI ignora avisos de segurança
 
 **VETOR 3 - Salvaguardas Insuficientes:**
+
 - Mocks do Vitest podem falhar em alguns contextos
 - Validações de segurança podem ser contornadas
 - Dependência de configuração manual do desenvolvedor
@@ -255,6 +262,7 @@ export default defineConfig({
 **CLASSIFICAÇÃO:** 🔴 **CRÍTICO - P0**
 
 **IMPACTO DEMONSTRADO:**
+
 - Perda total de dados de produção (confirmado por incidentes anteriores)
 - Falha sistemática de isolamento de ambientes
 - Vulnerabilidade a execução acidental de comandos destrutivos
@@ -268,6 +276,7 @@ export default defineConfig({
 ### 6.1 Ações Imediatas (P0)
 
 1. **🚨 IMPLEMENTAR VALIDAÇÃO OBRIGATÓRIA DE AMBIENTE:**
+
    ```typescript
    // drizzle.config.ts - CORREÇÃO NECESSÁRIA
    if (process.env.NODE_ENV === 'production') {
@@ -276,6 +285,7 @@ export default defineConfig({
    ```
 
 2. **🚨 CONFIGURAR DOTENV EXPLÍCITO:**
+
    ```typescript
    // carregar .env.test explicitamente em contextos de teste
    import dotenv from 'dotenv';
@@ -286,7 +296,7 @@ export default defineConfig({
 
 3. **🚨 SEPARAR CONFIGURAÇÕES POR AMBIENTE:**
    - `drizzle.config.dev.ts`
-   - `drizzle.config.test.ts` 
+   - `drizzle.config.test.ts`
    - `drizzle.config.prod.ts`
 
 ### 6.2 Salvaguardas Adicionais
@@ -306,5 +316,5 @@ export default defineConfig({
 
 ---
 
-*Relatório Forense gerado pela Operação Guardião do Cofre V1.0 - Fase 2*  
-*Data: 02/09/2025 | Investigador: PAM V1.0 | Classificação: CONFIDENCIAL*
+_Relatório Forense gerado pela Operação Guardião do Cofre V1.0 - Fase 2_  
+_Data: 02/09/2025 | Investigador: PAM V1.0 | Classificação: CONFIDENCIAL_

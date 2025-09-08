@@ -8,6 +8,7 @@
 ## 🎯 PROBLEMA IDENTIFICADO
 
 **BUG ORIGINAL:**
+
 - Ao clicar em "Gerar Link de Novo", o link de assinatura desaparecia da tela
 - Lógica de estados não diferenciava entre estado inicial e posterior
 - Erros de TypeScript causando problemas na atualização do estado
@@ -17,6 +18,7 @@
 ## 🔧 CORREÇÕES IMPLEMENTADAS
 
 ### 1. **LÓGICA DE ESTADOS CORRIGIDA**
+
 ```typescript
 // ❌ ANTES (problemático):
 {!proposta.clicksignSignUrl && !clickSignData && (
@@ -29,6 +31,7 @@
 **Estado posterior:** Link existe (novo ou antigo) e CCB gerada
 
 ### 2. **TIPAGEM CORRIGIDA**
+
 ```typescript
 // ✅ Interfaces adicionadas:
 interface ClickSignData {
@@ -42,13 +45,15 @@ interface CCBResponse { ... }
 ```
 
 ### 2. **LOGS DE DEBUG ADICIONADOS**
+
 ```typescript
-console.log("🔄 [CLICKSIGN] Regenerando link para proposta:", proposta.id);
-console.log("📊 [CLICKSIGN] Estado atual:", clickSignData);
-console.log("✅ [CLICKSIGN] Novo link gerado:", response);
+console.log('🔄 [CLICKSIGN] Regenerando link para proposta:', proposta.id);
+console.log('📊 [CLICKSIGN] Estado atual:', clickSignData);
+console.log('✅ [CLICKSIGN] Novo link gerado:', response);
 ```
 
 ### 3. **CASTING EXPLÍCITO DE TIPOS**
+
 ```typescript
 // ✅ Todas as chamadas de API agora fazem casting correto:
 const response = await apiRequest(...) as ClickSignData;
@@ -58,6 +63,7 @@ setClickSignData(response); // ✅ Sem erros de TypeScript
 ### 4. **MÁQUINA DE ESTADOS CLARA**
 
 #### **Estado Inicial (Proposta NUNCA enviada):**
+
 ```typescript
 {!proposta.clicksignSignUrl && !clickSignData && (
   <Button onClick={...}>
@@ -67,6 +73,7 @@ setClickSignData(response); // ✅ Sem erros de TypeScript
 ```
 
 #### **Estado Posterior (Link JÁ gerado):**
+
 ```typescript
 {(clickSignData || proposta.clicksignSignUrl) && (
   <div>
@@ -81,13 +88,15 @@ setClickSignData(response); // ✅ Sem erros de TypeScript
 ## 🧪 GUIA DE TESTE COMPLETO
 
 ### **CENÁRIO 1: Estado Inicial Corrigido**
+
 1. Acesse uma proposta com CCB gerada mas SEM link de ClickSign
-2. **Resultado esperado:** 
+2. **Resultado esperado:**
    - ✅ CCB gerada → Botão azul "Enviar Contrato para Assinatura (ClickSign)" aparece
    - ❌ Link de assinatura não deve estar visível
    - ❌ Botão "Gerar Novo Link" não deve estar visível
 
 ### **CENÁRIO 2: Primeiro Envio**
+
 1. Clique no botão "Enviar Contrato para Assinatura (ClickSign)"
 2. **Resultado esperado:**
    - Botão muda para estado de loading ("Enviando...")
@@ -96,6 +105,7 @@ setClickSignData(response); // ✅ Sem erros de TypeScript
    - Botão "Gerar Novo Link" aparece
 
 ### **CENÁRIO 3: Regeneração (Bug Corrigido)**
+
 1. Com link já visível, clique em "Gerar Novo Link"
 2. **Resultado esperado:**
    - ✅ **Link NÃO desaparece durante o processo**
@@ -105,9 +115,11 @@ setClickSignData(response); // ✅ Sem erros de TypeScript
    - Link permanece visível o tempo todo
 
 ### **CENÁRIO 4: Console de Debug**
+
 1. Abra o Console (F12)
 2. Execute qualquer ação ClickSign
 3. **Resultado esperado:**
+
 ```
 🔄 [CLICKSIGN] Regenerando link para proposta: 88a44696-9b63-42ee-aa81-15f9519d24cb
 📊 [CLICKSIGN] Estado atual: {signUrl: "...", envelopeId: "..."}
@@ -125,6 +137,7 @@ setClickSignData(response); // ✅ Sem erros de TypeScript
 ## 📊 VALIDAÇÃO TÉCNICA
 
 ### ✅ **Checklist de Correções:**
+
 - [x] Tipagem TypeScript corrigida (0 erros)
 - [x] Logs de debug implementados
 - [x] Máquina de estados clara
@@ -133,6 +146,7 @@ setClickSignData(response); // ✅ Sem erros de TypeScript
 - [x] Preservação do link durante regeneração
 
 ### ✅ **Protocolo 5-CHECK:**
+
 - [x] `get_latest_lsp_diagnostics` = 0 erros
 - [x] Sintaxe TypeScript válida
 - [x] Lógica de estados testada
@@ -143,12 +157,12 @@ setClickSignData(response); // ✅ Sem erros de TypeScript
 
 ## 🚀 STATUS FINAL
 
-| Componente | Status |
-|------------|--------|
-| Tipagem TypeScript | ✅ Corrigida |
-| Lógica de Estados | ✅ Implementada |
-| Bug "Link Some" | ✅ Corrigido |
-| Logs de Debug | ✅ Adicionados |
-| Teste E2E | ✅ Pronto |
+| Componente         | Status          |
+| ------------------ | --------------- |
+| Tipagem TypeScript | ✅ Corrigida    |
+| Lógica de Estados  | ✅ Implementada |
+| Bug "Link Some"    | ✅ Corrigido    |
+| Logs de Debug      | ✅ Adicionados  |
+| Teste E2E          | ✅ Pronto       |
 
 **CONCLUSÃO:** O bug foi completamente corrigido. A máquina de estados funciona perfeitamente e o link nunca mais desaparecerá ao clicar "Gerar Novo Link".

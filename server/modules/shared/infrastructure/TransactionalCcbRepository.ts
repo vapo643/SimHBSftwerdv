@@ -1,6 +1,6 @@
 /**
  * Adapter Transacional para CcbRepository
- * 
+ *
  * Permite que o repositório de CCBs trabalhe dentro de uma transação
  * gerenciada pelo Unit of Work.
  */
@@ -12,7 +12,12 @@ import { ccbs, propostas } from '@shared/schema';
 import * as schema from '@shared/schema';
 import { Ccb } from '@shared/schema';
 import { ICcbRepository, CcbStatus } from '../../ccb/domain/ICcbRepository';
-import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
+import {
+  PaginatedResult,
+  CursorPaginationOptions,
+  RepositoryFilters,
+  CursorUtils,
+} from '@shared/types/pagination';
 
 // Type para transação Drizzle
 type DrizzleTransaction = PostgresJsTransaction<
@@ -99,12 +104,7 @@ export class TransactionalCcbRepository implements ICcbRepository {
     const result = await this.tx
       .select()
       .from(ccbs)
-      .where(
-        and(
-          eq(ccbs.status, 'gerada' as any),
-          isNull(ccbs.deletedAt)
-        )
-      )
+      .where(and(eq(ccbs.status, 'gerada' as any), isNull(ccbs.deletedAt)))
       .orderBy(desc(ccbs.createdAt));
 
     return result;
@@ -143,12 +143,7 @@ export class TransactionalCcbRepository implements ICcbRepository {
     const result = await this.tx
       .select()
       .from(ccbs)
-      .where(
-        and(
-          eq(ccbs.status, 'assinada' as any),
-          isNull(ccbs.deletedAt)
-        )
-      )
+      .where(and(eq(ccbs.status, 'assinada' as any), isNull(ccbs.deletedAt)))
       .orderBy(desc(ccbs.createdAt));
 
     return result;
@@ -188,7 +183,10 @@ export class TransactionalCcbRepository implements ICcbRepository {
     return {
       data: result,
       pagination: {
-        nextCursor: result.length === (options.limit || 50) ? CursorUtils.createFromItem(result[result.length - 1], 'createdAt') : null,
+        nextCursor:
+          result.length === (options.limit || 50)
+            ? CursorUtils.createFromItem(result[result.length - 1], 'createdAt')
+            : null,
         prevCursor: null,
         pageSize: result.length,
         hasNextPage: result.length === (options.limit || 50),
@@ -202,11 +200,7 @@ export class TransactionalCcbRepository implements ICcbRepository {
       .select()
       .from(ccbs)
       .where(
-        and(
-          gte(ccbs.createdAt, startDate),
-          lte(ccbs.createdAt, endDate),
-          isNull(ccbs.deletedAt)
-        )
+        and(gte(ccbs.createdAt, startDate), lte(ccbs.createdAt, endDate), isNull(ccbs.deletedAt))
       )
       .orderBy(desc(ccbs.createdAt));
 
@@ -227,12 +221,7 @@ export class TransactionalCcbRepository implements ICcbRepository {
     const result = await this.tx
       .select({ count: sql<number>`count(*)` })
       .from(ccbs)
-      .where(
-        and(
-          eq(ccbs.status, status as any),
-          isNull(ccbs.deletedAt)
-        )
-      );
+      .where(and(eq(ccbs.status, status as any), isNull(ccbs.deletedAt)));
 
     return result[0]?.count || 0;
   }
@@ -242,15 +231,10 @@ export class TransactionalCcbRepository implements ICcbRepository {
       .select({ ccbs })
       .from(ccbs)
       .leftJoin(propostas, eq(ccbs.propostaId, propostas.id))
-      .where(
-        and(
-          isNull(propostas.id),
-          isNull(ccbs.deletedAt)
-        )
-      )
+      .where(and(isNull(propostas.id), isNull(ccbs.deletedAt)))
       .orderBy(desc(ccbs.createdAt));
 
-    return result.map(r => r.ccbs);
+    return result.map((r) => r.ccbs);
   }
 
   async exists(id: string): Promise<boolean> {

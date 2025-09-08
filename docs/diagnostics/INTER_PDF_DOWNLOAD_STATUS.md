@@ -24,12 +24,14 @@
 ### 📋 Mudanças Implementadas
 
 #### Backend - `obterPdfCobranca()` Totalmente Refatorada
+
 ```typescript
 // ANTES: Procurava PDF em base64 nos dados da cobrança (INCORRETO)
 // DEPOIS: Faz requisição direta ao endpoint /pdf com headers corretos (CORRETO)
 ```
 
 #### Backend - `makeRequest()` Enhanced PDF Support
+
 ```typescript
 // Adicionado:
 - Accept: application/pdf header support
@@ -39,9 +41,10 @@
 ```
 
 #### Frontend - Botão de Download Inteligente
+
 ```typescript
 // ANTES: Apenas copiava código de barras
-// DEPOIS: 
+// DEPOIS:
 1. Verifica status do boleto (EM_PROCESSAMENTO = aguardar)
 2. Faz download autenticado com JWT token
 3. Salva PDF na pasta Downloads
@@ -51,6 +54,7 @@
 ### 🧪 RESULTADO DO TESTE
 
 Status dos boletos: **EM_PROCESSAMENTO**
+
 - ✅ Funcionalidade implementada corretamente
 - ✅ Autenticação JWT funcionando
 - ⚠️ Inter só disponibiliza PDF quando status = "REGISTRADO" ou "A_RECEBER"
@@ -58,20 +62,22 @@ Status dos boletos: **EM_PROCESSAMENTO**
 
 ### 📊 STATUS FINAL
 
-| Aspecto | Status | Observação |
-|---------|---------|------------|
-| Headers corretos | ✅ | Accept: application/pdf |
-| Endpoint correto | ✅ | /cobranca/v3/cobrancas/{codigo}/pdf |
-| Response handling | ✅ | Buffer + magic bytes |
-| Error logging | ✅ | Enhanced para debug |
-| Autenticação JWT | ✅ | Token enviado corretamente |
-| Frontend UX | ✅ | Mensagem inteligente + fallback |
-| Status boletos | ✅ | Sistema verifica e informa ao usuário |
+| Aspecto           | Status | Observação                            |
+| ----------------- | ------ | ------------------------------------- |
+| Headers corretos  | ✅     | Accept: application/pdf               |
+| Endpoint correto  | ✅     | /cobranca/v3/cobrancas/{codigo}/pdf   |
+| Response handling | ✅     | Buffer + magic bytes                  |
+| Error logging     | ✅     | Enhanced para debug                   |
+| Autenticação JWT  | ✅     | Token enviado corretamente            |
+| Frontend UX       | ✅     | Mensagem inteligente + fallback       |
+| Status boletos    | ✅     | Sistema verifica e informa ao usuário |
 
 ### 🎉 CONCLUSÃO
+
 **PDF Download do Banco Inter: FUNCIONAL**
 
 A implementação está completa e funcionando. O sistema:
+
 1. Tenta baixar o PDF com deep research headers
 2. Verifica autenticação JWT
 3. Informa ao usuário quando PDF não está disponível (status EM_PROCESSAMENTO)
@@ -81,13 +87,16 @@ A implementação está completa e funcionando. O sistema:
 ## 🚨 PROBLEMA CRÍTICO IDENTIFICADO
 
 ### codigoSolicitacao Inválido
-- ❌ **Atual**: "CORRETO-1755013508.325368-X" (REJEITADO pela API Inter)  
+
+- ❌ **Atual**: "CORRETO-1755013508.325368-X" (REJEITADO pela API Inter)
 - ✅ **Correto**: UUIDs como "44a467d1-e93f-4e91-b1f9-c79438ef5eea"
 
 ### Causa Raiz
+
 Os boletos da proposta atual foram criados com códigos inválidos. A API Inter só aceita UUIDs válidos.
 
 ### Solução Imediata
+
 1. Criar novos boletos com API Inter correta
 2. Ou encontrar boletos existentes com UUIDs válidos para testar
 
@@ -96,17 +105,21 @@ Os boletos da proposta atual foram criados com códigos inválidos. A API Inter 
 ## 🛠️ SOLUÇÃO IMPLEMENTADA
 
 ### Endpoint de Regeneração Criado
+
 - **Teste**: `POST /api/inter/test-fix-collections/:propostaId` (sem auth)
 - **Produção**: `POST /api/inter/fix-collections/:propostaId` (com auth)
 
 ### Funcionalidade
+
 1. ✅ Identifica boletos com códigos inválidos (não-UUID)
 2. ✅ Desativa boletos antigos
 3. ✅ Cria novos boletos com API Inter usando UUIDs válidos
 4. ✅ Mantém todas as parcelas e valores originais
 
 ### Teste Atual
+
 **Proposta**: `88a44696-9b63-42ee-aa81-15f9519d24cb`
+
 - **Total**: 24 boletos
 - **Inválidos**: 24 (formato "CORRETO-1755013508.325368-X")
 - **Válidos**: 0

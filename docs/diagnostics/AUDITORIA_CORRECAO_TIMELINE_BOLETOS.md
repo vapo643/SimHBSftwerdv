@@ -7,6 +7,7 @@ A Timeline não estava exibindo boletos já criados em sessões anteriores. O fr
 ## 🔬 ANÁLISE TÉCNICA
 
 ### ❌ Lógica Condicional Problemática (ANTES)
+
 ```typescript
 {(!collectionsData || collectionsData.length === 0) && !interBoletoData ? (
   // Mostrar botão "Gerar Boletos"
@@ -16,13 +17,15 @@ A Timeline não estava exibindo boletos já criados em sessões anteriores. O fr
 ```
 
 **Problemas:**
+
 - ✗ Não verifica `proposta.interBoletoGerado` do banco
 - ✗ Se frontend reinicia, perde estado dos boletos
 - ✗ Timeline não reflete realidade persistida
 
 ### ✅ Lógica Corrigida (DEPOIS)
+
 ```typescript
-{(!collectionsData || collectionsData.length === 0) && 
+{(!collectionsData || collectionsData.length === 0) &&
  !interBoletoData && !proposta.interBoletoGerado ? (
   // Mostrar botão "Gerar Boletos"
 ) : (
@@ -31,6 +34,7 @@ A Timeline não estava exibindo boletos já criados em sessões anteriores. O fr
 ```
 
 **Benefícios:**
+
 - ✅ Verifica campo `interBoletoGerado` do banco
 - ✅ Timeline sempre reflete estado real
 - ✅ Funciona mesmo após reinicialização
@@ -38,6 +42,7 @@ A Timeline não estava exibindo boletos já criados em sessões anteriores. O fr
 ## 🔧 CORREÇÕES IMPLEMENTADAS
 
 ### 1. **Interface TypeScript Atualizada**
+
 ```typescript
 interface Proposta {
   // ... outros campos
@@ -47,6 +52,7 @@ interface Proposta {
 ```
 
 ### 2. **Lógica Condicional Corrigida**
+
 Adicionada verificação do campo `proposta.interBoletoGerado` na condição que decide se mostra botão de gerar boletos ou lista existente.
 
 ### 3. **Fluxo de Decisão Atualizado**
@@ -67,16 +73,19 @@ graph TD
 ## 🧪 CASOS DE TESTE
 
 ### Caso 1: Proposta SEM boletos
+
 - `interBoletoGerado = false`
 - `collectionsData = []`
 - **Resultado**: Mostra botão "Gerar Boletos" ✅
 
 ### Caso 2: Proposta COM boletos (dados em memória)
+
 - `interBoletoGerado = true`
 - `collectionsData = [boleto1, boleto2...]`
 - **Resultado**: Mostra lista de boletos ✅
 
 ### Caso 3: Proposta COM boletos (após reinicialização)
+
 - `interBoletoGerado = true`
 - `collectionsData = []` (em carregamento)
 - **Resultado**: Busca e mostra boletos ✅

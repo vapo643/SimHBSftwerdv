@@ -1,6 +1,6 @@
 /**
  * Use Case: Alterar Status da Proposta
- * 
+ *
  * Orquestra mudanças de status com auditoria completa
  * PAM V1.0 - Remediação de Segurança Crítica
  * Implementa trilha de auditoria mandatória
@@ -24,12 +24,14 @@ export class ChangeProposalStatusUseCase {
 
   async execute(dto: ChangeProposalStatusDTO): Promise<void> {
     return await this.unitOfWork.executeInTransaction(async () => {
-      console.log(`[CHANGE STATUS USE CASE] Iniciando mudança de status para proposta ${dto.proposalId}`);
+      console.log(
+        `[CHANGE STATUS USE CASE] Iniciando mudança de status para proposta ${dto.proposalId}`
+      );
       console.log(`[CHANGE STATUS USE CASE] Novo status: ${dto.newStatus}`);
-      
+
       // 1. Buscar proposta atual
       const proposal = await this.unitOfWork.proposals.findById(dto.proposalId);
-      
+
       if (!proposal) {
         throw new Error(`Proposta ${dto.proposalId} não encontrada`);
       }
@@ -64,15 +66,17 @@ export class ChangeProposalStatusUseCase {
             ...dto.metadata,
             reason: dto.reason,
             useCase: 'ChangeProposalStatusUseCase',
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
 
         console.log(`[CHANGE STATUS USE CASE] ✅ Auditoria registrada com sucesso`);
       } catch (auditError: any) {
         console.error(`[CHANGE STATUS USE CASE] ❌ Falha na auditoria:`, auditError);
         // Falha na auditoria deve quebrar a transação (segurança crítica)
-        throw new Error(`Falha crítica na auditoria: ${auditError?.message || 'Erro desconhecido'}`);
+        throw new Error(
+          `Falha crítica na auditoria: ${auditError?.message || 'Erro desconhecido'}`
+        );
       }
 
       console.log(`[CHANGE STATUS USE CASE] ✅ Mudança de status concluída com sucesso`);

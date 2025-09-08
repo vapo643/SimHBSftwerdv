@@ -1,7 +1,7 @@
 /**
  * IoC Container - IMPLEMENTAÇÃO P0.2 PLANO SOBERANIA
  * Centralização de dependências seguindo princípio DIP
- * 
+ *
  * Substitui dependencies.ts por container real de injeção de dependência
  */
 
@@ -79,7 +79,7 @@ export class Container {
 export const TOKENS = {
   // Repositories
   PROPOSAL_REPOSITORY: Symbol('ProposalRepository'),
-  
+
   // Use Cases
   CREATE_PROPOSAL_USE_CASE: Symbol('CreateProposalUseCase'),
   GET_PROPOSAL_BY_ID_USE_CASE: Symbol('GetProposalByIdUseCase'),
@@ -87,7 +87,7 @@ export const TOKENS = {
   REJECT_PROPOSAL_USE_CASE: Symbol('RejectProposalUseCase'),
   PENDENCIAR_PROPOSTA_USE_CASE: Symbol('PendenciarPropostaUseCase'),
   SUBMIT_FOR_ANALYSIS_USE_CASE: Symbol('SubmitForAnalysisUseCase'),
-  
+
   // 🏡 P0.2 GREEN - Novos use cases para eliminar DIP leakage
   LIST_PROPOSALS_BY_CRITERIA_USE_CASE: Symbol('ListProposalsByCriteriaUseCase'),
   RESUBMIT_PENDING_PROPOSAL_USE_CASE: Symbol('ResubmitPendingProposalUseCase'),

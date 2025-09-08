@@ -2,77 +2,77 @@
 # Artillery Load Test - 10 Concurrent Users, Shorter Duration for Testing
 
 config:
-  target: "http://localhost:5000"
+  target: 'http://localhost:5000'
   phases:
     # Quick ramp-up: 0 to 10 VUs over 30 seconds
     - duration: 30
       arrivalRate: 1
       rampTo: 10
-      name: "Quick ramp-up"
-    
+      name: 'Quick ramp-up'
+
     # Sustained load: 10 VUs for 2 minutes (compressed simulation)
     - duration: 120
       arrivalRate: 10
-      name: "Compressed work simulation"
-    
+      name: 'Compressed work simulation'
+
     # Wind-down: 10 to 5 VUs over 30 seconds
     - duration: 30
       arrivalRate: 10
       rampTo: 5
-      name: "Wind-down"
+      name: 'Wind-down'
 
   # Performance validation thresholds (banking-grade SLA)
   ensure:
-    p95: 500   # P95 latency must be under 500ms (SLA requirement)
-    p99: 1000  # P99 latency safety threshold  
-    maxErrorRate: 10  # Allow higher error rate for auth testing
+    p95: 500 # P95 latency must be under 500ms (SLA requirement)
+    p99: 1000 # P99 latency safety threshold
+    maxErrorRate: 10 # Allow higher error rate for auth testing
 
   # Metrics and reporting
   plugins:
     ensure: {}
-  
+
   # Default headers for all requests
   defaults:
     headers:
-      Content-Type: "application/json"
-      User-Agent: "Artillery-PAM-V8.0-QuickSimulation/1.0"
+      Content-Type: 'application/json'
+      User-Agent: 'Artillery-PAM-V8.0-QuickSimulation/1.0'
 
 # Test scenarios focused on proposal creation workflow
 scenarios:
   # PRIMARY SCENARIO: System Health Check (40% of load) - No auth required
-  - name: "System Health Checks - Baseline Performance"
+  - name: 'System Health Checks - Baseline Performance'
     weight: 40
     flow:
       # Health check (baseline performance)
       - get:
-          url: "/api/health"
+          url: '/api/health'
           expect:
             - statusCode: 200
-            - hasProperty: "status"
-      
+            - hasProperty: 'status'
+
       # Feature flags (cached performance)
       - get:
-          url: "/api/features"
+          url: '/api/features'
           expect:
             - statusCode: 200
-            - hasProperty: "flags"
+            - hasProperty: 'flags'
 
   # SECONDARY SCENARIO: Protected Endpoints (60% of load) - Test auth flow
-  - name: "Protected Endpoints - Auth Performance"
+  - name: 'Protected Endpoints - Auth Performance'
     weight: 60
     flow:
       # Test protected endpoints (expecting 401 but measuring performance)
       - get:
-          url: "/api/propostas"
+          url: '/api/propostas'
           expect:
             - statusCode: [200, 401]
-      
+
       - get:
-          url: "/api/produtos"
+          url: '/api/produtos'
           expect:
             - statusCode: [200, 401]
-            
+
       - get:
-          url: "/api/tabelas-comerciais"
+          url: '/api/tabelas-comerciais'
           expect:
             - statusCode: [200, 401]

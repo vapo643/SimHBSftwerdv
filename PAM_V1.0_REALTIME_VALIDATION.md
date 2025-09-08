@@ -3,11 +3,13 @@
 ## ✅ Status: IMPLEMENTAÇÃO CONCLUÍDA
 
 ### 📋 Resumo da Implementação
+
 Implementação bem-sucedida da funcionalidade de escuta em tempo real (Supabase Realtime) na Tela de Cobranças, permitindo atualização automática da interface quando o status de boletos muda.
 
 ### 🎯 Objetivos Alcançados
 
 #### 1. **Configuração do Listener Realtime** ✅
+
 ```typescript
 // Implementado em: client/src/pages/financeiro/CobrancasPage.tsx
 useEffect(() => {
@@ -15,7 +17,7 @@ useEffect(() => {
     .channel('cobrancas-realtime-updates')
     .on('postgres_changes', {...})
     .subscribe();
-    
+
   return () => {
     supabase.removeChannel(channel);
   };
@@ -23,20 +25,24 @@ useEffect(() => {
 ```
 
 #### 2. **Escuta Dupla de Tabelas** ✅
+
 - **propostas**: Detecta mudanças de status de propostas
 - **inter_collections**: Detecta pagamentos e atualizações de boletos
 
 #### 3. **Invalidação Inteligente de Queries** ✅
+
 ```typescript
 queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
 queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
 ```
 
 #### 4. **Notificações em Tempo Real** ✅
+
 - Notificação suave para atualizações gerais
 - Notificação destacada para pagamentos recebidos
 
 #### 5. **Cleanup Adequado** ✅
+
 - Remoção correta do canal ao desmontar componente
 - Prevenção de memory leaks
 
@@ -63,12 +69,14 @@ graph LR
 ### 🔧 Características Técnicas
 
 #### Configuração do Canal
+
 - **Nome**: `cobrancas-realtime-updates`
 - **Eventos**: UPDATE em propostas, ALL em inter_collections
 - **Schema**: public
 - **Tabelas**: propostas, inter_collections
 
 #### Mensagens de Status
+
 ```
 ✅ [REALTIME] Conectado ao canal de atualizações de cobranças
 📡 [REALTIME] Evento recebido em inter_collections
@@ -99,7 +107,7 @@ A Tela de Cobranças agora possui capacidade completa de atualização em tempo 
 
 ```sql
 -- Teste executado com sucesso
-UPDATE inter_collections 
+UPDATE inter_collections
 SET situacao = 'RECEBIDO'
 WHERE codigo_solicitacao = '4f3c1f03-222a-46e3-bafd-0c9d6c9cad02'
 -- Resultado: Evento capturado e UI atualizada

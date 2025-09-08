@@ -13,12 +13,14 @@ O Projeto Cérbero implementa um sistema completo de segurança DevSecOps para o
 ### 1. OWASP Dependency-Check (SCA - Software Composition Analysis)
 
 #### Arquivos Criados
+
 - `.security/vulnerability-exceptions.yml` - Configuração de exceções
 - `.security/dependency-check-with-exceptions.py` - Script de análise inteligente
 - `.security/run-dependency-check.sh` - Wrapper para CI/CD
 - `.github/workflows/security-scan.yml` - Pipeline automatizado
 
 #### Funcionalidades
+
 - **Versão**: 12.1.0 (última versão estável)
 - **Download**: https://github.com/dependency-check/DependencyCheck/releases/download/v12.1.0/dependency-check-12.1.0-release.zip
 - **Exceções com Expiração**: Vulnerabilidades podem ser temporariamente aceitas com justificativa
@@ -28,6 +30,7 @@ O Projeto Cérbero implementa um sistema completo de segurança DevSecOps para o
 ### 2. Semgrep MCP Server (SAST - Static Application Security Testing)
 
 #### Arquivos Criados
+
 - `server/security/semgrep-mcp-server.ts` - Servidor principal
 - `server/routes/security-mcp.ts` - Rotas da API
 - `.semgrep.yml` - Regras customizadas
@@ -85,19 +88,20 @@ GET /api/security/mcp/rules
 ```typescript
 // Desenvolvimento: Cache em memória
 if (process.env.NODE_ENV !== 'production') {
-  useMemoryCache = true
+  useMemoryCache = true;
 }
 
 // Produção: Redis com fallback
 try {
-  redis.connect()
+  redis.connect();
 } catch {
   // Fallback automático para memória
-  useMemoryCache = true
+  useMemoryCache = true;
 }
 ```
 
 ### Performance
+
 - **Cache Hit Rate**: >90% para arquivos não modificados
 - **Tempo de Análise**: <500ms para análise incremental
 - **TTL Cache**: 1 hora para análises, 24 horas para regras
@@ -124,6 +128,7 @@ try {
 ## 🔒 Autenticação e Autorização
 
 Todos os endpoints do MCP Server requerem:
+
 1. Token JWT válido
 2. Role mínimo: ANALISTA
 3. Header: `Authorization: Bearer <token>`
@@ -131,12 +136,14 @@ Todos os endpoints do MCP Server requerem:
 ## 📈 Métricas e Monitoramento
 
 ### KPIs de Segurança
+
 - **Vulnerabilidades Críticas**: 0 tolerância
 - **Tempo de Remediação**: <48h para críticas
 - **Cobertura de Código**: 100% análise SAST
 - **False Positive Rate**: <5%
 
 ### Dashboard de Segurança
+
 - Integração com `/admin/security/owasp`
 - Métricas em tempo real
 - Histórico de 30 dias
@@ -145,11 +152,13 @@ Todos os endpoints do MCP Server requerem:
 ## 🚀 Roadmap Futuro
 
 ### Q2 2025
+
 - [ ] Integração com VS Code Extension
 - [ ] Machine Learning para detecção de padrões
 - [ ] Auto-fix para vulnerabilidades simples
 
 ### Q3 2025
+
 - [ ] DAST integration (OWASP ZAP)
 - [ ] Container security (Trivy enhanced)
 - [ ] Supply chain security
@@ -157,11 +166,13 @@ Todos os endpoints do MCP Server requerem:
 ## 📚 Recursos Adicionais
 
 ### Documentação Oficial
+
 - [OWASP Dependency-Check v12.1.0](https://github.com/dependency-check/DependencyCheck)
 - [Semgrep Rules Registry](https://semgrep.dev/r)
 - [OWASP ASVS 5.0](https://owasp.org/www-project-application-security-verification-standard/)
 
 ### Scripts de Manutenção
+
 ```bash
 # Atualizar base de vulnerabilidades
 cd .security

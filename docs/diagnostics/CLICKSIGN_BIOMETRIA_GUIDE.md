@@ -3,19 +3,22 @@
 ## Funcionalidades Disponíveis (2025)
 
 ### 1. Biometria Facial
+
 - **Nova funcionalidade**: Validação completa da identidade do signatário
-- **Parceria**: Empresa Combate à Fraude (CAF) 
+- **Parceria**: Empresa Combate à Fraude (CAF)
 - **Como funciona**: Face match - compara imagem do rosto com foto do documento
 - **Documentação**: As imagens são anexadas ao documento final
 - **Obrigatoriedade**: Não é possível finalizar sem esta etapa quando configurada
 
 ### 2. Autenticação via WhatsApp
+
 - **Token de 6 dígitos**: Enviado via WhatsApp
 - **Validade**: 4 horas quando enviado via WhatsApp
 - **Perfil verificado**: Enviado através do perfil oficial da ClickSign
 - **Aceite direto**: Possibilidade de aceitar termos sem sair do WhatsApp
 
 ### 3. Métodos de Autenticação Disponíveis
+
 - Até 15 métodos diferentes:
   - Biometria facial
   - Selfie com documento
@@ -29,6 +32,7 @@
 ## Implementação via API
 
 ### 1. Configurar Signatário com Biometria
+
 ```json
 POST https://app.clicksign.com/api/v1/signers?access_token=TOKEN
 {
@@ -45,6 +49,7 @@ POST https://app.clicksign.com/api/v1/signers?access_token=TOKEN
 ```
 
 ### 2. Autenticação via WhatsApp
+
 ```json
 {
   "signer": {
@@ -55,6 +60,7 @@ POST https://app.clicksign.com/api/v1/signers?access_token=TOKEN
 ```
 
 ### 3. Múltiplas Autenticações
+
 ```json
 {
   "signer": {
@@ -75,15 +81,18 @@ POST https://app.clicksign.com/api/v1/signers?access_token=TOKEN
 ## Configuração no Sistema Simpix
 
 ### 1. Adicionar campos na interface de formalização
+
 - Checkbox para habilitar biometria facial
 - Seleção do método de envio (Email/WhatsApp/SMS)
 - Seleção de métodos de autenticação
 
 ### 2. Atualizar ClickSignServiceV3
+
 - Adicionar parâmetros de autenticação ao criar signatário
 - Suportar diferentes métodos de delivery
 
 ### 3. Webhook já está preparado
+
 - O webhook já atualiza automaticamente quando o documento é assinado
 - Campo `assinaturaEletronicaConcluida` é marcado como true
 

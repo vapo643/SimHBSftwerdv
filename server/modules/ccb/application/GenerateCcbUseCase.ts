@@ -1,6 +1,6 @@
 /**
  * Use Case: Gerar CCB (Cédula de Crédito Bancário)
- * 
+ *
  * Orquestra a geração de CCB com auditoria completa
  * PAM V1.0 - Remediação de Segurança Crítica
  * Implementa trilha de auditoria mandatória para geração de documentos
@@ -29,18 +29,22 @@ export class GenerateCcbUseCase {
 
   async execute(dto: GenerateCcbDTO): Promise<CcbGenerationResult> {
     return await this.unitOfWork.executeInTransaction(async () => {
-      console.log(`[GENERATE CCB USE CASE] Iniciando geração de CCB para proposta ${dto.proposalId}`);
-      
+      console.log(
+        `[GENERATE CCB USE CASE] Iniciando geração de CCB para proposta ${dto.proposalId}`
+      );
+
       // 1. Buscar proposta
       const proposal = await this.unitOfWork.proposals.findById(dto.proposalId);
-      
+
       if (!proposal) {
         throw new Error(`Proposta ${dto.proposalId} não encontrada`);
       }
 
       // 2. Validar status da proposta
       if (proposal.status !== 'aprovado') {
-        throw new Error(`CCB só pode ser gerada para propostas aprovadas. Status atual: ${proposal.status}`);
+        throw new Error(
+          `CCB só pode ser gerada para propostas aprovadas. Status atual: ${proposal.status}`
+        );
       }
 
       // 3. Verificar se já existe CCB para esta proposta
@@ -52,7 +56,7 @@ export class GenerateCcbUseCase {
           ccbId: existingCcb.id,
           ccbUrl: existingCcb.urlDocumentoOriginal || '',
           documentHash: existingCcb.hashDocumento || '',
-          generatedAt: existingCcb.createdAt || new Date()
+          generatedAt: existingCcb.createdAt || new Date(),
         };
       }
 
@@ -76,7 +80,7 @@ export class GenerateCcbUseCase {
         observacoes: `Gerada automaticamente via ${dto.metadata?.useCase || 'GenerateCcbUseCase'}`,
         createdAt: generatedAt,
         updatedAt: generatedAt,
-        deletedAt: null
+        deletedAt: null,
       } as any;
 
       await this.unitOfWork.ccbs.save(ccbData);
@@ -85,7 +89,7 @@ export class GenerateCcbUseCase {
       (proposal as any)._status = 'ccb_gerada';
       (proposal as any)._ccbUrl = ccbUrl;
       (proposal as any)._updatedAt = generatedAt;
-      
+
       await this.unitOfWork.proposals.save(proposal);
 
       // 7. AUDITORIA MANDATÓRIA - Registrar geração
@@ -104,24 +108,26 @@ export class GenerateCcbUseCase {
             templateVersion: dto.templateVersion,
             useCase: 'GenerateCcbUseCase',
             securityContext: 'CCB_GENERATION',
-            timestamp: generatedAt.toISOString()
-          }
+            timestamp: generatedAt.toISOString(),
+          },
         });
 
         console.log(`[GENERATE CCB USE CASE] ✅ Auditoria de geração registrada com sucesso`);
       } catch (auditError: any) {
         console.error(`[GENERATE CCB USE CASE] ❌ Falha crítica na auditoria:`, auditError);
         // Falha na auditoria deve quebrar a transação (segurança crítica)
-        throw new Error(`Falha crítica na auditoria de CCB: ${auditError?.message || 'Erro desconhecido'}`);
+        throw new Error(
+          `Falha crítica na auditoria de CCB: ${auditError?.message || 'Erro desconhecido'}`
+        );
       }
 
       console.log(`[GENERATE CCB USE CASE] ✅ CCB gerada com sucesso: ${ccbId}`);
-      
+
       return {
         ccbId,
         ccbUrl,
         documentHash,
-        generatedAt
+        generatedAt,
       };
     });
   }

@@ -17,12 +17,14 @@ Este documento registra as correções implementadas para as 5 vulnerabilidades 
 **Arquivo Criado**: `scripts/remove-comments.js`
 
 **Funcionalidade**:
+
 - Remove automaticamente TODO, FIXME, HACK, XXX, BUG, etc.
 - Remove console.log, debugger e alert statements
 - Processa apenas arquivos de build (dist/build)
 - Preserva código funcional
 
 **Como Usar**:
+
 ```bash
 # Após build de produção
 npm run build:clean-comments
@@ -32,6 +34,7 @@ npm run build:production
 ```
 
 **Padrões Removidos**:
+
 - `// TODO: implementar validação`
 - `/* FIXME: corrigir bug conhecido */`
 - `console.log('debug info')`
@@ -44,6 +47,7 @@ npm run build:production
 **Arquivo Criado**: `vite-plugin-obfuscate.ts`
 
 **Técnicas de Ofuscação**:
+
 - **Control Flow Flattening**: Torna fluxo de código incompreensível
 - **Dead Code Injection**: Adiciona código falso para confundir
 - **String Obfuscation**: Codifica strings em Base64/RC4
@@ -52,18 +56,20 @@ npm run build:production
 - **Debug Protection**: Previne uso de debugger
 
 **Configuração Vite** (adicionar em vite.config.ts):
+
 ```typescript
 import { obfuscatorPlugin } from './vite-plugin-obfuscate';
 
 export default defineConfig({
   plugins: [
     // ... outros plugins
-    process.env.NODE_ENV === 'production' && obfuscatorPlugin()
-  ]
+    process.env.NODE_ENV === 'production' && obfuscatorPlugin(),
+  ],
 });
 ```
 
 **Exemplo de Código Ofuscado**:
+
 ```javascript
 // Original
 function calculateTax(amount) {
@@ -81,6 +87,7 @@ var _0x4a2c=['0x0','0x1'];(function(_0x2d8f05,_0x4b81bb){var _0x4d74cb=function.
 **Arquivo Criado**: `server/middleware/honeypot.ts`
 
 **20 Endpoints Honeypot Implementados**:
+
 - `/api/admin/debug` - Falso painel admin
 - `/api/test/backdoor` - Falsa backdoor
 - `/api/.env` - Falso arquivo de ambiente
@@ -89,12 +96,14 @@ var _0x4a2c=['0x0','0x1'];(function(_0x2d8f05,_0x4b81bb){var _0x4d74cb=function.
 - E mais 15 endpoints armadilha
 
 **Funcionalidades**:
+
 - Rastreia IPs suspeitos automaticamente
 - Responde com delays aleatórios (0.5-2.5s)
 - Retorna erros falsos realistas
 - Detecta bots por campos ocultos em formulários
 
 **Integração** (em server/app.ts):
+
 ```typescript
 import { registerHoneypots, formHoneypotMiddleware } from './middleware/honeypot';
 
@@ -106,6 +115,7 @@ app.use('/api/auth', formHoneypotMiddleware);
 ```
 
 **Campos Honeypot para Formulários**:
+
 ```html
 <!-- Campo invisível que bots preenchem -->
 <input type="text" name="email_confirm" style="display:none" />
@@ -118,6 +128,7 @@ app.use('/api/auth', formHoneypotMiddleware);
 **Arquivo Criado**: `server/middleware/api-docs-protection.ts`
 
 **Endpoints Protegidos**:
+
 - `/api/docs`
 - `/api/swagger`
 - `/api/schema`
@@ -125,17 +136,23 @@ app.use('/api/auth', formHoneypotMiddleware);
 - `/__debug__`
 
 **Comportamento**:
+
 - **Development**: Permite acesso para facilitar desenvolvimento
 - **Staging/Production**: Retorna 404, oculta existência
 
 **Detecção de Enumeração**:
+
 - Detecta wildcards: `/api/v1/*`
 - Detecta parâmetros suspeitos: `?test=`, `?debug=`
 - Detecta directory traversal: `/../`
 
 **Integração** (em server/app.ts):
+
 ```typescript
-import { apiDocsProtectionMiddleware, apiEnumerationProtectionMiddleware } from './middleware/api-docs-protection';
+import {
+  apiDocsProtectionMiddleware,
+  apiEnumerationProtectionMiddleware,
+} from './middleware/api-docs-protection';
 
 app.use(apiDocsProtectionMiddleware);
 app.use(apiEnumerationProtectionMiddleware);
@@ -146,10 +163,12 @@ app.use(apiEnumerationProtectionMiddleware);
 ### 5. ✅ Segregação de Ambientes (ASVS V14.1.1)
 
 **Arquivos Criados**:
+
 - `server/config/environment.ts` - Configuração por ambiente
 - `.env.example` - Template de variáveis
 
 **Separação Completa**:
+
 ```typescript
 // Development
 {
@@ -169,11 +188,13 @@ app.use(apiEnumerationProtectionMiddleware);
 ```
 
 **Validações de Segurança**:
+
 - Produção não pode usar secrets de desenvolvimento
 - Monitoramento obrigatório em produção
 - Email de alertas obrigatório em produção
 
 **Como Usar**:
+
 ```typescript
 import { getEnvironmentConfig } from './config/environment';
 
@@ -188,6 +209,7 @@ if (config.enableHoneypots) {
 ## MÉTRICAS DE SEGURANÇA
 
 ### Antes das Correções
+
 - Comentários TODO/FIXME expostos no frontend
 - Código JavaScript legível e fácil de reverter
 - Sem detecção de atacantes explorando
@@ -195,6 +217,7 @@ if (config.enableHoneypots) {
 - Mesmas chaves em todos ambientes
 
 ### Após as Correções
+
 - Build de produção limpo de comentários sensíveis
 - Código JavaScript ofuscado e protegido
 - 20 honeypots detectando atacantes
@@ -206,6 +229,7 @@ if (config.enableHoneypots) {
 ## INTEGRAÇÃO COMPLETA
 
 ### 1. Atualizar package.json:
+
 ```json
 {
   "scripts": {
@@ -217,18 +241,20 @@ if (config.enableHoneypots) {
 ```
 
 ### 2. Atualizar vite.config.ts:
+
 ```typescript
 import { obfuscatorPlugin } from './vite-plugin-obfuscate';
 
 export default defineConfig({
   plugins: [
     // ... outros plugins
-    process.env.NODE_ENV === 'production' && obfuscatorPlugin()
-  ].filter(Boolean)
+    process.env.NODE_ENV === 'production' && obfuscatorPlugin(),
+  ].filter(Boolean),
 });
 ```
 
 ### 3. Atualizar server/app.ts:
+
 ```typescript
 import { getEnvironmentConfig } from './config/environment';
 import { registerHoneypots, formHoneypotMiddleware } from './middleware/honeypot';
@@ -251,6 +277,7 @@ app.use(apiDocsProtectionMiddleware);
 ## CONFORMIDADE FINAL
 
 ### OWASP ASVS Compliance:
+
 - **V2**: Autenticação ✅
 - **V3**: Gerenciamento de Sessão ✅
 - **V4**: Controle de Acesso ✅
@@ -262,6 +289,7 @@ app.use(apiDocsProtectionMiddleware);
 - **V14**: Configuração ✅
 
 ### OWASP Top 10 Mitigados:
+
 - **A01**: Broken Access Control ✅
 - **A02**: Cryptographic Failures ✅
 - **A03**: Injection ✅

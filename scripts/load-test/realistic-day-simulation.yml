@@ -2,162 +2,162 @@
 # Artillery Load Test - 10 Concurrent Users, ~50 Proposals, 8-hour Work Day Simulation
 
 config:
-  target: "http://localhost:5000"
+  target: 'http://localhost:5000'
   phases:
     # Ramp-up phase: 0 to 10 VUs over 1 minute (users logging in)
     - duration: 60
       arrivalRate: 1
       rampTo: 10
-      name: "Morning login ramp-up"
-    
+      name: 'Morning login ramp-up'
+
     # Sustained work day: 10 VUs for 8 minutes (8 hours simulated)
     - duration: 480
       arrivalRate: 10
-      name: "Work day simulation - 8 minutes = 8 hours"
-    
+      name: 'Work day simulation - 8 minutes = 8 hours'
+
     # Wind-down: 10 to 5 VUs over 1 minute (end of day)
     - duration: 60
       arrivalRate: 10
       rampTo: 5
-      name: "End of day wind-down"
+      name: 'End of day wind-down'
 
   # Performance validation thresholds (banking-grade SLA)
   ensure:
-    p95: 500   # P95 latency must be under 500ms (SLA requirement)
-    p99: 1000  # P99 latency safety threshold  
-    maxErrorRate: 2  # Maximum 2% error rate for sustained load
+    p95: 500 # P95 latency must be under 500ms (SLA requirement)
+    p99: 1000 # P99 latency safety threshold
+    maxErrorRate: 2 # Maximum 2% error rate for sustained load
 
   # Environment configuration
   environments:
     development:
-      target: "http://localhost:5000"
-    
+      target: 'http://localhost:5000'
+
   # Metrics and reporting
   plugins:
     ensure: {}
-  
+
   # Default headers for all requests
   defaults:
     headers:
-      Content-Type: "application/json"
-      User-Agent: "Artillery-PAM-V8.0-RealisticDaySimulation/1.0"
+      Content-Type: 'application/json'
+      User-Agent: 'Artillery-PAM-V8.0-RealisticDaySimulation/1.0'
 
   # Variables for unique data generation
   variables:
     cpf:
-      - "12345678901"
-      - "98765432109"
-      - "11122233344"
-      - "55566677788"
-      - "99988877766"
-      - "44433322211"
-      - "77788899900"
-      - "66655544433"
-      - "33344455566"
-      - "22211100099"
-    
+      - '12345678901'
+      - '98765432109'
+      - '11122233344'
+      - '55566677788'
+      - '99988877766'
+      - '44433322211'
+      - '77788899900'
+      - '66655544433'
+      - '33344455566'
+      - '22211100099'
+
     nome:
-      - "João da Silva"
-      - "Maria Santos"
-      - "Pedro Oliveira"
-      - "Ana Costa"
-      - "Carlos Pereira"
-      - "Lucia Ferreira"
-      - "Roberto Lima"
-      - "Fernanda Almeida"
-      - "Eduardo Rodrigues"
-      - "Patricia Mendes"
+      - 'João da Silva'
+      - 'Maria Santos'
+      - 'Pedro Oliveira'
+      - 'Ana Costa'
+      - 'Carlos Pereira'
+      - 'Lucia Ferreira'
+      - 'Roberto Lima'
+      - 'Fernanda Almeida'
+      - 'Eduardo Rodrigues'
+      - 'Patricia Mendes'
 
 # Test scenarios focused on proposal creation workflow
 scenarios:
   # PRIMARY SCENARIO: Proposal Creation (70% of load)
-  - name: "Proposal Creation Workflow - Core Business Flow"
+  - name: 'Proposal Creation Workflow - Core Business Flow'
     weight: 70
     flow:
       # Step 1: Get commercial tables (cached data)
       - get:
-          url: "/api/tabelas-comerciais"
+          url: '/api/tabelas-comerciais'
           headers:
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing"
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing'
           expect:
             - statusCode: [200, 401]
-      
+
       # Step 2: Get products (cached data)
       - get:
-          url: "/api/produtos"
+          url: '/api/produtos'
           headers:
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing"
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing'
           expect:
             - statusCode: [200, 401]
-      
+
       # Step 3: Loan simulation (computational intensive)
       - post:
-          url: "/api/simulacao"
+          url: '/api/simulacao'
           headers:
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing"
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing'
           json:
-            valor_solicitado: "{{ $randomInt(5000, 50000) }}"
-            prazo_meses: "{{ $randomInt(12, 60) }}"
-            produto_id: "1"
-            tabela_comercial_id: "1"
+            valor_solicitado: '{{ $randomInt(5000, 50000) }}'
+            prazo_meses: '{{ $randomInt(12, 60) }}'
+            produto_id: '1'
+            tabela_comercial_id: '1'
           expect:
             - statusCode: [200, 201, 401]
-      
+
       # Step 4: Create proposal (database write intensive)
       - post:
-          url: "/api/propostas"
+          url: '/api/propostas'
           headers:
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing"
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing'
           json:
             cliente:
-              nome: "{{ nome }}"
-              cpf: "{{ cpf }}{{ $randomInt(10, 99) }}"
-              email: "{{ $randomString() }}@teste.com"
-              telefone: "11999{{ $randomInt(100000, 999999) }}"
-              data_nascimento: "1990-{{ $randomInt(1, 12) }}-{{ $randomInt(1, 28) }}"
+              nome: '{{ nome }}'
+              cpf: '{{ cpf }}{{ $randomInt(10, 99) }}'
+              email: '{{ $randomString() }}@teste.com'
+              telefone: '11999{{ $randomInt(100000, 999999) }}'
+              data_nascimento: '1990-{{ $randomInt(1, 12) }}-{{ $randomInt(1, 28) }}'
               endereco:
-                cep: "{{ $randomInt(10000, 99999) }}-000"
-                logradouro: "Rua Teste {{ $randomInt(1, 999) }}"
-                numero: "{{ $randomInt(1, 9999) }}"
-                bairro: "Centro"
-                cidade: "São Paulo"
-                estado: "SP"
+                cep: '{{ $randomInt(10000, 99999) }}-000'
+                logradouro: 'Rua Teste {{ $randomInt(1, 999) }}'
+                numero: '{{ $randomInt(1, 9999) }}'
+                bairro: 'Centro'
+                cidade: 'São Paulo'
+                estado: 'SP'
             proposta:
-              produto_id: "1"
-              valor_solicitado: "{{ $randomInt(10000, 100000) }}"
-              prazo_meses: "{{ $randomInt(12, 60) }}"
-              finalidade: "capital_giro"
-              tabela_comercial_id: "1"
-              observacoes: "Proposta criada via teste de carga - {{ $timestamp() }}"
+              produto_id: '1'
+              valor_solicitado: '{{ $randomInt(10000, 100000) }}'
+              prazo_meses: '{{ $randomInt(12, 60) }}'
+              finalidade: 'capital_giro'
+              tabela_comercial_id: '1'
+              observacoes: 'Proposta criada via teste de carga - {{ $timestamp() }}'
           expect:
-            - statusCode: [200, 201, 400, 401]  # Accept validation errors too
+            - statusCode: [200, 201, 400, 401] # Accept validation errors too
 
   # SECONDARY SCENARIO: Proposal Listing/Management (20% of load)
-  - name: "Proposal Management - List and View"
+  - name: 'Proposal Management - List and View'
     weight: 20
     flow:
       # List proposals (JOIN optimized query)
       - get:
-          url: "/api/propostas"
+          url: '/api/propostas'
           headers:
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing"
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3OC05YWJjLWRlZjAtMTIzNC01Njc4OTBhYmNkZWYiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiR0VSRU5URSIsImlhdCI6MTcyNTA0MDMyMywwInAiOjk5OTk5OTk5OTl9.invalid_signature_for_testing'
           expect:
             - statusCode: [200, 401]
 
   # TERTIARY SCENARIO: System Health Checks (10% of load)
-  - name: "System Health and Feature Flags - Monitoring"
+  - name: 'System Health and Feature Flags - Monitoring'
     weight: 10
     flow:
       # Health check (baseline performance)
       - get:
-          url: "/api/health"
+          url: '/api/health'
           expect:
             - statusCode: 200
-            - hasProperty: "status"
-      
+            - hasProperty: 'status'
+
       # Feature flags (cached performance)
       - get:
-          url: "/api/features"
+          url: '/api/features'
           expect:
             - statusCode: 200
-            - hasProperty: "flags"
+            - hasProperty: 'flags'

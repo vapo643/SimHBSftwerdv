@@ -106,15 +106,18 @@ export class PagamentoService {
     // CONF-001 CRITICAL FIX: Check database for existing payment before creating job
     // This prevents duplicate jobs at the application level
     const existingCollection = await pagamentoRepository.checkExistingPayment(validated.propostaId);
-    
+
     if (existingCollection) {
-      console.log(`[PAYMENT IDEMPOTENCY] 🛡️ Payment already exists for proposal ${validated.propostaId}:`, {
-        codigoSolicitacao: existingCollection.codigoSolicitacao,
-        seuNumero: existingCollection.seuNumero,
-        situacao: existingCollection.situacao,
-        createdAt: existingCollection.createdAt
-      });
-      
+      console.log(
+        `[PAYMENT IDEMPOTENCY] 🛡️ Payment already exists for proposal ${validated.propostaId}:`,
+        {
+          codigoSolicitacao: existingCollection.codigoSolicitacao,
+          seuNumero: existingCollection.seuNumero,
+          situacao: existingCollection.situacao,
+          createdAt: existingCollection.createdAt,
+        }
+      );
+
       return {
         message: 'Pagamento já foi processado anteriormente (idempotência database-level)',
         propostaId: validated.propostaId,
@@ -122,7 +125,7 @@ export class PagamentoService {
           codigoSolicitacao: existingCollection.codigoSolicitacao,
           seuNumero: existingCollection.seuNumero,
           situacao: existingCollection.situacao,
-          valorNominal: existingCollection.valorNominal
+          valorNominal: existingCollection.valorNominal,
         },
         status: 'ja_processado',
         duplicate: true,
@@ -130,17 +133,19 @@ export class PagamentoService {
       };
     }
 
-    // CONF-001 FIX: Generate DETERMINISTIC jobId without timestamp 
+    // CONF-001 FIX: Generate DETERMINISTIC jobId without timestamp
     // This ensures the same proposal always gets the same jobId
     const jobId = `payment-${validated.propostaId}`;
 
-    console.log(`[PAYMENT IDEMPOTENCY] 🔑 Generated deterministic jobId: ${jobId} for proposal ${validated.propostaId}`);
+    console.log(
+      `[PAYMENT IDEMPOTENCY] 🔑 Generated deterministic jobId: ${jobId} for proposal ${validated.propostaId}`
+    );
 
     try {
-      // CONF-001 - Add job to paymentsQueue with deterministic jobId 
+      // CONF-001 - Add job to paymentsQueue with deterministic jobId
       const paymentsQueue = await getPaymentsQueue();
       const job = await paymentsQueue.add(
-        'PROCESS_PAYMENT', 
+        'PROCESS_PAYMENT',
         {
           type: 'PROCESS_PAYMENT',
           propostaId: validated.propostaId,
@@ -162,8 +167,10 @@ export class PagamentoService {
         }
       );
 
-      console.log(`[PAYMENT IDEMPOTENCY] ✅ Job ${jobId} added to paymentsQueue (Job ID: ${job.id})`);
-      
+      console.log(
+        `[PAYMENT IDEMPOTENCY] ✅ Job ${jobId} added to paymentsQueue (Job ID: ${job.id})`
+      );
+
       // Return job information instead of direct processing result
       return {
         message: 'Pagamento enfileirado para processamento idempotente',
@@ -173,12 +180,13 @@ export class PagamentoService {
         status: 'em_fila',
         timestamp: new Date().toISOString(),
       };
-
     } catch (error: any) {
       // If job addition fails, check if it's due to duplicate jobId (idempotency working)
       if (error.message?.includes('already exists') || error.message?.includes('duplicate')) {
-        console.log(`[PAYMENT IDEMPOTENCY] 🛡️ Duplicate job prevented: ${jobId} already exists in queue`);
-        
+        console.log(
+          `[PAYMENT IDEMPOTENCY] 🛡️ Duplicate job prevented: ${jobId} already exists in queue`
+        );
+
         return {
           message: 'Pagamento já foi enfileirado anteriormente (idempotência BullMQ-level)',
           jobId: jobId,
@@ -188,7 +196,7 @@ export class PagamentoService {
           timestamp: new Date().toISOString(),
         };
       }
-      
+
       console.error(`[PAYMENT IDEMPOTENCY] ❌ Failed to add job ${jobId}:`, error as Error);
       throw new Error(`Erro ao enfileirar pagamento: ${(error as Error).message}`);
     }

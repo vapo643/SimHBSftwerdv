@@ -10,6 +10,7 @@
 ## 🧪 Como Testar
 
 ### 1. Teste Simples no Painel ClickSign
+
 1. Vá em **Configurações → Webhooks**
 2. Encontre o webhook que você criou
 3. Clique em **"Testar"** ou **"Test"**
@@ -17,7 +18,9 @@
 5. Clique em **Enviar**
 
 ### 2. O que deve acontecer
+
 Você verá nos logs do sistema:
+
 ```
 [CLICKSIGN WEBHOOK] ✅ Webhook secret validated
 [CLICKSIGN WEBHOOK v3] Processing event: auto_close
@@ -25,6 +28,7 @@ Você verá nos logs do sistema:
 ```
 
 ### 3. Teste Real (Criar CCB de Teste)
+
 1. Crie uma proposta de teste no sistema
 2. Gere o CCB
 3. Envie para ClickSign
@@ -34,6 +38,7 @@ Você verá nos logs do sistema:
 ## 🔍 Monitorando os Logs
 
 Para ver os logs em tempo real:
+
 - Os logs aparecem automaticamente no console do Replit
 - Procure por mensagens com `[CLICKSIGN WEBHOOK]`
 - Eventos importantes mostram emojis: ✅ ❌ 🎉 🚀
@@ -41,14 +46,17 @@ Para ver os logs em tempo real:
 ## 🚨 Possíveis Problemas
 
 ### ❌ "Invalid webhook signature"
+
 - **Causa**: Secret incorreto
 - **Solução**: Verificar se copiou o secret corretamente
 
 ### ❌ "Proposal not found"
+
 - **Causa**: Sistema não encontrou a proposta relacionada
 - **Solução**: Normal em testes - use proposta real
 
 ### ❌ "Too many requests"
+
 - **Causa**: Rate limiting ativo
 - **Solução**: Espere alguns segundos e tente novamente
 
@@ -60,7 +68,7 @@ Se aparecer ✅ nos logs, está funcionando perfeitamente.
 ## 📞 Status
 
 - **Webhook**: ✅ Configurado e ativo
-- **Segurança**: ✅ HMAC validation ativa  
+- **Segurança**: ✅ HMAC validation ativa
 - **Integração**: ✅ Inter Bank conectado
 - **Sistema**: ✅ Pronto para produção
 

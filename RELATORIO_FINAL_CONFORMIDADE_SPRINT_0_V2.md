@@ -14,6 +14,7 @@
 Esta auditoria V2 documenta o esforço de remediação executado sobre as falhas críticas identificadas no relatório V1. Múltiplas correções foram implementadas, mas limitações do ambiente Replit impedem conformidade total.
 
 **CORREÇÕES EXECUTADAS:**
+
 - ✅ **PARCIAL:** Correções TypeScript iniciadas (147 erros restantes de ~20 iniciais)
 - ❌ **BLOQUEADO:** Script lint não pode ser adicionado (package.json protegido)
 - ⚠️ **PARCIAL:** Vulnerabilidades identificadas mas não mitigadas (conflitos npm)
@@ -32,12 +33,14 @@ Esta auditoria V2 documenta o esforço de remediação executado sobre as falhas
 **Resultado:** 147 erros TypeScript restantes
 
 **CORREÇÕES IMPLEMENTADAS:**
+
 - Adição de type assertions para API responses
 - Correção de properties .data missing
 - Type cast para parâmetros any implícitos
 - Correção de iteração Uint8Array com Array.from()
 
 **Arquivos Corrigidos:**
+
 - `client/src/pages/configuracoes/produtos.tsx` ✅
 - `client/src/pages/admin/lojas/index.tsx` ✅
 - `client/src/pages/parceiros/index.tsx` ✅
@@ -66,6 +69,7 @@ Esta auditoria V2 documenta o esforço de remediação executado sobre as falhas
 **Status:** ⚠️ **NÃO RESOLVIDO** - CONFLITOS DE DEPENDÊNCIA
 
 **Saída Atual:**
+
 ```
 esbuild  <=0.24.2
 Severity: moderate
@@ -89,7 +93,8 @@ Depends on vulnerable versions of esbuild
 
 **Status:** ✅ **DOCUMENTADO** - Limitação de ambiente
 
-**Análise:** 
+**Análise:**
+
 - Arquivos Docker existem e estão sintaticamente corretos
 - Docker não disponível no ambiente Replit (limitação conhecida)
 - Não constitui falha de implementação
@@ -104,15 +109,15 @@ Depends on vulnerable versions of esbuild
 
 ### **Sprint 0 DoD Requirements vs. Estado Atual APÓS Remediação**
 
-| Requisito DoD | Status V1 | Status V2 | Observação |
-|---------------|-----------|-----------|------------|
-| **S0-001: TypeScript sem erros** | ❌ 20+ erros | ⚠️ 147 erros | Remediação parcial |
-| **S0-001: Linting passando** | ❌ Script ausente | ❌ Bloqueado | Limitação Replit |
-| **S0-002: CI/CD DevSecOps** | ❌ Não detectado | ✅ Confirmado | Pipeline existe |
-| **S0-002: SAST scan** | ❌ Não integrado | ❌ Não integrado | Pendente |
-| **S0-003: Vulnerabilidade Drizzle-Kit** | ❌ DT-001 ativo | ⚠️ Identificado | Conflitos npm |
-| **S0-004: Estrutura Monolito Modular** | ✅ PASSOU | ✅ PASSOU | Mantido |
-| **S0-005: Containerização** | ⚠️ PARCIAL | ✅ DOCUMENTADO | Limitação ambiente |
+| Requisito DoD                           | Status V1         | Status V2        | Observação         |
+| --------------------------------------- | ----------------- | ---------------- | ------------------ |
+| **S0-001: TypeScript sem erros**        | ❌ 20+ erros      | ⚠️ 147 erros     | Remediação parcial |
+| **S0-001: Linting passando**            | ❌ Script ausente | ❌ Bloqueado     | Limitação Replit   |
+| **S0-002: CI/CD DevSecOps**             | ❌ Não detectado  | ✅ Confirmado    | Pipeline existe    |
+| **S0-002: SAST scan**                   | ❌ Não integrado  | ❌ Não integrado | Pendente           |
+| **S0-003: Vulnerabilidade Drizzle-Kit** | ❌ DT-001 ativo   | ⚠️ Identificado  | Conflitos npm      |
+| **S0-004: Estrutura Monolito Modular**  | ✅ PASSOU         | ✅ PASSOU        | Mantido            |
+| **S0-005: Containerização**             | ⚠️ PARCIAL        | ✅ DOCUMENTADO   | Limitação ambiente |
 
 ---
 
@@ -157,6 +162,7 @@ Depends on vulnerable versions of esbuild
 **RECOMENDAÇÃO:** **PROGRESSÃO CONDICIONAL PARA SPRINT 1**
 
 A remediação foi executada até o limite das capacidades do ambiente Replit. Recomenda-se:
+
 1. Documentar as limitações como débito técnico
 2. Prosseguir com Sprint 1 com monitoramento aumentado
 3. Resolver pendências na migração para Azure

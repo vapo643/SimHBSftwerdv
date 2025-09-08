@@ -5,6 +5,7 @@
 Implementamos um sistema robusto de webhooks para o ClickSign com as seguintes características:
 
 ### 🔒 Segurança
+
 - **Validação HMAC**: Verificação de assinatura SHA-256 para garantir autenticidade
 - **Validação de Timestamp**: Rejeita requisições com mais de 5 minutos
 - **Proteção contra Replay**: Sistema de deduplicação de eventos
@@ -12,6 +13,7 @@ Implementamos um sistema robusto de webhooks para o ClickSign com as seguintes c
 ### 📋 Eventos Suportados
 
 #### Eventos de Documento
+
 - `document.created` - Documento criado no ClickSign
 - `document.signed` - Documento assinado (dispara geração de boleto)
 - `document.finished` - Todos os signatários assinaram
@@ -19,10 +21,12 @@ Implementamos um sistema robusto de webhooks para o ClickSign com as seguintes c
 - `document.refused` - Assinatura recusada
 
 #### Eventos de Signatário
+
 - `signer.signed` - Signatário específico assinou
 - `signer.viewed` - Signatário visualizou o documento
 
 #### Eventos de Lista
+
 - `list.created` - Lista de assinatura criada
 - `list.updated` - Lista atualizada
 - `auto_close.deadline` - Prazo de assinatura expirado
@@ -30,6 +34,7 @@ Implementamos um sistema robusto de webhooks para o ClickSign com as seguintes c
 ## 🔧 Configuração
 
 ### 1. Variável de Ambiente
+
 ```bash
 # Adicione ao seu .env
 CLICKSIGN_WEBHOOK_SECRET=seu-webhook-secret-aqui
@@ -38,16 +43,19 @@ CLICKSIGN_WEBHOOK_SECRET=seu-webhook-secret-aqui
 ### 2. Configurar Webhook no ClickSign
 
 **Produção:**
+
 ```
 URL: https://seu-dominio.com/api/clicksign/webhook
 ```
 
 **Sandbox:**
+
 ```
 URL: https://seu-dominio.com/api/clicksign/webhook
 ```
 
 ### 3. Eventos para Selecionar no ClickSign
+
 - ✅ document.created
 - ✅ document.signed
 - ✅ document.finished
@@ -62,6 +70,7 @@ URL: https://seu-dominio.com/api/clicksign/webhook
 ## 🚀 Fluxo Automático
 
 ### Assinatura → Boleto
+
 1. Cliente assina CCB no ClickSign
 2. Webhook `document.signed` é disparado
 3. Sistema valida assinatura HMAC
@@ -71,12 +80,14 @@ URL: https://seu-dominio.com/api/clicksign/webhook
 ## 📊 Logs e Monitoramento
 
 Todos os eventos são registrados com:
+
 - Timestamp em horário de Brasília
 - ID da proposta relacionada
 - Status anterior e novo
 - Descrição detalhada da ação
 
 ### Exemplos de Logs
+
 ```
 [CLICKSIGN WEBHOOK] Processing event: document.signed
 [CLICKSIGN WEBHOOK] ✅ Document signed for proposal: 12345
@@ -97,6 +108,7 @@ Todos os eventos são registrados com:
 Para debugar webhooks em desenvolvimento:
 
 1. Use ngrok ou similar para expor localhost:
+
 ```bash
 ngrok http 5000
 ```

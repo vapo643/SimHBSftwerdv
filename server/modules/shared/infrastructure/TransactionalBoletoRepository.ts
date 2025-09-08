@@ -1,6 +1,6 @@
 /**
  * Adapter Transacional para BoletoRepository
- * 
+ *
  * Permite que o repositório de Boletos trabalhe dentro de uma transação
  * gerenciada pelo Unit of Work.
  */
@@ -11,8 +11,17 @@ import { ExtractTablesWithRelations } from 'drizzle-orm';
 import { boletos, propostas, ccbs } from '@shared/schema';
 import * as schema from '@shared/schema';
 import { Boleto } from '@shared/schema';
-import { IBoletoRepository, BoletoStatus, FormaPagamento } from '../../boleto/domain/IBoletoRepository';
-import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
+import {
+  IBoletoRepository,
+  BoletoStatus,
+  FormaPagamento,
+} from '../../boleto/domain/IBoletoRepository';
+import {
+  PaginatedResult,
+  CursorPaginationOptions,
+  RepositoryFilters,
+  CursorUtils,
+} from '@shared/types/pagination';
 
 // Type para transação Drizzle
 type DrizzleTransaction = PostgresJsTransaction<
@@ -127,17 +136,19 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
       const thresholdDate = new Date();
       thresholdDate.setDate(thresholdDate.getDate() - daysOverdue);
       const thresholdDateStr = thresholdDate.toISOString().split('T')[0];
-      
+
       const result = await this.tx
         .select()
         .from(boletos)
-        .where(and(
-          lt(boletos.dataVencimento, thresholdDateStr),
-          inArray(boletos.status, ['emitido', 'enviado', 'visualizado'] as any[]),
-          isNull(boletos.deletedAt)
-        ))
+        .where(
+          and(
+            lt(boletos.dataVencimento, thresholdDateStr),
+            inArray(boletos.status, ['emitido', 'enviado', 'visualizado'] as any[]),
+            isNull(boletos.deletedAt)
+          )
+        )
         .orderBy(desc(boletos.dataVencimento));
-      
+
       return result;
     }
 
@@ -188,10 +199,7 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
       .select()
       .from(boletos)
       .where(
-        and(
-          inArray(boletos.status, ['emitido', 'enviado'] as any[]),
-          isNull(boletos.deletedAt)
-        )
+        and(inArray(boletos.status, ['emitido', 'enviado'] as any[]), isNull(boletos.deletedAt))
       )
       .orderBy(desc(boletos.createdAt));
 
@@ -201,7 +209,7 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
   async findPaidInPeriod(startDate: Date, endDate: Date): Promise<Boleto[]> {
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr = endDate.toISOString().split('T')[0];
-    
+
     const result = await this.tx
       .select()
       .from(boletos)
@@ -262,7 +270,10 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
     return {
       data: result,
       pagination: {
-        nextCursor: result.length === (options.limit || 50) ? CursorUtils.createFromItem(result[result.length - 1], 'createdAt') : null,
+        nextCursor:
+          result.length === (options.limit || 50)
+            ? CursorUtils.createFromItem(result[result.length - 1], 'createdAt')
+            : null,
         prevCursor: null,
         pageSize: result.length,
         hasNextPage: result.length === (options.limit || 50),
@@ -273,8 +284,8 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
 
   async getTotalPendingByProposta(propostaId: string): Promise<number> {
     const result = await this.tx
-      .select({ 
-        total: sql<number>`COALESCE(SUM(CAST(${boletos.valorTotal} AS DECIMAL)), 0)` 
+      .select({
+        total: sql<number>`COALESCE(SUM(CAST(${boletos.valorTotal} AS DECIMAL)), 0)`,
       })
       .from(boletos)
       .where(
@@ -293,17 +304,17 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
       .select()
       .from(boletos)
       .where(
-        and(
-          gte(sql`CAST(${boletos.valorTotal} AS DECIMAL)`, minAmount),
-          isNull(boletos.deletedAt)
-        )
+        and(gte(sql`CAST(${boletos.valorTotal} AS DECIMAL)`, minAmount), isNull(boletos.deletedAt))
       )
       .orderBy(desc(boletos.valorTotal));
 
     return result;
   }
 
-  async getPaymentStatsByPeriod(startDate: Date, endDate: Date): Promise<{
+  async getPaymentStatsByPeriod(
+    startDate: Date,
+    endDate: Date
+  ): Promise<{
     totalEmitidos: number;
     totalPagos: number;
     totalVencidos: number;
@@ -313,11 +324,11 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
   }> {
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr = endDate.toISOString().split('T')[0];
-    
+
     const emitidos = await this.tx
-      .select({ 
+      .select({
         count: sql<number>`count(*)`,
-        valor: sql<number>`COALESCE(SUM(CAST(${boletos.valorTotal} AS DECIMAL)), 0)`
+        valor: sql<number>`COALESCE(SUM(CAST(${boletos.valorTotal} AS DECIMAL)), 0)`,
       })
       .from(boletos)
       .where(
@@ -329,9 +340,9 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
       );
 
     const pagos = await this.tx
-      .select({ 
+      .select({
         count: sql<number>`count(*)`,
-        valor: sql<number>`COALESCE(SUM(CAST(${boletos.valorTotal} AS DECIMAL)), 0)`
+        valor: sql<number>`COALESCE(SUM(CAST(${boletos.valorTotal} AS DECIMAL)), 0)`,
       })
       .from(boletos)
       .where(
@@ -344,9 +355,9 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
       );
 
     const vencidos = await this.tx
-      .select({ 
+      .select({
         count: sql<number>`count(*)`,
-        valor: sql<number>`COALESCE(SUM(CAST(${boletos.valorTotal} AS DECIMAL)), 0)`
+        valor: sql<number>`COALESCE(SUM(CAST(${boletos.valorTotal} AS DECIMAL)), 0)`,
       })
       .from(boletos)
       .where(
@@ -374,15 +385,11 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
       .from(boletos)
       .innerJoin(propostas, eq(boletos.propostaId, propostas.id))
       .where(
-        and(
-          eq(propostas.clienteCpf, cpf),
-          isNull(boletos.deletedAt),
-          isNull(propostas.deletedAt)
-        )
+        and(eq(propostas.clienteCpf, cpf), isNull(boletos.deletedAt), isNull(propostas.deletedAt))
       )
       .orderBy(desc(boletos.createdAt));
 
-    return result.map(r => r.boletos);
+    return result.map((r) => r.boletos);
   }
 
   async findByGeneratedBy(userId: string): Promise<Boleto[]> {
@@ -399,12 +406,7 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
     const result = await this.tx
       .select({ count: sql<number>`count(*)` })
       .from(boletos)
-      .where(
-        and(
-          eq(boletos.status, status as any),
-          isNull(boletos.deletedAt)
-        )
-      );
+      .where(and(eq(boletos.status, status as any), isNull(boletos.deletedAt)));
 
     return result[0]?.count || 0;
   }
@@ -415,18 +417,10 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
       .from(boletos)
       .leftJoin(propostas, eq(boletos.propostaId, propostas.id))
       .leftJoin(ccbs, eq(boletos.ccbId, ccbs.id))
-      .where(
-        and(
-          or(
-            isNull(propostas.id),
-            isNull(ccbs.id)
-          ),
-          isNull(boletos.deletedAt)
-        )
-      )
+      .where(and(or(isNull(propostas.id), isNull(ccbs.id)), isNull(boletos.deletedAt)))
       .orderBy(desc(boletos.createdAt));
 
-    return result.map(r => r.boletos);
+    return result.map((r) => r.boletos);
   }
 
   async exists(id: string): Promise<boolean> {
@@ -460,7 +454,9 @@ export class TransactionalBoletoRepository implements IBoletoRepository {
 
   async getNextNumeroBoleto(): Promise<string> {
     const result = await this.tx
-      .select({ maxNum: sql<number>`COALESCE(MAX(CAST(${boletos.numeroBoleto} AS INTEGER)), 200000)` })
+      .select({
+        maxNum: sql<number>`COALESCE(MAX(CAST(${boletos.numeroBoleto} AS INTEGER)), 200000)`,
+      })
       .from(boletos);
 
     const nextNumber = (result[0]?.maxNum || 200000) + 1;

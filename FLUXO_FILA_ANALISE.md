@@ -11,6 +11,7 @@
 ### **Arquivo-Alvo:** `client/src/pages/credito/fila.tsx`
 
 #### **Evidência 1.1: Query TanStack**
+
 ```typescript
 // Linha 104-107: useQuery configuration
 const {
@@ -35,6 +36,7 @@ const queryUrl = useMemo(() => {
 ```
 
 #### **Evidência 1.2: Estrutura JSX da Tabela**
+
 ```typescript
 // Linha 46-66: Interface esperada pelo frontend
 interface Proposta {
@@ -51,7 +53,7 @@ interface Proposta {
     id: number;
     razaoSocial: string; // ← CAMPO CRÍTICO
   };
-  loja?: {             // ← OBJETO ANINHADO ESPERADO  
+  loja?: {             // ← OBJETO ANINHADO ESPERADO
     id: number;
     nomeLoja: string;   // ← CAMPO CRÍTICO
   };
@@ -74,12 +76,12 @@ filteredData.map((proposta) => (
 ```
 
 #### **Evidência 1.3: Filtro de Status Crítico**
+
 ```typescript
 // Linha 125-129: Filtro local no frontend para ANALISTA
 if (user?.role === 'ANALISTA' && !showHistorico) {
   filtered = propostas.filter(
-    (proposta) => proposta.status === 'aguardando_analise' || 
-                  proposta.status === 'em_analise'  // ← STATUSES ESPERADOS
+    (proposta) => proposta.status === 'aguardando_analise' || proposta.status === 'em_analise' // ← STATUSES ESPERADOS
   );
 }
 ```
@@ -91,6 +93,7 @@ if (user?.role === 'ANALISTA' && !showHistorico) {
 ### **Arquivo-Alvo:** `server/routes/propostas/core.ts` + `server/modules/proposal/presentation/proposalController.ts`
 
 #### **Evidência 2.1: Rota e Controller**
+
 ```typescript
 // core.ts linha 29: Registro da rota
 router.get('/', auth, (req: any, res: any) => controller.list(req, res));
@@ -99,7 +102,7 @@ router.get('/', auth, (req: any, res: any) => controller.list(req, res));
 async list(req: Request, res: Response): Promise<Response> {
   try {
     const { status, loja_id, atendente_id, cpf, queue } = req.query;
-    
+
     const user = (req as any).user;
     let criteria: any = {};
 
@@ -146,6 +149,7 @@ async list(req: Request, res: Response): Promise<Response> {
 ### **Arquivo-Alvo:** `server/modules/proposal/infrastructure/ProposalRepository.ts`
 
 #### **Evidência 3.1: Query Drizzle ORM Completa**
+
 ```typescript
 // Linha 229-315: Método findByCriteriaLightweight() COMPLETO
 async findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]> {
@@ -154,7 +158,7 @@ async findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]
   if (criteria.status) {
     conditions.push(eq(propostas.status, criteria.status));
   }
-  
+
   // ← SUPORTE CRÍTICO PARA MÚLTIPLOS STATUS (queue=analysis)
   if (criteria.statusArray && Array.isArray(criteria.statusArray)) {
     conditions.push(inArray(propostas.status, criteria.statusArray));
@@ -166,7 +170,7 @@ async findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]
   if (criteria.cpf) conditions.push(eq(propostas.clienteCpf, cleanCPF));
 
   console.log('⚡ [PERF-BOOST-001] Executing lightweight query without Value Objects...');
-  
+
   // ← QUERY PRINCIPAL COM TODOS OS JOINs NECESSÁRIOS
   const results = await db
     .select({
@@ -220,9 +224,11 @@ async findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]
 ```
 
 #### **Análise da Query:**
+
 ✅ **JOINS CORRETOS:** A query realiza todos os JOINs necessários:
+
 - `propostas` ← LEFT JOIN → `produtos` (para produto_nome)
-- `propostas` ← LEFT JOIN → `tabelasComerciais` (para tabela_comercial_nome)  
+- `propostas` ← LEFT JOIN → `tabelasComerciais` (para tabela_comercial_nome)
 - `propostas` ← LEFT JOIN → `lojas` (para loja_nome)
 - `lojas` ← LEFT JOIN → `parceiros` (para parceiro_nome)
 
@@ -234,20 +240,21 @@ async findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]
 
 ### **Evidência 4.1: Frontend ESPERA vs Backend RETORNA**
 
-| Campo Esperado no Frontend | Campo Retornado pelo Backend | Status |
-| :--- | :--- | :---: |
-| `nomeCliente` | `nomeCliente` (mapeado de `cliente_nome`) | ✅ CORRETO |
-| `parceiro.id` | `parceiro.id` (mapeado de `parceiro_id`) | ✅ CORRETO |
-| `parceiro.razaoSocial` | `parceiro.razaoSocial` (mapeado de `parceiro_nome`) | ✅ CORRETO |
-| `loja.id` | `loja.id` (mapeado de `loja_id`) | ✅ CORRETO |
-| `loja.nomeLoja` | `loja.nomeLoja` (mapeado de `loja_nome`) | ✅ CORRETO |
-| `status` = `'aguardando_analise'` | **STATUS NÃO EXISTE NO BANCO** | ❌ **FALHA CRÍTICA** |
-| `status` = `'em_analise'` | `status` = `'em_analise'` | ✅ CORRETO |
-| `createdAt` | `created_at` | ✅ CORRETO |
-| `valor` | `valor` | ✅ CORRETO |
-| `prazo` | `prazo` | ✅ CORRETO |
+| Campo Esperado no Frontend        | Campo Retornado pelo Backend                        |        Status        |
+| :-------------------------------- | :-------------------------------------------------- | :------------------: |
+| `nomeCliente`                     | `nomeCliente` (mapeado de `cliente_nome`)           |      ✅ CORRETO      |
+| `parceiro.id`                     | `parceiro.id` (mapeado de `parceiro_id`)            |      ✅ CORRETO      |
+| `parceiro.razaoSocial`            | `parceiro.razaoSocial` (mapeado de `parceiro_nome`) |      ✅ CORRETO      |
+| `loja.id`                         | `loja.id` (mapeado de `loja_id`)                    |      ✅ CORRETO      |
+| `loja.nomeLoja`                   | `loja.nomeLoja` (mapeado de `loja_nome`)            |      ✅ CORRETO      |
+| `status` = `'aguardando_analise'` | **STATUS NÃO EXISTE NO BANCO**                      | ❌ **FALHA CRÍTICA** |
+| `status` = `'em_analise'`         | `status` = `'em_analise'`                           |      ✅ CORRETO      |
+| `createdAt`                       | `created_at`                                        |      ✅ CORRETO      |
+| `valor`                           | `valor`                                             |      ✅ CORRETO      |
+| `prazo`                           | `prazo`                                             |      ✅ CORRETO      |
 
 ### **Evidência 4.2: Validação no Banco de Dados**
+
 ```sql
 -- QUERY REAL EXECUTADA PARA VERIFICAR STATUS EXISTENTES:
 SELECT status, COUNT(*) FROM propostas GROUP BY status;
@@ -259,14 +266,15 @@ SELECT status, COUNT(*) FROM propostas GROUP BY status;
 ```
 
 ### **Evidência 4.3: Fluxo de Filtro Quebrado**
+
 ```typescript
 // BACKEND: busca por AMBOS status
 criteria.statusArray = ['aguardando_analise', 'em_analise'];
 // SQL: WHERE status IN ('aguardando_analise', 'em_analise')
 // RESULTADO: Retorna apenas propostas com 'em_analise' (1 proposta)
 
-// FRONTEND: filtra localmente AMBOS status  
-propostas.filter(p => p.status === 'aguardando_analise' || p.status === 'em_analise')
+// FRONTEND: filtra localmente AMBOS status
+propostas.filter((p) => p.status === 'aguardando_analise' || p.status === 'em_analise');
 // RESULTADO: Mantém a 1 proposta com 'em_analise'
 
 // STATUS FINAL: Frontend mostra 1 proposta (correto pelos dados disponíveis)
@@ -283,7 +291,7 @@ propostas.filter(p => p.status === 'aguardando_analise' || p.status === 'em_anal
 #### **Detalhamento da Causa:**
 
 1. **Estado dos Dados:** O banco contém apenas 1 proposta com status `'em_analise'` e 2 com `'rascunho'`
-2. **Query Backend:** Busca corretamente por `['aguardando_analise', 'em_analise']`  
+2. **Query Backend:** Busca corretamente por `['aguardando_analise', 'em_analise']`
 3. **Resultado Query:** Retorna apenas 1 proposta (a única com `'em_analise'`)
 4. **Filtro Frontend:** Aplica o mesmo filtro corretamente
 5. **Resultado Final:** Fila mostra 1 proposta (comportamento correto pelos dados existentes)
@@ -291,7 +299,7 @@ propostas.filter(p => p.status === 'aguardando_analise' || p.status === 'em_anal
 #### **O Problema NÃO é Espelhamento de Dados:**
 
 - ✅ **JOINs estão corretos** - todos os dados relacionados são buscados
-- ✅ **Mapeamento está correto** - objetos aninhados criados adequadamente  
+- ✅ **Mapeamento está correto** - objetos aninhados criados adequadamente
 - ✅ **Contratos estão alinhados** - frontend recebe exatamente o que espera
 - ✅ **Query funciona perfeitamente** - retorna os dados disponíveis
 
@@ -300,14 +308,15 @@ propostas.filter(p => p.status === 'aguardando_analise' || p.status === 'em_anal
 ❌ **FINITE STATE MACHINE QUEBRADA:** O sistema tem states definidos no código (`'aguardando_analise'`) que não correspondem aos states reais no banco de dados.
 
 #### **Estados Esperados vs Estados Reais:**
+
 ```typescript
 // ESTADOS DEFINIDOS NO CÓDIGO:
 enum ProposalStatus {
-  DRAFT = 'rascunho',                    // ✅ EXISTE (2 propostas)
-  WAITING_ANALYSIS = 'aguardando_analise', // ❌ NÃO EXISTE (0 propostas)  
-  IN_ANALYSIS = 'em_analise',            // ✅ EXISTE (1 proposta)
-  APPROVED = 'aprovado',                 // ? DESCONHECIDO
-  REJECTED = 'rejeitado',               // ? DESCONHECIDO
+  DRAFT = 'rascunho', // ✅ EXISTE (2 propostas)
+  WAITING_ANALYSIS = 'aguardando_analise', // ❌ NÃO EXISTE (0 propostas)
+  IN_ANALYSIS = 'em_analise', // ✅ EXISTE (1 proposta)
+  APPROVED = 'aprovado', // ? DESCONHECIDO
+  REJECTED = 'rejeitado', // ? DESCONHECIDO
 }
 
 // SOLUÇÃO NECESSÁRIA:
@@ -327,8 +336,9 @@ enum ProposalStatus {
 ## 6. CONCLUSÃO
 
 **O fluxo da Fila de Análise está tecnicamente CORRETO** em termos de:
+
 - Estrutura de dados ✅
-- JOINs de tabelas ✅  
+- JOINs de tabelas ✅
 - Mapeamento de objetos ✅
 - Contratos de API ✅
 

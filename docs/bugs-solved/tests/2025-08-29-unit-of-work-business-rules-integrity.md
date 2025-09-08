@@ -17,20 +17,21 @@ Unit of Work integration tests were failing due to database business rule violat
    - A profile exists where `id = NEW.user_id AND loja_id = NEW.loja_id`
    - Association in `gerente_lojas` table for store-manager relationship
 
-2. **Schema vs Database Mismatch:** 
-   - Schema defined `gerenteLojas.gerenteId` as `integer` 
+2. **Schema vs Database Mismatch:**
+   - Schema defined `gerenteLojas.gerenteId` as `integer`
    - Database actual type was `uuid`
    - Caused `invalid input syntax for type uuid: "999"` errors
 
 3. **Missing Required Fields:** Mock propostas lacked the `userId` field required by the database trigger
 
 ### Database Trigger Analysis:
+
 ```sql
 -- Trigger: enforce_proposta_integrity on table propostas
 -- Function: validate_proposta_integrity()
 -- Logic: Validates user belongs to specified store via profiles table
 IF NOT EXISTS (
-  SELECT 1 FROM profiles p 
+  SELECT 1 FROM profiles p
   WHERE p.id = NEW.user_id AND p.loja_id = NEW.loja_id
 ) THEN
   RAISE EXCEPTION 'User does not belong to the specified store';
@@ -40,6 +41,7 @@ END IF;
 ## Solution Implemented
 
 ### 1. **Corrected Test Setup:**
+
 ```typescript
 // Create profile for Supabase Auth user with correct loja_id
 await db.execute(sql`
@@ -60,6 +62,7 @@ await db.execute(sql`
 ```
 
 ### 2. **Fixed Mock Propostas:**
+
 ```typescript
 const mockProposta = {
   id: testPropostaId,
@@ -74,6 +77,7 @@ const mockProposta = {
 ```
 
 ### 3. **Type Compatibility Resolution:**
+
 - Identified that `gerente_lojas.gerente_id` references `profiles.id` (UUID) not `users.id` (integer)
 - Adjusted association creation to use correct UUID type
 - Removed unnecessary legacy user creation
@@ -81,18 +85,20 @@ const mockProposta = {
 ## Validation Evidence
 
 ### Test Results:
+
 ```
 ✓ PROVA UoW #1: Deve fazer COMMIT quando todas as operações são bem-sucedidas (4467ms)
-✓ PROVA UoW #2: Deve fazer ROLLBACK quando operação falha (3334ms)  
+✓ PROVA UoW #2: Deve fazer ROLLBACK quando operação falha (3334ms)
 ✓ PROVA UoW #3: Business Operation Pattern (3304ms)
 
 Test Files: 1 passed (1)
 Tests: 3 passed (3)
 ```
 
-### LSP Diagnostics: 
+### LSP Diagnostics:
+
 - ✅ Zero syntax errors
-- ✅ Zero type errors  
+- ✅ Zero type errors
 - ✅ Clean code quality
 
 ## Prevention Measures

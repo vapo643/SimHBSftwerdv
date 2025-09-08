@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 
 /**
  * Mock do ioredis para testes - PAM V1.0 DECD Autorizada
- * 
+ *
  * Implementa mock completo do Redis para garantir isolamento de testes
  * Baseado em melhores práticas do vitest + ioredis 2024
  */
@@ -29,7 +29,7 @@ export const mockRedisClient: any = {
 
   del: vi.fn().mockImplementation(async (...keys: string[]) => {
     let deleted = 0;
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (mockRedisData.has(key)) {
         mockRedisData.delete(key);
         deleted++;
@@ -47,9 +47,9 @@ export const mockRedisClient: any = {
     const allKeys = Array.from(mockRedisData.keys());
     if (pattern.endsWith('*')) {
       const prefix = pattern.slice(0, -1);
-      return allKeys.filter(key => key.startsWith(prefix));
+      return allKeys.filter((key) => key.startsWith(prefix));
     }
-    return allKeys.filter(key => key === pattern);
+    return allKeys.filter((key) => key === pattern);
   }),
 
   // Operações de saúde e conexão

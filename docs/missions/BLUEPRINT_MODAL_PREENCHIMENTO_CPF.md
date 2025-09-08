@@ -3,7 +3,7 @@
 **PROTOCOLO:** PAM V1.0 - Operação Aceleração de Originação (TRACK 1, FASE 2)  
 **MISSÃO:** Arquitetura UX/UI para Substituição de `window.confirm()`  
 **DATA:** 2025-09-03  
-**ARQUITETO:** Replit Agent AI  
+**ARQUITETO:** Replit Agent AI
 
 ---
 
@@ -12,6 +12,7 @@
 **OBJETIVO:** Substituir o `window.confirm()` existente no componente `ClientDataStep.tsx` por um modal customizado utilizando a biblioteca `shadcn/ui`, proporcionando uma experiência de usuário superior, consistente e profissional.
 
 **IMPACTO ESPERADO:**
+
 - ✅ UX profissional alinhada com o design system
 - ✅ Controle total sobre estilo e comportamento
 - ✅ Melhor acessibilidade e responsividade
@@ -39,6 +40,7 @@ if (userConfirmed) {
 ```
 
 **Problemas Identificados:**
+
 - ❌ Interface visualmente inconsistente com o design system
 - ❌ Limitações de styling e customização
 - ❌ Experiência de usuário inadequada para aplicação bancária
@@ -54,6 +56,7 @@ if (userConfirmed) {
 **RECOMENDAÇÃO:** `AlertDialog` (shadcn/ui)
 
 **JUSTIFICATIVA TÉCNICA:**
+
 - ✅ **Comportamento Correto:** Exige resposta explícita do usuário (não pode ser fechado acidentalmente)
 - ✅ **Semântica Apropriada:** `role="alertdialog"` para leitores de tela
 - ✅ **Acessibilidade Avançada:** Foco inicial no botão seguro (Cancelar)
@@ -61,12 +64,12 @@ if (userConfirmed) {
 
 **Comparação AlertDialog vs Dialog:**
 
-| Aspecto | AlertDialog | Dialog |
-|---------|-------------|---------|
-| **Fechamento ao clicar fora** | ❌ Não | ✅ Sim |
-| **Resposta obrigatória** | ✅ Sim | ❌ Não |
-| **Uso recomendado** | ✅ Confirmações críticas | ❌ Formulários gerais |
-| **Papel ARIA** | `alertdialog` | `dialog` |
+| Aspecto                       | AlertDialog              | Dialog                |
+| ----------------------------- | ------------------------ | --------------------- |
+| **Fechamento ao clicar fora** | ❌ Não                   | ✅ Sim                |
+| **Resposta obrigatória**      | ✅ Sim                   | ❌ Não                |
+| **Uso recomendado**           | ✅ Confirmações críticas | ❌ Formulários gerais |
+| **Papel ARIA**                | `alertdialog`            | `dialog`              |
 
 ---
 
@@ -81,12 +84,13 @@ const [showClientConfirmDialog, setShowClientConfirmDialog] = useState(false);
 
 // Fluxo de controle
 1. Busca da API → Armazena dados no estado
-2. Ativa modal → Usuário toma decisão  
+2. Ativa modal → Usuário toma decisão
 3. Ação confirmada → Preenche formulário + fecha modal
 4. Ação cancelada → Apenas fecha modal
 ```
 
 **VANTAGENS:**
+
 - ✅ Estado reativo e controlado
 - ✅ Separação clara entre dados e UI
 - ✅ Fácil testabilidade
@@ -101,18 +105,19 @@ const [showClientConfirmDialog, setShowClientConfirmDialog] = useState(false);
 **RECOMENDAÇÃO:** Reutilizar `ConfirmationDialog` existente com pequenos ajustes
 
 **ANÁLISE DO COMPONENTE EXISTENTE:**
+
 ```typescript
 // ConfirmationDialog já possui API completa:
 interface ConfirmationDialogProps {
-  isOpen: boolean;           // ✅ Controle de visibilidade
-  onClose: () => void;       // ✅ Callback de fechamento
-  onConfirm: () => void;     // ✅ Callback de confirmação
-  title: string;             // ✅ Título customizável
-  description: string;       // ✅ Descrição customizável
-  confirmText?: string;      // ✅ Texto do botão de ação
-  cancelText?: string;       // ✅ Texto do botão de cancelar
-  variant?: 'destructive' | 'default';  // ✅ Variante visual
-  isLoading?: boolean;       // ✅ Estado de carregamento
+  isOpen: boolean; // ✅ Controle de visibilidade
+  onClose: () => void; // ✅ Callback de fechamento
+  onConfirm: () => void; // ✅ Callback de confirmação
+  title: string; // ✅ Título customizável
+  description: string; // ✅ Descrição customizável
+  confirmText?: string; // ✅ Texto do botão de ação
+  cancelText?: string; // ✅ Texto do botão de cancelar
+  variant?: 'destructive' | 'default'; // ✅ Variante visual
+  isLoading?: boolean; // ✅ Estado de carregamento
 }
 ```
 
@@ -124,12 +129,12 @@ const clientConfirmDialogProps = {
   isOpen: showClientConfirmDialog,
   onClose: () => setShowClientConfirmDialog(false),
   onConfirm: handleUseExistingClientData,
-  title: "Cliente Encontrado",
+  title: 'Cliente Encontrado',
   description: `Encontramos dados de: ${clientFoundData?.nome}\n\nDeseja preencher a proposta com os dados existentes?`,
-  confirmText: "Usar Dados",
-  cancelText: "Não Usar",
-  variant: "default" as const,
-  isLoading: loadingCpfData
+  confirmText: 'Usar Dados',
+  cancelText: 'Não Usar',
+  variant: 'default' as const,
+  isLoading: loadingCpfData,
 };
 ```
 
@@ -165,11 +170,12 @@ const [showClientConfirmDialog, setShowClientConfirmDialog] = useState(false);
 #### **4.3 Refatoração da Função fetchClientDataByCpf**
 
 **ANTES:**
+
 ```typescript
 const fetchClientDataByCpf = useCallback(
   async (cpf: string) => {
     // ... código de busca ...
-    
+
     if (response && response.exists && response.data) {
       const data = response.data;
 
@@ -189,6 +195,7 @@ const fetchClientDataByCpf = useCallback(
 ```
 
 **DEPOIS:**
+
 ```typescript
 const fetchClientDataByCpf = useCallback(
   async (cpf: string) => {
@@ -246,7 +253,8 @@ const handleUseExistingClientData = useCallback(() => {
     ocupacao: clientFoundData.ocupacao || '',
     rendaMensal: clientFoundData.rendaMensal || '',
     telefoneEmpresa: clientFoundData.telefoneEmpresa || '',
-    metodoPagamento: (clientFoundData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
+    metodoPagamento:
+      (clientFoundData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
     dadosPagamentoBanco: clientFoundData.dadosPagamentoBanco || '',
     dadosPagamentoAgencia: clientFoundData.dadosPagamentoAgencia || '',
     dadosPagamentoConta: clientFoundData.dadosPagamentoConta || '',
@@ -276,7 +284,7 @@ const handleUseExistingClientData = useCallback(() => {
 return (
   <div className="space-y-6">
     {/* ... todo o conteúdo existente ... */}
-    
+
     {/* Modal de Confirmação de Cliente Encontrado */}
     <ConfirmationDialog
       isOpen={showClientConfirmDialog}
@@ -301,23 +309,27 @@ return (
 ## 📋 CHECKLIST DE IMPLEMENTAÇÃO
 
 ### **Fase 1: Preparação**
-- [ ] ✅ Verificar que `ConfirmationDialog` está disponível  
+
+- [ ] ✅ Verificar que `ConfirmationDialog` está disponível
 - [ ] ✅ Confirmar imports do `@/components/ui/alert-dialog`
 - [ ] 🔍 Analisar se há conflitos de estado existentes
 
 ### **Fase 2: Refatoração**
+
 - [ ] 🔧 Adicionar estados `clientFoundData` e `showClientConfirmDialog`
 - [ ] 🔧 Refatorar função `fetchClientDataByCpf`
 - [ ] 🔧 Implementar `handleUseExistingClientData`
 - [ ] 🔧 Adicionar renderização do `ConfirmationDialog`
 
 ### **Fase 3: Testes**
+
 - [ ] 🧪 Testar fluxo completo com CPF demo (12345678901)
 - [ ] 🧪 Testar cancelamento do modal
 - [ ] 🧪 Verificar responsividade em mobile
 - [ ] 🧪 Validar acessibilidade (navegação por teclado)
 
 ### **Fase 4: Polimento**
+
 - [ ] 🎨 Ajustar textos se necessário
 - [ ] 🎨 Considerar ícones adicionais (User, CheckCircle)
 - [ ] 📝 Atualizar documentação/comentários
@@ -328,18 +340,21 @@ return (
 ## 🎯 BENEFÍCIOS ESPERADOS
 
 ### **Experiência do Usuário**
+
 - ✅ **Interface Consistente:** Alinhada com design system da aplicação
 - ✅ **Acessibilidade Aprimorada:** Navegação por teclado, ARIA labels
 - ✅ **Responsividade:** Funciona perfeitamente em desktop e mobile
 - ✅ **Feedback Visual:** Estados de loading e transições suaves
 
 ### **Experiência do Desenvolvedor**
+
 - ✅ **Manutenibilidade:** Código mais limpo e organizando
 - ✅ **Testabilidade:** Estados controláveis e isolados
 - ✅ **Reutilização:** Aproveita componente existente
 - ✅ **Typing:** TypeScript robusto com tipos bem definidos
 
 ### **Performance**
+
 - ✅ **Não-Bloqueante:** Remove bloqueio do thread principal
 - ✅ **Otimizada:** Re-renders controlados via React state
 - ✅ **Memória:** Estados temporários são limpos adequadamente
@@ -349,11 +364,13 @@ return (
 ## 🚨 CONSIDERAÇÕES DE SEGURANÇA
 
 ### **Dados Sensíveis**
+
 - ✅ **Mascaramento PII:** Dados já vêm mascarados da API
 - ✅ **Estado Temporário:** `clientFoundData` é limpo após uso
 - ✅ **Não Persistência:** Modal não persiste dados between sessions
 
 ### **Acessibilidade**
+
 - ✅ **Focus Management:** AlertDialog gerencia foco automaticamente
 - ✅ **Screen Readers:** ARIA labels e descriptions nativas
 - ✅ **Keyboard Navigation:** ESC fecha, Tab navega, Enter confirma
@@ -363,11 +380,13 @@ return (
 ## 📊 MÉTRICAS DE SUCESSO
 
 ### **Quantitativas**
+
 - 🎯 **Zero regressões** no fluxo de preenchimento existente
 - 🎯 **100% responsividade** em dispositivos mobile/tablet/desktop
 - 🎯 **Acessibilidade** WCAG 2.1 AA compliance
 
 ### **Qualitativas**
+
 - 🎯 **UX profissional** alinhada com padrões bancários
 - 🎯 **Código maintível** seguindo patterns da aplicação
 - 🎯 **Performance** sem degradação perceptível
@@ -377,11 +396,13 @@ return (
 ## 🔮 EXTENSÕES FUTURAS
 
 ### **Curto Prazo (Opcional)**
+
 - 💡 **Ícones Contextuais:** User icon, CheckCircle para reforçar positività
 - 💡 **Animações Suaves:** Micro-interactions para melhor feedback
 - 💡 **Preset Messages:** Templates de mensagem baseados no tipo de cliente
 
 ### **Médio Prazo (Roadmap)**
+
 - 💡 **Preview de Dados:** Mostrar resumo dos dados no modal antes de confirmar
 - 💡 **Histórico:** "Este cliente tem X propostas anteriores"
 - 💡 **Campos Seletivos:** Permitir escolher quais campos preencher
@@ -393,4 +414,4 @@ return (
 
 ---
 
-*Este blueprint está pronto para implementação seguindo as práticas de engenharia estabelecidas no projeto Simpix.*
+_Este blueprint está pronto para implementação seguindo as práticas de engenharia estabelecidas no projeto Simpix._

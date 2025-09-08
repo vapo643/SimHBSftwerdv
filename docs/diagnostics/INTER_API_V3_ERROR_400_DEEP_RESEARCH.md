@@ -5,8 +5,9 @@
 Estamos enfrentando um erro 400 persistente na API v3 do Banco Inter ao tentar criar uma cobrança (boleto). O erro NÃO está relacionado à autenticação OAuth2 (que está funcionando perfeitamente), mas sim à validação dos dados da cobrança.
 
 ### STATUS ATUAL
+
 - ✅ OAuth2 mTLS: Funcionando (token obtido com sucesso, expiração 3600s)
-- ✅ Certificados: Configurados corretamente  
+- ✅ Certificados: Configurados corretamente
 - ❌ Criação de Cobrança: Erro 400 sem corpo de resposta
 
 ## PAYLOAD ENVIADO (EXATO)
@@ -44,7 +45,7 @@ Estamos enfrentando um erro 400 persistente na API v3 do Banco Inter ao tentar c
 ## INFORMAÇÕES TÉCNICAS
 
 - **Endpoint**: `POST https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas`
-- **Headers**: 
+- **Headers**:
   - `Authorization: Bearer [token válido]`
   - `Content-Type: application/json`
 - **Certificado mTLS**: Configurado via undici.Agent
@@ -56,7 +57,7 @@ Estamos enfrentando um erro 400 persistente na API v3 do Banco Inter ao tentar c
 
 2. **Estrutura do campo formasRecebimento**: Por que este campo não aparece no payload final? Qual a estrutura correta?
 
-3. **Validações específicas**: 
+3. **Validações específicas**:
    - O campo "seuNumero" tem alguma validação além do limite de 15 caracteres?
    - O formato da data está correto (YYYY-MM-DD)?
    - Existe alguma validação de valor mínimo/máximo?
@@ -89,6 +90,7 @@ Estamos enfrentando um erro 400 persistente na API v3 do Banco Inter ao tentar c
 ## BUSCA DIRECIONADA
 
 Por favor, procure por:
+
 - "Banco Inter API v3 cobrança erro 400 campos obrigatórios"
 - "Inter API v3 boleto payload completo exemplo"
 - "Banco Inter cobrança v3 formasRecebimento estrutura"
@@ -99,6 +101,7 @@ Por favor, procure por:
 ## IMPORTANTE
 
 NÃO precisamos de informações sobre:
+
 - Configuração de OAuth2 (já funciona)
 - Geração de certificados (já temos)
 - Erros de autenticação (não é o problema)

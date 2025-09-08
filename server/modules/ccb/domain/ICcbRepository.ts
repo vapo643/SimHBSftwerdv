@@ -6,21 +6,20 @@
  * para o workflow de formalização.
  */
 
-import { PaginatedResult, CursorPaginationOptions, RepositoryFilters } from '@shared/types/pagination';
+import {
+  PaginatedResult,
+  CursorPaginationOptions,
+  RepositoryFilters,
+} from '@shared/types/pagination';
 import { Ccb } from '@shared/schema';
 
-export type CcbStatus = 
-  | 'gerada'
-  | 'enviada_para_assinatura'
-  | 'assinada'
-  | 'baixada'
-  | 'cancelada';
+export type CcbStatus = 'gerada' | 'enviada_para_assinatura' | 'assinada' | 'baixada' | 'cancelada';
 
 export interface CcbRepository {
   // ========================================================================
   // CRUD BÁSICO
   // ========================================================================
-  
+
   /**
    * Salva uma CCB (create ou update)
    */

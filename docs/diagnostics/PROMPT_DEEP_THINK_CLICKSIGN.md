@@ -3,15 +3,18 @@
 ## Contexto Técnico Completo
 
 ### Problema Principal
+
 Integração da API v3 do ClickSign para upload de documentos PDF em envelopes está falhando com mensagens de erro inconsistentes sobre campos obrigatórios.
 
 ### Stack Tecnológico
+
 - Node.js + TypeScript
 - Express.js backend
 - Supabase para storage de PDFs
 - ClickSign API v3 (produção)
 
 ### Erros Observados
+
 1. **Erro 1**: `content_base64 deve ser informado(a)` (quando uso campo `content`)
 2. **Erro 2**: `content - não pode ficar em branco` (quando uso campo `content_base64`)
 3. **Erro 3**: `MimeType não informado no campo content_base64` (em tentativas anteriores)
@@ -48,12 +51,14 @@ const requestBody = {
 ```
 
 ### Fluxo de Processo
+
 1. Criar envelope (✅ FUNCIONANDO)
 2. Adicionar documento ao envelope (❌ FALHANDO)
 3. Adicionar signatário (não testado ainda)
 4. Enviar para assinatura (não testado ainda)
 
 ### Tentativas Realizadas
+
 - [x] content_base64 + filename
 - [x] content + filename
 - [x] content + filename + content_type
@@ -62,6 +67,7 @@ const requestBody = {
 - [x] Base64 puro (sem prefixo)
 
 ### Documentos de Referência Disponíveis
+
 - Endpoints da API v3 fornecidos pelo usuário
 - Logs detalhados de requests/responses
 - Código de exemplo de tentativas anteriores
@@ -85,4 +91,5 @@ const requestBody = {
 **Meta-pergunta**: Como abordar sistematicamente problemas de integração de API quando a documentação oficial parece inconsistente com o comportamento real da API?
 
 ### Resultado Esperado
+
 Estratégia clara e testável para resolver a integração, baseada em análise lógica dos padrões de erro e melhores práticas de debugging de APIs.

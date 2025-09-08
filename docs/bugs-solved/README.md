@@ -5,15 +5,19 @@ Esta pasta contém a documentação detalhada de todos os bugs críticos identif
 ## 📁 Estrutura de Organização
 
 ### `/critical/` - Bugs Críticos
+
 Bugs que afetam funcionalidade essencial, segurança ou integridade de dados.
 
-### `/high/` - Bugs de Alta Prioridade  
+### `/high/` - Bugs de Alta Prioridade
+
 Bugs que impactam significativamente a experiência do usuário ou performance.
 
 ### `/medium/` - Bugs de Média Prioridade
+
 Bugs que causam inconvenientes mas não impedem o uso do sistema.
 
 ### `/low/` - Bugs de Baixa Prioridade
+
 Bugs menores, melhorias de UX e correções cosméticas.
 
 ## 📋 Padrão de Documentação
@@ -24,28 +28,34 @@ Cada bug resolvido deve seguir o template:
 # [CATEGORIA] Nome do Bug - Data Resolução
 
 ## 🔍 Descrição do Problema
+
 - **Impacto:** [Crítico/Alto/Médio/Baixo]
 - **Área Afetada:** [Frontend/Backend/Database/API/etc]
 - **Descoberto em:** [Data/Context]
 - **Reportado por:** [Fonte]
 
 ## 🚨 Sintomas Observados
+
 - Lista dos comportamentos incorretos observados
 
 ## 🔬 Análise Técnica
+
 - Root cause analysis
 - Código/configuração problemática
 
-## ✅ Solução Implementada  
+## ✅ Solução Implementada
+
 - Mudanças técnicas realizadas
 - Arquivos modificados
 - Testes de validação
 
 ## 🧪 Validação
+
 - Como foi testado
 - Evidências de correção
 
 ## 📊 Impacto da Correção
+
 - Benefícios alcançados
 - Métricas melhoradas
 ```
@@ -55,13 +65,16 @@ Cada bug resolvido deve seguir o template:
 ### 2025-08
 
 #### Críticos
+
 - [PAM V1.0 - Bug Parsing Monetário](./critical/2025-08-21-parsing-monetario-multiplicacao-100x.md)
 - [PAM V1.0 - Inconsistência Transacional Webhooks](./critical/2025-08-20-transacao-atomica-webhooks.md)
 
 #### Altos
+
 - [PAM V1.0 - Upload UI Condicional Analistas](./high/2025-08-20-upload-ui-role-analista.md)
 
 #### Médios
+
 - [Testes Automatizados Faltantes](./medium/2025-08-21-testes-pre-approval-service.md)
 
 ## 🎯 Estatísticas

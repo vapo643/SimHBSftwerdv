@@ -6,21 +6,21 @@
 export interface PaginatedResult<T> {
   /** Dados da página atual */
   data: T[];
-  
+
   /** Metadados de paginação */
   pagination: {
     /** Cursor para a próxima página (null se for a última) */
     nextCursor: string | null;
-    
+
     /** Cursor para a página anterior (null se for a primeira) */
     prevCursor: string | null;
-    
+
     /** Total de itens na página atual */
     pageSize: number;
-    
+
     /** Indica se há mais páginas após esta */
     hasNextPage: boolean;
-    
+
     /** Indica se há páginas anteriores a esta */
     hasPrevPage: boolean;
   };
@@ -29,13 +29,13 @@ export interface PaginatedResult<T> {
 export interface CursorPaginationOptions {
   /** Número máximo de itens por página (padrão: 50, máximo: 100) */
   limit?: number;
-  
+
   /** Cursor para buscar itens após este ponto */
   cursor?: string;
-  
+
   /** Campo a ser usado como cursor (padrão: 'created_at') */
   cursorField?: 'created_at' | 'updated_at' | 'id';
-  
+
   /** Direção da ordenação (padrão: 'desc') */
   direction?: 'asc' | 'desc';
 }
@@ -43,15 +43,15 @@ export interface CursorPaginationOptions {
 export interface RepositoryFilters {
   /** Filtros por status */
   status?: string | string[];
-  
+
   /** Filtros por data de criação */
   createdAfter?: Date;
   createdBefore?: Date;
-  
+
   /** Filtros por data de atualização */
   updatedAfter?: Date;
   updatedBefore?: Date;
-  
+
   /** Filtros específicos por entidade */
   [key: string]: any;
 }

@@ -1,9 +1,9 @@
 /**
  * Error Handler Middleware - PAM P2.4.1: Fundação da Resiliência
- * 
+ *
  * Middleware centralizado de tratamento de erros para substituir
  * blocos try/catch inconsistentes nos controllers.
- * 
+ *
  * Funcionalidades:
  * - Logging estruturado com Winston
  * - Resposta JSON padronizada e segura
@@ -17,7 +17,7 @@ import { logError } from '../lib/logger.js';
 export const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
   // Extrair correlation ID do request se disponível
   const correlationId = (req as any).correlationId || 'unknown';
-  
+
   // Log estruturado do erro usando Winston logger central
   logError(`Erro não tratado na rota ${req.method} ${req.path}`, error, {
     correlationId,
@@ -32,7 +32,7 @@ export const errorHandler = (error: Error, req: Request, res: Response, next: Ne
 
   // Determinar ambiente para controlar exposição de detalhes
   const isDevelopment = process.env.NODE_ENV === 'development';
-  
+
   // Determinar status code do erro
   const statusCode = (error as any).status || (error as any).statusCode || 500;
 
@@ -40,9 +40,7 @@ export const errorHandler = (error: Error, req: Request, res: Response, next: Ne
   const errorResponse = {
     success: false,
     error: {
-      message: isDevelopment 
-        ? error.message 
-        : 'Ocorreu um erro interno no servidor.',
+      message: isDevelopment ? error.message : 'Ocorreu um erro interno no servidor.',
       code: statusCode,
       correlationId,
       // Stack trace apenas em desenvolvimento

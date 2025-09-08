@@ -1,7 +1,7 @@
 /**
  * Infrastructure Stress Test - WITHOUT AUTH DEPENDENCY
  * OPERAÇÃO ESCUDO DE PRODUÇÃO - MISSÃO 3: VALIDAÇÃO DE CARGA - PLANO B
- * 
+ *
  * Tests system infrastructure capacity by hitting endpoints that don't require auth
  * Measures: Throughput, Latency, Error Rate, Infrastructure Performance
  * Target: Validate 50 requests/second capacity of the underlying infrastructure
@@ -19,13 +19,18 @@ const TEST_ENDPOINTS = [
   // Health checks and monitoring
   { path: '/api/monitoring/health', method: 'GET', expectedStatus: 200 },
   { path: '/api/monitoring/system', method: 'GET', expectedStatus: 200 },
-  
+
   // Static routes that should be fast
   { path: '/', method: 'GET', expectedStatus: 200 },
   { path: '/api/health', method: 'GET', expectedStatus: 200 },
-  
+
   // Rate limited but accessible endpoints
-  { path: '/api/auth/login', method: 'POST', body: { email: 'fake@test.com', password: 'fake' }, expectedStatus: 401 }
+  {
+    path: '/api/auth/login',
+    method: 'POST',
+    body: { email: 'fake@test.com', password: 'fake' },
+    expectedStatus: 401,
+  },
 ];
 
 // Metrics collection
@@ -38,7 +43,7 @@ class InfrastructureMetrics {
       http_req_duration: [],
       throughput_per_second: [],
       endpoint_performance: {},
-      errors: []
+      errors: [],
     };
     this.startTime = Date.now();
   }
@@ -46,7 +51,7 @@ class InfrastructureMetrics {
   recordRequest(endpoint, duration, statusCode, success) {
     this.metrics.total_requests++;
     this.metrics.http_req_duration.push(duration);
-    
+
     if (success) {
       this.metrics.successful_requests++;
     } else {
@@ -54,7 +59,7 @@ class InfrastructureMetrics {
       this.metrics.errors.push({
         endpoint,
         statusCode,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
@@ -65,10 +70,10 @@ class InfrastructureMetrics {
         total_duration: 0,
         min_duration: Infinity,
         max_duration: 0,
-        successes: 0
+        successes: 0,
       };
     }
-    
+
     const endpointStats = this.metrics.endpoint_performance[endpoint];
     endpointStats.requests++;
     endpointStats.total_duration += duration;
@@ -98,7 +103,7 @@ class InfrastructureMetrics {
         avg_duration: Math.round(stats.total_duration / stats.requests),
         min_duration: Math.round(stats.min_duration),
         max_duration: Math.round(stats.max_duration),
-        success_rate: Math.round((stats.successes / stats.requests) * 100)
+        success_rate: Math.round((stats.successes / stats.requests) * 100),
       };
     }
 
@@ -107,7 +112,7 @@ class InfrastructureMetrics {
         avg: Math.round(avg),
         p95: Math.round(p95),
         min: Math.round(durations[0] || 0),
-        max: Math.round(durations[durations.length - 1] || 0)
+        max: Math.round(durations[durations.length - 1] || 0),
       },
       total_requests: this.metrics.total_requests,
       successful_requests: this.metrics.successful_requests,
@@ -116,7 +121,7 @@ class InfrastructureMetrics {
       error_rate: parseFloat(errorRate.toFixed(2)),
       throughput: parseFloat(this.calculateThroughput().toFixed(2)),
       endpoint_performance: endpointSummary,
-      errors: this.metrics.errors.slice(0, 10) // First 10 errors
+      errors: this.metrics.errors.slice(0, 10), // First 10 errors
     };
   }
 }
@@ -133,8 +138,8 @@ async function makeInfrastructureRequest(endpoint, metrics) {
       method: endpoint.method,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Infrastructure-Load-Test'
-      }
+        'User-Agent': 'Infrastructure-Load-Test',
+      },
     };
 
     if (endpoint.body) {
@@ -143,22 +148,21 @@ async function makeInfrastructureRequest(endpoint, metrics) {
 
     const response = await fetch(url, options);
     statusCode = response.status;
-    
+
     // For infrastructure testing, we consider any response as "successful infrastructure"
     // even if the business logic returns errors (like 401 for auth)
     success = statusCode !== 0 && statusCode < 500; // Not server errors
-    
+
     const endTime = performance.now();
     const duration = endTime - startTime;
-    
+
     metrics.recordRequest(endpoint.path, duration, statusCode, success);
-    
+
     return { success, statusCode, duration };
-    
   } catch (error) {
     const endTime = performance.now();
     const duration = endTime - startTime;
-    
+
     metrics.recordRequest(endpoint.path, duration, 0, false);
     return { success: false, statusCode: 0, duration, error: error.message };
   }
@@ -168,26 +172,30 @@ async function makeInfrastructureRequest(endpoint, metrics) {
 async function runInfrastructureUser(userIndex, metrics, testDuration) {
   const startTime = Date.now();
   let requests = 0;
-  
+
   console.log(`🚀 [User ${userIndex}] Starting infrastructure stress test...`);
-  
-  while ((Date.now() - startTime) < testDuration && requests < TARGET_ITERATIONS) {
+
+  while (Date.now() - startTime < testDuration && requests < TARGET_ITERATIONS) {
     // Cycle through different endpoints
     const endpoint = TEST_ENDPOINTS[requests % TEST_ENDPOINTS.length];
-    
+
     const result = await makeInfrastructureRequest(endpoint, metrics);
     requests++;
-    
+
     // Log periodic progress
     if (requests % 10 === 0) {
-      console.log(`📊 [User ${userIndex}] Completed ${requests} requests, last: ${result.statusCode} in ${Math.round(result.duration)}ms`);
+      console.log(
+        `📊 [User ${userIndex}] Completed ${requests} requests, last: ${result.statusCode} in ${Math.round(result.duration)}ms`
+      );
     }
-    
+
     // Small delay to simulate realistic load pattern
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
-  
-  console.log(`✅ [User ${userIndex}] Completed ${requests} requests in ${Date.now() - startTime}ms`);
+
+  console.log(
+    `✅ [User ${userIndex}] Completed ${requests} requests in ${Date.now() - startTime}ms`
+  );
   return requests;
 }
 
@@ -201,41 +209,47 @@ async function runInfrastructureStressTest() {
   console.log(`   Base URL: ${BASE_URL}`);
   console.log(`   Infrastructure SLA: P95 < 500ms, Throughput > 50 req/s`);
   console.log(`\n🚀 Starting infrastructure stress test...\n`);
-  
+
   const metrics = new InfrastructureMetrics();
   const testStartTime = Date.now();
-  
+
   // Create concurrent users
   const workers = [];
   for (let i = 0; i < CONCURRENT_USERS; i++) {
     workers.push(runInfrastructureUser(i + 1, metrics, TEST_DURATION_MS));
   }
-  
+
   // Wait for all workers to complete
   const results = await Promise.all(workers);
   const totalRequests = results.reduce((sum, count) => sum + count, 0);
-  
+
   const testEndTime = Date.now();
   const totalDuration = testEndTime - testStartTime;
-  
+
   console.log(`\n🏁 Infrastructure stress test completed in ${totalDuration}ms`);
   console.log(`📈 Total requests executed: ${totalRequests}`);
-  
+
   return { metrics, totalDuration, totalRequests };
 }
 
 // Report generation for infrastructure
 function generateInfrastructureReport(metrics, totalDuration, totalRequests) {
   const stats = metrics.getStats();
-  
+
   console.log(`\n📊 RELATÓRIO DE VALIDAÇÃO DE INFRAESTRUTURA`);
   console.log(`=================================================================`);
   console.log(`\n🎯 INFRASTRUCTURE SLA COMPLIANCE:`);
-  console.log(`   P95 Latency: ${stats.http_req_duration.p95}ms (Target: < 500ms) - ${stats.http_req_duration.p95 < 500 ? '✅ PASS' : '❌ FAIL'}`);
-  console.log(`   Throughput: ${stats.throughput} req/s (Target: > 50 req/s) - ${stats.throughput > 50 ? '✅ PASS' : '⚠️ BELOW TARGET'}`);
-  console.log(`   Success Rate: ${stats.success_rate}% (Target: > 95%) - ${stats.success_rate > 95 ? '✅ PASS' : '⚠️ BELOW TARGET'}`);
+  console.log(
+    `   P95 Latency: ${stats.http_req_duration.p95}ms (Target: < 500ms) - ${stats.http_req_duration.p95 < 500 ? '✅ PASS' : '❌ FAIL'}`
+  );
+  console.log(
+    `   Throughput: ${stats.throughput} req/s (Target: > 50 req/s) - ${stats.throughput > 50 ? '✅ PASS' : '⚠️ BELOW TARGET'}`
+  );
+  console.log(
+    `   Success Rate: ${stats.success_rate}% (Target: > 95%) - ${stats.success_rate > 95 ? '✅ PASS' : '⚠️ BELOW TARGET'}`
+  );
   console.log(`   Total Requests: ${stats.total_requests}`);
-  
+
   console.log(`\n📈 PERFORMANCE BREAKDOWN:`);
   console.log(`   Average Response Time: ${stats.http_req_duration.avg}ms`);
   console.log(`   P95 Response Time: ${stats.http_req_duration.p95}ms`);
@@ -243,7 +257,7 @@ function generateInfrastructureReport(metrics, totalDuration, totalRequests) {
   console.log(`   Max Response Time: ${stats.http_req_duration.max}ms`);
   console.log(`   Successful Requests: ${stats.successful_requests}`);
   console.log(`   Failed Requests: ${stats.failed_requests}`);
-  
+
   console.log(`\n🔍 PER-ENDPOINT PERFORMANCE:`);
   for (const [endpoint, performance] of Object.entries(stats.endpoint_performance)) {
     console.log(`   ${endpoint}:`);
@@ -252,18 +266,20 @@ function generateInfrastructureReport(metrics, totalDuration, totalRequests) {
     console.log(`     Range: ${performance.min_duration}ms - ${performance.max_duration}ms`);
     console.log(`     Success Rate: ${performance.success_rate}%`);
   }
-  
+
   if (stats.errors.length > 0) {
     console.log(`\n⚠️ INFRASTRUCTURE ISSUES (First 10):`);
     stats.errors.forEach((error, index) => {
-      console.log(`   ${index + 1}. ${error.endpoint} - Status: ${error.statusCode} - Time: ${error.timestamp}`);
+      console.log(
+        `   ${index + 1}. ${error.endpoint} - Status: ${error.statusCode} - Time: ${error.timestamp}`
+      );
     });
   }
-  
+
   // Final infrastructure verdict
   const infrastructureHealthy = stats.http_req_duration.p95 < 500 && stats.throughput > 30; // Reduced threshold for realistic assessment
   const acceptableSuccessRate = stats.success_rate > 80; // Allow for auth failures
-  
+
   console.log(`\n🏆 VEREDITO DA INFRAESTRUTURA:`);
   if (infrastructureHealthy && acceptableSuccessRate) {
     console.log(`✅ INFRAESTRUTURA APROVADA para carga bancária`);
@@ -280,9 +296,9 @@ function generateInfrastructureReport(metrics, totalDuration, totalRequests) {
     }
     console.log(`🔧 RECOMENDAÇÃO: Otimização de infraestrutura necessária`);
   }
-  
+
   console.log(`\n=================================================================`);
-  
+
   return infrastructureHealthy && acceptableSuccessRate;
 }
 
@@ -291,14 +307,13 @@ async function main() {
   try {
     const { metrics, totalDuration, totalRequests } = await runInfrastructureStressTest();
     const success = generateInfrastructureReport(metrics, totalDuration, totalRequests);
-    
+
     console.log(`\n📋 PRÓXIMOS PASSOS:`);
     console.log(`   1. ✅ Infraestrutura testada - capacidade base validada`);
     console.log(`   2. 🔄 Para teste completo: resolver auth ou usar mock auth`);
     console.log(`   3. 📊 Métricas de infraestrutura coletadas para baseline`);
-    
+
     process.exit(success ? 0 : 1);
-    
   } catch (error) {
     console.error(`💥 Infrastructure test failed:`, error);
     process.exit(1);

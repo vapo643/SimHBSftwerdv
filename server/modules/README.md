@@ -3,24 +3,28 @@
 ## Bounded Contexts
 
 ### 1. Credit Context (Propostas)
+
 - **Core Domain**: Gerenciamento de propostas de crédito
 - **Aggregates**: Proposal, Customer
 - **Domain Services**: CreditAnalysis, RiskAssessment
 - **Repositories**: ProposalRepository, CustomerRepository
 
 ### 2. Payment Context (Pagamentos)
+
 - **Supporting Domain**: Processamento de pagamentos
 - **Aggregates**: Payment, Invoice
 - **Domain Services**: PaymentProcessor, InvoiceGenerator
 - **Repositories**: PaymentRepository
 
 ### 3. User Context (Usuários)
+
 - **Supporting Domain**: Gestão de usuários e autenticação
 - **Aggregates**: User, Profile
 - **Domain Services**: Authentication, Authorization
 - **Repositories**: UserRepository
 
 ### 4. Partner Context (Parceiros)
+
 - **Supporting Domain**: Gestão de parceiros e lojas
 - **Aggregates**: Partner, Store
 - **Domain Services**: CommissionCalculator

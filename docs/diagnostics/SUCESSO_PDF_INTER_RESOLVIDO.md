@@ -6,12 +6,13 @@
 
 ## 🎯 PROBLEMA IDENTIFICADO
 
-A API v3 do Banco Inter **NÃO retorna PDF binário** no endpoint `/cobrancas/{id}/pdf`. 
+A API v3 do Banco Inter **NÃO retorna PDF binário** no endpoint `/cobrancas/{id}/pdf`.
 Em vez disso, retorna **JSON com PDF em base64**.
 
 ## 🔍 EVIDÊNCIAS DO SUCESSO
 
 ### Logs da Solução Funcionando:
+
 ```
 [INTER] 📋 Resposta é JSON, procurando campo base64...
 [INTER] 📋 Campos disponíveis no JSON: [ 'pdf' ]
@@ -23,6 +24,7 @@ Em vez disso, retorna **JSON com PDF em base64**.
 ```
 
 ### Dados Concretos:
+
 - **JSON Response:** 55,182 bytes
 - **Campo base64:** 55,172 caracteres
 - **PDF Final:** 41,378 bytes
@@ -32,10 +34,21 @@ Em vez disso, retorna **JSON com PDF em base64**.
 ## 🎉 SOLUÇÃO IMPLEMENTADA
 
 ### Parser Inteligente de Base64:
+
 ```typescript
 // Procura PDF em múltiplos campos possíveis
-const possibleFields = ['pdf', 'arquivo', 'base64', 'conteudo', 'content', 
-                        'data', 'document', 'boleto', 'file', 'documento'];
+const possibleFields = [
+  'pdf',
+  'arquivo',
+  'base64',
+  'conteudo',
+  'content',
+  'data',
+  'document',
+  'boleto',
+  'file',
+  'documento',
+];
 
 // Encontrou no campo 'pdf'
 if (response.pdf) {
@@ -46,6 +59,7 @@ if (response.pdf) {
 ```
 
 ### Fallbacks Implementados:
+
 1. **Endpoints Alternativos** - Se principal falhar
 2. **Múltiplos Campos** - Busca em vários campos possíveis
 3. **Validação Robusta** - Magic bytes + tamanho
@@ -54,10 +68,11 @@ if (response.pdf) {
 ## 🚨 PROBLEMA RESIDUAL MENOR
 
 **Falso positivo de vírus** - resolvido com headers melhorados:
+
 ```typescript
-res.setHeader("X-Content-Origin", "Banking-API");
-res.setHeader("X-File-Type", "BankStatement");
-res.setHeader("Content-Disposition", "inline; filename=\"boleto_inter_2025-08-12.pdf\"");
+res.setHeader('X-Content-Origin', 'Banking-API');
+res.setHeader('X-File-Type', 'BankStatement');
+res.setHeader('Content-Disposition', 'inline; filename="boleto_inter_2025-08-12.pdf"');
 ```
 
 ## 📚 LIÇÕES APRENDIDAS
@@ -79,6 +94,7 @@ res.setHeader("Content-Disposition", "inline; filename=\"boleto_inter_2025-08-12
 ## 💡 INSIGHT PRINCIPAL
 
 **A API v3 do Inter mudou a arquitetura:**
+
 - v2: PDF binário direto
 - v3: JSON com PDF base64 encapsulado
 

@@ -3,7 +3,7 @@
 **DATA:** 27 de Agosto de 2025  
 **AUDITOR:** Arquiteto de Verificação Final e Cético Absoluto  
 **PROTOCOLO:** Auditoria de Conformidade Absoluta - Tolerância Zero  
-**PADRÃO:** ZERO ERROS  
+**PADRÃO:** ZERO ERROS
 
 ---
 
@@ -22,6 +22,7 @@
 **RESULTADO:** ❌ **FALHOU CRITICAMENTE**
 
 **SAÍDA COMPLETA:**
+
 ```bash
 > rest-express@1.0.0 check
 > tsc
@@ -68,6 +69,7 @@ Errors  Files
 **RESULTADO:** ❌ **FALHOU - SCRIPT INEXISTENTE**
 
 **SAÍDA COMPLETA:**
+
 ```bash
 npm error Missing script: "lint"
 npm error
@@ -91,6 +93,7 @@ SCRIPT_NOT_FOUND
 **RESULTADO:** ❌ **FALHOU - VULNERABILIDADES DETECTADAS**
 
 **SAÍDA COMPLETA:**
+
 ```bash
 # npm audit report
 
@@ -127,6 +130,7 @@ To address all issues (including breaking changes), run:
 **RESULTADO:** ❌ **FALHOU - DOCKER INDISPONÍVEL**
 
 **SAÍDA COMPLETA:**
+
 ```bash
 /nix/store/0nxvi9r5ymdlr2p24rjj9qzyms72zld1-bash-interactive-5.2p37/bin/bash: line 1: docker: command not found
 ```
@@ -138,6 +142,7 @@ To address all issues (including breaking changes), run:
 **RESULTADO:** ❌ **FALHOU - ESTRUTURA INEXISTENTE**
 
 **SAÍDA COMPLETA:**
+
 ```bash
 MODULES_DIRECTORY_NOT_FOUND
 ```
@@ -145,6 +150,7 @@ MODULES_DIRECTORY_NOT_FOUND
 **ANÁLISE:** Diretório `src/modules/` não existe. A arquitetura de Bounded Contexts mandatória pelo DoD S0-005 **NÃO FOI IMPLEMENTADA**.
 
 **ESTRUTURA ENCONTRADA:**
+
 ```bash
 ./client/src  # Frontend encontrado
 # src/modules/ NÃO ENCONTRADO
@@ -154,29 +160,32 @@ MODULES_DIRECTORY_NOT_FOUND
 
 ## 📊 **RESUMO DE FALHAS CRÍTICAS**
 
-| **DoD** | **CRITÉRIO** | **STATUS** | **BLOQUEADOR** |
-|---------|-------------|------------|----------------|
-| **S0-001** | TypeScript Compilation | ❌ **FALHOU** | 27 erros críticos |
-| **S0-001** | ESLint Linting | ❌ **FALHOU** | Script inexistente |
-| **S0-002** | Vulnerabilidades | ⚠️ **PARCIAL** | 2 moderate |
-| **S0-003** | SAST/SCA | ❌ **NÃO EXECUTADO** | Pipeline indisponível |
-| **S0-004** | Container Build | ❌ **FALHOU** | Docker indisponível |
-| **S0-005** | Bounded Contexts | ❌ **FALHOU** | Estrutura inexistente |
+| **DoD**    | **CRITÉRIO**           | **STATUS**           | **BLOQUEADOR**        |
+| ---------- | ---------------------- | -------------------- | --------------------- |
+| **S0-001** | TypeScript Compilation | ❌ **FALHOU**        | 27 erros críticos     |
+| **S0-001** | ESLint Linting         | ❌ **FALHOU**        | Script inexistente    |
+| **S0-002** | Vulnerabilidades       | ⚠️ **PARCIAL**       | 2 moderate            |
+| **S0-003** | SAST/SCA               | ❌ **NÃO EXECUTADO** | Pipeline indisponível |
+| **S0-004** | Container Build        | ❌ **FALHOU**        | Docker indisponível   |
+| **S0-005** | Bounded Contexts       | ❌ **FALHOU**        | Estrutura inexistente |
 
 ---
 
 ## 🚨 **BLOQUEADORES CRÍTICOS IDENTIFICADOS**
 
 ### **1. AMBIENTE DE COMPILAÇÃO CORROMPIDO**
+
 - **27 erros TypeScript** em `node_modules/` impedem build de produção
 - Bibliotecas fundamentais (@types/react, @types/express, typescript/lib) corrompidas
 
 ### **2. CONFIGURAÇÃO DE QUALIDADE AUSENTE**
+
 - Script `npm run lint` **NÃO CONFIGURADO**
-- Pipeline CI/CD **NÃO CONFIGURADO** 
+- Pipeline CI/CD **NÃO CONFIGURADO**
 - Gates de qualidade **INEXISTENTES**
 
 ### **3. ARQUITETURA MONOLÍTICA**
+
 - **Bounded Contexts não implementados**
 - Estrutura `src/modules/` **AUSENTE**
 - DoD S0-005 **COMPLETAMENTE DESCUMPRIDO**
@@ -186,7 +195,9 @@ MODULES_DIRECTORY_NOT_FOUND
 ## 🛑 **AÇÕES MANDATÓRIAS ANTES DO SPRINT 1**
 
 ### **CRÍTICO (P0) - BLOQUEADORES ABSOLUTOS:**
+
 1. **Rebuild completo do ambiente Node.js/TypeScript**
+
    ```bash
    rm -rf node_modules package-lock.json
    npm install
@@ -194,6 +205,7 @@ MODULES_DIRECTORY_NOT_FOUND
    ```
 
 2. **Configurar script de linting**
+
    ```json
    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0"
    ```
@@ -204,6 +216,7 @@ MODULES_DIRECTORY_NOT_FOUND
    ```
 
 ### **ALTO (P1) - QUALIDADE:**
+
 1. Resolver vulnerabilidades de segurança
 2. Configurar pipeline CI/CD com SAST/SCA
 3. Configurar Docker environment

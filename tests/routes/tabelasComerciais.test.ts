@@ -65,13 +65,14 @@ vi.mock('../../server/lib/supabase', () => ({
   db: {
     select: vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        innerJoin: vi.fn().mockReturnValue({  // ← ADICIONAR MÉTODO innerJoin
+        innerJoin: vi.fn().mockReturnValue({
+          // ← ADICIONAR MÉTODO innerJoin
           where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockResolvedValue([])  // Retornar arrays vazios ou com dados mock
-          })
-        })
-      })
-    })
+            orderBy: vi.fn().mockResolvedValue([]), // Retornar arrays vazios ou com dados mock
+          }),
+        }),
+      }),
+    }),
   },
   createServerSupabaseClient: vi.fn(),
   createServerSupabaseAdminClient: vi.fn(),
@@ -136,12 +137,12 @@ describe('GET /api/tabelas-comerciais-disponiveis', () => {
     it('should return general tables when partner has no custom tables', async () => {
       // Mock para tabelas personalizadas
       const personalizedBuilder = createMockQueryBuilder([]);
-      // Mock para tabelas gerais  
+      // Mock para tabelas gerais
       const generalBuilder = createMockQueryBuilder(mockTabelasGerais);
-      
+
       dbMock.select
-        .mockReturnValueOnce(personalizedBuilder)  // Primeira chamada
-        .mockReturnValueOnce(generalBuilder);      // Segunda chamada (fallback)
+        .mockReturnValueOnce(personalizedBuilder) // Primeira chamada
+        .mockReturnValueOnce(generalBuilder); // Segunda chamada (fallback)
 
       const response = await request(app)
         .get('/api/tabelas-comerciais-disponiveis')
@@ -256,7 +257,7 @@ describe('GET /api/tabelas-comerciais-disponiveis', () => {
       // the API doesn't also return general tables
       const mockChainPersonalized = {
         from: vi.fn().mockReturnThis(),
-        innerJoin: vi.fn().mockReturnThis(),  // P2 CORRECTION: Missing innerJoin method
+        innerJoin: vi.fn().mockReturnThis(), // P2 CORRECTION: Missing innerJoin method
         where: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockResolvedValue(mockTabelasPersonalizadas),
       };
@@ -264,7 +265,7 @@ describe('GET /api/tabelas-comerciais-disponiveis', () => {
       // The second call should not happen
       const mockChainGeral = {
         from: vi.fn().mockReturnThis(),
-        innerJoin: vi.fn().mockReturnThis(),  // P2 CORRECTION: Missing innerJoin method
+        innerJoin: vi.fn().mockReturnThis(), // P2 CORRECTION: Missing innerJoin method
         where: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockResolvedValue(mockTabelasGerais),
       };

@@ -1,7 +1,7 @@
 /**
  * 🎯 OPERAÇÃO CERTIFICAÇÃO DE PRODUÇÃO - MISSÃO 2
  * Queue Stress Testing - Formalization Queue Validation
- * 
+ *
  * Testa resiliência da infraestrutura BullMQ/Redis:
  * - Caminho feliz: 50 jobs processados com sucesso
  * - Caminho infeliz: Jobs com falha movidos para DLQ
@@ -29,28 +29,30 @@ const FAILURE_TEST_JOBS = 1;
 // ================================
 
 // Use mesma configuração do sistema (via environment variables)
-const redisConfig = process.env.REDIS_URL ? {
-  url: process.env.REDIS_URL,
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-  retryDelayOnFailover: 100,
-  lazyConnect: true,
-} : {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  db: parseInt(process.env.REDIS_DB || '0'),
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-  retryDelayOnFailover: 100,
-  lazyConnect: true,
-};
+const redisConfig = process.env.REDIS_URL
+  ? {
+      url: process.env.REDIS_URL,
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+      retryDelayOnFailover: 100,
+      lazyConnect: true,
+    }
+  : {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      db: parseInt(process.env.REDIS_DB || '0'),
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+      retryDelayOnFailover: 100,
+      lazyConnect: true,
+    };
 
-console.log('🔌 Redis config:', { 
-  host: redisConfig.host || 'from URL', 
+console.log('🔌 Redis config:', {
+  host: redisConfig.host || 'from URL',
   port: redisConfig.port || 'from URL',
   hasPassword: !!redisConfig.password,
-  url: process.env.REDIS_URL ? 'configured' : 'not set'
+  url: process.env.REDIS_URL ? 'configured' : 'not set',
 });
 
 const formalizationQueue = new Queue('formalization-queue', {
@@ -77,7 +79,7 @@ function generateValidPayload(index) {
       source: 'queue-stress-test',
       testRun: Date.now(),
       jobIndex: index,
-    }
+    },
   };
 }
 
@@ -86,14 +88,14 @@ function generateValidPayload(index) {
  */
 function generateFailurePayload() {
   return {
-    aggregateId: 'invalid-proposal-id-that-does-not-exist-in-database', 
+    aggregateId: 'invalid-proposal-id-that-does-not-exist-in-database',
     eventType: 'ProposalApproved',
     timestamp: new Date().toISOString(),
     metadata: {
       source: 'queue-stress-test-failure',
       testRun: Date.now(),
       expectedToFail: true,
-    }
+    },
   };
 }
 
@@ -107,9 +109,9 @@ async function authenticate() {
     const credentials = [
       { email: 'admin@simpix.com.br', password: 'admin123' },
       { email: 'test@test.com', password: 'test123' },
-      { email: 'developer@simpix.com.br', password: 'dev123' }
+      { email: 'developer@simpix.com.br', password: 'dev123' },
     ];
-    
+
     for (const cred of credentials) {
       try {
         console.log(`🔐 Tentando autenticar com ${cred.email}...`);
@@ -123,7 +125,7 @@ async function authenticate() {
         console.log(`❌ Falha com ${cred.email}: ${err.response?.data?.message || err.message}`);
       }
     }
-    
+
     throw new Error('Todas as tentativas de autenticação falharam');
   } catch (error) {
     console.error('❌ Authentication completely failed:', error.message);
@@ -135,8 +137,8 @@ async function getQueueMetrics(token) {
   try {
     const response = await axios.get(`${BASE_URL}/api/monitoring/queues/metrics`, {
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error) {
@@ -180,9 +182,10 @@ class TestMetrics {
 
   getReport() {
     const totalTime = Date.now() - this.startTime;
-    const avgProcessingTime = this.processingTimes.length > 0 
-      ? this.processingTimes.reduce((a, b) => a + b, 0) / this.processingTimes.length 
-      : 0;
+    const avgProcessingTime =
+      this.processingTimes.length > 0
+        ? this.processingTimes.reduce((a, b) => a + b, 0) / this.processingTimes.length
+        : 0;
 
     return {
       testDurationMs: totalTime,
@@ -191,8 +194,14 @@ class TestMetrics {
       jobsFailed: this.jobsFailed,
       dlqEntries: this.dlqCount,
       avgProcessingTimeMs: Math.round(avgProcessingTime),
-      successRate: this.jobsInjected > 0 ? (this.jobsCompleted / this.jobsInjected * 100).toFixed(1) + '%' : '0%',
-      failureRate: this.jobsInjected > 0 ? (this.jobsFailed / this.jobsInjected * 100).toFixed(1) + '%' : '0%',
+      successRate:
+        this.jobsInjected > 0
+          ? ((this.jobsCompleted / this.jobsInjected) * 100).toFixed(1) + '%'
+          : '0%',
+      failureRate:
+        this.jobsInjected > 0
+          ? ((this.jobsFailed / this.jobsInjected) * 100).toFixed(1) + '%'
+          : '0%',
     };
   }
 }
@@ -203,24 +212,20 @@ class TestMetrics {
 
 async function injectHappyPathJobs(metrics) {
   console.log(`🚀 PASSO 1: Injetando ${HAPPY_PATH_JOBS} jobs válidos na formalization-queue...`);
-  
+
   const promises = [];
-  
+
   for (let i = 1; i <= HAPPY_PATH_JOBS; i++) {
     const payload = generateValidPayload(i);
-    
-    const jobPromise = formalizationQueue.add(
-      'ProposalApprovedJob',
-      payload,
-      {
-        attempts: 3, // Default retry policy  
-        backoff: {
-          type: 'exponential',
-          delay: 2000,
-        }
-      }
-    );
-    
+
+    const jobPromise = formalizationQueue.add('ProposalApprovedJob', payload, {
+      attempts: 3, // Default retry policy
+      backoff: {
+        type: 'exponential',
+        delay: 2000,
+      },
+    });
+
     promises.push(jobPromise);
     metrics.recordJobInjected();
   }
@@ -231,34 +236,30 @@ async function injectHappyPathJobs(metrics) {
 
 async function injectFailureJob(metrics) {
   console.log(`🚀 PASSO 2: Injetando ${FAILURE_TEST_JOBS} job de falha (attempts: 2)...`);
-  
+
   const failurePayload = generateFailurePayload();
-  
-  await formalizationQueue.add(
-    'ProposalApprovedJob',
-    failurePayload,
-    {
-      attempts: 2, // Configurado para PAM requirement
-      backoff: {
-        type: 'exponential',
-        delay: 1000, // Faster for testing
-      }
-    }
-  );
-  
+
+  await formalizationQueue.add('ProposalApprovedJob', failurePayload, {
+    attempts: 2, // Configurado para PAM requirement
+    backoff: {
+      type: 'exponential',
+      delay: 1000, // Faster for testing
+    },
+  });
+
   metrics.recordJobInjected();
   console.log(`✅ Job de falha injetado (esperando 2 tentativas + DLQ)`);
 }
 
 async function waitForProcessing(durationMs = 30000) {
-  console.log(`⏳ Aguardando ${durationMs/1000}s para processamento dos jobs...`);
-  
-  return new Promise(resolve => {
+  console.log(`⏳ Aguardando ${durationMs / 1000}s para processamento dos jobs...`);
+
+  return new Promise((resolve) => {
     let elapsed = 0;
     const interval = setInterval(() => {
       elapsed += 1000;
-      process.stdout.write(`\r⏳ Processando... ${elapsed/1000}s/${durationMs/1000}s`);
-      
+      process.stdout.write(`\r⏳ Processando... ${elapsed / 1000}s/${durationMs / 1000}s`);
+
       if (elapsed >= durationMs) {
         console.log('\n✅ Período de processamento concluído');
         clearInterval(interval);
@@ -270,42 +271,42 @@ async function waitForProcessing(durationMs = 30000) {
 
 async function validateResults(token, metrics) {
   console.log(`🔍 PASSO 3: Validando resultados...`);
-  
+
   let queueMetrics = null;
   let completedJobs = 0;
   let dlqSize = 0;
   let failedJobs = 0;
-  
+
   if (token) {
     // Validação via HTTP endpoint
     console.log('📊 Usando endpoint HTTP de monitoramento...');
     queueMetrics = await getQueueMetrics(token);
-    
+
     if (queueMetrics) {
       completedJobs = queueMetrics.formalizationQueue?.completed || 0;
       dlqSize = queueMetrics.formalizationQueue?.dlqSize || 0;
       failedJobs = queueMetrics.formalizationQueue?.failed || 0;
-      
+
       console.log('📊 MÉTRICAS DA QUEUE (HTTP):');
       console.log(JSON.stringify(queueMetrics, null, 2));
     }
   }
-  
+
   if (!token || !queueMetrics) {
     // Validação via BullMQ stats diretos
     console.log('📊 Usando stats diretos da BullMQ queue...');
-    
+
     try {
       const waitingCount = await formalizationQueue.getWaitingCount();
       const activeCount = await formalizationQueue.getActiveCount();
       const completedCount = await formalizationQueue.getCompletedCount();
       const failedCount = await formalizationQueue.getFailedCount();
       const delayedCount = await formalizationQueue.getDelayedCount();
-      
+
       completedJobs = completedCount;
       failedJobs = failedCount;
       dlqSize = failedJobs; // Em BullMQ, jobs que falharam definitivamente
-      
+
       console.log('📊 MÉTRICAS DA QUEUE (BullMQ direto):');
       console.log({
         waiting: waitingCount,
@@ -321,25 +322,25 @@ async function validateResults(token, metrics) {
       dlqSize = metrics.dlqCount;
     }
   }
-  
+
   const expectedHappyPath = HAPPY_PATH_JOBS;
   const expectedDLQ = FAILURE_TEST_JOBS;
-  
+
   console.log(`\n✅ VALIDAÇÃO DO CAMINHO FELIZ:`);
   console.log(`   Expected: ${expectedHappyPath} jobs processados`);
   console.log(`   Actual: ${completedJobs} jobs completed`);
-  
+
   console.log(`\n❌ VALIDAÇÃO DO CAMINHO INFELIZ:`);
   console.log(`   Expected: ${expectedDLQ} jobs na DLQ`);
   console.log(`   Actual: ${dlqSize} jobs failed/DLQ`);
-  
+
   // Update internal metrics
   metrics.jobsCompleted = completedJobs;
   metrics.dlqCount = dlqSize;
-  
+
   const happyPathSuccess = completedJobs >= expectedHappyPath * 0.5; // 50% threshold para teste inicial
   const failurePathSuccess = dlqSize >= expectedDLQ || failedJobs > 0; // Pelo menos 1 falha
-  
+
   return {
     happyPathSuccess,
     failurePathSuccess,
@@ -365,12 +366,12 @@ async function runQueueStressTest() {
   console.log(`\n🚀 Iniciando teste de stress das filas...\n`);
 
   const metrics = new TestMetrics();
-  
+
   try {
     // Autenticação para monitoramento (tentativa)
     console.log('🔐 Tentando autenticar para monitoramento...');
     const token = await authenticate();
-    
+
     let authWarning = false;
     if (!token) {
       console.log('⚠️ Autenticação falhou - continuando sem monitoramento HTTP');
@@ -400,35 +401,36 @@ async function runQueueStressTest() {
 
     // Passo 1: Injetar jobs de sucesso
     await injectHappyPathJobs(metrics);
-    
-    // Passo 2: Injetar job de falha  
+
+    // Passo 2: Injetar job de falha
     await injectFailureJob(metrics);
-    
+
     // Aguardar processamento
     await waitForProcessing(45000); // 45 segundos para jobs + retries
-    
+
     // Passo 3: Validar resultados
     const validation = await validateResults(token, metrics);
-    
+
     // Relatório final
     console.log(`\n🏆 RELATÓRIO FINAL:`);
     const report = metrics.getReport();
     console.log(JSON.stringify(report, null, 2));
-    
+
     // Status da missão
     const missionSuccess = validation.happyPathSuccess && validation.failurePathSuccess;
-    
+
     console.log(`\n🎯 STATUS DA MISSÃO 2:`);
     console.log(`   Caminho Feliz: ${validation.happyPathSuccess ? '✅ SUCESSO' : '❌ FALHOU'}`);
-    console.log(`   Caminho Infeliz: ${validation.failurePathSuccess ? '✅ SUCESSO' : '❌ FALHOU'}`);
+    console.log(
+      `   Caminho Infeliz: ${validation.failurePathSuccess ? '✅ SUCESSO' : '❌ FALHOU'}`
+    );
     console.log(`   Missão Geral: ${missionSuccess ? '🏆 COMPLETA' : '❌ FALHOU'}`);
-    
+
     return {
       success: missionSuccess,
       metrics: report,
       validation,
     };
-    
   } catch (error) {
     console.error('❌ Erro durante o teste:', error);
     return {

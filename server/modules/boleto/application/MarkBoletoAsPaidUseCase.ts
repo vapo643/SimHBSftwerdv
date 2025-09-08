@@ -1,6 +1,6 @@
 /**
  * Use Case: Marcar Boleto como Pago
- * 
+ *
  * Orquestra a marcação de um boleto como pago por um webhook ou operação manual
  * Implementa auditoria completa para conformidade bancária
  * PAM V1.0 - Operação Muralha de Aço Fase 2
@@ -40,10 +40,10 @@ export class MarkBoletoAsPaidUseCase {
             description: 'Attempted to mark non-existent boleto as paid',
             boletoId: dto.boletoId,
             reason: 'boleto_not_found',
-            webhookEventId: dto.webhookEventId
-          }
+            webhookEventId: dto.webhookEventId,
+          },
         });
-        
+
         throw new Error(`Boleto ${dto.boletoId} não encontrado`);
       }
 
@@ -61,10 +61,10 @@ export class MarkBoletoAsPaidUseCase {
             propostaId: boleto.propostaId,
             currentStatus: boleto.status,
             originalPaymentDate: boleto.dataPagamento,
-            webhookEventId: dto.webhookEventId
-          }
+            webhookEventId: dto.webhookEventId,
+          },
         });
-        
+
         throw new Error(`Boleto ${boleto.numeroBoleto} já está marcado como pago`);
       }
 
@@ -81,37 +81,39 @@ export class MarkBoletoAsPaidUseCase {
             propostaId: boleto.propostaId,
             currentStatus: boleto.status,
             motivoCancelamento: boleto.motivoCancelamento,
-            webhookEventId: dto.webhookEventId
-          }
+            webhookEventId: dto.webhookEventId,
+          },
         });
-        
-        throw new Error(`Boleto ${boleto.numeroBoleto} está cancelado e não pode ser marcado como pago`);
+
+        throw new Error(
+          `Boleto ${boleto.numeroBoleto} está cancelado e não pode ser marcado como pago`
+        );
       }
 
       // Atualizar dados do boleto
       const dataPagamento = dto.dataPagamento || new Date();
       const statusAnterior = boleto.status;
-      
+
       boleto.status = 'pago';
       boleto.dataPagamento = dataPagamento;
       boleto.formaPagamento = dto.formaPagamento || boleto.formaPagamento || 'boleto';
-      
+
       if (dto.valorPago) {
         boleto.valorTotal = dto.valorPago;
       }
-      
+
       if (dto.nossoNumero) {
         boleto.nossoNumero = dto.nossoNumero;
       }
-      
+
       if (dto.pixTxid) {
         boleto.pixTxid = dto.pixTxid;
       }
-      
+
       if (dto.comprovantePagamentoUrl) {
         boleto.urlComprovantePagamento = dto.comprovantePagamentoUrl;
       }
-      
+
       if (dto.observacoes) {
         boleto.observacoes = dto.observacoes;
       }
@@ -143,12 +145,14 @@ export class MarkBoletoAsPaidUseCase {
           auditTrail: {
             operation: 'mark_boleto_as_paid',
             timestamp: new Date().toISOString(),
-            transactionContext: this.unitOfWork.transactionId
-          }
-        }
+            transactionContext: this.unitOfWork.transactionId,
+          },
+        },
       });
 
-      console.log(`[BOLETO PAYMENT] ✅ Boleto ${boleto.numeroBoleto} marcado como pago - Proposta ${boleto.propostaId}`);
+      console.log(
+        `[BOLETO PAYMENT] ✅ Boleto ${boleto.numeroBoleto} marcado como pago - Proposta ${boleto.propostaId}`
+      );
     });
   }
 }

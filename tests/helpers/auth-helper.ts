@@ -113,23 +113,22 @@ export async function loginTestUser(app: Express, user: TestUser): Promise<strin
     // Em ambiente de teste, não precisamos de autenticação real do Supabase
     const jwt = await import('jsonwebtoken');
     const testSecret = process.env.JWT_SECRET || 'development-secret-key'; // Match middleware default
-    
+
     const mockPayload = {
       userId: user.id, // Compatible with local JWT validation path (line 426)
       email: user.email,
       role: user.role,
       sub: user.id, // Keep sub for JWT standard compliance
       aud: 'authenticated',
-      exp: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour expiry
+      exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour expiry
       iat: Math.floor(Date.now() / 1000),
       iss: 'simpix-test-environment',
     };
 
     const mockToken = jwt.sign(mockPayload, testSecret, { algorithm: 'HS256' });
-    
+
     console.log(`[AUTH HELPER] ✅ Mock JWT created for user ${user.id}`);
     return mockToken;
-    
   } catch (error) {
     console.error(`[AUTH HELPER] ❌ Mock auth failed:`, error);
     throw error;

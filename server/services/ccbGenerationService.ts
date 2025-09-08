@@ -166,7 +166,9 @@ export class CCBGenerationService {
 
       // RELAXAR exigência de endereço por enquanto para completar teste
       if (!enderecoCliente) {
-        console.warn(`⚠️ [CCB] Endereço não informado - usando valor padrão para proposta ${proposalId}`);
+        console.warn(
+          `⚠️ [CCB] Endereço não informado - usando valor padrão para proposta ${proposalId}`
+        );
       }
 
       const dadosCliente = {
@@ -1320,20 +1322,29 @@ export class CCBGenerationService {
 
       // CORREÇÃO CRÍTICA: Aceitar dados tanto de campos JSONB quanto campos diretos
       // Validar se há dados mínimos necessários (seja em JSONB ou campos diretos)
-      const hasClientData = !!(proposta.cliente_data || (proposta.cliente_nome && proposta.cliente_cpf));
+      const hasClientData = !!(
+        proposta.cliente_data ||
+        (proposta.cliente_nome && proposta.cliente_cpf)
+      );
       const hasConditionsData = !!(proposta.condicoes_data || (proposta.valor && proposta.prazo));
-      
+
       if (!hasClientData) {
-        console.error('❌ [CCB] Dados incompletos: cliente_data JSONB ausente e campos diretos insuficientes (falta nome/cpf)');
+        console.error(
+          '❌ [CCB] Dados incompletos: cliente_data JSONB ausente e campos diretos insuficientes (falta nome/cpf)'
+        );
         return null;
       }
-      
+
       if (!hasConditionsData) {
-        console.error('❌ [CCB] Dados incompletos: condicoes_data JSONB ausente e campos diretos insuficientes (falta valor/prazo)');
+        console.error(
+          '❌ [CCB] Dados incompletos: condicoes_data JSONB ausente e campos diretos insuficientes (falta valor/prazo)'
+        );
         return null;
       }
-      
-      console.log('✅ [CCB] Validação aprovada - dados mínimos encontrados em campos diretos da tabela');
+
+      console.log(
+        '✅ [CCB] Validação aprovada - dados mínimos encontrados em campos diretos da tabela'
+      );
 
       // Retornar TODOS os dados para uso na geração
       return {
@@ -1345,7 +1356,8 @@ export class CCBGenerationService {
         cliente_cidade: proposta.cliente_cidade || proposta.cliente_data?.cidade || '',
         cliente_estado: proposta.cliente_uf || proposta.cliente_data?.estado || '',
         cliente_cep: proposta.cliente_cep || proposta.cliente_data?.cep || '',
-        valor_emprestimo: proposta.valor || proposta.condicoes_data?.valor || proposta.valor_aprovado || 0,
+        valor_emprestimo:
+          proposta.valor || proposta.condicoes_data?.valor || proposta.valor_aprovado || 0,
         prazo_meses: proposta.prazo || proposta.condicoes_data?.prazo || 12,
         taxa_juros: proposta.taxa_juros || proposta.condicoes_data?.taxa_juros || 0,
       };

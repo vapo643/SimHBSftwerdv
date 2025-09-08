@@ -3,6 +3,7 @@
 ## ✅ Implementações de Segurança OWASP Aplicadas
 
 ### 1. Input Validation (OWASP Top 10 - A03:2021)
+
 ```javascript
 // CPF: Apenas 11 dígitos sem formatação
 const CPFSchema = z.string().regex(/^\d{11}$/);
@@ -20,17 +21,16 @@ const NameSchema = z.string().transform(val => xss(val));
 ```
 
 ### 2. Access Control (OWASP Top 10 - A01:2021)
+
 ```javascript
 // RBAC implementado para todas as rotas
-router.post('/send-ccb/:id', 
-  jwtAuthMiddleware, 
-  checkRole(['ADMIN', 'GERENTE', 'FORMALIZADOR'])
-);
+router.post('/send-ccb/:id', jwtAuthMiddleware, checkRole(['ADMIN', 'GERENTE', 'FORMALIZADOR']));
 
 // Apenas roles autorizadas podem enviar para assinatura
 ```
 
 ### 3. Cryptographic Failures (OWASP Top 10 - A02:2021)
+
 ```javascript
 // HMAC SHA-256 para webhooks
 const expectedSignature = crypto
@@ -45,6 +45,7 @@ crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 ```
 
 ### 4. Security Logging (OWASP Top 10 - A09:2021)
+
 ```javascript
 // Logs sanitizados - nunca expõem dados sensíveis
 {
@@ -57,6 +58,7 @@ crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 ```
 
 ### 5. Rate Limiting & DDoS Protection
+
 ```javascript
 // API: 300 req/min (limite do ClickSign)
 // Webhooks: 100 req/min/IP
@@ -68,6 +70,7 @@ if (rateLimitRemaining <= 0) {
 ```
 
 ### 6. Webhook Security
+
 - ✅ IP Whitelist (configurável)
 - ✅ Timestamp validation (5 minutos)
 - ✅ HMAC signature validation
@@ -76,11 +79,12 @@ if (rateLimitRemaining <= 0) {
 - ✅ Schema validation
 
 ### 7. Error Handling Seguro
+
 ```javascript
 // Nunca expõe stack traces
 catch (error) {
   console.error('[INTERNAL]', error); // Log completo interno
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Erro ao processar solicitação',
     code: 'CLICKSIGN_ERROR'
   }); // Resposta genérica
@@ -88,6 +92,7 @@ catch (error) {
 ```
 
 ### 8. Data Validation Pipeline
+
 ```
 1. Input → Zod Schema → Sanitização XSS → Validação de negócio
 2. PDF → Size check → Magic number → Nome sanitizado
@@ -97,26 +102,31 @@ catch (error) {
 ## 🛡️ Proteções Implementadas
 
 ### Contra Injection Attacks
+
 - ✅ Todos inputs validados com Zod
 - ✅ CPF/CNPJ sempre sem formatação
 - ✅ XSS sanitization em strings
 
 ### Contra Replay Attacks
+
 - ✅ Timestamp validation (5 min)
 - ✅ Event deduplication
 - ✅ Request ID único
 
 ### Contra Information Disclosure
+
 - ✅ Logs sanitizados
 - ✅ Erros genéricos para cliente
 - ✅ Dados sensíveis criptografados
 
 ### Contra DoS/DDoS
+
 - ✅ Rate limiting multicamada
 - ✅ Backoff exponencial
 - ✅ Memory cleanup automático
 
 ### Contra Man-in-the-Middle
+
 - ✅ HTTPS obrigatório
 - ✅ HMAC validation
 - ✅ Bearer token authentication
@@ -124,6 +134,7 @@ catch (error) {
 ## 📊 Monitoramento de Segurança
 
 ### Logs de Auditoria
+
 ```
 [CLICKSIGN AUDIT] {
   timestamp: "2025-01-31T10:00:00Z",
@@ -137,6 +148,7 @@ catch (error) {
 ```
 
 ### Métricas de Segurança
+
 1. Taxa de webhooks rejeitados por IP
 2. Taxa de falhas de HMAC
 3. Tentativas de rate limit
@@ -146,6 +158,7 @@ catch (error) {
 ## ✅ Compliance OWASP
 
 ### ASVS Nível 1 - Verificações Aplicadas
+
 - V1.2.3 - Autenticação forte
 - V3.4.1 - Token validation
 - V4.1.1 - Access control
@@ -155,6 +168,7 @@ catch (error) {
 - V13.2.1 - API security
 
 ### OWASP Top 10 - Mitigações
+
 - A01:2021 ✅ Broken Access Control
 - A02:2021 ✅ Cryptographic Failures
 - A03:2021 ✅ Injection
@@ -167,6 +181,7 @@ catch (error) {
 ## 🚀 Status: PRODUÇÃO SEGURA
 
 A integração ClickSign está:
+
 - ✅ 100% validada contra OWASP Top 10
 - ✅ Protegida contra ataques conhecidos
 - ✅ Com auditoria completa

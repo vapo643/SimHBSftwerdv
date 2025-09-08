@@ -5,16 +5,19 @@
 **⚠️ IMPORTANTE: URL TEMPORÁRIA DE DESENVOLVIMENTO**
 
 Durante o desenvolvimento, use esta URL temporária:
+
 ```
 https://workspace.gabrielserri238.repl.co/api/clicksign/webhook
 ```
 
 **🏢 PARA PRODUÇÃO, configure a URL do domínio oficial:**
+
 ```
 https://seudominiooficial.com.br/api/clicksign/webhook
 ```
 
 **Exemplo para Eleeve:**
+
 ```
 https://sistema.eleeve.com.br/api/clicksign/webhook
 ```
@@ -27,7 +30,8 @@ Acesse: **Configurações → Webhooks → Adicionar Webhook**
 
 **Preencha os seguintes campos:**
 
-1. **URL do Webhook** (use o domínio oficial em produção): 
+1. **URL do Webhook** (use o domínio oficial em produção):
+
    ```
    DESENVOLVIMENTO: https://workspace.gabrielserri238.repl.co/api/clicksign/webhook
    PRODUÇÃO: https://seudominiooficial.com.br/api/clicksign/webhook
@@ -66,6 +70,7 @@ CLICKSIGN_ALLOWED_IPS=ip1,ip2,ip3
 ## 🔄 Fluxo do Webhook
 
 ### Quando `envelope.finished` é recebido:
+
 1. ✅ Marca proposta como "contratos_assinados"
 2. ✅ Atualiza campo `assinaturaEletronicaConcluida = true`
 3. ✅ Registra data/hora da assinatura
@@ -73,6 +78,7 @@ CLICKSIGN_ALLOWED_IPS=ip1,ip2,ip3
 5. ✅ Cria log de auditoria
 
 ### Segurança Implementada:
+
 - 🔒 Validação HMAC SHA-256
 - 🔒 Validação de timestamp (5 minutos)
 - 🔒 Proteção contra replay attack

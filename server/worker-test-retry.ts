@@ -46,7 +46,9 @@ async function initTestRetryWorker() {
         const attemptNumber = job.attemptsMade + 1;
 
         console.log(`[TEST RETRY WORKER] 🔄 Processando job ${job.id}`);
-        console.log(`[TEST RETRY WORKER] 📊 Tentativa ${attemptNumber} de ${job.opts.attempts || 1}`);
+        console.log(
+          `[TEST RETRY WORKER] 📊 Tentativa ${attemptNumber} de ${job.opts.attempts || 1}`
+        );
         console.log(`[TEST RETRY WORKER] ⏰ Timestamp: ${new Date().toISOString()}`);
         console.log(`[TEST RETRY WORKER] 📦 Dados do job:`, job.data);
 
@@ -63,7 +65,7 @@ async function initTestRetryWorker() {
 // REFATORADO: Event handlers configurados durante a inicialização
 async function setupTestRetryWorkerEvents() {
   const worker = await initTestRetryWorker();
-  
+
   // Event handlers para demonstrar o retry
   worker.on('completed', (job) => {
     console.log(
@@ -110,15 +112,15 @@ async function startTestRetryWorker() {
   try {
     console.log('[TEST RETRY WORKER] 🚀 Iniciando worker de teste com Redis Manager...');
     console.log('[TEST RETRY WORKER] 🎯 PAM V1.0 - Redis Singleton Refactoring Applied');
-    
+
     const worker = await setupTestRetryWorkerEvents();
-    
+
     console.log('[TEST RETRY WORKER] 📋 Configuração:');
     console.log(`  - Queue: test-retry`);
     console.log(`  - Concorrência: 1`);
     console.log(`  - Comportamento: SEMPRE FALHA (para testar retry)`);
     console.log('[TEST RETRY WORKER] ⏳ Aguardando jobs de teste...');
-    
+
     return worker;
   } catch (error) {
     console.error('[TEST RETRY WORKER] ❌ Falha na inicialização:', error);

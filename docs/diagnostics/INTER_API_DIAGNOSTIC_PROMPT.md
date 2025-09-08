@@ -1,9 +1,11 @@
 # 🔴 DIAGNÓSTICO PROFUNDO: Erro Persistente OAuth2 - Banco Inter API v3
 
 ## CONTEXTO CRÍTICO
+
 Estamos enfrentando um erro **persistente e repetitivo** há vários dias ao tentar autenticar com a API do Banco Inter. O erro 400 (Bad Request) ocorre na etapa inicial de autenticação OAuth2, impedindo completamente a geração de boletos bancários em produção.
 
 ## PROBLEMA PRINCIPAL
+
 ```
 [INTER] 📡 Response status: 400
 [INTER] ❌ Error response body: (vazio)
@@ -16,12 +18,14 @@ Estamos enfrentando um erro **persistente e repetitivo** há vários dias ao ten
 ## IMPLEMENTAÇÃO ATUAL DETALHADA
 
 ### 1. Arquitetura do Sistema
+
 - **Framework**: Node.js/Express com TypeScript
 - **Cliente HTTP**: Fetch API nativo do Node.js
 - **Autenticação**: OAuth 2.0 com mTLS (Mutual TLS)
 - **Ambiente**: Produção no Replit
 
 ### 2. Fluxo de Autenticação Implementado
+
 ```typescript
 // URL de autenticação
 const tokenUrl = 'https://cdpj.partners.bancointer.com.br/oauth/v2/token';
@@ -48,6 +52,7 @@ const tokenUrl = 'https://cdpj.partners.bancointer.com.br/oauth/v2/token';
 ```
 
 ### 3. Certificados mTLS
+
 - **Origem**: Baixados do Internet Banking do Banco Inter
 - **Formato**: .crt e .key em formato PEM
 - **Validação**: Certificados validados com OpenSSL
@@ -56,6 +61,7 @@ const tokenUrl = 'https://cdpj.partners.bancointer.com.br/oauth/v2/token';
 ### 4. Tentativas de Solução Já Realizadas
 
 #### ✅ Validações Confirmadas:
+
 1. Client ID e Client Secret corretos (36 caracteres cada)
 2. Certificados válidos e não expirados
 3. URLs corretas conforme documentação oficial
@@ -63,9 +69,10 @@ const tokenUrl = 'https://cdpj.partners.bancointer.com.br/oauth/v2/token';
 5. Scopes válidos conforme documentação
 
 #### ❌ Tentativas Sem Sucesso:
+
 1. Diferentes formatos de certificado (com/sem headers, line breaks)
 2. Variações no agente HTTPS (diferentes configurações TLS)
-3. Headers adicionais (User-Agent, X-Inter-*, etc.)
+3. Headers adicionais (User-Agent, X-Inter-\*, etc.)
 4. Diferentes bibliotecas HTTP (axios, node-fetch, https nativo)
 5. Codificação URL manual vs automática
 6. Ordem diferente dos parâmetros
@@ -75,6 +82,7 @@ const tokenUrl = 'https://cdpj.partners.bancointer.com.br/oauth/v2/token';
 10. Diferentes versões do Node.js
 
 ### 5. Logs Completos do Erro
+
 ```
 [INTER] 🔑 Requesting new access token...
 [INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
@@ -100,20 +108,22 @@ const tokenUrl = 'https://cdpj.partners.bancointer.com.br/oauth/v2/token';
   date: 'Mon, 04 Aug 2025 17:26:11 GMT',
   'content-length': '0'
 }
-[INTER] ❌ Error response body: 
+[INTER] ❌ Error response body:
 ```
 
 ### 6. Peculiaridades Observadas
+
 1. **Response body vazio**: O erro 400 não retorna nenhum corpo de resposta
 2. **Header traceparent**: Indica que a requisição está chegando ao servidor
 3. **Content-length: 0**: Confirma que não há corpo de resposta
 4. **Sem mensagem de erro**: Impossível saber o motivo exato do erro
 
 ### 7. Código de Implementação Atual
+
 ```typescript
 private async getAccessToken(): Promise<void> {
   const tokenUrl = `https://${this.baseUrl}/oauth/v2/token`;
-  
+
   const params = new URLSearchParams({
     client_id: this.clientId,
     client_secret: this.clientSecret,
@@ -164,20 +174,24 @@ private async getAccessToken(): Promise<void> {
    - Há exemplos funcionais em produção que podemos comparar?
 
 ## DOCUMENTAÇÃO CONSULTADA
+
 1. [Documentação Oficial API Inter](https://developers.inter.co/references/autenticacao)
 2. [Guia de Integração Boletos](https://developers.inter.co/references/cobrancas)
 3. RFC 6749 - OAuth 2.0 Framework
 4. RFC 8705 - OAuth 2.0 Mutual-TLS
 
 ## OBJETIVO DA ANÁLISE
+
 Precisamos identificar a **causa raiz** do erro 400 e encontrar uma solução definitiva. O sistema está em produção e precisa gerar boletos automaticamente após assinatura eletrônica via ClickSign.
 
 ## INFORMAÇÕES ADICIONAIS
+
 - **Urgência**: Sistema em produção com clientes aguardando
 - **Impacto**: Impossibilidade total de gerar boletos bancários
 - **Alternativas**: Não há - o Banco Inter é requisito do cliente
 
 Por favor, analise profundamente este problema e sugira:
+
 1. Possíveis causas não exploradas
 2. Métodos de debugging avançados
 3. Soluções alternativas ou workarounds

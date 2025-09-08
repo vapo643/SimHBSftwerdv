@@ -7,18 +7,21 @@
 ## 🔧 **PASSO 1: UPLOAD DO ARQUIVO .pfx**
 
 ### **Método 1: Drag & Drop (Mais Fácil)**
+
 1. **Baixe o arquivo .pfx** do portal do Inter
 2. **Abra o painel de arquivos** do Replit (lado esquerdo)
 3. **Arraste o arquivo .pfx** para a pasta raiz do projeto
 4. **Confirme o upload** quando aparecer
 
 ### **Método 2: Upload via Interface**
+
 1. **Clique no ícone "+"** no painel de arquivos
 2. **Selecione "Upload file"**
 3. **Escolha o arquivo .pfx** baixado
 4. **Aguarde o upload** concluir
 
 ### **Resultado Esperado:**
+
 ```
 📁 Projeto/
   ├── certificado_inter.pfx  ← Arquivo aqui
@@ -32,11 +35,14 @@
 ## 🔐 **PASSO 2: EXTRAIR CHAVES DO CERTIFICADO**
 
 ### **Informações Necessárias:**
+
 - **Nome do arquivo**: `certificado_inter.pfx` (ou nome que você deu)
 - **Senha do certificado**: Fornecida pelo banco quando baixou
 
 ### **Script de Extração (Vou criar para você):**
+
 Um script que extrai automaticamente:
+
 - Certificate (parte pública)
 - Private Key (parte privada)
 
@@ -57,6 +63,7 @@ Depois do upload, vou criar scripts que fazem:
 ## 📋 **FORMATO DOS SECRETS EXTRAÍDOS**
 
 ### **INTER_CERTIFICATE**
+
 ```
 -----BEGIN CERTIFICATE-----
 MIIDXTCCAkWgAwIBAgIJAKoK/OvqDMGmMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
@@ -67,6 +74,7 @@ aWRnaXRzIFB0eSBMdGQwHhcNMTcwODI4MTQxNTMwWhcNMTgwODI4MTQxNTMwWjBF
 ```
 
 ### **INTER_PRIVATE_KEY**
+
 ```
 -----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKB

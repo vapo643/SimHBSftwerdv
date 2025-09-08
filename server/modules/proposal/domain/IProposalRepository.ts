@@ -7,7 +7,11 @@
  */
 
 import { Proposal, ProposalStatus } from './Proposal';
-import { PaginatedResult, CursorPaginationOptions, RepositoryFilters } from '@shared/types/pagination';
+import {
+  PaginatedResult,
+  CursorPaginationOptions,
+  RepositoryFilters,
+} from '@shared/types/pagination';
 
 export interface ProposalSearchCriteria {
   status?: string;
@@ -23,7 +27,7 @@ export interface ProposalRepository {
   // ========================================================================
   // CRUD BÁSICO
   // ========================================================================
-  
+
   /**
    * Salva uma proposta (create ou update)
    */

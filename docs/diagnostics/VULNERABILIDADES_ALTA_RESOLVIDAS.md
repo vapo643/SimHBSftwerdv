@@ -18,6 +18,7 @@ Este documento registra as correções implementadas para as 5 vulnerabilidades 
 **Linha**: 22
 
 **Correção Implementada**:
+
 ```typescript
 // Disable X-Powered-By header - OWASP ASVS V14.4.1
 app.disable('x-powered-by');
@@ -33,6 +34,7 @@ app.disable('x-powered-by');
 **Linhas**: 96-102
 
 **Correção Implementada**:
+
 ```typescript
 keyGenerator: (req) => {
   // Advanced key generation - OWASP ASVS V11.1.1
@@ -42,7 +44,7 @@ keyGenerator: (req) => {
   // Hash the fingerprint to protect privacy
   const crypto = require('crypto');
   return crypto.createHash('sha256').update(fingerprint).digest('hex');
-}
+};
 ```
 
 **Melhoria**: Rate limiting agora considera IP + Email + User Agent, impedindo bypass via proxies/VPNs.
@@ -52,14 +54,16 @@ keyGenerator: (req) => {
 ### 3. 🔄 Enumeração de Usuários (ASVS V3.2.3) - EM PROGRESSO
 
 **Arquivos Afetados**:
+
 - `server/routes/email-change.ts` - ✅ Corrigido
 - `server/routes.ts` - 🔄 Em andamento
 
 **Correções Implementadas**:
+
 ```typescript
 // Generic error message - OWASP ASVS V3.2.3
 return res.status(401).json({
-  error: 'Credenciais inválidas'
+  error: 'Credenciais inválidas',
 });
 ```
 
@@ -71,12 +75,14 @@ return res.status(401).json({
 
 **Situação**: Tokens JWT do Supabase têm expiração padrão de 1 hora.
 
-**Recomendação**: 
+**Recomendação**:
+
 - Configurar no painel do Supabase: Dashboard → Settings → Auth → JWT Expiry
 - Reduzir para 30 minutos ou menos
 - Implementado sistema de idle timeout no frontend (30 minutos)
 
-**Mitigação Implementada**: 
+**Mitigação Implementada**:
+
 - Sistema de timeout por inatividade já existe no frontend
 - Modal de aviso 2 minutos antes do logout
 - Arquivo: `client/src/hooks/useIdleTimer.ts`
@@ -88,12 +94,14 @@ return res.status(401).json({
 **Arquivo Criado**: `server/middleware/anti-automation.ts`
 
 **Funcionalidades**:
+
 - Desafio matemático simples para endpoints críticos
 - Fingerprinting de clientes (IP + User Agent)
 - Limite de 3 tentativas por desafio
 - Limpeza automática de desafios expirados
 
 **Uso Recomendado**:
+
 ```typescript
 // Em endpoints críticos como criação de propostas
 app.post('/api/propostas', antiAutomationMiddleware, async (req, res) => {
@@ -108,12 +116,14 @@ app.post('/api/propostas', antiAutomationMiddleware, async (req, res) => {
 ## MÉTRICAS DE SEGURANÇA
 
 ### Antes das Correções
+
 - Rate limiting baseado apenas em IP
 - Headers revelando tecnologia
 - Mensagens de erro expondo existência de usuários
 - Sem proteção contra bots
 
 ### Após as Correções
+
 - Rate limiting com fingerprinting avançado
 - Headers de servidor ofuscados
 - Mensagens de erro padronizadas

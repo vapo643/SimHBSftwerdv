@@ -106,7 +106,11 @@ class CCBSyncService {
       // Download the signed document from ClickSign - CONF-002: With integrity verification
       const documentData = await clickSignService.downloadSignedDocument(clicksignKey);
 
-      if (!documentData || !documentData.documentBuffer || documentData.documentBuffer.length === 0) {
+      if (
+        !documentData ||
+        !documentData.documentBuffer ||
+        documentData.documentBuffer.length === 0
+      ) {
         console.log(`[CCB SYNC] ⚠️ Empty PDF received for ${proposalId}`);
         return false as boolean;
       }
@@ -116,7 +120,7 @@ class CCBSyncService {
         hash: documentData.documentHash,
         auditTrailEvents: documentData.auditTrail.events.length,
         auditTrailSignatures: documentData.auditTrail.signatures.length,
-        verifiedAt: documentData.verifiedAt
+        verifiedAt: documentData.verifiedAt,
       });
 
       const pdfBuffer = documentData.documentBuffer;
@@ -137,7 +141,7 @@ class CCBSyncService {
         audit_trail: JSON.stringify(documentData.auditTrail),
         integrity_verified_at: documentData.verifiedAt.toISOString(),
         clicksign_document_key: clicksignKey,
-        original_size_bytes: pdfBuffer.length
+        original_size_bytes: pdfBuffer.length,
       };
 
       // Upload to Supabase Storage with metadata

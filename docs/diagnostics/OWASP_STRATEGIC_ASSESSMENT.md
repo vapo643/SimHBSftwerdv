@@ -3,9 +3,11 @@
 ## Plano de Avaliação Estratégica OWASP
 
 ### Fase 1: OWASP SAMM - Software Assurance Maturity Model
+
 **Objetivo**: Avaliar maturidade atual de segurança do software
 
 #### Domínios SAMM a Avaliar:
+
 1. **Governance (Governança)**
    - Strategy & Metrics
    - Policy & Compliance
@@ -32,6 +34,7 @@
    - Operational Management
 
 #### Status Atual - Baseline Assessment:
+
 - **Data de Avaliação**: 30 de Janeiro de 2025
 - **Versão do Sistema**: Simpix v4.3 com OWASP Infrastructure
 - **Avaliador**: Sistema automatizado + Manual
@@ -39,14 +42,17 @@
 ---
 
 ### Fase 2: OWASP ASVS - Application Security Verification Standard
+
 **Objetivo**: Definir requisitos específicos de segurança
 
 #### Níveis ASVS:
+
 - **Nível 1**: Requisitos básicos de segurança
 - **Nível 2**: Aplicações com dados sensíveis (TARGET para Simpix)
 - **Nível 3**: Aplicações de alta criticidade
 
 #### Categorias de Requisitos:
+
 1. Architecture, Design and Threat Modeling
 2. Authentication
 3. Session Management
@@ -65,9 +71,11 @@
 ---
 
 ### Fase 3: OWASP Cheat Sheets - Guias Práticos
+
 **Objetivo**: Estabelecer guias práticos durante codificação
 
 #### Cheat Sheets Prioritários para Simpix:
+
 1. **Authentication Cheat Sheet**
 2. **Authorization Cheat Sheet**
 3. **Session Management Cheat Sheet**
@@ -82,9 +90,11 @@
 ---
 
 ### Fase 4: OWASP WSTG - Web Security Testing Guide
+
 **Objetivo**: Testar e verificar implementação de segurança
 
 #### Categorias de Teste:
+
 1. **Information Gathering**
 2. **Configuration and Deployment Management Testing**
 3. **Identity Management Testing**
@@ -102,6 +112,7 @@
 ## Status de Implementação
 
 ### ✅ Infraestrutura Base Implementada (30/01/2025):
+
 - Enhanced Security Headers (Helmet + CSP)
 - Input Sanitization Middleware
 - Security Event Logging
@@ -110,6 +121,7 @@
 - OWASP Top 10 Base Protection
 
 ### 🔄 Próximas Etapas:
+
 1. **Receber PDF OWASP (70 páginas)**
 2. **Processar links dos sites OWASP**
 3. **Executar SAMM Assessment**
@@ -120,6 +132,7 @@
 ---
 
 ## Documentos Aguardando Análise:
+
 - [ ] PDF OWASP (70 páginas) - Pendente upload
 - [ ] Links OWASP SAMM
 - [ ] Links OWASP ASVS

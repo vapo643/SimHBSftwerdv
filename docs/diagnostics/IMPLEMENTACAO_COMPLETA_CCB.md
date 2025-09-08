@@ -7,10 +7,12 @@
 ### ✅ 1. ADICIONADOS 24 CAMPOS NA TABELA `propostas`:
 
 #### **Documentos RG Completos:**
+
 - ✅ `cliente_rg_uf` - UF de emissão do RG
 - ✅ `cliente_rg_data_emissao` - Data de emissão do RG
 
 #### **Endereço Detalhado:**
+
 - ✅ `cliente_logradouro` - Rua/Avenida
 - ✅ `cliente_numero` - Número do imóvel
 - ✅ `cliente_complemento` - Apto/Bloco
@@ -19,14 +21,17 @@
 - ✅ `cliente_uf` - Estado
 
 #### **Dados Pessoais:**
+
 - ✅ `cliente_local_nascimento` - Cidade de nascimento
 
 #### **Pessoa Jurídica:**
+
 - ✅ `tipo_pessoa` - PF ou PJ (default: 'PF')
 - ✅ `cliente_razao_social` - Razão social da empresa
 - ✅ `cliente_cnpj` - CNPJ da empresa
 
 #### **Dados Financeiros:**
+
 - ✅ `valor_liquido_liberado` - Valor após descontos
 - ✅ `juros_modalidade` - Pré ou Pós-fixado (default: 'pre_fixado')
 - ✅ `periodicidade_capitalizacao` - Mensal ou Diária (default: 'mensal')
@@ -41,6 +46,7 @@
 - ✅ `calculo_encargos` - Fórmula de cálculo
 
 #### **Dados de Pagamento PIX:**
+
 - ✅ `dados_pagamento_codigo_banco` - Código do banco (001, 237, etc)
 - ✅ `dados_pagamento_digito` - Dígito da conta
 - ✅ `dados_pagamento_pix_banco` - Banco do PIX
@@ -49,6 +55,7 @@
 - ✅ `metodo_pagamento` - conta_bancaria ou pix (default: 'conta_bancaria')
 
 ### ✅ 2. ADICIONADOS 5 CAMPOS NA TABELA `produtos`:
+
 - ✅ `modalidade_juros` - Pré ou Pós-fixado
 - ✅ `periodicidade_capitalizacao` - Mensal ou Diária
 - ✅ `ano_base` - Base de cálculo (365 dias)
@@ -56,11 +63,13 @@
 - ✅ `taxa_credito_padrao` - Taxa de crédito padrão (50.00)
 
 ### ✅ 3. ADICIONADOS 3 CAMPOS NA TABELA `tabelas_comerciais`:
+
 - ✅ `taxa_juros_anual` - Taxa anual calculada
 - ✅ `calculo_encargos` - Fórmula dos encargos
 - ✅ `cet_formula` - Como calcular CET
 
 ### ✅ 4. CRIADA NOVA TABELA `configuracao_empresa`:
+
 ```sql
 - id
 - razao_social (SIMPIX LTDA)
@@ -78,6 +87,7 @@
 ```
 
 ### ✅ 5. ADICIONADOS 3 CAMPOS NA TABELA `inter_collections`:
+
 - ✅ `vencimento_primeira_parcela` - Data do primeiro vencimento
 - ✅ `vencimento_ultima_parcela` - Data do último vencimento
 - ✅ `forma_pagamento` - Como será pago
@@ -114,19 +124,20 @@ O arquivo `ccbFieldMappingV2.ts` foi completamente atualizado para:
 
 ## 📊 ESTATÍSTICAS FINAIS
 
-| Categoria | Antes | Depois | Ganho |
-|-----------|-------|--------|-------|
-| **Campos na Proposta** | 25 | 49 | +96% |
-| **Campos nos Produtos** | 3 | 8 | +167% |
-| **Campos nas Tabelas** | 3 | 6 | +100% |
-| **Configuração Empresa** | 0 | 14 | NOVO |
-| **TOTAL DE CAMPOS** | 31 | 77 | +148% |
+| Categoria                | Antes | Depois | Ganho |
+| ------------------------ | ----- | ------ | ----- |
+| **Campos na Proposta**   | 25    | 49     | +96%  |
+| **Campos nos Produtos**  | 3     | 8      | +167% |
+| **Campos nas Tabelas**   | 3     | 6      | +100% |
+| **Configuração Empresa** | 0     | 14     | NOVO  |
+| **TOTAL DE CAMPOS**      | 31    | 77     | +148% |
 
 ## 🎉 RESULTADO FINAL
 
 ### **SISTEMA 100% COMPLETO!**
 
 ✅ **TODOS os 57 campos do CCB agora estão:**
+
 - Mapeados no banco de dados
 - Conectados no sistema de geração
 - Com cálculos automáticos
@@ -134,12 +145,14 @@ O arquivo `ccbFieldMappingV2.ts` foi completamente atualizado para:
 - Com formatações adequadas
 
 ### **Opção PIX implementada:**
+
 - ✅ Campos separados para PIX
 - ✅ Detecção automática se é PIX ou conta bancária
 - ✅ PIX relacionado à conta bancária
 - ✅ Dados do PIX vão para o financeiro
 
 ### **Sistema inteligente detecta:**
+
 - ✅ PF ou PJ automaticamente
 - ✅ PIX ou Conta Bancária
 - ✅ Endereço detalhado ou simples
@@ -148,17 +161,20 @@ O arquivo `ccbFieldMappingV2.ts` foi completamente atualizado para:
 ## 🚀 COMO TESTAR
 
 ### 1. Testar CCB com dados completos:
+
 ```bash
 POST /api/ccb-corrected/test/teste-123
 Body: {"useTestData": true}
 ```
 
 ### 2. Validar proposta:
+
 ```bash
 POST /api/ccb-corrected/validate-proposal/{propostaId}
 ```
 
 ### 3. Ver mapeamento:
+
 ```bash
 GET /api/ccb-corrected/field-mapping
 ```

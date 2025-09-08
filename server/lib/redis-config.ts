@@ -1,7 +1,7 @@
 /**
  * Redis Configuration for Production-Ready Deployment
  * Centralizes Redis connection settings for BullMQ queues and workers
- * 
+ *
  * Features:
  * - Environment-based configuration (dev/staging/production)
  * - TLS/SSL support for secure connections
@@ -34,15 +34,15 @@ interface RedisConfigOptions {
 export function createRedisConfig(): RedisOptions {
   const isDevelopment = process.env.NODE_ENV === 'development';
   const isProduction = process.env.NODE_ENV === 'production';
-  
+
   // Base configuration optimized for BullMQ
   const baseConfig: RedisConfigOptions = {
     maxRetriesPerRequest: null, // Critical for BullMQ - prevents timeouts
-    enableReadyCheck: false,    // BullMQ recommendation
-    retryDelayOnFailover: 100,  // Fast failover
-    lazyConnect: true,          // Connect when needed
-    keepAlive: 30000,          // Keep connections alive
-    family: 4,                 // IPv4
+    enableReadyCheck: false, // BullMQ recommendation
+    retryDelayOnFailover: 100, // Fast failover
+    lazyConnect: true, // Connect when needed
+    keepAlive: 30000, // Keep connections alive
+    family: 4, // IPv4
   };
 
   // Development configuration (localhost fallback)
@@ -84,7 +84,7 @@ export function createRedisConfig(): RedisOptions {
     config.port = parseInt(url.port) || 6379;
     config.password = url.password || config.password;
     config.db = parseInt(url.pathname.slice(1)) || config.db || 0;
-    
+
     // Detect TLS from URL scheme
     if (url.protocol === 'rediss:') {
       config.tls = {
@@ -164,15 +164,15 @@ export async function checkRedisHealth(): Promise<{
     // Use existing client instead of creating a new one
     const client = sharedRedisClient || createRedisClient('health-check');
     const startTime = Date.now();
-    
+
     await client.ping();
     const latency = Date.now() - startTime;
-    
+
     // Don't quit the shared client
     if (!sharedRedisClient) {
       await client.quit();
     }
-    
+
     return {
       healthy: true,
       latency,

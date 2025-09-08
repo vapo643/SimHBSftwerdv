@@ -2,7 +2,7 @@
 
 **Data:** 2025-08-26  
 **PAM V6.0 - Operação Fênix P1.5**  
-**Executado por:** Diagnóstico de Ferramentas + Arquiteto de Refatoração  
+**Executado por:** Diagnóstico de Ferramentas + Arquiteto de Refatoração
 
 ---
 
@@ -15,7 +15,9 @@ A discrepância entre `get_latest_lsp_diagnostics` (0 erros) e `npx tsc --noEmit
 ### **ANÁLISE TÉCNICA:**
 
 #### **A. Definição Oficial (Correta)**
+
 **Localização:** `server/lib/jwt-auth-middleware.ts:5`
+
 ```typescript
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -30,16 +32,19 @@ export interface AuthenticatedRequest extends Request {
 ```
 
 #### **B. Definições Duplicadas (Inconsistentes)**
+
 **Exemplo:** `server/routes/documents.ts:10`
+
 ```typescript
 interface AuthenticatedRequest extends Request {
-  userId?: string;  // ❌ CONFLITA com oficial: user.id
-  user?: any;       // ❌ TIPO GENÉRICO vs estruturado
-  file?: any;       // ❌ PROPRIEDADE EXTRA não oficial
+  userId?: string; // ❌ CONFLITA com oficial: user.id
+  user?: any; // ❌ TIPO GENÉRICO vs estruturado
+  file?: any; // ❌ PROPRIEDADE EXTRA não oficial
 }
 ```
 
 **Arquivos com Definições Duplicadas:**
+
 1. `server/routes/documents.ts:10`
 2. `server/routes/cobrancas.ts:11`
 3. `server/routes/security-api.ts:12`
@@ -67,6 +72,7 @@ interface AuthenticatedRequest extends Request {
 ### **FASE A: Definição do Tipo Canônico**
 
 #### **A.1. Consolidação em Arquivo Central**
+
 **Localização Proposta:** `shared/types/express.ts`
 
 ```typescript
@@ -75,7 +81,7 @@ import { Request } from 'express';
 /**
  * Interface canônica para requests autenticados
  * Extende Express Request com dados de usuário validados
- * 
+ *
  * @interface AuthenticatedRequest
  * @extends Request
  */
@@ -96,18 +102,18 @@ export interface AuthenticatedRequest extends Request {
     /** ID da loja associada (se aplicável) */
     loja_id?: number | null;
   };
-  
+
   /**
    * ID da sessão Express (compatibilidade express-session)
    */
   sessionID?: string;
-  
+
   /**
    * Dados de arquivo para upload (compatibilidade multer)
    * Presente apenas em routes de upload
    */
   file?: Express.Multer.File;
-  
+
   /**
    * Múltiplos arquivos para upload (compatibilidade multer)
    */
@@ -125,10 +131,13 @@ export type AuthenticatedHandler = (
 ```
 
 #### **A.2. Migração do JWT Middleware**
+
 **Ação:** Atualizar `server/lib/jwt-auth-middleware.ts` para importar de `shared/types/express.ts`
 
 #### **A.3. Atualização do tsconfig.json**
+
 **Adicionar ao paths:**
+
 ```json
 {
   "paths": {
@@ -144,7 +153,9 @@ export type AuthenticatedHandler = (
 ### **FASE B: Plano de Rollout Incremental**
 
 #### **B.1. Grupo Piloto (5 arquivos críticos)**
+
 **Prioridade P0 - Sistema Core:**
+
 1. `server/routes/auth/index.ts` - Autenticação
 2. `server/routes/documents.ts` - Documentos (já testado)
 3. `server/routes/security-api.ts` - Segurança
@@ -152,24 +163,30 @@ export type AuthenticatedHandler = (
 5. `server/routes/integracao/inter.ts` - Integrações
 
 **Estratégia:**
+
 - Remover definições locais
 - Adicionar: `import { AuthenticatedRequest } from '@types/express';`
 - Ajustar uso de `req.userId` para `req.user?.id`
 - Validar tipos específicos (`any` → tipos estruturados)
 
 #### **B.2. Grupo Secundário (50+ arquivos)**
+
 **Prioridade P1 - Controllers e Services:**
+
 - Todos os arquivos em `server/routes/`
 - Arquivos de middleware personalizados
 - Services que usam AuthenticatedRequest
 
 **Metodologia:**
+
 - Implementar em lotes de 10 arquivos por iteração
 - Testes de regressão após cada lote
 - Monitoramento de erros TSC por lote
 
 #### **B.3. Grupo Final (Cleanup)**
+
 **Prioridade P2 - Arquivos Originais e Backups:**
+
 - Arquivos `*-original.ts`
 - Arquivos `.backup`
 - Documentação e testes
@@ -181,6 +198,7 @@ export type AuthenticatedHandler = (
 #### **C.1. Métricas de Sucesso**
 
 **Linha Base Atual:**
+
 - LSP Diagnostics: 0 erros
 - TSC Erros: ~300+ erros
 - AuthenticatedRequest duplicações: 10 definições
@@ -188,18 +206,22 @@ export type AuthenticatedHandler = (
 **Metas por Fase:**
 
 **Fase A (Pós-Consolidação):**
+
 - TSC Erros: <200 (-100 erros)
 - AuthenticatedRequest duplicações: 1 definição oficial
 
 **Fase B.1 (Pós-Piloto):**
+
 - TSC Erros: <150 (-50 erros)
 - AuthenticatedRequest imports: 5 arquivos migrados
 
 **Fase B.2 (Pós-Secundário):**
+
 - TSC Erros: <50 (-100 erros)
 - AuthenticatedRequest coverage: 80% dos controllers
 
 **Fase Final:**
+
 - TSC Erros: 0 erros
 - LSP Diagnostics: 0 erros (mantido)
 - 100% consistência de tipos
@@ -223,11 +245,13 @@ grep -r "AuthenticatedRequest" server/ --include="*.ts" | grep -E "(interface|im
 #### **C.3. Critérios de Rollback**
 
 **Triggers de Rollback:**
+
 - Aumento de erros TSC em >20% após migração
 - Falha em testes de integração críticos
 - Erro de compilação em produção
 
 **Estratégia de Rollback:**
+
 - Git commit por fase permite rollback granular
 - Backup de definições originais em `docs/rollback/`
 - Plan B: Type assertions temporários (`as AuthenticatedRequest`)
@@ -263,7 +287,7 @@ grep -r "AuthenticatedRequest" server/ --include="*.ts" | grep -E "(interface|im
 Este plano resolve sistematicamente o débito técnico de tipagem através de:
 
 1. **Consolidação:** Uma única definição oficial e robusta
-2. **Migração Incremental:** Baixo risco com validação contínua  
+2. **Migração Incremental:** Baixo risco com validação contínua
 3. **Validação Rigorosa:** Métricas claras de sucesso
 4. **Estratégia de Segurança:** Rollback granular se necessário
 

@@ -3,6 +3,7 @@
 ## 📋 Status: IMPLEMENTAÇÃO COMPLETA
 
 ### 🎯 Missão Cumprida - VALIDADO ✅
+
 Auditoria e refatoração completa do mecanismo de busca e atualização de dados da "Tela de Cobranças" para garantir dados 100% precisos e atualizados em tempo real.
 
 **VALIDAÇÃO FINAL**: Sistema agora retorna 2 propostas (antes: 1) - todas com CCB assinado incluindo aquelas sem boletos gerados.
@@ -10,6 +11,7 @@ Auditoria e refatoração completa do mecanismo de busca e atualização de dado
 ### ✅ Correções Implementadas
 
 #### 1. **Backend - Query Refatorada** (`server/routes/cobrancas.ts`)
+
 - **Problema Identificado**: A query original não verificava se os boletos estavam ativos
 - **Solução Implementada**:
   ```typescript
@@ -27,6 +29,7 @@ Auditoria e refatoração completa do mecanismo de busca e atualização de dado
 - **Validação adicional**: Filtra parcelas verificando `interSituacao !== 'CANCELADO'`
 
 #### 2. **Frontend - Realtime Aprimorado** (`CobrancasPage.tsx`)
+
 - **Melhorias no Realtime**:
   - Escuta eventos INSERT em `inter_collections` (novos boletos)
   - Detecta quando boletos são cancelados
@@ -42,11 +45,11 @@ graph TD
     C --> D[Invalida query /api/cobrancas]
     D --> E[Backend filtra boletos ativos]
     E --> F[UI atualizada automaticamente]
-    
+
     G[Boleto Cancelado] --> H[UPDATE situacao = CANCELADO]
     H --> I[Realtime detecta UPDATE]
     I --> D
-    
+
     J[Todos Boletos Cancelados] --> K[Query não retorna proposta]
     K --> L[Proposta some da tela]
 ```
@@ -54,6 +57,7 @@ graph TD
 ### 📊 Logs de Debug Implementados
 
 #### Backend
+
 ```
 🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======
 🔍 [COBRANÇAS] Encontradas X propostas com boletos ativos
@@ -62,6 +66,7 @@ graph TD
 ```
 
 #### Frontend (Realtime)
+
 ```
 📡 [REALTIME] Evento de INSERT recebido
 📡 [REALTIME] Novo boleto inserido - atualizando lista
@@ -100,11 +105,13 @@ graph TD
 ### 🚀 Como Testar
 
 #### Cenário 1: Nova Proposta com Boletos
+
 1. Assinar uma proposta (assinatura eletrônica)
 2. Gerar boletos via Banco Inter
 3. **Esperado**: Proposta aparece automaticamente na tela
 
 #### Cenário 2: Cancelamento de Todos os Boletos
+
 1. Selecionar proposta existente
 2. Cancelar todos os boletos via API do Inter
 3. **Esperado**: Proposta some automaticamente da tela
@@ -114,6 +121,7 @@ graph TD
 **MISSÃO PAM V1.0 - SYNC COBRANÇAS CONCLUÍDA**
 
 O sistema agora garante:
+
 - Dados 100% precisos e atualizados ✅
 - Sincronização em tempo real funcionando ✅
 - Regras de negócio implementadas corretamente ✅

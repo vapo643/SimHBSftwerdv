@@ -19,17 +19,17 @@ export interface IUnitOfWork {
   // ========================================================================
   // REPOSITÓRIOS TRANSACIONAIS
   // ========================================================================
-  
+
   /**
    * Repositório de Propostas dentro do contexto transacional
    */
   readonly proposals: IProposalRepository;
-  
+
   /**
    * Repositório de CCBs dentro do contexto transacional
    */
   readonly ccbs: ICcbRepository;
-  
+
   /**
    * Repositório de Boletos dentro do contexto transacional
    */
@@ -41,13 +41,13 @@ export interface IUnitOfWork {
 
   /**
    * Executa um bloco de trabalho dentro de uma transação atômica.
-   * 
+   *
    * Se qualquer operação dentro do trabalho falhar, toda a transação é revertida.
    * Se todas as operações forem bem-sucedidas, a transação é confirmada.
    *
    * @param work Função que contém a lógica de negócio a ser executada transacionalmente
    * @returns Promise com o resultado do trabalho executado
-   * 
+   *
    * @example
    * ```typescript
    * const resultado = await uow.executeInTransaction(async () => {
@@ -55,11 +55,11 @@ export interface IUnitOfWork {
    *   const proposta = await uow.proposals.findById(propostaId);
    *   proposta.aprovar();
    *   await uow.proposals.save(proposta);
-   *   
+   *
    *   // Gerar CCB
    *   const ccb = new Ccb(proposta);
    *   await uow.ccbs.save(ccb);
-   *   
+   *
    *   return { propostaId: proposta.id, ccbId: ccb.id };
    * });
    * ```

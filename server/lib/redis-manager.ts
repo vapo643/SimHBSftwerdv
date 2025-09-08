@@ -3,11 +3,11 @@ import type { RedisOptions } from 'ioredis';
 
 /**
  * Singleton Redis Connection Manager
- * 
+ *
  * Este módulo implementa um padrão Singleton rigoroso para gerenciar
  * a conexão Redis única em toda a aplicação. Elimina vazamentos de
  * conexão e garante gestão adequada do ciclo de vida.
- * 
+ *
  * ATENÇÃO: Este é o ÚNICO ponto de criação de instâncias Redis.
  * Qualquer uso direto de `new Redis()` fora deste módulo é PROIBIDO.
  */
@@ -66,8 +66,8 @@ class RedisManager {
       // Reconexão automática em erros específicos
       reconnectOnError: (err: Error) => {
         const reconnectErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT'];
-        return reconnectErrors.some(error => err.message.includes(error));
-      }
+        return reconnectErrors.some((error) => err.message.includes(error));
+      },
     };
 
     // Configurações específicas para teste
@@ -77,7 +77,7 @@ class RedisManager {
         connectTimeout: 2000,
         commandTimeout: 1000,
         maxRetriesPerRequest: 1,
-        enableReadyCheck: false
+        enableReadyCheck: false,
       };
     }
 
@@ -85,7 +85,7 @@ class RedisManager {
     if (isProduction) {
       return {
         ...baseConfig,
-        tls: {}
+        tls: {},
       };
     }
 
@@ -108,7 +108,7 @@ class RedisManager {
       console.error('[REDIS MANAGER] ❌ Erro de conexão:', {
         message: err.message,
         code: (err as any).code,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
 
@@ -132,7 +132,7 @@ class RedisManager {
 
   /**
    * Obtém o cliente Redis (método principal de acesso)
-   * 
+   *
    * @returns Promise<Redis> - Cliente Redis conectado
    */
   public async getClient(): Promise<Redis> {
@@ -171,12 +171,12 @@ class RedisManager {
 
     const config = this.createRedisConfig();
     this.client = new Redis(config);
-    
+
     this.setupEventHandlers(this.client);
 
     // Aguarda conexão ser estabelecida
     await this.client.ping();
-    
+
     console.log('[REDIS MANAGER] 🎯 Singleton Redis conectado com sucesso');
     return this.client;
   }
@@ -199,13 +199,13 @@ class RedisManager {
       return {
         status: 'healthy',
         latency,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         error: (error as Error).message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }

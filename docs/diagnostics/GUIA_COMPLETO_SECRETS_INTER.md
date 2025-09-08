@@ -8,31 +8,35 @@
 
 ## 📊 **STATUS ATUAL DOS SECRETS**
 
-| Secret | Status | Precisa Atualizar | Observação |
-|--------|---------|------------------|------------|
-| `INTER_CLIENT_ID` | ✅ Configurado | 🔄 **SIM** | Atual não funciona |
-| `INTER_CLIENT_SECRET` | ✅ Configurado | 🔄 **SIM** | Atual não funciona |
-| `INTER_CERTIFICATE` | ✅ Configurado | 🔄 **SIM** | Atual não funciona |
-| `INTER_PRIVATE_KEY` | ✅ Configurado | 🔄 **SIM** | Atual não funciona |
-| `INTER_WEBHOOK_SECRET` | ❌ Faltando | ➕ **ADICIONAR** | Necessário |
-| `INTER_CONTA_CORRENTE` | ✅ Configurado | ❓ **VERIFICAR** | Pode estar correto |
+| Secret                 | Status         | Precisa Atualizar | Observação         |
+| ---------------------- | -------------- | ----------------- | ------------------ |
+| `INTER_CLIENT_ID`      | ✅ Configurado | 🔄 **SIM**        | Atual não funciona |
+| `INTER_CLIENT_SECRET`  | ✅ Configurado | 🔄 **SIM**        | Atual não funciona |
+| `INTER_CERTIFICATE`    | ✅ Configurado | 🔄 **SIM**        | Atual não funciona |
+| `INTER_PRIVATE_KEY`    | ✅ Configurado | 🔄 **SIM**        | Atual não funciona |
+| `INTER_WEBHOOK_SECRET` | ❌ Faltando    | ➕ **ADICIONAR**  | Necessário         |
+| `INTER_CONTA_CORRENTE` | ✅ Configurado | ❓ **VERIFICAR**  | Pode estar correto |
 
 ---
 
 ## 🎯 **SECRETS PARA ATUALIZAR**
 
 ### **1. INTER_CLIENT_ID** 🔄
+
 **Status**: Precisa atualizar (atual não funciona)
 
 **Formato Correto:**
+
 ```
 12345678-1234-1234-1234-123456789abc
 ```
+
 - UUID/GUID format
 - 36 caracteres com hífens
 - Letras minúsculas
 
 **Onde Encontrar no Portal:**
+
 ```
 Portal: https://developers.inter.co ou https://internetbanking.bancointer.com.br
 
@@ -48,17 +52,21 @@ Campo: "Client ID" ou "Application ID"
 ---
 
 ### **2. INTER_CLIENT_SECRET** 🔄
+
 **Status**: Precisa atualizar (atual não funciona)
 
 **Formato Correto:**
+
 ```
 eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9...
 ```
+
 - String longa (200+ caracteres)
 - Pode ser formato JWT ou string aleatória
 - Case-sensitive
 
 **Onde Encontrar no Portal:**
+
 ```
 Portal: https://developers.inter.co ou https://internetbanking.bancointer.com.br
 
@@ -67,7 +75,7 @@ Caminho:
 2. Clicar na aplicação criada
 3. Seção "Credenciais" ou "Client Secret"
 
-ATENÇÃO: 
+ATENÇÃO:
 - Client Secret só aparece na criação ou regeneração
 - Se não conseguir ver, precisa regenerar
 - Guardar imediatamente quando aparecer
@@ -76,9 +84,11 @@ ATENÇÃO:
 ---
 
 ### **3. INTER_CERTIFICATE** 🔄
+
 **Status**: Precisa atualizar (atual não funciona)
 
 **Formato Correto:**
+
 ```
 -----BEGIN CERTIFICATE-----
 MIIDXTCCAkWgAwIBAgIJAKoK/OvqDMGmMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
@@ -89,12 +99,14 @@ ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
 ...mais linhas...
 -----END CERTIFICATE-----
 ```
+
 - Inicia com `-----BEGIN CERTIFICATE-----`
 - Termina com `-----END CERTIFICATE-----`
 - Conteúdo em Base64 entre as linhas
 - Múltiplas linhas
 
 **Onde Encontrar no Portal:**
+
 ```
 Portal: https://developers.inter.co ou https://internetbanking.bancointer.com.br
 
@@ -115,9 +127,11 @@ openssl pkcs12 -in certificado.pfx -out certificado.pem -clcerts -nokeys
 ---
 
 ### **4. INTER_PRIVATE_KEY** 🔄
+
 **Status**: Precisa atualizar (atual não funciona)
 
 **Formato Correto:**
+
 ```
 -----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKB
@@ -126,12 +140,14 @@ X8R4+8/Ck7E5rN9F1Q7V6J1aK8K7B8CZ1Xs+o7V5aZ+K6Z1aQ7J+XK7VY8Q7Z9J
 ...mais linhas...
 -----END PRIVATE KEY-----
 ```
+
 - Inicia com `-----BEGIN PRIVATE KEY-----`
 - Termina com `-----END PRIVATE KEY-----`
 - Conteúdo em Base64 entre as linhas
 - Múltiplas linhas
 
 **Onde Encontrar no Portal:**
+
 ```
 Portal: Mesmo lugar do certificado
 
@@ -154,18 +170,22 @@ ATENÇÃO:
 ## ➕ **SECRETS PARA ADICIONAR**
 
 ### **5. INTER_WEBHOOK_SECRET** ➕
+
 **Status**: Faltando (obrigatório)
 
 **Formato Correto:**
+
 ```
 webhook_secret_production_2025_abc123
 ```
+
 - String aleatória de 20-50 caracteres
 - Alfanumérica (a-z, A-Z, 0-9)
 - Sem caracteres especiais
 - Você define esta string
 
 **Onde Configurar no Portal:**
+
 ```
 Portal: https://developers.inter.co
 
@@ -187,18 +207,22 @@ ATENÇÃO:
 ## ❓ **SECRETS PARA VERIFICAR**
 
 ### **6. INTER_CONTA_CORRENTE** ❓
+
 **Status**: Configurado (verificar se está correto)
 
 **Formato Correto:**
+
 ```
 12345678
 ```
+
 - Apenas números
 - 6-8 dígitos
 - Sem hífen ou dígito verificador
 - Exemplo: 1234567 (sem o -8)
 
 **Onde Encontrar no Portal:**
+
 ```
 Portal: https://internetbanking.bancointer.com.br
 
@@ -215,18 +239,21 @@ Exemplo: Se conta é 1234567-8, usar apenas 1234567
 ## 🎯 **ORDEM DE BUSCA NO PORTAL**
 
 ### **Primeira Tentativa: Portal Desenvolvedores**
+
 1. Acesse: https://developers.inter.co
 2. Login com credenciais empresariais
 3. Procurar: "Aplicações" → "Minhas Aplicações"
 4. Se não encontrar aplicações, criar nova
 
 ### **Segunda Tentativa: Internet Banking**
+
 1. Acesse: https://internetbanking.bancointer.com.br
 2. Login empresarial
 3. Procurar: "Produtos" → "APIs" → "Integrações"
 4. Ou: "Serviços" → "Open Banking"
 
 ### **Terceira Tentativa: Contato Direto**
+
 **Telefone**: (11) 3003-4070
 **Dizer**: "Preciso das credenciais de API Cobrança, CNPJ: SEU_CNPJ"
 
@@ -250,6 +277,7 @@ Depois de obter as credenciais:
 ## 🚀 **TESTE FINAL**
 
 Após configurar todos os secrets:
+
 ```bash
 node test-inter-production.cjs
 ```

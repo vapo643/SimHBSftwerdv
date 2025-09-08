@@ -10,8 +10,9 @@
 ## 📋 CENÁRIO DE NEGÓCIO AUDITADO
 
 **Regra a Implementar:** Durante a criação de uma nova proposta, o sistema deve:
+
 1. Identificar se o cliente (CPF) é novo ou existente
-2. Se novo: aplicar TAC de 10% sobre o valor da proposta  
+2. Se novo: aplicar TAC de 10% sobre o valor da proposta
 3. Se existente: usar lógica atual de cálculo TAC
 
 ---
@@ -43,13 +44,15 @@ async clientExists(cpf: string): Promise<boolean> {
 **✅ EVIDÊNCIA:** A função verifica existência baseada em propostas com mesmo CPF na tabela `propostas`.
 
 **Outros métodos relevantes:**
+
 - `findByCPF(cpf)` - retorna dados da proposta mais recente
 - `getProposalsByCPF(cpf)` - retorna todas as propostas do CPF
 
 ### 2. PONTO DE CÁLCULO (Lógica da TAC)
 
 #### 2.1 Serviço Centralizado Identificado
-**Arquivo:** `server/services/tacCalculationService.ts` 
+
+**Arquivo:** `server/services/tacCalculationService.ts`
 
 **Método Principal:** `calculateTac(produtoId, valorEmprestimo, clienteCpf)`
 
@@ -58,7 +61,7 @@ async clientExists(cpf: string): Promise<boolean> {
 1. Verifica se cliente é cadastrado (via isClienteCadastrado)
 2. Se cadastrado: TAC = 0 (isenção completa)
 3. Se não cadastrado: calcula via produto
-   - TAC Fixo: valor direto do produto  
+   - TAC Fixo: valor direto do produto
    - TAC Percentual: (valorEmprestimo * tacValor) / 100
 ```
 
@@ -67,25 +70,29 @@ Status: ['aprovado', 'ASSINATURA_CONCLUIDA', 'QUITADO']
 
 **🎯 DESCOBERTA CRÍTICA:** Este serviço JÁ implementa lógica de cliente novo vs existente!
 
-#### 2.2 Cálculo no Use Case  
+#### 2.2 Cálculo no Use Case
+
 **Arquivo:** `server/modules/proposal/application/CreateProposalUseCase.ts`  
-**Linha 158:** 
+**Linha 158:**
 
 ```typescript
-const valorTac = dto.valorTac || (dto.valor * 0.02); // 2% do valor HARDCODED
+const valorTac = dto.valorTac || dto.valor * 0.02; // 2% do valor HARDCODED
 ```
 
 **🚨 PROBLEMA CRÍTICO:** Lógica duplicada! O Use Case não usa o TacCalculationService.
 
 **⚡ IMPACTO:** O sistema atual aplica TAC de 2% para TODOS os clientes, ignorando:
+
 - Configuração por produto (tacValor/tacTipo)
 - Isenção para clientes cadastrados
 - Flexibilidade do TacCalculationService
 
 #### 2.3 Configuração por Produto
+
 **Tabela:** `produtos`  
 **Campos:**
-- `tacValor` - decimal(10,2) 
+
+- `tacValor` - decimal(10,2)
 - `tacTipo` - text ('fixo' ou 'percentual')
 
 ### 3. PONTO DE PERSISTÊNCIA (Salvando a TAC)
@@ -94,8 +101,9 @@ const valorTac = dto.valorTac || (dto.valor * 0.02); // 2% do valor HARDCODED
 **Campo:** `valorTac` - decimal(10,2)
 
 **Fluxo de Persistência:**
+
 1. Cálculo no Use Case (linha 158)
-2. Construção do DTO (linha 181)  
+2. Construção do DTO (linha 181)
 3. Criação do agregado Proposal (linha 199)
 4. Persistência via repository (linha 229)
 
@@ -104,15 +112,18 @@ const valorTac = dto.valorTac || (dto.valor * 0.02); // 2% do valor HARDCODED
 ## ⚠️ ANÁLISE DE RISCOS IDENTIFICADOS
 
 ### RISCO CRÍTICO - Lógica Descentralizada ✅ CONFIRMADO
+
 - **Evidência:** TacCalculationService existe mas não é usado no CreateProposalUseCase
 - **Impacto:** Clientes cadastrados pagam TAC (deveriam ter isenção)
 
-### RISCO ALTO - Regra de Negócio Invertida ✅ CONFIRMADO  
+### RISCO ALTO - Regra de Negócio Invertida ✅ CONFIRMADO
+
 - **Evidência:** Sistema atual: clientes cadastrados têm isenção (TAC = 0)
 - **Nova regra:** Clientes NOVOS devem pagar 10%, existentes seguem produto
 - **Impacto:** Lógica atual é oposta à nova regra
 
 ### RISCO MÉDIO - Configuração Ignorada ✅ CONFIRMADO
+
 - **Evidência:** Produtos têm tacValor/tacTipo configurados mas não são usados
 - **Impacto:** Flexibilidade do sistema não é aproveitada
 
@@ -126,7 +137,7 @@ const valorTac = dto.valorTac || (dto.valor * 0.02); // 2% do valor HARDCODED
 ✅ TacCalculationService centralizado existe  
 ✅ Verificação de cliente existente implementada  
 ✅ Campo valorTac na proposta suporta novos valores  
-✅ Configuração por produto via tacValor/tacTipo  
+✅ Configuração por produto via tacValor/tacTipo
 
 **Limitações Críticas:**
 ❌ Use Case não usa o serviço centralizado  
@@ -151,8 +162,8 @@ const valorTac = dto.valorTac || (dto.valor * 0.02); // 2% do valor HARDCODED
    ```typescript
    // Nova lógica conceitual:
    const isClienteCadastrado = await TacCalculationService.isClienteCadastrado(cpf);
-   const valorTac = !isClienteCadastrado 
-     ? valorEmprestimo * 0.10  // 10% para clientes NOVOS
+   const valorTac = !isClienteCadastrado
+     ? valorEmprestimo * 0.1 // 10% para clientes NOVOS
      : calcularTacPorProduto(produtoId, valorEmprestimo); // Existentes via produto
    ```
 
@@ -165,14 +176,16 @@ const valorTac = dto.valorTac || (dto.valor * 0.02); // 2% do valor HARDCODED
 **Risco de Regressão:** 🔴 **ALTO** - Mudança comportamental significativa
 
 **⚠️ ATENÇÃO ESPECIAL:** Nova regra inverte comportamento atual:
+
 - **Antes:** Clientes novos pagam TAC via produto, existentes isentos
 - **Depois:** Clientes novos pagam 10%, existentes pagam via produto
 
 **Próximos Passos:**
+
 1. Implementar nova lógica no TacCalculationService
 2. Refatorar CreateProposalUseCase para usar serviço
 3. Testes para validar ambos os cenários (cliente novo/existente)
 
 ---
 
-*Auditoria concluída conforme protocolo PACN V1.0*
+_Auditoria concluída conforme protocolo PACN V1.0_

@@ -44,20 +44,20 @@ const DEFAULT_WORKER_CONFIG = {
  */
 async function initializeWorkers(): Promise<Worker[]> {
   const activeWorkers: Worker[] = [];
-  
+
   try {
     // Initialize feature flag service
     await featureFlagService.init();
-    
+
     console.log('[WORKER] 🎛️  PAM V3.6 - Feature Flag Controlled Initialization Started');
-    
+
     // Define worker configurations with fallback defaults
     const workerConfigs = [
       { name: 'payments', queueName: 'payments', priority: 'CRITICAL' },
       { name: 'webhooks', queueName: 'webhooks', priority: 'HIGH' },
       { name: 'reports', queueName: 'reports', priority: 'NORMAL' },
     ];
-    
+
     for (const config of workerConfigs) {
       try {
         // Check if worker is enabled via feature flags
@@ -65,40 +65,58 @@ async function initializeWorkers(): Promise<Worker[]> {
           `queue.${config.name}.enabled`,
           undefined // No user context needed for worker initialization
         );
-        
+
         // Get concurrency setting from feature flags
         const concurrency = await featureFlagService.getVariant(
           `worker.${config.name}.concurrency`,
           undefined
         );
-        
+
         const concurrencyValue = concurrency?.payload?.value || DEFAULT_WORKER_CONFIG.concurrency;
-        
-        if (enabledFlag !== false) { // Default to enabled if flag check fails
-          const worker = await createWorkerByName(config.name, config.queueName, parseInt(concurrencyValue as string, 10));
+
+        if (enabledFlag !== false) {
+          // Default to enabled if flag check fails
+          const worker = await createWorkerByName(
+            config.name,
+            config.queueName,
+            parseInt(concurrencyValue as string, 10)
+          );
           if (worker) {
             activeWorkers.push(worker);
-            console.log(`[WORKER] ✅ ${config.name.toUpperCase()} Worker initialized (concurrency: ${concurrencyValue}, priority: ${config.priority})`);
+            console.log(
+              `[WORKER] ✅ ${config.name.toUpperCase()} Worker initialized (concurrency: ${concurrencyValue}, priority: ${config.priority})`
+            );
           }
         } else {
           console.log(`[WORKER] ⏸️  ${config.name.toUpperCase()} Worker disabled via feature flag`);
         }
       } catch (error) {
-        console.warn(`[WORKER] ⚠️  Feature flag check failed for ${config.name}, using defaults:`, error);
+        console.warn(
+          `[WORKER] ⚠️  Feature flag check failed for ${config.name}, using defaults:`,
+          error
+        );
         // Fallback: create worker with default settings
-        const worker = await createWorkerByName(config.name, config.queueName, DEFAULT_WORKER_CONFIG.concurrency);
+        const worker = await createWorkerByName(
+          config.name,
+          config.queueName,
+          DEFAULT_WORKER_CONFIG.concurrency
+        );
         if (worker) {
           activeWorkers.push(worker);
-          console.log(`[WORKER] 🔄 ${config.name.toUpperCase()} Worker initialized with fallback defaults`);
+          console.log(
+            `[WORKER] 🔄 ${config.name.toUpperCase()} Worker initialized with fallback defaults`
+          );
         }
       }
     }
-    
+
     console.log(`[WORKER] 🎯 PAM V3.6 - Successfully initialized ${activeWorkers.length} workers`);
     return activeWorkers;
-    
   } catch (error) {
-    console.error('[WORKER] ❌ Feature flag service initialization failed, starting with defaults:', error);
+    console.error(
+      '[WORKER] ❌ Feature flag service initialization failed, starting with defaults:',
+      error
+    );
     // Fallback: start all workers with default configuration
     return await initializeFallbackWorkers();
   }
@@ -109,22 +127,26 @@ async function initializeWorkers(): Promise<Worker[]> {
  */
 async function initializeFallbackWorkers(): Promise<Worker[]> {
   console.log('[WORKER] 🔧 Initializing fallback workers with default configuration');
-  
+
   const fallbackWorkers = [
     await createWorkerByName('payments', 'payments', DEFAULT_WORKER_CONFIG.concurrency),
     await createWorkerByName('webhooks', 'webhooks', DEFAULT_WORKER_CONFIG.concurrency),
     await createWorkerByName('reports', 'reports', DEFAULT_WORKER_CONFIG.concurrency),
   ];
-  
-  return fallbackWorkers.filter(w => w !== null) as Worker[];
+
+  return fallbackWorkers.filter((w) => w !== null) as Worker[];
 }
 
 /**
  * Factory function to create workers by name with dynamic configuration
  */
-async function createWorkerByName(name: string, queueName: string, concurrency: number): Promise<Worker | null> {
+async function createWorkerByName(
+  name: string,
+  queueName: string,
+  concurrency: number
+): Promise<Worker | null> {
   const workerOptions = await createWorkerOptions(concurrency);
-  
+
   switch (name) {
     case 'payments':
       return new Worker(queueName, paymentsWorkerHandler, workerOptions);
@@ -151,38 +173,38 @@ const paymentsWorkerHandler = async (job: Job) => {
     switch (job.data.type) {
       case 'PROCESS_PAYMENT':
         console.log(`[WORKER:PAYMENTS] 💰 Processing payment for proposal ${job.data.propostaId}`);
-        
+
         // Idempotency key for payment processing (prevents duplicates)
         const idempotencyKey = `payment-${job.data.propostaId}-${job.data.timestamp || Date.now()}`;
         console.log(`[WORKER:PAYMENTS] 🔑 Using idempotency key: ${idempotencyKey}`);
-        
+
         await job.updateProgress(50);
-        
+
         // TODO: Implement actual payment processing logic
         // This is where you would integrate with payment providers
-        
+
         await job.updateProgress(100);
-        
+
         const paymentDuration = Date.now() - startTime;
         console.log(`[WORKER:PAYMENTS] ✅ Payment processed successfully in ${paymentDuration}ms`);
-        
+
         return {
           success: true,
           propostaId: job.data.propostaId,
           idempotencyKey,
           processingTime: paymentDuration,
-          message: 'Payment processed successfully'
+          message: 'Payment processed successfully',
         };
 
       case 'REFUND_PAYMENT':
         console.log(`[WORKER:PAYMENTS] 💸 Processing refund for proposal ${job.data.propostaId}`);
-        
+
         await job.updateProgress(100);
-        
+
         return {
           success: true,
           propostaId: job.data.propostaId,
-          message: 'Refund processed successfully (placeholder)'
+          message: 'Refund processed successfully (placeholder)',
         };
 
       default:
@@ -195,9 +217,11 @@ const paymentsWorkerHandler = async (job: Job) => {
   }
 };
 
-// WEBHOOKS WORKER HANDLER - HIGH PRIORITY  
+// WEBHOOKS WORKER HANDLER - HIGH PRIORITY
 const webhooksWorkerHandler = async (job: Job) => {
-  console.log(`[WORKER:WEBHOOKS] 🔄 Processing high-priority job ${job.id} - Type: ${job.data.type}`);
+  console.log(
+    `[WORKER:WEBHOOKS] 🔄 Processing high-priority job ${job.id} - Type: ${job.data.type}`
+  );
   const startTime = Date.now();
 
   try {
@@ -206,21 +230,21 @@ const webhooksWorkerHandler = async (job: Job) => {
     switch (job.data.type) {
       case 'PROCESS_WEBHOOK':
         console.log(`[WORKER:WEBHOOKS] 📡 Processing webhook for ${job.data.source}`);
-        
+
         await job.updateProgress(50);
-        
+
         // TODO: Implement webhook processing logic
-        
+
         await job.updateProgress(100);
-        
+
         const webhookDuration = Date.now() - startTime;
         console.log(`[WORKER:WEBHOOKS] ✅ Webhook processed successfully in ${webhookDuration}ms`);
-        
+
         return {
           success: true,
           source: job.data.source,
           processingTime: webhookDuration,
-          message: 'Webhook processed successfully'
+          message: 'Webhook processed successfully',
         };
 
       default:
@@ -244,21 +268,21 @@ const reportsWorkerHandler = async (job: Job) => {
     switch (job.data.type) {
       case 'GENERATE_REPORT':
         console.log(`[WORKER:REPORTS] 📊 Generating report ${job.data.reportType}`);
-        
+
         await job.updateProgress(50);
-        
+
         // TODO: Implement report generation logic
-        
+
         await job.updateProgress(100);
-        
+
         const reportDuration = Date.now() - startTime;
         console.log(`[WORKER:REPORTS] ✅ Report generated successfully in ${reportDuration}ms`);
-        
+
         return {
           success: true,
           reportType: job.data.reportType,
           processingTime: reportDuration,
-          message: 'Report generated successfully'
+          message: 'Report generated successfully',
         };
 
       default:
@@ -393,7 +417,9 @@ async function initBoletoWorker() {
               await job.updateProgress(50);
 
               // Step 2: Generate carnê from synced boletos
-              const carneResult = await boletoStorageService.gerarCarneDoStorage(job.data.propostaId);
+              const carneResult = await boletoStorageService.gerarCarneDoStorage(
+                job.data.propostaId
+              );
 
               await job.updateProgress(100);
 
@@ -529,18 +555,18 @@ async function initNotificationWorker() {
 // REFATORADO: Graceful shutdown agora gerencia workers dinâmicos
 process.on('SIGTERM', async () => {
   console.log('[WORKER] 🛑 SIGTERM received, closing workers...');
-  
+
   const closePromises = [];
-  
+
   // Close legacy workers if initialized
   if (pdfWorker) closePromises.push(pdfWorker.close());
   if (boletoWorker) closePromises.push(boletoWorker.close());
   if (documentWorker) closePromises.push(documentWorker.close());
   if (notificationWorker) closePromises.push(notificationWorker.close());
-  
+
   // Close dynamic workers initialized through initializeWorkers()
   // Note: activeWorkers from initializeWorkers() should be tracked globally for proper shutdown
-  
+
   await Promise.all(closePromises);
   console.log('[WORKER] ✅ All workers closed gracefully');
   process.exit(0);
@@ -550,7 +576,7 @@ process.on('SIGTERM', async () => {
 async function startWorkerProcess() {
   console.log('[WORKER] 🚀 Worker process started with Redis Manager Singleton.');
   console.log('[WORKER] 🎯 PAM V1.0 - Redis Singleton Refactoring Applied');
-  
+
   try {
     const activeWorkers = await initializeWorkers();
     console.log(`[WORKER] ✅ Successfully initialized ${activeWorkers.length} workers`);

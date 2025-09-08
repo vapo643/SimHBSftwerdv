@@ -1,6 +1,6 @@
 /**
  * Adaptador Supabase Storage
- * 
+ *
  * Implementa IStorageProvider usando Supabase Storage como provider concreto.
  * Aplica o Padrão Adapter para desacoplar a tecnologia específica.
  */
@@ -11,15 +11,21 @@ import { IStorageProvider, UploadResult } from '../domain/IStorageProvider';
 export class SupabaseStorageAdapter implements IStorageProvider {
   constructor(private supabaseClient: SupabaseClient) {}
 
-  async upload(fileBuffer: Buffer, destinationPath: string, bucketName: string): Promise<UploadResult> {
+  async upload(
+    fileBuffer: Buffer,
+    destinationPath: string,
+    bucketName: string
+  ): Promise<UploadResult> {
     try {
-      console.log(`[STORAGE] Uploading file to bucket '${bucketName}' at path '${destinationPath}'`);
-      
+      console.log(
+        `[STORAGE] Uploading file to bucket '${bucketName}' at path '${destinationPath}'`
+      );
+
       const { data, error } = await this.supabaseClient.storage
         .from(bucketName)
         .upload(destinationPath, fileBuffer, {
           contentType: this.getContentType(destinationPath),
-          upsert: true // Permite sobrescrever ficheiros existentes
+          upsert: true, // Permite sobrescrever ficheiros existentes
         });
 
       if (error) {
@@ -37,7 +43,7 @@ export class SupabaseStorageAdapter implements IStorageProvider {
       return {
         filePath: data.path,
         publicUrl: urlData.publicUrl,
-        fullPath: `${bucketName}/${data.path}`
+        fullPath: `${bucketName}/${data.path}`,
       };
     } catch (error: any) {
       console.error('[STORAGE] Upload failed:', error);
@@ -45,10 +51,16 @@ export class SupabaseStorageAdapter implements IStorageProvider {
     }
   }
 
-  async getDownloadUrl(filePath: string, bucketName: string, expirationSeconds: number = 3600): Promise<string> {
+  async getDownloadUrl(
+    filePath: string,
+    bucketName: string,
+    expirationSeconds: number = 3600
+  ): Promise<string> {
     try {
-      console.log(`[STORAGE] Generating signed URL for '${filePath}' in bucket '${bucketName}' (expires in ${expirationSeconds}s)`);
-      
+      console.log(
+        `[STORAGE] Generating signed URL for '${filePath}' in bucket '${bucketName}' (expires in ${expirationSeconds}s)`
+      );
+
       const { data, error } = await this.supabaseClient.storage
         .from(bucketName)
         .createSignedUrl(filePath, expirationSeconds);
@@ -67,10 +79,8 @@ export class SupabaseStorageAdapter implements IStorageProvider {
   }
 
   getPublicUrl(filePath: string, bucketName: string): string {
-    const { data } = this.supabaseClient.storage
-      .from(bucketName)
-      .getPublicUrl(filePath);
-    
+    const { data } = this.supabaseClient.storage.from(bucketName).getPublicUrl(filePath);
+
     console.log(`[STORAGE] Public URL generated for '${filePath}': ${data.publicUrl}`);
     return data.publicUrl;
   }
@@ -78,10 +88,8 @@ export class SupabaseStorageAdapter implements IStorageProvider {
   async delete(filePath: string, bucketName: string): Promise<void> {
     try {
       console.log(`[STORAGE] Deleting file '${filePath}' from bucket '${bucketName}'`);
-      
-      const { error } = await this.supabaseClient.storage
-        .from(bucketName)
-        .remove([filePath]);
+
+      const { error } = await this.supabaseClient.storage.from(bucketName).remove([filePath]);
 
       if (error) {
         console.error('[STORAGE] Delete error:', error);
@@ -98,7 +106,7 @@ export class SupabaseStorageAdapter implements IStorageProvider {
   async exists(filePath: string, bucketName: string): Promise<boolean> {
     try {
       console.log(`[STORAGE] Checking if file exists: '${filePath}' in bucket '${bucketName}'`);
-      
+
       const { data, error } = await this.supabaseClient.storage
         .from(bucketName)
         .list(this.getDirectoryFromPath(filePath));
@@ -110,7 +118,7 @@ export class SupabaseStorageAdapter implements IStorageProvider {
 
       const fileName = this.getFileNameFromPath(filePath);
       const exists = data.some((file: any) => file.name === fileName);
-      
+
       console.log(`[STORAGE] File ${exists ? 'exists' : 'does not exist'}: ${filePath}`);
       return exists;
     } catch (error: any) {
@@ -121,8 +129,10 @@ export class SupabaseStorageAdapter implements IStorageProvider {
 
   async listFiles(directoryPath: string, bucketName: string): Promise<string[]> {
     try {
-      console.log(`[STORAGE] Listing files in directory '${directoryPath}' from bucket '${bucketName}'`);
-      
+      console.log(
+        `[STORAGE] Listing files in directory '${directoryPath}' from bucket '${bucketName}'`
+      );
+
       const { data, error } = await this.supabaseClient.storage
         .from(bucketName)
         .list(directoryPath);
@@ -151,18 +161,18 @@ export class SupabaseStorageAdapter implements IStorageProvider {
    */
   private getContentType(filePath: string): string {
     const extension = filePath.split('.').pop()?.toLowerCase();
-    
+
     const mimeTypes: Record<string, string> = {
-      'pdf': 'application/pdf',
-      'png': 'image/png',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'gif': 'image/gif',
-      'txt': 'text/plain',
-      'csv': 'text/csv',
-      'json': 'application/json',
-      'xml': 'application/xml',
-      'zip': 'application/zip'
+      pdf: 'application/pdf',
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      txt: 'text/plain',
+      csv: 'text/csv',
+      json: 'application/json',
+      xml: 'application/xml',
+      zip: 'application/zip',
     };
 
     return mimeTypes[extension || ''] || 'application/octet-stream';

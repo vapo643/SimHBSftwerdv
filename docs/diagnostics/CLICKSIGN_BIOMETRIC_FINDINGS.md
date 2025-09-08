@@ -30,6 +30,7 @@ After extensive testing and research, I've discovered that biometric facial auth
 ### 2. Invalid Authentication Types
 
 All these values in the `auths` array return "Autenticação inválida":
+
 - ❌ "biometria_facial"
 - ❌ "selfie"
 - ❌ "facial"
@@ -42,6 +43,7 @@ Only valid value: ✅ "email"
 ### 3. Boolean Flag Conflicts
 
 **DO NOT** use these together:
+
 ```javascript
 // This causes an error
 {
@@ -56,6 +58,7 @@ Error: "Assinatura por selfie dinâmica deve estar desabilitada quando a Biometr
 ### 4. Account Requirements
 
 From ClickSign documentation:
+
 - **Plan**: Available from "Empresarial" (Enterprise) plan
 - **Activation**: Must be enabled in dashboard under Settings → Security
 - **Cost**: Free for facial biometric (Serpro validation costs R$ 4.50/query)

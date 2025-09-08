@@ -3,6 +3,7 @@
 ## [AUTH_001] Token inválido ou expirado
 
 ### 🚨 Sintoma
+
 ```
 🔐 JWT VALIDATION: {
   hasError: true,
@@ -14,6 +15,7 @@
 ```
 
 ### 🔍 Causa
+
 1. **Token expirado** - JWT passou do tempo de validade
 2. **Chave secreta alterada** - JWT_SECRET mudou após geração do token
 3. **Token malformado** - Formato inválido ou corrompido
@@ -22,6 +24,7 @@
 ### ✅ Solução Testada
 
 #### 1. Para usuários - Fazer novo login
+
 ```javascript
 // Client-side: Limpar token e redirecionar
 localStorage.removeItem('auth-token');
@@ -29,6 +32,7 @@ window.location.href = '/login';
 ```
 
 #### 2. Para desenvolvimento - Gerar novo token
+
 ```bash
 # Via curl para login
 curl -X POST "http://localhost:5000/api/auth/login" \
@@ -37,18 +41,21 @@ curl -X POST "http://localhost:5000/api/auth/login" \
 ```
 
 #### 3. Verificar configuração do JWT_SECRET
+
 ```javascript
 // Confirmar que JWT_SECRET está definido
 console.log('JWT_SECRET definido:', !!process.env.JWT_SECRET);
 ```
 
 ### 🛡️ Prevenção
+
 - Implementar refresh tokens para renovação automática
 - Alertar usuário antes do token expirar
 - Logs detalhados de falhas de autenticação
 - Middleware para capturar e tratar erros JWT
 
 ### 📅 Última Atualização
+
 2025-08-07 - Middleware de validação funcionando
 
 ---
@@ -56,11 +63,13 @@ console.log('JWT_SECRET definido:', !!process.env.JWT_SECRET);
 ## [AUTH_002] CSRF Token Missing
 
 ### 🚨 Sintoma
+
 ```
 ❌ CSRF token missing or invalid
 ```
 
 ### 🔍 Causa
+
 - Requisição sem header X-CSRF-Token
 - Token CSRF inválido ou expirado
 - Configuração incorreta do middleware CSRF
@@ -68,6 +77,7 @@ console.log('JWT_SECRET definido:', !!process.env.JWT_SECRET);
 ### ✅ Solução Testada
 
 #### 1. Para desenvolvimento - Desabilitar CSRF temporariamente
+
 ```javascript
 // No server/index.ts
 if (process.env.NODE_ENV === 'development') {
@@ -77,20 +87,23 @@ if (process.env.NODE_ENV === 'development') {
 ```
 
 #### 2. Para produção - Incluir token nas requisições
+
 ```javascript
 // Client-side
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 fetch('/api/endpoint', {
   headers: {
-    'X-CSRF-Token': csrfToken
-  }
+    'X-CSRF-Token': csrfToken,
+  },
 });
 ```
 
 ### 🛡️ Prevenção
+
 - Configurar corretamente CSRF em produção
 - Documentar endpoints que precisam de CSRF
 - Testes automatizados para validar CSRF
 
 ### 📅 Última Atualização
+
 2025-08-07 - CSRF configurado para desenvolvimento

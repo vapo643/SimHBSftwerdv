@@ -1,9 +1,10 @@
 # 🔍 RELATÓRIO DE DIAGNÓSTICO FORENSE
+
 ## Auditoria: Preenchimento Automático de Proposta por CPF
 
 **PROTOCOLO:** PAM V1.0 - Operação Aceleração de Originação (TRACK 1, FASE 1)  
 **DATA:** 2025-09-03  
-**CRITICIDADE:** ALTA - Funcionalidade crítica para eficiência operacional  
+**CRITICIDADE:** ALTA - Funcionalidade crítica para eficiência operacional
 
 ---
 
@@ -12,6 +13,7 @@
 **VEREDITO DA HIPÓTESE:** ✅ **FUNCIONALIDADE OPERACIONAL** - A cadeia de dados está íntegra do frontend ao backend.
 
 **DESCOBERTA CRÍTICA:** O sistema possui **DOIS FLUXOS DISTINTOS** de preenchimento automático:
+
 1. **Fluxo A (Operacional):** Via `ClientDataStep.tsx` - Detecção automática + confirmação via `window.confirm()`
 2. **Fluxo B (Legacy):** Via `nova-proposta.tsx` - Busca manual por função `buscarDadosPorCpf()`
 
@@ -26,19 +28,20 @@
 #### 🔍 **Arquivo:** `client/src/components/propostas/ClientDataStep.tsx`
 
 **Linhas 246-263:** Handler do campo CPF com detecção automática
+
 ```typescript
 const handleCPFChange = (value: string) => {
   updateClient({ cpf: value });
   clearError('cpf');
-  
+
   // UX-006: Validação em tempo real
   const cleanCPF = value.replace(/\D/g, '');
   setCpfValidation({ isValidating: true, isValid: false });
-  
+
   setTimeout(() => {
     const isValid = CPF.isValid(cleanCPF);
     setCpfValidation({ isValidating: false, isValid });
-    
+
     // Buscar dados quando CPF for válido (11 dígitos)
     if (cleanCPF.length === 11 && isValid) {
       fetchClientDataByCpf(value); // 🎯 GATILHO AUTOMÁTICO
@@ -48,6 +51,7 @@ const handleCPFChange = (value: string) => {
 ```
 
 **Linhas 172-174:** Diálogo de confirmação
+
 ```typescript
 const userConfirmed = window.confirm(
   `Cliente já cadastrado!\n\nEncontramos dados de: ${data.nome}\n\nDeseja usar os dados existentes para esta nova proposta?`
@@ -61,6 +65,7 @@ const userConfirmed = window.confirm(
 #### 🔍 **Arquivo:** `client/src/components/propostas/ClientDataStep.tsx`
 
 **Linhas 157-226:** Função de busca por CPF
+
 ```typescript
 const fetchClientDataByCpf = useCallback(
   async (cpf: string) => {
@@ -72,11 +77,12 @@ const fetchClientDataByCpf = useCallback(
       const response = (await apiRequest(`/api/clientes/cpf/${cleanCPF}`, {
         method: 'GET',
       })) as ClientDataApiResponse;
-      
+
       // 🎯 REQUISIÇÃO COMPROVADAMENTE FUNCIONAL
 ```
 
 **📡 TESTE DE REDE (Executado via curl):**
+
 ```bash
 URL: /api/clientes/cpf/12345678901
 Método: GET
@@ -91,12 +97,13 @@ Resposta: {"exists":true,"data":{...dados completos...}}
 #### 🔍 **Arquivo:** `server/routes/cliente-routes-original.ts`
 
 **Linhas 16-35:** Controlador da API
+
 ```typescript
 router.get('/clientes/cpf/:cpf', async (req: Request, res: Response) => {
   try {
     const { cpf } = req.params;
     const result = await clienteService.getClientByCPF(cpf);
-    
+
     if (result.exists) {
       res.json(result); // ✅ RETORNA DADOS CORRETAMENTE
     } else {
@@ -116,6 +123,7 @@ router.get('/clientes/cpf/:cpf', async (req: Request, res: Response) => {
 #### 🔍 **Arquivo:** `server/services/clienteService.ts`
 
 **Linhas 14-108:** Lógica de negócio
+
 ```typescript
 async getClientByCPF(cpf: string): Promise<{
   exists: boolean;
@@ -124,7 +132,7 @@ async getClientByCPF(cpf: string): Promise<{
 }> {
   try {
     const cleanCPF = cpf.replace(/\D/g, '');
-    
+
     // ✅ VALIDAÇÃO + DADOS DEMO FUNCIONAIS
     if (cleanCPF === '12345678901') {
       return {
@@ -136,7 +144,7 @@ async getClientByCPF(cpf: string): Promise<{
         },
       };
     }
-    
+
     // ✅ BUSCA NO BANCO VIA REPOSITORY
     const clientData = await clienteRepository.findByCPF(cleanCPF);
 ```
@@ -144,6 +152,7 @@ async getClientByCPF(cpf: string): Promise<{
 #### 🔍 **Arquivo:** `server/repositories/cliente.repository.ts`
 
 **Linhas 20-34:** Consulta no banco de dados
+
 ```typescript
 async findByCPF(cpf: string): Promise<any | null> {
   try {
@@ -169,6 +178,7 @@ async findByCPF(cpf: string): Promise<any | null> {
 #### 🔍 **Arquivo:** `client/src/components/propostas/ClientDataStep.tsx`
 
 **Linhas 176-217:** Callback de sucesso da API
+
 ```typescript
 if (userConfirmed) {
   // ✅ PREENCHIMENTO COMPLETO DOS CAMPOS
@@ -222,6 +232,7 @@ if (userConfirmed) {
 #### 🔍 **Arquivo:** `client/src/pages/nova-proposta.tsx`
 
 **Linhas 194-244:** Função alternativa de busca
+
 ```typescript
 const buscarDadosPorCpf = useCallback(
   async (cpf: string) => {
@@ -229,7 +240,7 @@ const buscarDadosPorCpf = useCallback(
     const response: any = await apiRequest(`/api/propostas/buscar-por-cpf/${cpfLimpo}`, {
       method: 'GET',
     });
-    
+
     if (response && response.data) {
       // Uses setValue() instead of updateClient()
       const dadosCliente = response.data.cliente_data || {};
@@ -247,15 +258,19 @@ const buscarDadosPorCpf = useCallback(
 ## 🎯 VEREDITO DAS HIPÓTESES
 
 ### ❌ **HIPÓTESE 1:** Frontend (Gatilho) - **REFUTADA**
+
 O evento está funcionando corretamente. A função `fetchClientDataByCpf` é chamada automaticamente quando CPF válido é digitado.
 
-### ❌ **HIPÓTESE 2:** Frontend (Chamada API) - **REFUTADA**  
+### ❌ **HIPÓTESE 2:** Frontend (Chamada API) - **REFUTADA**
+
 A chamada à API está correta e funcional. Teste executado com sucesso: Status 200, dados retornados.
 
 ### ❌ **HIPÓTESE 3:** Backend (API) - **REFUTADA**
+
 O endpoint `/api/clientes/cpf/:cpf` existe, está registrado corretamente em `routes.ts` e retorna dados válidos.
 
 ### ❌ **HIPÓTESE 4:** Frontend (Atualização de Estado) - **REFUTADA**
+
 A função `updateClient()` do contexto está sendo chamada corretamente com todos os campos mapeados.
 
 ---
@@ -265,15 +280,18 @@ A função `updateClient()` do contexto está sendo chamada corretamente com tod
 ### **HIPÓTESE PRINCIPAL:** Expectativa vs. Realidade de UX
 
 **CENÁRIO PROVÁVEL:**
+
 1. O usuário digitou um CPF válido
-2. O sistema automaticamente detectou e fez a busca  
+2. O sistema automaticamente detectou e fez a busca
 3. Apareceu o diálogo `window.confirm()` com "Cliente já cadastrado!"
 4. O usuário interpretou o diálogo como um "botão" para preencher
 5. Ao clicar "OK", os dados foram preenchidos corretamente
 6. **POSSÍVEL CONFUSÃO:** O usuário esperava um botão visual em vez de um diálogo de confirmação
 
 ### **CENÁRIO ALTERNATIVO:** Fluxo Duplo
+
 O sistema possui dois fluxos diferentes:
+
 - **Fluxo Atual (ClientDataStep):** Automático via diálogo
 - **Fluxo Legacy (nova-proposta):** Manual via função `buscarDadosPorCpf()`
 
@@ -282,6 +300,7 @@ O sistema possui dois fluxos diferentes:
 ## ✅ VALIDAÇÃO COMPORTAMENTAL (PACN V1.0)
 
 ### **Cenário de Negócio Testado:**
+
 1. ✅ Atendente inicia nova proposta
 2. ✅ Digita CPF `12345678901` (demo)
 3. ✅ Sistema exibe "Cliente já cadastrado" + nome
@@ -290,8 +309,9 @@ O sistema possui dois fluxos diferentes:
 6. ✅ Toast de confirmação exibido
 
 ### **Penetration Testing:**
+
 - ✅ CPF inválido: Não aciona busca
-- ✅ CPF não existente: Retorna 404 adequadamente  
+- ✅ CPF não existente: Retorna 404 adequadamente
 - ✅ Erro de rede: Tratado com try/catch
 - ✅ Dados mascarados: PII protegida no retorno
 
@@ -300,16 +320,19 @@ O sistema possui dois fluxos diferentes:
 ## 🎯 RECOMENDAÇÕES
 
 ### **IMEDIATA (UX Enhancement):**
-1. **Substituir `window.confirm()` por modal/dialog visual**  
+
+1. **Substituir `window.confirm()` por modal/dialog visual**
    - Melhor UX com botões "Usar Dados" / "Cancelar"
    - Preservar funcionalidade atual
 
 ### **CURTO PRAZO (Consolidação):**
+
 2. **Unificar os dois fluxos de preenchimento**
    - Decidir entre `/api/clientes/cpf/` vs `/api/propostas/buscar-por-cpf/`
    - Manter apenas um endpoint para consistência
 
 ### **MÉDIO PRAZO (Otimização):**
+
 3. **Implementar feedback visual durante busca**
    - Loading indicator mais visível
    - Estado de "cliente encontrado" visual
@@ -323,6 +346,7 @@ O sistema possui dois fluxos diferentes:
 **AÇÃO REQUERIDA:** 🟡 **UX ENHANCEMENT** - Melhorar interface do usuário substituindo diálogo por modal visual.
 
 **PRÓXIMOS PASSOS:**
+
 1. Confirmar com usuário se o fluxo atual atende expectativas
 2. Se necessário, implementar botão visual em substituição ao `window.confirm()`
 3. Documentar e padronizar o fluxo único de preenchimento

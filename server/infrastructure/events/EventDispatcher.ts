@@ -22,7 +22,7 @@ export class EventDispatcher {
   public async dispatch(event: DomainEvent): Promise<void> {
     try {
       const eventType = event.eventType;
-      
+
       if (eventType === 'ProposalApproved') {
         // Send to formalization queue
         const formalizationQueue = await getFormalizationQueue();
@@ -30,7 +30,7 @@ export class EventDispatcher {
           removeOnComplete: 100,
           removeOnFail: false,
         });
-        
+
         logger.info('[EventDispatcher] Domain event dispatched to formalization queue', {
           eventType,
           aggregateId: event.aggregateId,

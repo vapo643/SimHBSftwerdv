@@ -36,15 +36,23 @@ export class ProposalController {
    */
   async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const useCase = this.container.resolve<CreateProposalUseCase>(TOKENS.CREATE_PROPOSAL_USE_CASE);
+      const useCase = this.container.resolve<CreateProposalUseCase>(
+        TOKENS.CREATE_PROPOSAL_USE_CASE
+      );
 
       // SAFE DEBUG: Log request body for troubleshooting without PII exposure
       SafeLogger.debug('[ProposalController.create] Raw request body received');
-      SafeLogger.debug('[ProposalController.create] User context available', { userId: (req as any).user?.id });
+      SafeLogger.debug('[ProposalController.create] User context available', {
+        userId: (req as any).user?.id,
+      });
 
       // SAFE DEBUG: Test individual field parsing without exposing PII
-      SafeLogger.debug('[DEBUG] valorSolicitado received', { type: typeof req.body.valorSolicitado });
-      SafeLogger.debug('[DEBUG] parseFloat test successful', { isValid: !isNaN(parseFloat(req.body.valorSolicitado)) });
+      SafeLogger.debug('[DEBUG] valorSolicitado received', {
+        type: typeof req.body.valorSolicitado,
+      });
+      SafeLogger.debug('[DEBUG] parseFloat test successful', {
+        isValid: !isNaN(parseFloat(req.body.valorSolicitado)),
+      });
 
       // LACRE DE OURO: Mapeamento COMPLETO de todos os campos enviados pelo frontend
       const dto = {
@@ -54,13 +62,13 @@ export class ProposalController {
         tipoPessoa: req.body.tipoPessoa,
         clienteRazaoSocial: req.body.clienteRazaoSocial,
         clienteCnpj: req.body.clienteCnpj,
-        
+
         // ===== DOCUMENTAÇÃO COMPLETA (RG) =====
         clienteRg: req.body.clienteRg,
         clienteOrgaoEmissor: req.body.clienteOrgaoEmissor,
         clienteRgUf: req.body.clienteRgUf,
         clienteRgDataEmissao: req.body.clienteRgDataEmissao,
-        
+
         // ===== DADOS PESSOAIS =====
         clienteEmail: req.body.clienteEmail,
         clienteTelefone: req.body.clienteTelefone,
@@ -68,7 +76,7 @@ export class ProposalController {
         clienteLocalNascimento: req.body.clienteLocalNascimento,
         clienteEstadoCivil: req.body.clienteEstadoCivil,
         clienteNacionalidade: req.body.clienteNacionalidade,
-        
+
         // ===== ENDEREÇO DETALHADO =====
         clienteCep: req.body.clienteCep,
         clienteLogradouro: req.body.clienteLogradouro,
@@ -78,12 +86,12 @@ export class ProposalController {
         clienteCidade: req.body.clienteCidade,
         clienteUf: req.body.clienteUf,
         clienteEndereco: req.body.clienteEndereco, // Campo concatenado
-        
+
         // ===== DADOS PROFISSIONAIS =====
         clienteOcupacao: req.body.clienteOcupacao,
         clienteRenda: req.body.clienteRenda ? parseFloat(req.body.clienteRenda) : undefined,
         clienteTelefoneEmpresa: req.body.clienteTelefoneEmpresa,
-        
+
         // ===== DADOS DE PAGAMENTO =====
         metodoPagamento: req.body.metodoPagamento,
         dadosPagamentoBanco: req.body.dadosPagamentoBanco,
@@ -95,23 +103,27 @@ export class ProposalController {
         dadosPagamentoPixBanco: req.body.dadosPagamentoPixBanco,
         dadosPagamentoPixNomeTitular: req.body.dadosPagamentoPixNomeTitular,
         dadosPagamentoPixCpfTitular: req.body.dadosPagamentoPixCpfTitular,
-        
+
         // ===== DADOS DO EMPRÉSTIMO =====
         valor: parseFloat(req.body.valor),
         prazo: parseInt(req.body.prazo),
-        taxaJuros: req.body.taxaJuros ? parseFloat(req.body.taxaJuros) : Proposal.getDefaultInterestRate(),
+        taxaJuros: req.body.taxaJuros
+          ? parseFloat(req.body.taxaJuros)
+          : Proposal.getDefaultInterestRate(),
         produtoId: req.body.produtoId,
         tabelaComercialId: req.body.tabelaComercialId,
-        
+
         // ===== VALORES CALCULADOS =====
         valorTac: req.body.valorTac ? parseFloat(req.body.valorTac) : undefined,
         valorIof: req.body.valorIof ? parseFloat(req.body.valorIof) : undefined,
-        valorTotalFinanciado: req.body.valorTotalFinanciado ? parseFloat(req.body.valorTotalFinanciado) : undefined,
-        
+        valorTotalFinanciado: req.body.valorTotalFinanciado
+          ? parseFloat(req.body.valorTotalFinanciado)
+          : undefined,
+
         // ===== CONDIÇÕES ESPECIAIS =====
         dataCarencia: req.body.dataCarencia,
         incluirTac: req.body.incluirTac,
-        
+
         // ===== ADMINISTRATIVO =====
         lojaId: req.body.lojaId || (req as any).user?.lojaId || 1,
         atendenteId: req.body.atendenteId || (req as any).user?.id,
@@ -120,26 +132,28 @@ export class ProposalController {
         formaLiberacao: req.body.formaLiberacao,
         formaPagamento: req.body.formaPagamento,
         pracaPagamento: req.body.pracaPagamento,
-        
+
         // ===== REFERÊNCIAS PESSOAIS =====
         referenciaPessoal: req.body.referenciaPessoal,
-        
+
         // ===== CONTROLE DE FLUXO =====
         submitForAnalysis: req.body.submitForAnalysis || false, // Padrão: false (criar como rascunho)
       };
 
-      SafeLogger.debug('[ProposalController.create] DTO mapping completed', { hasRequiredFields: !!(dto.clienteNome && dto.clienteCpf && dto.valor) });
-      
+      SafeLogger.debug('[ProposalController.create] DTO mapping completed', {
+        hasRequiredFields: !!(dto.clienteNome && dto.clienteCpf && dto.valor),
+      });
+
       // Validar campos obrigatórios
       if (!dto.clienteNome || !dto.clienteCpf || !dto.valor) {
         SafeLogger.error('[ProposalController.create] Missing required fields', {
           clienteNome: !!dto.clienteNome,
           clienteCpf: !!dto.clienteCpf,
-          valor: !!dto.valor
+          valor: !!dto.valor,
         });
         return res.status(400).json({
           success: false,
-          error: 'Campos obrigatórios ausentes: nome, CPF e valor'
+          error: 'Campos obrigatórios ausentes: nome, CPF e valor',
         });
       }
 
@@ -160,9 +174,11 @@ export class ProposalController {
   async getById(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
-      
+
       // OPERAÇÃO VISÃO CLARA V1.0: Buscar proposta por ID usando método específico
-      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE);
+      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(
+        TOKENS.GET_PROPOSAL_BY_ID_USE_CASE
+      );
       const proposal = await getByIdUseCase.execute(id);
 
       if (!proposal) {
@@ -177,19 +193,19 @@ export class ProposalController {
       const tabelaComercialNome = (proposal as any)._relatedCommercialTableName || null;
       const tabelaComercialTaxa = (proposal as any)._relatedCommercialTableRate ?? null;
       const lojaNome = (proposal as any)._relatedStoreName || null;
-      
+
       SafeLogger.debug('[getById] Extracted related data', {
         hasProductName: !!produtoNome,
         hasTableName: !!tabelaComercialNome,
         hasTableRate: tabelaComercialTaxa !== null,
         hasStoreName: !!lojaNome,
         produtoId: proposal.produtoId,
-        tabelaComercialId: proposal.tabelaComercialId
+        tabelaComercialId: proposal.tabelaComercialId,
       });
 
       // PAM V1.0 CORREÇÃO: proposal agora é DTO, usar type casting
       const proposalDto = proposal as any;
-      
+
       // OPERAÇÃO VISÃO CLARA V1.0: Serializar DTO COMPLETO para resposta
       const data = {
         id: proposalDto.id,
@@ -248,13 +264,15 @@ export class ProposalController {
         success: true,
         data,
       };
-      
+
       // Validar a resposta antes de enviar
       try {
         const validated = ProposalOutputSchema.parse(response);
         return res.json(validated);
       } catch (validationError) {
-        SafeLogger.error('[ProposalController.getById] Output validation failed', { errorType: validationError?.constructor?.name });
+        SafeLogger.error('[ProposalController.getById] Output validation failed', {
+          errorType: validationError?.constructor?.name,
+        });
         // Em desenvolvimento, log o erro mas envie a resposta mesmo assim
         // Em produção, você pode querer tratar isso diferentemente
         return res.json(response);
@@ -297,45 +315,49 @@ export class ProposalController {
 
       // PERF-BOOST-001: Usar método lightweight para listagem
       // 🏡 P0.2 GREEN - DIP Compliant: Use case elimina violação DIP
-      const listUseCase = this.container.resolve<ListProposalsByCriteriaUseCase>(TOKENS.LIST_PROPOSALS_BY_CRITERIA_USE_CASE);
+      const listUseCase = this.container.resolve<ListProposalsByCriteriaUseCase>(
+        TOKENS.LIST_PROPOSALS_BY_CRITERIA_USE_CASE
+      );
       const rawData = await listUseCase.execute(criteria);
 
       // PAM V1.0 DEBUG: Log crítico para entender o que chega no controller
       console.log('🔍 [CONTROLLER DEBUG] rawData do UseCase - Total:', rawData.length);
       if (rawData.length > 0) {
-        console.log('🔍 [CONTROLLER DEBUG] Primeiro item do UseCase:', JSON.stringify({
-          id: rawData[0].id,
-          parceiro: rawData[0].parceiro,
-          loja: rawData[0].loja
-        }));
+        console.log(
+          '🔍 [CONTROLLER DEBUG] Primeiro item do UseCase:',
+          JSON.stringify({
+            id: rawData[0].id,
+            parceiro: rawData[0].parceiro,
+            loja: rawData[0].loja,
+          })
+        );
       }
 
       // TODO P1.2: Remover este adaptador quando o repositório for consolidado para retornar o DTO correto
       // OPERAÇÃO AÇO LÍQUIDO P0.3: Adaptador de Contrato API para blindagem do frontend
-      const data = rawData.map(row => ({
+      const data = rawData.map((row) => ({
         id: row.id,
         status: row.status,
         nomeCliente: row.nomeCliente, // ← Já mapeado pelo repository
-        cpfCliente: row.cpfCliente,   // ← CORREÇÃO: Use Case agora retorna camelCase
+        cpfCliente: row.cpfCliente, // ← CORREÇÃO: Use Case agora retorna camelCase
         emailCliente: row.emailCliente || null, // ← CORREÇÃO: Use Case agora retorna camelCase
-        telefoneCliente: row.telefoneCliente || null, // ← CORREÇÃO: Use Case agora retorna camelCase  
+        telefoneCliente: row.telefoneCliente || null, // ← CORREÇÃO: Use Case agora retorna camelCase
         valorSolicitado: row.valorSolicitado, // ← CORREÇÃO: Use Case agora retorna camelCase
         prazo: row.prazo,
-        taxaJuros: row.taxaJuros,     // ← CORREÇÃO: Use Case agora retorna camelCase
+        taxaJuros: row.taxaJuros, // ← CORREÇÃO: Use Case agora retorna camelCase
         // CORREÇÃO CRÍTICA P3: Incluir campos que estavam ausentes
-        valorTac: row.valorTac,       // ← CORREÇÃO: Use Case agora retorna camelCase
-        valorIof: row.valorIof,       // ← CORREÇÃO: Use Case agora retorna camelCase
+        valorTac: row.valorTac, // ← CORREÇÃO: Use Case agora retorna camelCase
+        valorIof: row.valorIof, // ← CORREÇÃO: Use Case agora retorna camelCase
         valorTotalFinanciado: row.valorTotalFinanciado, // ← CORREÇÃO: Use Case agora retorna camelCase
         finalidade: row.finalidade,
         garantia: row.garantia,
-        lojaId: row.lojaId,           // ← CORREÇÃO: Use Case agora retorna camelCase
+        lojaId: row.lojaId, // ← CORREÇÃO: Use Case agora retorna camelCase
         parceiro: row.parceiro, // ← Já estruturado pelo repository
         loja: row.loja, // ← Já estruturado pelo repository
-        createdAt: row.createdAt,     // ← CORREÇÃO: Use Case agora retorna camelCase
-        updatedAt: row.updatedAt,     // ← CORREÇÃO: Use Case agora retorna camelCase
+        createdAt: row.createdAt, // ← CORREÇÃO: Use Case agora retorna camelCase
+        updatedAt: row.updatedAt, // ← CORREÇÃO: Use Case agora retorna camelCase
       }));
 
-      
       return res.json({
         success: true,
         data,
@@ -362,7 +384,9 @@ export class ProposalController {
         });
       }
 
-      const useCase = this.container.resolve<ApproveProposalUseCase>(TOKENS.APPROVE_PROPOSAL_USE_CASE);
+      const useCase = this.container.resolve<ApproveProposalUseCase>(
+        TOKENS.APPROVE_PROPOSAL_USE_CASE
+      );
 
       await useCase.execute({
         proposalId: id,
@@ -402,7 +426,9 @@ export class ProposalController {
         });
       }
 
-      const useCase = this.container.resolve<RejectProposalUseCase>(TOKENS.REJECT_PROPOSAL_USE_CASE);
+      const useCase = this.container.resolve<RejectProposalUseCase>(
+        TOKENS.REJECT_PROPOSAL_USE_CASE
+      );
 
       await useCase.execute({
         proposalId: id,
@@ -443,9 +469,14 @@ export class ProposalController {
         });
       }
 
-      SafeLogger.info('[ProposalController.pendenciar] Processing proposal request', { hasProposalId: !!id, hasAnalystId: !!analistaId });
+      SafeLogger.info('[ProposalController.pendenciar] Processing proposal request', {
+        hasProposalId: !!id,
+        hasAnalystId: !!analistaId,
+      });
 
-      const useCase = this.container.resolve<PendenciarPropostaUseCase>(TOKENS.PENDENCIAR_PROPOSTA_USE_CASE);
+      const useCase = this.container.resolve<PendenciarPropostaUseCase>(
+        TOKENS.PENDENCIAR_PROPOSTA_USE_CASE
+      );
 
       const result = await useCase.execute({
         propostaId: id,
@@ -476,7 +507,11 @@ export class ProposalController {
    * Reenviar proposta pendente para análise (após correções)
    * PAM V2.5 - OPERAÇÃO VISÃO CLARA - Endpoint específico para reenvio
    */
-  async resubmitFromPending(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  async resubmitFromPending(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
       const { id } = req.params;
       const analistaId = (req as any).user?.id;
@@ -488,7 +523,9 @@ export class ProposalController {
         });
       }
 
-      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE);
+      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(
+        TOKENS.GET_PROPOSAL_BY_ID_USE_CASE
+      );
       const proposal = await getByIdUseCase.execute(id);
 
       if (!proposal) {
@@ -524,11 +561,11 @@ export class ProposalController {
       SafeLogger.debug('[CONTROLLER DEBUG] Starting update request');
       const { id } = req.params;
       const { cliente_data, condicoes_data } = req.body;
-      
+
       SafeLogger.debug('[CONTROLLER DEBUG] Request analysis', {
         bodyKeysCount: Object.keys(req.body).length,
         hasClienteData: !!cliente_data,
-        hasCondicoesData: !!condicoes_data
+        hasCondicoesData: !!condicoes_data,
       });
 
       if (!cliente_data && !condicoes_data) {
@@ -539,7 +576,9 @@ export class ProposalController {
       }
 
       SafeLogger.debug('[CONTROLLER DEBUG] Finding proposal by ID');
-      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE);
+      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(
+        TOKENS.GET_PROPOSAL_BY_ID_USE_CASE
+      );
       const proposal = await getByIdUseCase.execute(id);
 
       if (!proposal) {
@@ -549,14 +588,16 @@ export class ProposalController {
           error: 'Proposta não encontrada',
         });
       }
-      
+
       SafeLogger.debug('[CONTROLLER DEBUG] Proposal found', { status: proposal.status });
 
       // Verificar se a proposta pode ser editada (apenas pendenciadas)
       const statusString = String(proposal.status || '').trim();
       SafeLogger.debug('[CONTROLLER DEBUG] Status validation', { statusString });
       if (statusString !== 'pendenciado' && statusString !== 'pendente') {
-        SafeLogger.warn('[CONTROLLER DEBUG] Invalid status for editing', { currentStatus: statusString });
+        SafeLogger.warn('[CONTROLLER DEBUG] Invalid status for editing', {
+          currentStatus: statusString,
+        });
         return res.status(400).json({
           success: false,
           error: 'Apenas propostas pendenciadas podem ser editadas',
@@ -631,11 +672,17 @@ export class ProposalController {
   /**
    * Submeter proposta para análise
    */
-  async submitForAnalysis(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  async submitForAnalysis(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
       const { id } = req.params;
 
-      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE);
+      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(
+        TOKENS.GET_PROPOSAL_BY_ID_USE_CASE
+      );
       const proposal = await getByIdUseCase.execute(id);
 
       if (!proposal) {
@@ -670,7 +717,7 @@ export class ProposalController {
     try {
       SafeLogger.debug('[DEBUG] FORMALIZATION ROUTE HIT IN DDD CONTROLLER');
       SafeLogger.debug('[DEBUG] Route information', { url: req.url, path: req.path });
-      
+
       const { createServerSupabaseAdminClient } = await import('../../../lib/supabase.js');
       const supabase = createServerSupabaseAdminClient();
 
@@ -693,7 +740,11 @@ export class ProposalController {
       const userRole = (req as any).user?.role;
       const userLojaId = (req as any).user?.loja_id;
 
-      SafeLogger.info('[FORMALIZATION] Querying proposals with user context', { hasUserId: !!userId, userRole, userLojaId });
+      SafeLogger.info('[FORMALIZATION] Querying proposals with user context', {
+        hasUserId: !!userId,
+        userRole,
+        userLojaId,
+      });
 
       // Build query based on user role
       let query = supabase.from('propostas').select('*').in('status', formalizationStatuses);
@@ -710,7 +761,9 @@ export class ProposalController {
       const { data: formalizacaoPropostasRaw, error } = await query;
 
       if (error) {
-        SafeLogger.error('Formalization error fetching proposals', { errorType: error?.constructor?.name });
+        SafeLogger.error('Formalization error fetching proposals', {
+          errorType: error?.constructor?.name,
+        });
         throw error;
       }
 
@@ -763,7 +816,8 @@ export class ProposalController {
 
       const { data: logs, error } = await supabase
         .from('proposta_logs')
-        .select(`
+        .select(
+          `
           id,
           observacao,
           status_anterior,
@@ -774,12 +828,15 @@ export class ProposalController {
             full_name,
             role
           )
-        `)
+        `
+        )
         .eq('proposta_id', propostaId)
         .order('created_at', { ascending: true });
 
       if (error) {
-        SafeLogger.warn('Erro ao buscar logs de auditoria', { errorType: error?.constructor?.name });
+        SafeLogger.warn('Erro ao buscar logs de auditoria', {
+          errorType: error?.constructor?.name,
+        });
         return res.json({ logs: [] });
       }
 
@@ -818,10 +875,10 @@ export class ProposalController {
     if (!req.body || typeof req.body !== 'object') {
       return res.status(400).json({
         success: false,
-        error: 'Request body is required'
+        error: 'Request body is required',
       });
     }
-    
+
     const { id } = req.params;
     const { status } = req.body;
 
@@ -836,21 +893,24 @@ export class ProposalController {
       // OPERAÇÃO VISÃO CLARA V1.0: Implementar transição para pendenciado
       try {
         // DEBUG: Log completo do request body
-        SafeLogger.debug('Pendenciar request received', { 
+        SafeLogger.debug('Pendenciar request received', {
           userId: (req as any).user?.id,
           proposalId: id,
-          fieldsCount: Object.keys(req.body).length
+          fieldsCount: Object.keys(req.body).length,
         });
-        SafeLogger.debug('Pendenciar operation details', { 
+        SafeLogger.debug('Pendenciar operation details', {
           status,
           hasMotivo: !!req.body.motivo_pendencia || !!req.body.motivoPendencia,
-          hasObservacao: !!req.body.observacao
+          hasObservacao: !!req.body.observacao,
         });
-        
+
         // Aceitar tanto camelCase (frontend) quanto snake_case (backend)
-        const motivo_pendencia = req.body.motivo_pendencia || req.body.motivoPendencia || req.body.observacao;
-        SafeLogger.debug('Pendenciar final motivo processed', { hasFinalMotivo: !!motivo_pendencia });
-        
+        const motivo_pendencia =
+          req.body.motivo_pendencia || req.body.motivoPendencia || req.body.observacao;
+        SafeLogger.debug('Pendenciar final motivo processed', {
+          hasFinalMotivo: !!motivo_pendencia,
+        });
+
         if (!motivo_pendencia) {
           SafeLogger.debug('Pendenciar validation failed', { reason: 'motivo_pendencia_missing' });
           return res.status(400).json({
@@ -858,11 +918,11 @@ export class ProposalController {
             error: 'Motivo da pendência é obrigatório',
           });
         }
-        
+
         // Garantir que o motivo seja passado corretamente para o controller
         req.body.motivo_pendencia = motivo_pendencia;
         SafeLogger.debug('Pendenciar validation passed', { motivoPresent: true });
-        
+
         // OPERAÇÃO VISÃO CLARA V1.0: Implementado endpoint de pendência
         return this.pendenciar(req, res, next);
       } catch (error) {

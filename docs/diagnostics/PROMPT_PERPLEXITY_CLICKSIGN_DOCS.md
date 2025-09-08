@@ -1,6 +1,7 @@
 # PROMPT PARA PERPLEXITY - DOCUMENTAÇÃO CLICKSIGN API V3
 
 ## Contexto
+
 Preciso integrar a API v3 do ClickSign para upload de documentos em envelopes, mas estou enfrentando inconsistências na documentação dos campos obrigatórios.
 
 ## Pergunta para Perplexity
@@ -14,6 +15,7 @@ Preciso integrar a API v3 do ClickSign para upload de documentos em envelopes, m
 5. **Headers obrigatórios**: Content-Type e outros headers necessários
 
 Contexto técnico:
+
 - Estou usando Node.js/TypeScript
 - Endpoint: https://app.clicksign.com/api/v3
 - Tentei content_base64, content, com e sem content_type
@@ -22,6 +24,7 @@ Contexto técnico:
 Preciso das URLs oficiais da documentação, não exemplos genéricos."
 
 ## URLs que preciso encontrar:
+
 - [ ] Documentação oficial ClickSign API v3
 - [ ] Referência de endpoints de envelopes
 - [ ] Guia de integração para upload de documentos

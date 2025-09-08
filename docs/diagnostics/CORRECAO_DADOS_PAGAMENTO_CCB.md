@@ -1,9 +1,11 @@
 # Correção dos Dados de Pagamento na CCB
 
 ## 🐛 Problema Identificado
+
 Os dados de pagamento do cliente não estavam sendo preenchidos na CCB (Cédula de Crédito Bancário), aparecendo sempre como "NÃO INFORMADO" mesmo quando preenchidos no formulário.
 
 ## 📊 Diagnóstico
+
 1. **No banco de dados**: Campos `dados_pagamento_*` estavam todos NULL
 2. **No JSON cliente_data**: Não havia campos de pagamento (banco, agência, conta, pix)
 3. **No frontend**: Formulário coleta corretamente os dados em `ClientDataStep.tsx`
@@ -14,6 +16,7 @@ Os dados de pagamento do cliente não estavam sendo preenchidos na CCB (Cédula 
 ### Arquivo: `server/routes.ts`
 
 #### 1. Adicionado mapeamento completo dos dados de pagamento
+
 ```javascript
 // Dados de pagamento (separados para melhor controle)
 metodo_pagamento: dataWithId.metodoPagamento, // 'conta_bancaria' ou 'pix'
@@ -37,6 +40,7 @@ dados_pagamento_pix_cpf_titular: dataWithId.dadosPagamentoPixCpfTitular,
 ```
 
 #### 2. Adicionado dados de pagamento no JSON cliente_data como fallback
+
 ```javascript
 clienteData: {
   // ... outros campos ...
@@ -55,6 +59,7 @@ clienteData: {
 ```
 
 #### 3. Adicionado logs de debug para monitoramento
+
 ```javascript
 console.log("💳 [NOVA PROPOSTA] Dados de pagamento recebidos do frontend:", {...});
 console.log("💳 [NOVA PROPOSTA] Dados de pagamento que serão salvos no banco:", {...});
@@ -71,6 +76,7 @@ console.log("💳 [NOVA PROPOSTA] Dados de pagamento que serão salvos no banco:
 ## 📋 Campos de Pagamento Suportados
 
 ### Conta Bancária
+
 - `dados_pagamento_banco`: Código do banco
 - `dados_pagamento_agencia`: Número da agência
 - `dados_pagamento_conta`: Número da conta
@@ -79,6 +85,7 @@ console.log("💳 [NOVA PROPOSTA] Dados de pagamento que serão salvos no banco:
 - `dados_pagamento_cpf_titular`: CPF do titular
 
 ### PIX
+
 - `dados_pagamento_pix`: Chave PIX
 - `dados_pagamento_tipo_pix`: Tipo da chave (cpf/cnpj/email/telefone/aleatoria)
 - `dados_pagamento_pix_banco`: Banco do PIX

@@ -1,4 +1,5 @@
 # OPERAÇÃO GUARDIÃO DO COFRE V1.0 - RELATÓRIO FORENSE
+
 ## MAPEAMENTO COMPLETO DE VETORES DE ATAQUE AO BANCO DE DADOS
 
 **Data:** 02 de Setembro de 2025  
@@ -12,8 +13,9 @@
 ⚠️ **ALERTA CRÍTICO:** Foram identificados **27 vetores de ataque** distintos capazes de executar operações destrutivas no banco de dados. O projeto possui vulnerabilidades graves que permitiram a deleção acidental do banco de produção em incidentes anteriores.
 
 **CLASSIFICAÇÃO DE RISCO:**
+
 - 🔴 **CRÍTICO (P0):** 8 vetores
-- 🟡 **ALTO (P1):** 12 vetores  
+- 🟡 **ALTO (P1):** 12 vetores
 - 🟠 **MÉDIO (P2):** 7 vetores
 
 ---
@@ -30,13 +32,14 @@
 }
 ```
 
-| Script | Comando | Nível de Risco | Potencial Destrutivo |
-|--------|---------|----------------|---------------------|
+| Script    | Comando            | Nível de Risco | Potencial Destrutivo                                                  |
+| --------- | ------------------ | -------------- | --------------------------------------------------------------------- |
 | `db:push` | `drizzle-kit push` | 🔴 **CRÍTICO** | Pode aplicar migrações destrutivas diretamente ao banco sem validação |
 
 #### Análise Detalhada - `npm run db:push`
 
 **⚠️ VETOR DE ATAQUE P0-001**
+
 - **Comando:** `drizzle-kit push`
 - **Risco:** Aplica mudanças de schema diretamente ao banco de dados sem confirmação
 - **Potencial Destrutivo:** MÁXIMO - pode executar `DROP TABLE`, `ALTER TABLE DROP COLUMN`, modificações irreversíveis
@@ -49,10 +52,10 @@
 
 ### 2.1 Localizações de Uso do drizzle-kit
 
-| Arquivo | Linha | Comando | Risco |
-|---------|-------|---------|-------|
-| `package.json` | 11 | `"db:push": "drizzle-kit push"` | 🔴 **CRÍTICO** |
-| `drizzle.config.ts` | 1-14 | Configuração drizzle-kit | 🟡 **ALTO** |
+| Arquivo             | Linha | Comando                         | Risco          |
+| ------------------- | ----- | ------------------------------- | -------------- |
+| `package.json`      | 11    | `"db:push": "drizzle-kit push"` | 🔴 **CRÍTICO** |
+| `drizzle.config.ts` | 1-14  | Configuração drizzle-kit        | 🟡 **ALTO**    |
 
 ### 2.2 Análise da Configuração drizzle-kit
 
@@ -61,16 +64,17 @@
 ```typescript
 // drizzle.config.ts
 export default defineConfig({
-  out: "./migrations",
-  schema: "./shared/schema.ts", 
-  dialect: "postgresql",
+  out: './migrations',
+  schema: './shared/schema.ts',
+  dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL,  // ⚠️ CRÍTICO: Usa variável de produção diretamente
+    url: process.env.DATABASE_URL, // ⚠️ CRÍTICO: Usa variável de produção diretamente
   },
 });
 ```
 
 **Riscos Identificados:**
+
 - Usa `DATABASE_URL` diretamente (não `TEST_DATABASE_URL`)
 - Sem validação de ambiente
 - Sem confirmações de segurança
@@ -95,21 +99,24 @@ export async function cleanTestDatabase(): Promise<void> {
 ```
 
 **Análise de Periculosidade:**
-- **Comando:** `TRUNCATE ... CASCADE` 
+
+- **Comando:** `TRUNCATE ... CASCADE`
 - **Impacto:** Deleta TODOS os dados de TODAS as tabelas
 - **Alcance:** 169 linhas de tabelas especificadas
 - **Fallback:** Se falhar, executa `DELETE FROM` individual para cada tabela
 
 **Lista de Tabelas Afetadas (CRÍTICO):**
+
 ```
 historico_observacoes_cobranca, parcelas, inter_collections, inter_webhooks,
-inter_callbacks, status_transitions, solicitacoes_modificacao, 
+inter_callbacks, status_transitions, solicitacoes_modificacao,
 proposta_documentos, status_contextuais, proposta_logs, referencia_pessoal,
 comunicacao_logs, propostas, produto_tabela_comercial, tabelas_comerciais,
 produtos, gerente_lojas, lojas, parceiros, users, security_logs
 ```
 
 **Salvaguardas Existentes (ANÁLISE):**
+
 1. ✅ Verificação `NODE_ENV !== 'test'`
 2. ✅ Exigência de `TEST_DATABASE_URL`
 3. ✅ Validação de nome do banco
@@ -143,24 +150,25 @@ export async function setupTestEnvironment(): Promise<{...}> {
 
 #### 4.1.1 Comandos TRUNCATE
 
-| Arquivo | Linha | Comando | Risco |
-|---------|-------|---------|-------|
-| `tests/lib/db-helper.ts` | 176 | `TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE` | 🔴 **CRÍTICO** |
+| Arquivo                  | Linha | Comando                                                | Risco          |
+| ------------------------ | ----- | ------------------------------------------------------ | -------------- |
+| `tests/lib/db-helper.ts` | 176   | `TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE` | 🔴 **CRÍTICO** |
 
 #### 4.1.2 Comandos DELETE FROM (Sem WHERE ou WHERE Perigoso)
 
-| Arquivo | Linha | Comando | Risco |
-|---------|-------|---------|-------|
-| `tests/lib/db-helper.ts` | 206 | `DELETE FROM "${table}"` | 🔴 **CRÍTICO** |
-| `tests/lib/db-helper.ts` | 214 | `DELETE FROM "propostas"` | 🔴 **CRÍTICO** |
-| `tests/lib/db-helper.ts` | 231 | `DELETE FROM "${table}"` | 🔴 **CRÍTICO** |
+| Arquivo                  | Linha | Comando                   | Risco          |
+| ------------------------ | ----- | ------------------------- | -------------- |
+| `tests/lib/db-helper.ts` | 206   | `DELETE FROM "${table}"`  | 🔴 **CRÍTICO** |
+| `tests/lib/db-helper.ts` | 214   | `DELETE FROM "propostas"` | 🔴 **CRÍTICO** |
+| `tests/lib/db-helper.ts` | 231   | `DELETE FROM "${table}"`  | 🔴 **CRÍTICO** |
 
 #### 4.1.3 Usos de db.execute() com Potencial Risco
 
 **Arquivos com Múltiplos Usos:**
+
 - `server/routes.ts` - 15 ocorrências de `db.execute()`
 - `server/services/documentProcessingService.ts` - 5 ocorrências
-- `server/services/ccbSyncService.ts` - 4 ocorrências  
+- `server/services/ccbSyncService.ts` - 4 ocorrências
 - `server/services/healthService.ts` - 2 ocorrências
 - `tests/integration/*.test.ts` - 12 ocorrências em testes
 
@@ -168,13 +176,14 @@ export async function setupTestEnvironment(): Promise<{...}> {
 
 **⚠️ VETOR DE ATAQUE P1-005 - Scripts de Migração**
 
-| Arquivo | Tipo | Risco |
-|---------|------|-------|
-| `migrations/*.sql` | Scripts de migração | 🟡 **ALTO** |
-| `server/scripts/optimize-database.sql` | Script de otimização | 🟡 **ALTO** |
-| `docs/runbooks/04-procedimento-de-restore.md` | Comandos de restore | 🔴 **CRÍTICO** |
+| Arquivo                                       | Tipo                 | Risco          |
+| --------------------------------------------- | -------------------- | -------------- |
+| `migrations/*.sql`                            | Scripts de migração  | 🟡 **ALTO**    |
+| `server/scripts/optimize-database.sql`        | Script de otimização | 🟡 **ALTO**    |
+| `docs/runbooks/04-procedimento-de-restore.md` | Comandos de restore  | 🔴 **CRÍTICO** |
 
 **Exemplo Crítico - Runbook de Restore:**
+
 ```sql
 -- docs/runbooks/04-procedimento-de-restore.md
 echo "DROP TABLE propostas CASCADE;" | psql $DATABASE_URL
@@ -188,11 +197,13 @@ echo "DROP TABLE users CASCADE;" | psql $DATABASE_URL
 ### 5.1 Vulnerabilidades de Configuração
 
 **⚠️ VETOR DE ATAQUE P1-006 - Variáveis de Ambiente**
+
 - `DATABASE_URL` usado diretamente em múltiplos locais
 - Sem diferenciação clara entre desenvolvimento/produção/teste
 - Falta de validação de URL de banco antes da execução
 
 **⚠️ VETOR DE ATAQUE P1-007 - Arquivos .sql Externos**
+
 - 21 arquivos `.sql` encontrados no projeto
 - Alguns contêm comandos `DROP`, `DELETE`, `TRUNCATE`
 - Podem ser executados acidentalmente
@@ -200,6 +211,7 @@ echo "DROP TABLE users CASCADE;" | psql $DATABASE_URL
 ### 5.2 Padrões de Código Perigosos
 
 **⚠️ VETOR DE ATAQUE P2-008 - SQL Injection Potencial**
+
 - Uso de `sql.raw()` em múltiplos locais
 - Interpolação de strings em SQL
 - Falta de sanitização em alguns casos
@@ -213,7 +225,8 @@ echo "DROP TABLE users CASCADE;" | psql $DATABASE_URL
 **CENÁRIO:** Execução Acidental de `npm run db:push` em Produção
 
 **SEQUÊNCIA DE EVENTOS:**
-1. Desenvolvedor executa `npm run db:push` 
+
+1. Desenvolvedor executa `npm run db:push`
 2. `drizzle.config.ts` lê `DATABASE_URL`
 3. Se `DATABASE_URL` = produção → **DESTRUIÇÃO TOTAL**
 4. `drizzle-kit push` aplica mudanças destrutivas sem confirmação
@@ -224,6 +237,7 @@ echo "DROP TABLE users CASCADE;" | psql $DATABASE_URL
 **CENÁRIO:** Execução de Testes Contra Produção
 
 **SEQUÊNCIA DE EVENTOS:**
+
 1. Variável `TEST_DATABASE_URL` não configurada ou inválida
 2. Sistema fallback para `DATABASE_URL` de produção
 3. `cleanTestDatabase()` executa `TRUNCATE ... CASCADE`
@@ -258,7 +272,7 @@ echo "DROP TABLE users CASCADE;" | psql $DATABASE_URL
 
 ## 8. CONCLUSÃO
 
-**VEREDICTO:** O projeto Simpix contém **múltiplos vetores de ataque críticos** que tornam a deleção acidental do banco de dados não apenas possível, mas provável. 
+**VEREDICTO:** O projeto Simpix contém **múltiplos vetores de ataque críticos** que tornam a deleção acidental do banco de dados não apenas possível, mas provável.
 
 **PRIORIDADE MÁXIMA:** Implementar salvaguardas de segurança antes de qualquer deploy em produção.
 
@@ -266,5 +280,5 @@ echo "DROP TABLE users CASCADE;" | psql $DATABASE_URL
 
 ---
 
-*Relatório gerado pela Operação Guardião do Cofre V1.0 - PAM (Protocolo de Ativação de Missão)*  
-*Data: 02/09/2025 | Classificação: CONFIDENCIAL*
+_Relatório gerado pela Operação Guardião do Cofre V1.0 - PAM (Protocolo de Ativação de Missão)_  
+_Data: 02/09/2025 | Classificação: CONFIDENCIAL_

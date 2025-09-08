@@ -229,10 +229,7 @@
         "https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/03-Testing_for_Sensitive_Information_Sent_via_Unencrypted_Channels",
         "https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/04-Testing_for_Weak_Encryption"
       ],
-      "complementary": [
-        "https://www.bouncycastle.org/",
-        "https://www.iana.org/"
-      ]
+      "complementary": ["https://www.bouncycastle.org/", "https://www.iana.org/"]
     },
     "business_logic": {
       "name": "Business Logic Testing",
@@ -283,9 +280,7 @@
     },
     "reporting": {
       "name": "Reporting",
-      "urls": [
-        "https://owasp.org/www-project-web-security-testing-guide/v42/5-Reporting/README"
-      ]
+      "urls": ["https://owasp.org/www-project-web-security-testing-guide/v42/5-Reporting/README"]
     },
     "appendices": {
       "name": "Appendices",

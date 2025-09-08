@@ -128,7 +128,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
   ): Promise<{ publicUrl: string } | null> {
     try {
       console.log(`[DOCUMENTS_REPO] Uploading file '${filePath}' using storage abstraction`);
-      
+
       const uploadResult = await this.storageProvider.upload(
         fileBuffer,
         filePath,
@@ -149,7 +149,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
   async generateSignedUrl(path: string, expiresIn: number = 3600): Promise<string | null> {
     try {
       console.log(`[DOCUMENTS_REPO] Generating signed URL for '${path}' using storage abstraction`);
-      
+
       const signedUrl = await this.storageProvider.getDownloadUrl(
         path,
         this.BUCKET_NAME,
@@ -182,9 +182,9 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
   async deleteFromStorage(path: string): Promise<boolean> {
     try {
       console.log(`[DOCUMENTS_REPO] Deleting file '${path}' using storage abstraction`);
-      
+
       await this.storageProvider.delete(path, this.BUCKET_NAME);
-      
+
       console.log(`[DOCUMENTS_REPO] File deleted successfully`);
       return true;
     } catch (error) {

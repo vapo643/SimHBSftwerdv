@@ -8,22 +8,26 @@
 ## Problema Identificado
 
 ### Sintoma
+
 ```
 ❌ [USER CREATE ERROR]: ApiError: Failed to create profile: Could not find the 'loja_ids' column of 'profiles' in the schema cache
 ```
 
 ### Causa Raiz
+
 Discrepância fatal entre o schema da tabela `profiles` e o código do repository:
 
 **Schema Real (`profiles`):**
+
 ```sql
 - id (uuid)
-- full_name (text) 
+- full_name (text)
 - role (text)
 - loja_id (integer) -- SINGULAR
 ```
 
 **Código tentando usar:**
+
 ```typescript
 loja_ids: userData.lojaIds || null, // ❌ COLUNA INEXISTENTE
 ```
@@ -31,12 +35,14 @@ loja_ids: userData.lojaIds || null, // ❌ COLUNA INEXISTENTE
 ## Análise Arquitetural
 
 ### Modelo de Dados Correto Descoberto
+
 O sistema usa **arquitetura híbrida inteligente**:
 
 1. **ATENDENTE**: `profiles.loja_id` (1:1) - Um atendente trabalha em uma loja
 2. **GERENTE**: Tabela `gerente_lojas` (N:N) - Um gerente pode gerenciar múltiplas lojas
 
 ### Evidências da Arquitetura
+
 - **Schema `gerente_lojas`**: Tabela de junção com `gerente_id` (UUID) + `loja_id` (integer)
 - **Políticas RLS**: Fazem referência a relacionamento N:N via junction table
 - **Validação**: Schema de entrada suporta `lojaId` (singular) e `lojaIds` (plural)
@@ -44,6 +50,7 @@ O sistema usa **arquitetura híbrida inteligente**:
 ## Solução Implementada
 
 ### 1. Repository Corrigido (`user.repository.ts`)
+
 ```typescript
 // ❌ ANTES: Tentava inserir coluna inexistente
 loja_ids: userData.lojaIds || null,
@@ -56,6 +63,7 @@ async createGerenteLojaAssociations(gerenteId: string, lojaIds: number[]): Promi
 ```
 
 ### 2. Interface Profile Atualizada
+
 ```typescript
 export interface Profile {
   id: string;
@@ -68,6 +76,7 @@ export interface Profile {
 ```
 
 ### 3. Lógica de Criação de Usuários
+
 ```typescript
 // Step 2: Create profile (ALIGNED WITH REAL SCHEMA)
 const profile = await this.supabaseAdmin.from(this.tableName).insert({
@@ -85,6 +94,7 @@ if (userData.role === 'GERENTE' && userData.lojaIds && userData.lojaIds.length >
 ```
 
 ### 4. Busca por Loja Corrigida
+
 ```typescript
 async getUsersByLoja(lojaId: number): Promise<Profile[]> {
   // Get ATENDENTEs directly via loja_id
@@ -106,6 +116,7 @@ async getUsersByLoja(lojaId: number): Promise<Profile[]> {
 ## Validação da Correção
 
 ### Testes Realizados
+
 - ✅ Schema real confirmado via SQL query
 - ✅ Zero erros LSP após correções
 - ✅ Estrutura de tabelas validada:
@@ -113,6 +124,7 @@ async getUsersByLoja(lojaId: number): Promise<Profile[]> {
   - `gerente_lojas`: `gerente_id` + `loja_id` (junction table)
 
 ### Impacto
+
 - ✅ API de criação de usuários funcional
 - ✅ Suporte correto para ATENDENTE (1:1) e GERENTE (N:N)
 - ✅ Arquitetura híbrida mantida e clarificada

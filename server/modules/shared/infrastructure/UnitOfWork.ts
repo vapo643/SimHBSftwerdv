@@ -40,7 +40,7 @@ export class UnitOfWork implements IUnitOfWork {
   // ========================================================================
   // REPOSITÓRIOS TRANSACIONAIS
   // ========================================================================
-  
+
   get proposals(): IProposalRepository {
     if (!this._isInTransaction) {
       throw new Error('Cannot access repositories outside of transaction context');
@@ -73,7 +73,7 @@ export class UnitOfWork implements IUnitOfWork {
 
     // Gerar ID único para auditoria
     this._transactionId = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     console.log(`[UoW] Starting transaction: ${this._transactionId}`);
 
     try {
@@ -81,7 +81,7 @@ export class UnitOfWork implements IUnitOfWork {
       const result = await db.transaction(async (tx: DrizzleTransaction) => {
         // Configurar estado transacional
         this._isInTransaction = true;
-        
+
         // Instanciar repositórios com contexto transacional
         this._proposals = new TransactionalProposalRepository(tx);
         this._ccbs = new TransactionalCcbRepository(tx);
@@ -92,18 +92,20 @@ export class UnitOfWork implements IUnitOfWork {
         try {
           // Executar lógica de negócio
           const workResult = await work();
-          
+
           console.log(`[UoW] Work completed successfully: ${this._transactionId}`);
           return workResult;
         } catch (error) {
-          console.error(`[UoW] Work failed, rolling back transaction: ${this._transactionId}`, error);
+          console.error(
+            `[UoW] Work failed, rolling back transaction: ${this._transactionId}`,
+            error
+          );
           throw error; // Drizzle automaticamente faz rollback quando há exception
         }
       });
 
       console.log(`[UoW] Transaction committed successfully: ${this._transactionId}`);
       return result;
-
     } catch (error) {
       console.error(`[UoW] Transaction failed: ${this._transactionId}`, error);
       throw error;
@@ -111,12 +113,12 @@ export class UnitOfWork implements IUnitOfWork {
       // Limpar estado transacional
       this._isInTransaction = false;
       this._transactionId = null;
-      
+
       // Limpar referências dos repositórios
       this._proposals = undefined as any;
       this._ccbs = undefined as any;
       this._boletos = undefined as any;
-      
+
       console.log(`[UoW] Transaction context cleaned up`);
     }
   }

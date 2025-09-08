@@ -3,7 +3,7 @@
 **Date:** 2025-01-20  
 **Severity:** CRITICAL - Production Blocking  
 **Category:** Authentication  
-**Status:** RESOLVED  
+**Status:** RESOLVED
 
 ## Problem Description
 
@@ -19,9 +19,11 @@ All users in the system were receiving "Acesso negado. Perfil de usuário não e
 ## Root Cause Analysis
 
 ### Primary Issue
+
 The `profiles` table was completely empty (0 records) despite having 119 authenticated users in `auth.users` table.
 
 ### Secondary Issue
+
 The JWT auth middleware was using Supabase client queries which were being blocked by RLS (Row Level Security) policies, even when using the admin client.
 
 ### Technical Details
@@ -32,9 +34,11 @@ The JWT auth middleware was using Supabase client queries which were being block
    - `users`: 0 records (Legacy table also empty)
 
 2. **RLS Policy Conflict:**
+
    ```sql
    profiles_secure_select: ((auth.uid() = id) OR ((auth.jwt() ->> 'user_role'::text) = 'ADMINISTRADOR'::text))
    ```
+
    This policy was preventing even admin client access to profiles.
 
 3. **Middleware Implementation:**
@@ -43,23 +47,24 @@ The JWT auth middleware was using Supabase client queries which were being block
 ## Solution Implemented
 
 ### Phase 1: Data Recovery
+
 ```sql
 -- Populated profiles table from auth.users
 INSERT INTO profiles (id, full_name, role)
-SELECT 
+SELECT
   id,
   COALESCE(raw_user_meta_data->>'full_name', email) as full_name,
-  CASE 
+  CASE
     WHEN email LIKE '%analista%' OR email LIKE '%analyst%' THEN 'ANALISTA'::user_role
-    WHEN email LIKE '%atendente%' OR email LIKE '%attendant%' THEN 'ATENDENTE'::user_role  
+    WHEN email LIKE '%atendente%' OR email LIKE '%attendant%' THEN 'ATENDENTE'::user_role
     WHEN email LIKE '%admin%' OR email LIKE '%gerente%' OR email LIKE '%manager%' THEN 'ADMINISTRADOR'::user_role
     WHEN email LIKE '%diretor%' OR email LIKE '%director%' THEN 'DIRETOR'::user_role
     WHEN email LIKE '%financeiro%' OR email LIKE '%finance%' THEN 'FINANCEIRO'::user_role
     WHEN email LIKE '%cobranca%' OR email LIKE '%cobrança%' THEN 'COBRANÇA'::user_role
     ELSE 'ATENDENTE'::user_role
   END as role
-FROM auth.users 
-WHERE email IS NOT NULL 
+FROM auth.users
+WHERE email IS NOT NULL
   AND email NOT LIKE 'test-%@test.com'
 ON CONFLICT (id) DO NOTHING;
 ```
@@ -67,14 +72,15 @@ ON CONFLICT (id) DO NOTHING;
 Result: 20 real user profiles created successfully.
 
 ### Phase 2: Middleware Fix
+
 Modified `server/lib/jwt-auth-middleware.ts` to use direct database connection instead of Supabase client:
 
 ```typescript
 // OLD: Supabase client query (blocked by RLS)
 const { data: profile, error: profileError } = await supabaseAdmin
-  .from("profiles")
-  .select("id, full_name, role, loja_id")
-  .eq("id", userId)
+  .from('profiles')
+  .select('id, full_name, role, loja_id')
+  .eq('id', userId)
   .single();
 
 // NEW: Direct database query (bypasses RLS)
@@ -93,12 +99,14 @@ const profileResult = await db
 ## Validation Evidence
 
 ### Before Fix
+
 ```
 🚨 [SECURITY] ACCESS_DENIED | severity=HIGH | FAILURE | user=atendenteinovando2@gmail.com | ip=187.36.168.240 | endpoint=/api/alertas/notificacoes
 Profile query failed: PGRST116 - The result contains 0 rows
 ```
 
 ### After Fix
+
 ```
 [ALERTAS] Mapeamento: atendenteinovando2@gmail.com -> Local ID: 20
 [ALERTAS] Encontradas 0 notificações, 0 não lidas

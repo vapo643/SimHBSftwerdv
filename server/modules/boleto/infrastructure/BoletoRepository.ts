@@ -11,7 +11,12 @@ import { db } from '../../../lib/supabase';
 import { boletos, propostas, ccbs } from '@shared/schema';
 import { Boleto } from '@shared/schema';
 import { IBoletoRepository, BoletoStatus, FormaPagamento } from '../domain/IBoletoRepository';
-import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
+import {
+  PaginatedResult,
+  CursorPaginationOptions,
+  RepositoryFilters,
+  CursorUtils,
+} from '@shared/types/pagination';
 
 export class BoletoRepository implements IBoletoRepository {
   async save(boleto: Boleto): Promise<void> {
@@ -110,7 +115,7 @@ export class BoletoRepository implements IBoletoRepository {
           observacoes: boletos.observacoes,
           createdAt: boletos.createdAt,
           updatedAt: boletos.updatedAt,
-          deletedAt: boletos.deletedAt
+          deletedAt: boletos.deletedAt,
         })
         .from(boletos)
         .innerJoin(propostas, eq(boletos.propostaId, propostas.id))
@@ -150,7 +155,7 @@ export class BoletoRepository implements IBoletoRepository {
   async findOverdue(daysOverdue?: number): Promise<Boleto[]> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     let overdueDate = today;
     if (daysOverdue !== undefined) {
       overdueDate = new Date(today);
@@ -252,15 +257,10 @@ export class BoletoRepository implements IBoletoRepository {
       bancoOrigemId?: string;
     }
   ): Promise<PaginatedResult<Boleto>> {
-    const {
-      limit = 50,
-      cursor,
-      cursorField = 'created_at',
-      direction = 'desc'
-    } = options;
+    const { limit = 50, cursor, cursorField = 'created_at', direction = 'desc' } = options;
 
     const safeLimit = Math.min(Math.max(limit, 1), 100);
-    
+
     const conditions = [isNull(boletos.deletedAt)];
 
     // Filtros específicos
@@ -291,12 +291,13 @@ export class BoletoRepository implements IBoletoRepository {
     // Condição do cursor
     if (cursor && CursorUtils.isValid(cursor)) {
       const cursorValue = CursorUtils.decode(cursor);
-      
+
       if (cursorField === 'created_at') {
         const cursorDate = new Date(cursorValue);
-        const cursorCondition = direction === 'desc' 
-          ? lt(boletos.createdAt, cursorDate)
-          : gt(boletos.createdAt, cursorDate);
+        const cursorCondition =
+          direction === 'desc'
+            ? lt(boletos.createdAt, cursorDate)
+            : gt(boletos.createdAt, cursorDate);
         conditions.push(cursorCondition);
       }
     }
@@ -314,18 +315,18 @@ export class BoletoRepository implements IBoletoRepository {
     }
 
     const results = await query;
-    
+
     const hasNextPage = results.length > safeLimit;
     const data = hasNextPage ? results.slice(0, safeLimit) : results;
-    
+
     let nextCursor: string | null = null;
     let prevCursor: string | null = null;
-    
+
     if (hasNextPage && data.length > 0) {
       const lastItem = data[data.length - 1];
       nextCursor = CursorUtils.createFromItem(lastItem, cursorField);
     }
-    
+
     if (cursor && data.length > 0) {
       const firstItem = data[0];
       prevCursor = CursorUtils.createFromItem(firstItem, cursorField);
@@ -338,15 +339,15 @@ export class BoletoRepository implements IBoletoRepository {
         prevCursor,
         pageSize: data.length,
         hasNextPage,
-        hasPrevPage: !!cursor
-      }
+        hasPrevPage: !!cursor,
+      },
     };
   }
 
   async getTotalPendingByProposta(propostaId: string): Promise<number> {
     const result = await db
-      .select({ 
-        total: sql<number>`COALESCE(SUM(${boletos.valorTotal}::numeric), 0)` 
+      .select({
+        total: sql<number>`COALESCE(SUM(${boletos.valorTotal}::numeric), 0)`,
       })
       .from(boletos)
       .where(
@@ -364,18 +365,16 @@ export class BoletoRepository implements IBoletoRepository {
     const results = await db
       .select()
       .from(boletos)
-      .where(
-        and(
-          gte(boletos.valorTotal, minAmount.toString()),
-          isNull(boletos.deletedAt)
-        )
-      )
+      .where(and(gte(boletos.valorTotal, minAmount.toString()), isNull(boletos.deletedAt)))
       .orderBy(desc(boletos.valorTotal));
 
     return results;
   }
 
-  async getPaymentStatsByPeriod(startDate: Date, endDate: Date): Promise<{
+  async getPaymentStatsByPeriod(
+    startDate: Date,
+    endDate: Date
+  ): Promise<{
     totalEmitidos: number;
     totalPagos: number;
     totalVencidos: number;
@@ -401,19 +400,21 @@ export class BoletoRepository implements IBoletoRepository {
         )
       );
 
-    return stats[0] || {
-      totalEmitidos: 0,
-      totalPagos: 0,
-      totalVencidos: 0,
-      valorTotalEmitido: 0,
-      valorTotalPago: 0,
-      valorTotalVencido: 0,
-    };
+    return (
+      stats[0] || {
+        totalEmitidos: 0,
+        totalPagos: 0,
+        totalVencidos: 0,
+        valorTotalEmitido: 0,
+        valorTotalPago: 0,
+        valorTotalVencido: 0,
+      }
+    );
   }
 
   async findByClienteCpf(cpf: string): Promise<Boleto[]> {
     const cleanCPF = cpf.replace(/\D/g, '');
-    
+
     const results = await db
       .select({
         boleto: boletos,
@@ -429,7 +430,7 @@ export class BoletoRepository implements IBoletoRepository {
       )
       .orderBy(desc(boletos.dataVencimento));
 
-    return results.map(row => row.boleto);
+    return results.map((row) => row.boleto);
   }
 
   async findByGeneratedBy(userId: string): Promise<Boleto[]> {
@@ -470,7 +471,7 @@ export class BoletoRepository implements IBoletoRepository {
       )
       .orderBy(desc(boletos.createdAt));
 
-    return results.map(row => row.boleto);
+    return results.map((row) => row.boleto);
   }
 
   async exists(id: string): Promise<boolean> {
@@ -498,7 +499,9 @@ export class BoletoRepository implements IBoletoRepository {
 
   async getNextNumeroBoleto(): Promise<string> {
     const result = await db
-      .select({ maxNumero: sql<number>`COALESCE(MAX(CAST(SUBSTRING(numero_boleto FROM '[0-9]+') AS INTEGER)), 200000)` })
+      .select({
+        maxNumero: sql<number>`COALESCE(MAX(CAST(SUBSTRING(numero_boleto FROM '[0-9]+') AS INTEGER)), 200000)`,
+      })
       .from(boletos);
 
     const nextNumber = result[0].maxNumero + 1;

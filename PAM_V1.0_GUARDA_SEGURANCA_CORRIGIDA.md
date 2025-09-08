@@ -1,5 +1,7 @@
 # 🛡️ Correção Crítica de Segurança - Proteção de Dados
+
 ## PAM V1.0 - Fortalecimento do Circuit Breaker
+
 ### Data: 20/08/2025 22:00 UTC | Status: ✅ IMPLEMENTADO
 
 ---
@@ -7,19 +9,21 @@
 ## 🔴 PROBLEMA IDENTIFICADO
 
 ### Falha Lógica na Proteção Anterior:
+
 ```javascript
 // ❌ PROTEÇÃO INADEQUADA (anterior):
 if (process.env.NODE_ENV === 'production') {
   throw new Error('...');
 }
 
-// PROBLEMA: 
+// PROBLEMA:
 // - Se NODE_ENV = '' (vazio) → Executa TRUNCATE
-// - Se NODE_ENV = 'development' → Executa TRUNCATE  
+// - Se NODE_ENV = 'development' → Executa TRUNCATE
 // - Se NODE_ENV = undefined → Executa TRUNCATE
 ```
 
 ### Por que falhou:
+
 - **Lista negra** (bloquear apenas production) em vez de **lista branca** (permitir apenas test)
 - NODE_ENV vazio bypass a proteção
 - Foi assim que os testes destruíram o banco de produção
@@ -29,6 +33,7 @@ if (process.env.NODE_ENV === 'production') {
 ## ✅ CORREÇÃO IMPLEMENTADA
 
 ### Nova Tripla Proteção:
+
 ```javascript
 // ✅ PROTEÇÃO CORRIGIDA (nova):
 // Proteção 1: Whitelist - APENAS 'test' é permitido
@@ -43,7 +48,7 @@ if (!process.env.DATABASE_URL?.includes('test')) {
 
 // Proteção 3: Blacklist de padrões de produção
 const prodPatterns = ['prod', 'production', 'azure', 'live', 'main'];
-if (prodPatterns.some(p => dbUrl.includes(p))) {
+if (prodPatterns.some((p) => dbUrl.includes(p))) {
   throw new Error('FATAL: DATABASE_URL parece ser de produção');
 }
 ```
@@ -52,30 +57,33 @@ if (prodPatterns.some(p => dbUrl.includes(p))) {
 
 ## 📊 ANÁLISE COMPARATIVA
 
-| Cenário | Proteção Antiga | Proteção Nova |
-|---------|----------------|---------------|
-| NODE_ENV = '' | ❌ **EXECUTA** | ✅ **BLOQUEIA** |
-| NODE_ENV = undefined | ❌ **EXECUTA** | ✅ **BLOQUEIA** |
-| NODE_ENV = 'development' | ❌ **EXECUTA** | ✅ **BLOQUEIA** |
-| NODE_ENV = 'staging' | ❌ **EXECUTA** | ✅ **BLOQUEIA** |
-| NODE_ENV = 'production' | ✅ BLOQUEIA | ✅ **BLOQUEIA** |
-| NODE_ENV = 'test' | ❌ **EXECUTA** | ✅ **EXECUTA** (único permitido) |
+| Cenário                  | Proteção Antiga | Proteção Nova                    |
+| ------------------------ | --------------- | -------------------------------- |
+| NODE_ENV = ''            | ❌ **EXECUTA**  | ✅ **BLOQUEIA**                  |
+| NODE_ENV = undefined     | ❌ **EXECUTA**  | ✅ **BLOQUEIA**                  |
+| NODE_ENV = 'development' | ❌ **EXECUTA**  | ✅ **BLOQUEIA**                  |
+| NODE_ENV = 'staging'     | ❌ **EXECUTA**  | ✅ **BLOQUEIA**                  |
+| NODE_ENV = 'production'  | ✅ BLOQUEIA     | ✅ **BLOQUEIA**                  |
+| NODE_ENV = 'test'        | ❌ **EXECUTA**  | ✅ **EXECUTA** (único permitido) |
 
 ---
 
 ## 🔒 CAMADAS DE SEGURANÇA
 
 ### Camada 1: Validação de Ambiente
+
 - **Tipo:** Whitelist
 - **Regra:** NODE_ENV === 'test' obrigatório
 - **Falha:** Erro imediato com NODE_ENV atual
 
 ### Camada 2: Validação de Banco
+
 - **Tipo:** Pattern matching
 - **Regra:** DATABASE_URL deve conter 'test'
 - **Falha:** Erro se não houver indicação de teste
 
 ### Camada 3: Defesa em Profundidade
+
 - **Tipo:** Blacklist
 - **Regra:** Rejeitar padrões conhecidos de produção
 - **Padrões:** 'prod', 'production', 'azure', 'live', 'main'
@@ -85,12 +93,14 @@ if (prodPatterns.some(p => dbUrl.includes(p))) {
 ## 🧪 TESTE DA CORREÇÃO
 
 ### Ambiente Atual:
+
 ```bash
 NODE_ENV = '' (vazio)
 DATABASE_URL = postgresql://...supabase.co... (produção)
 ```
 
 ### Resultado:
+
 ```
 ✅ PROTEÇÃO FUNCIONANDO - Bloquearia execução
 🔴 CRITICAL SECURITY ALERT: NODE_ENV='' - deve ser 'test'
@@ -123,13 +133,14 @@ FATAL: NODE_ENV='' - Esta função só pode executar com NODE_ENV='test'
 ## 🚀 PRÓXIMOS PASSOS RECOMENDADOS
 
 1. **Configurar NODE_ENV adequadamente:**
+
    ```bash
    # Para desenvolvimento:
    NODE_ENV=development
-   
+
    # Para testes (único que permite TRUNCATE):
    NODE_ENV=test
-   
+
    # Para produção:
    NODE_ENV=production
    ```
@@ -153,5 +164,5 @@ FATAL: NODE_ENV='' - Esta função só pode executar com NODE_ENV='test'
 
 ---
 
-*Implementado por: PEAF V1.4*
-*Data: 20/08/2025 22:00 UTC*
+_Implementado por: PEAF V1.4_
+_Data: 20/08/2025 22:00 UTC_

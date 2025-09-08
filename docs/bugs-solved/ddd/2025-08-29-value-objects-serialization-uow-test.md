@@ -3,7 +3,7 @@
 **Date:** 2025-08-29  
 **Category:** DDD Architecture  
 **Severity:** P1 - Critical (Blocking refactoring)  
-**Status:** ✅ RESOLVED  
+**Status:** ✅ RESOLVED
 
 ## Problem Description
 
@@ -16,9 +16,11 @@ TypeError: The "string" argument must be of type string or an instance of Buffer
 ## Root Cause Analysis
 
 ### Primary Cause
+
 The repository layer was attempting to insert complex JavaScript objects (Value Objects) directly into PostgreSQL, which expects primitive types.
 
 ### Secondary Causes
+
 1. **Schema Mismatch**: Test was using `clienteData` object but actual schema uses individual fields (`clienteNome`, `clienteCpf`, etc.)
 2. **Missing Serialization**: Repository lacked Value Object to primitive conversion logic
 3. **UUID Type Issues**: `gerente_lojas` table expected UUID but received integer
@@ -26,12 +28,14 @@ The repository layer was attempting to insert complex JavaScript objects (Value 
 ## Technical Analysis
 
 ### The Error Chain
+
 1. **Value Objects Created**: CPF, Money, Email objects created in domain aggregates
 2. **Direct Database Insert**: Repository tried to insert objects without serialization
 3. **PostgreSQL Rejection**: Database cannot process JavaScript objects as primitive types
 4. **Test Failure**: `"Received an instance of Object"` error
 
 ### Code Evidence
+
 ```typescript
 // BEFORE (Failing)
 const createdProposta = await this.tx.insert(schema.propostas).values(proposta).returning();
@@ -44,6 +48,7 @@ const createdProposta = await this.tx.insert(schema.propostas).values(propostaDa
 ## Solution Implemented
 
 ### 1. Repository Serialization Layer
+
 ```typescript
 // server/lib/unit-of-work.ts
 export class PropostaTransactionRepository extends TransactionRepository {
@@ -57,17 +62,19 @@ export class PropostaTransactionRepository extends TransactionRepository {
 ```
 
 ### 2. Test Data Structure Fix
+
 ```typescript
 // tests/integration/unit-of-work.test.ts
 const mockProposta = {
-  clienteNome: 'Cliente Business',     // ✅ Individual fields
-  clienteCpf: '98765432100',           // ✅ Match schema
-  clienteEmail: 'teste@example.com',   // ✅ Correct structure
+  clienteNome: 'Cliente Business', // ✅ Individual fields
+  clienteCpf: '98765432100', // ✅ Match schema
+  clienteEmail: 'teste@example.com', // ✅ Correct structure
   // clienteData: { ... }              // ❌ Object removed
 };
 ```
 
 ### 3. UUID Casting Fix
+
 ```typescript
 // tests/lib/db-helper.ts
 await directDb`
@@ -79,27 +86,31 @@ await directDb`
 ## Validation Evidence
 
 ### Before Fix
+
 ```
 ❌ 1 failed | 2 passed | 43 skipped (50 tests)
 TypeError: Received an instance of Object
 ```
 
 ### After Fix
+
 ```
 ✅ 3 passed (3 tests)
 ✓ PROVA UoW #1: COMMIT Test - Funcionando
-✓ PROVA UoW #2: ROLLBACK Test - Funcionando  
+✓ PROVA UoW #2: ROLLBACK Test - Funcionando
 ✓ PROVA UoW #3: Business Operation Pattern - Funcionando
 ```
 
 ## Impact Assessment
 
 ### Business Impact
+
 - **🚫 Blocking**: Mission REM-S2-004 Value Objects integration
 - **⚡ Performance**: Zero impact (serialization is lightweight)
 - **🔒 Security**: Enhanced (Value Objects add validation)
 
 ### Technical Debt Resolution
+
 - **Domain Model**: Now properly uses Value Objects instead of primitives
 - **Type Safety**: Improved with CPF, Money, Email validation
 - **Architecture**: Clean DDD implementation achieved
@@ -107,18 +118,22 @@ TypeError: Received an instance of Object
 ## Prevention Measures
 
 ### 1. Repository Pattern Enhancement
+
 All future repositories must implement automatic serialization:
+
 ```typescript
 // Pattern for all repositories
 const dataToInsert = aggregate.toPersistence ? aggregate.toPersistence() : aggregate;
 ```
 
 ### 2. Test Infrastructure
+
 - ✅ Schema validation in test setup
 - ✅ Proper UUID handling for foreign keys
 - ✅ Value Object compatibility tests
 
 ### 3. Architecture Guidelines
+
 - All Domain Aggregates MUST implement `toPersistence()` method
 - Repository layer MUST handle Value Object serialization
 - Tests MUST use actual schema structure, not mock objects

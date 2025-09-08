@@ -8,24 +8,26 @@
 
 ## 🎯 **RESUMO EXECUTIVO**
 
-| Aspecto | Nossa Implementação | SDK Java | Vantagem |
-|---------|-------------------|----------|----------|
-| **Linguagem** | TypeScript/Node.js | Java | 🏠 Nossa Stack |
-| **Funcionalidades** | 85% completa | 100% completa | 📈 SDK Java |
-| **Manutenção** | Manual | Automática | 📈 SDK Java |
-| **Customização** | Total | Limitada | 🏠 Nossa Implementação |
+| Aspecto             | Nossa Implementação | SDK Java      | Vantagem               |
+| ------------------- | ------------------- | ------------- | ---------------------- |
+| **Linguagem**       | TypeScript/Node.js  | Java          | 🏠 Nossa Stack         |
+| **Funcionalidades** | 85% completa        | 100% completa | 📈 SDK Java            |
+| **Manutenção**      | Manual              | Automática    | 📈 SDK Java            |
+| **Customização**    | Total               | Limitada      | 🏠 Nossa Implementação |
 
 ---
 
 ## ✅ **O QUE O SDK JAVA OFERECE**
 
 ### **1. APIs Disponíveis**
+
 - ✅ **API Cobrança** (Boleto com PIX)
-- ✅ **API Banking** (Extratos, Saldo, Pagamentos)  
+- ✅ **API Banking** (Extratos, Saldo, Pagamentos)
 - ✅ **API PIX** (Cobranças imediatas e com vencimento)
 - ✅ **Webhooks** para todas as APIs
 
 ### **2. Funcionalidades Avançadas**
+
 ```java
 // Rate limit automático
 interSdk.setRateLimitControl(true); // Pausa 1min e retenta
@@ -40,6 +42,7 @@ EnrichedStatementPage statement = interSdk.banking()
 ```
 
 ### **3. Tratamento de Erros Estruturado**
+
 ```java
 try {
     Balance balance = interSdk.banking().retrieveBalance();
@@ -53,6 +56,7 @@ try {
 ```
 
 ### **4. Builder Pattern**
+
 ```java
 BillingIssueRequest boleto = BillingIssueRequest.builder()
     .yourNumber(seuNumero)
@@ -67,6 +71,7 @@ BillingIssueRequest boleto = BillingIssueRequest.builder()
 ## 🏠 **NOSSA IMPLEMENTAÇÃO ATUAL**
 
 ### **✅ O que já temos:**
+
 - OAuth 2.0 + mTLS ✅
 - Criação e consulta de boletos ✅
 - Webhooks com HMAC ✅
@@ -75,6 +80,7 @@ BillingIssueRequest boleto = BillingIssueRequest.builder()
 - Tratamento de erros ✅
 
 ### **❌ O que nos falta (comparado ao SDK):**
+
 - **Rate limit automático** com retry
 - **Suporte nativo a múltiplas contas**
 - **Paginação automática**
@@ -87,11 +93,13 @@ BillingIssueRequest boleto = BillingIssueRequest.builder()
 ## 🤔 **É ÚTIL PARA NÓS?**
 
 ### **🚫 NÃO PODEMOS USAR DIRETAMENTE**
+
 - Nosso projeto é **TypeScript/Node.js**
 - SDK é **Java** only
 - Não há versão Node.js oficial
 
 ### **✅ É ÚTIL COMO REFERÊNCIA**
+
 1. **Arquitetura**: Ver como estruturar melhor nosso serviço
 2. **Funcionalidades**: Identificar recursos que faltam
 3. **Padrões**: Implementar builder pattern e retry automático
@@ -104,6 +112,7 @@ BillingIssueRequest boleto = BillingIssueRequest.builder()
 ### **1. Implementar Funcionalidades Faltantes**
 
 **Rate Limit Automático:**
+
 ```typescript
 // Adicionar ao interBankService.ts
 private async makeRequestWithRetry(config: any, maxRetries = 3): Promise<any> {
@@ -125,14 +134,15 @@ private async makeRequestWithRetry(config: any, maxRetries = 3): Promise<any> {
 ```
 
 **Múltiplas Contas:**
+
 ```typescript
 class InterBankService {
   private currentAccount?: string;
-  
+
   setAccount(contaCorrente: string): void {
     this.currentAccount = contaCorrente;
   }
-  
+
   private getAccountParam(): string {
     return this.currentAccount ? `?contaCorrente=${this.currentAccount}` : '';
   }
@@ -140,20 +150,21 @@ class InterBankService {
 ```
 
 **Builder Pattern:**
+
 ```typescript
 class BoletoBuilder {
   private data: Partial<CobrancaRequest> = {};
-  
+
   seuNumero(valor: string): BoletoBuilder {
     this.data.seuNumero = valor;
     return this;
   }
-  
+
   valorNominal(valor: number): BoletoBuilder {
     this.data.valorNominal = valor;
     return this;
   }
-  
+
   build(): CobrancaRequest {
     return this.data as CobrancaRequest;
   }
@@ -163,6 +174,7 @@ class BoletoBuilder {
 ### **2. Expandir APIs**
 
 **API Banking (Extratos/Saldo):**
+
 ```typescript
 // Adicionar métodos:
 async getSaldo(contaCorrente?: string): Promise<SaldoResponse>
@@ -171,6 +183,7 @@ async getExtratoPDF(dataInicio: string, dataFim: string): Promise<Buffer>
 ```
 
 **API PIX:**
+
 ```typescript
 // Implementar:
 async createPixCharge(pixData: PixChargeRequest): Promise<PixChargeResponse>
@@ -182,16 +195,19 @@ async getPixCharge(txid: string): Promise<PixChargeResponse>
 ## 📊 **PRIORIDADES DE IMPLEMENTAÇÃO**
 
 ### **🔥 Alta Prioridade (Implementar agora):**
+
 1. **Rate limit automático** - Previne bloqueios
 2. **Múltiplas contas** - Necessário para clientes grandes
 3. **Builder pattern** - Melhora DX
 
 ### **📈 Média Prioridade (Próximas sprints):**
+
 1. **API Banking** - Extratos e saldos
 2. **Paginação automática** - Performance
 3. **API PIX** - Funcionalidade extra
 
 ### **📝 Baixa Prioridade (Futuro):**
+
 1. **Testes funcionais** automatizados
 2. **Debug mode** avançado
 3. **Javadoc** equivalente (TSDoc)
@@ -203,6 +219,7 @@ async getPixCharge(txid: string): Promise<PixChargeResponse>
 **O SDK Java NÃO É DIRETAMENTE ÚTIL** (linguagem diferente), **MAS É MUITO ÚTIL COMO REFERÊNCIA** para melhorar nossa implementação.
 
 ### **Ações Recomendadas:**
+
 1. ✅ **Manter nossa implementação** (já funciona bem)
 2. 🔄 **Implementar rate limit automático** (previne problemas)
 3. 📈 **Adicionar múltiplas contas** (escalabilidade)

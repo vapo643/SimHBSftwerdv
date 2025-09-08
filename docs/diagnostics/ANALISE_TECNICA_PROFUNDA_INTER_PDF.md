@@ -5,6 +5,7 @@
 ### PADRÃO IDENTIFICADO NAS REQUISIÇÕES
 
 #### Requisição 1: Consulta do Boleto (FUNCIONA ✅)
+
 ```
 URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/73e76cfe-f8f8-4638-ac83-d8e809e06eef
 Method: GET
@@ -22,6 +23,7 @@ Response: JSON com dados completos do boleto
 ```
 
 #### Requisição 2: Download do PDF (FALHA ❌)
+
 ```
 URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/73e76cfe-f8f8-4638-ac83-d8e809e06eef/pdf
 Method: GET
@@ -43,32 +45,37 @@ Response: JSON ao invés de PDF binário
 ## 🔍 DESCOBERTAS CRÍTICAS
 
 ### 1. TAMANHO SUSPEITO DA RESPOSTA
+
 - **55KB** é muito grande para um JSON de erro
 - **55KB** é muito pequeno para um PDF de boleto (normalmente 150-300KB)
 - **Hipótese**: API está retornando PDF em base64 dentro de JSON?
 
 ### 2. DIFERENÇA DE HEADERS
+
 - Requisição normal: `content-length: 974`
 - Requisição PDF: `transfer-encoding: chunked` + 55KB
 - **Indica**: Resposta grande demais para JSON normal
 
 ### 3. TEMPO DE RESPOSTA
+
 - Consulta normal: `x-upstream-time: 87ms`
 - Download PDF: `x-upstream-time: 109ms` a `1244ms`
 - **Indica**: Processamento adicional no servidor
 
 ### 4. RATE LIMIT
+
 - `x-rate-limit-remaining: 118`
 - **Não é problema de rate limit**
 
 ## 🧪 TESTES NECESSÁRIOS URGENTES
 
 ### TESTE 1: Analisar o JSON de 55KB
+
 ```javascript
 // URGENTE: Ver o que tem dentro desses 55KB
 const response = await axios.get(pdfUrl, {
   headers: { Accept: 'application/json' },
-  responseType: 'text' // Forçar texto para análise
+  responseType: 'text', // Forçar texto para análise
 });
 
 console.log('CONTEÚDO COMPLETO:', response.data);
@@ -81,9 +88,9 @@ console.log('É Base64?', isBase64);
 // Se tiver campo 'pdf' ou 'documento'
 if (typeof response.data === 'object') {
   console.log('CAMPOS DO JSON:', Object.keys(response.data));
-  
+
   // Procurar por campos suspeitos
-  ['pdf', 'documento', 'arquivo', 'base64', 'content', 'data'].forEach(field => {
+  ['pdf', 'documento', 'arquivo', 'base64', 'content', 'data'].forEach((field) => {
     if (response.data[field]) {
       console.log(`CAMPO ${field} ENCONTRADO:`, response.data[field].substring(0, 100));
     }
@@ -92,6 +99,7 @@ if (typeof response.data === 'object') {
 ```
 
 ### TESTE 2: Requisição com curl Completo
+
 ```bash
 # Teste completo com todos os detalhes
 curl -v -X GET \
@@ -110,14 +118,15 @@ hexdump -C response.txt | head -20
 ```
 
 ### TESTE 3: Headers Alternativos
+
 ```javascript
 // Teste com diferentes combinações
 const tests = [
-  { 'Accept': 'application/pdf, */*;q=0.8' },
-  { 'Accept': 'application/octet-stream' },
-  { 'Accept': 'application/pdf', 'Accept-Encoding': 'gzip, deflate' },
-  { 'Accept': 'application/pdf', 'x-api-version': 'v3' },
-  { 'Accept': 'application/pdf', 'x-format': 'pdf' }
+  { Accept: 'application/pdf, */*;q=0.8' },
+  { Accept: 'application/octet-stream' },
+  { Accept: 'application/pdf', 'Accept-Encoding': 'gzip, deflate' },
+  { Accept: 'application/pdf', 'x-api-version': 'v3' },
+  { Accept: 'application/pdf', 'x-format': 'pdf' },
 ];
 
 for (const headers of tests) {
@@ -135,25 +144,26 @@ for (const headers of tests) {
 ## 🎯 SOLUÇÃO ALTERNATIVA IMEDIATA
 
 ### OPÇÃO 1: Parser do JSON de 55KB
+
 ```javascript
 async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
   // ... código atual ...
-  
+
   const response = await axios.get(url, {
     headers: { ...headers, Accept: 'application/json' },
     responseType: 'text'
   });
-  
+
   // ANALISAR O RESPONSE DE 55KB
   try {
     const data = JSON.parse(response.data);
-    
+
     // Procurar campo com PDF
     const pdfFields = ['pdf', 'arquivo', 'documento', 'base64', 'content'];
     for (const field of pdfFields) {
       if (data[field]) {
         console.log(`[INTER] ✅ PDF encontrado no campo '${field}'`);
-        
+
         // Se for base64
         if (typeof data[field] === 'string' && data[field].length > 1000) {
           return Buffer.from(data[field], 'base64');
@@ -167,12 +177,13 @@ async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
       return Buffer.from(response.data);
     }
   }
-  
+
   throw new Error('PDF não encontrado na resposta');
 }
 ```
 
 ### OPÇÃO 2: Gerar PDF Localmente
+
 ```javascript
 // Se API não fornecer, gerar com dados que temos
 import PDFDocument from 'pdfkit';
@@ -181,27 +192,27 @@ import QRCode from 'qrcode';
 async gerarPdfLocal(dadosBoleto: any): Promise<Buffer> {
   const doc = new PDFDocument();
   const chunks: Buffer[] = [];
-  
+
   doc.on('data', chunk => chunks.push(chunk));
-  
+
   // Adicionar logo do Inter
   doc.image('inter-logo.png', 50, 50, { width: 100 });
-  
+
   // Dados do boleto
   doc.fontSize(12)
      .text(`Nosso Número: ${dadosBoleto.nossoNumero}`)
      .text(`Vencimento: ${dadosBoleto.dataVencimento}`)
      .text(`Valor: R$ ${dadosBoleto.valorNominal}`);
-  
+
   // Código de barras
   doc.text(dadosBoleto.linhaDigitavel);
-  
+
   // QR Code PIX
   const qrImage = await QRCode.toBuffer(dadosBoleto.pixCopiaECola);
   doc.image(qrImage, 400, 200, { width: 100 });
-  
+
   doc.end();
-  
+
   return Buffer.concat(chunks);
 }
 ```
@@ -224,12 +235,14 @@ async gerarPdfLocal(dadosBoleto: any): Promise<Buffer> {
 ## 💡 INSIGHTS FINAIS
 
 O problema NÃO é:
+
 - ❌ Autenticação (token válido)
 - ❌ Certificados (mTLS funcionando)
 - ❌ Rate limit (temos cota)
 - ❌ Código do boleto (UUID válido)
 
 O problema PODE SER:
+
 - ⚠️ API retorna PDF em formato não documentado (base64 em JSON)
 - ⚠️ Conta não tem permissão para PDFs
 - ⚠️ Endpoint mudou mas ainda responde

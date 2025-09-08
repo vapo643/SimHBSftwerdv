@@ -89,7 +89,7 @@ export async function getFormalizationQueue(): Promise<Queue> {
 }
 
 // Dead-Letter Queue - for permanently failed jobs from all other queues
-// Critical for audit trail and preventing silent data loss  
+// Critical for audit trail and preventing silent data loss
 let deadLetterQueue: Queue | null = null;
 
 export async function getDeadLetterQueue(): Promise<Queue> {
@@ -97,15 +97,15 @@ export async function getDeadLetterQueue(): Promise<Queue> {
     const connection = await getRedisConnection();
     deadLetterQueue = new Queue('dead-letter-queue', {
       connection,
-  defaultJobOptions: {
-    removeOnComplete: {
-      age: 86400 * 7, // Keep completed DLQ jobs for 7 days
-      count: 1000, // Keep max 1000 completed jobs
-    },
-    removeOnFail: {
-      age: 86400 * 30, // Keep failed DLQ jobs for 30 days (compliance)
-    },
-  },
+      defaultJobOptions: {
+        removeOnComplete: {
+          age: 86400 * 7, // Keep completed DLQ jobs for 7 days
+          count: 1000, // Keep max 1000 completed jobs
+        },
+        removeOnFail: {
+          age: 86400 * 30, // Keep failed DLQ jobs for 30 days (compliance)
+        },
+      },
     });
   }
   return deadLetterQueue;
@@ -152,20 +152,20 @@ export async function getPaymentsQueue(): Promise<Queue> {
     const connection = await getRedisConnection();
     paymentsQueue = new Queue('payments', {
       connection,
-  defaultJobOptions: {
-    attempts: 5,
-    backoff: {
-      type: 'exponential',
-      delay: 2000, // Start with 2 seconds
-    },
-    removeOnComplete: {
-      age: 3600, // Keep completed jobs for 1 hour
-      count: 100, // Keep max 100 completed jobs
-    },
-    removeOnFail: {
-      age: 86400, // Keep failed jobs for 24 hours
-    },
-  },
+      defaultJobOptions: {
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 2000, // Start with 2 seconds
+        },
+        removeOnComplete: {
+          age: 3600, // Keep completed jobs for 1 hour
+          count: 100, // Keep max 100 completed jobs
+        },
+        removeOnFail: {
+          age: 86400, // Keep failed jobs for 24 hours
+        },
+      },
     });
   }
   return paymentsQueue;
@@ -176,20 +176,20 @@ export async function getWebhooksQueue(): Promise<Queue> {
     const connection = await getRedisConnection();
     webhooksQueue = new Queue('webhooks', {
       connection,
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: 'fixed',
-      delay: 5000, // Fixed 5 seconds delay
-    },
-    removeOnComplete: {
-      age: 3600,
-      count: 50,
-    },
-    removeOnFail: {
-      age: 86400,
-    },
-  },
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'fixed',
+          delay: 5000, // Fixed 5 seconds delay
+        },
+        removeOnComplete: {
+          age: 3600,
+          count: 50,
+        },
+        removeOnFail: {
+          age: 86400,
+        },
+      },
     });
   }
   return webhooksQueue;
@@ -200,20 +200,20 @@ export async function getReportsQueue(): Promise<Queue> {
     const connection = await getRedisConnection();
     reportsQueue = new Queue('reports', {
       connection,
-  defaultJobOptions: {
-    attempts: 2,
-    backoff: {
-      type: 'fixed',
-      delay: 10000, // Fixed 10 seconds delay
-    },
-    removeOnComplete: {
-      age: 1800, // 30 minutes
-      count: 25,
-    },
-    removeOnFail: {
-      age: 43200, // 12 hours
-    },
-  },
+      defaultJobOptions: {
+        attempts: 2,
+        backoff: {
+          type: 'fixed',
+          delay: 10000, // Fixed 10 seconds delay
+        },
+        removeOnComplete: {
+          age: 1800, // 30 minutes
+          count: 25,
+        },
+        removeOnFail: {
+          age: 43200, // 12 hours
+        },
+      },
     });
   }
   return reportsQueue;
@@ -238,14 +238,14 @@ export async function checkQueuesHealth() {
   try {
     const [
       pdfQueue,
-      boletoQueue, 
+      boletoQueue,
       docQueue,
       notifQueue,
       formalQueue,
       dlqQueue,
       payQueue,
       webhookQueue,
-      reportQueue
+      reportQueue,
     ] = await Promise.all([
       getPdfProcessingQueue(),
       getBoletoSyncQueue(),
@@ -315,10 +315,10 @@ export async function createWorkerWithDLQ(
     concurrency: options.concurrency || 1,
     ...options,
   });
-  
+
   // Automatically set up DLQ handler
   dlqManager.setupFailedJobHandler(worker, queueName);
-  
+
   return worker;
 }
 

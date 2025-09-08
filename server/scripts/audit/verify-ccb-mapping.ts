@@ -1,7 +1,7 @@
 /**
  * SCRIPT DE AUDITORIA CCB - DATA-AUDIT-003
  * Validação de Integridade de Mapeamento da "Proposta de Ouro"
- * 
+ *
  * OBJETIVO: Verificar se todos os dados da proposta são corretamente
  * mapeados para as coordenadas do template CCB, garantindo integridade
  * do contrato legal gerado.
@@ -50,7 +50,7 @@ interface ProposalData {
 async function loadGoldenProposal(): Promise<ProposalData | null> {
   try {
     console.log(`🔍 [AUDIT] Carregando proposta de ouro: ${GOLDEN_PROPOSAL_ID}`);
-    
+
     const result = await db.execute(sql`
       SELECT 
         p.*,
@@ -185,7 +185,10 @@ function simulateCCBMapping(proposalData: ProposalData): { [key: string]: any } 
 /**
  * ETAPA 3: Executar auditoria campo a campo
  */
-function executeFieldByFieldAudit(proposalData: ProposalData, mappingObject: { [key: string]: any }): AuditResult[] {
+function executeFieldByFieldAudit(
+  proposalData: ProposalData,
+  mappingObject: { [key: string]: any }
+): AuditResult[] {
   console.log('🔬 [AUDIT] Executando auditoria campo a campo...');
 
   const auditResults: AuditResult[] = [];
@@ -199,7 +202,7 @@ function executeFieldByFieldAudit(proposalData: ProposalData, mappingObject: { [
       valorPDF: mappingObject.nomeCliente,
     },
     {
-      campo: 'cliente_cpf', 
+      campo: 'cliente_cpf',
       valorBanco: proposalData.cliente_cpf,
       campoMapeado: 'cpfCliente',
       valorPDF: mappingObject.cpfCliente,
@@ -207,7 +210,7 @@ function executeFieldByFieldAudit(proposalData: ProposalData, mappingObject: { [
     {
       campo: 'valor',
       valorBanco: proposalData.valor,
-      campoMapeado: 'valorPrincipal', 
+      campoMapeado: 'valorPrincipal',
       valorPDF: mappingObject.valorPrincipal,
     },
     {
@@ -277,17 +280,21 @@ function executeFieldByFieldAudit(proposalData: ProposalData, mappingObject: { [
       if (!hasCoordinate) {
         status = 'AUSENTE';
         observações = 'Campo não possui coordenada mapeada no PDF';
-      } else if (field.valorBanco === null || field.valorBanco === undefined || field.valorBanco === '') {
+      } else if (
+        field.valorBanco === null ||
+        field.valorBanco === undefined ||
+        field.valorBanco === ''
+      ) {
         status = 'AUSENTE';
         observações = 'Valor não existe no banco de dados';
       } else if (field.valorPDF === null || field.valorPDF === undefined || field.valorPDF === '') {
-        status = 'AUSENTE'; 
+        status = 'AUSENTE';
         observações = 'Valor não foi mapeado para o PDF';
       } else {
         // Comparação de valores (convertendo para string para comparação consistente)
         const valorBancoStr = String(field.valorBanco).trim();
         const valorPDFStr = String(field.valorPDF).trim();
-        
+
         if (valorBancoStr === valorPDFStr) {
           status = 'IDÊNTICO';
         } else {
@@ -316,11 +323,14 @@ function executeFieldByFieldAudit(proposalData: ProposalData, mappingObject: { [
 /**
  * ETAPA 4: Gerar relatório de auditoria
  */
-function generateAuditReport(auditResults: AuditResult[], mappingObject: { [key: string]: any }): void {
+function generateAuditReport(
+  auditResults: AuditResult[],
+  mappingObject: { [key: string]: any }
+): void {
   console.log('\n' + '='.repeat(80));
   console.log('📋 RELATÓRIO DE AUDITORIA DE MAPEAMENTO CCB - DATA-AUDIT-003');
   console.log('='.repeat(80));
-  
+
   console.log(`🎯 Proposta Auditada: ${GOLDEN_PROPOSAL_ID}`);
   console.log(`📊 Total de Coordenadas Disponíveis: ${Object.keys(USER_CCB_COORDINATES).length}`);
   console.log(`🔬 Campos Auditados: ${auditResults.length}`);
@@ -329,11 +339,12 @@ function generateAuditReport(auditResults: AuditResult[], mappingObject: { [key:
   console.log('\n📋 TABELA COMPARATIVA - DB vs PDF:');
   console.log('-'.repeat(120));
   console.log(
-    '| Campo (DB)'.padEnd(25) + 
-    '| Valor no Banco'.padEnd(25) + 
-    '| Campo Mapeado (PDF)'.padEnd(25) + 
-    '| Valor a ser Impresso'.padEnd(25) + 
-    '| Status'.padEnd(15) + '|'
+    '| Campo (DB)'.padEnd(25) +
+      '| Valor no Banco'.padEnd(25) +
+      '| Campo Mapeado (PDF)'.padEnd(25) +
+      '| Valor a ser Impresso'.padEnd(25) +
+      '| Status'.padEnd(15) +
+      '|'
   );
   console.log('-'.repeat(120));
 
@@ -343,9 +354,14 @@ function generateAuditReport(auditResults: AuditResult[], mappingObject: { [key:
   let erros = 0;
 
   for (const result of auditResults) {
-    const status = result.status === 'IDÊNTICO' ? '✅ IDÊNTICO' : 
-                   result.status === 'DIVERGENTE' ? '❌ DIVERGENTE' :
-                   result.status === 'AUSENTE' ? '⚠️ AUSENTE' : '💥 ERRO';
+    const status =
+      result.status === 'IDÊNTICO'
+        ? '✅ IDÊNTICO'
+        : result.status === 'DIVERGENTE'
+          ? '❌ DIVERGENTE'
+          : result.status === 'AUSENTE'
+            ? '⚠️ AUSENTE'
+            : '💥 ERRO';
 
     const valorBanco = String(result.valorBanco || 'NULL').substring(0, 22);
     const valorPDF = String(result.valorPDF || 'NULL').substring(0, 22);
@@ -360,10 +376,18 @@ function generateAuditReport(auditResults: AuditResult[], mappingObject: { [key:
 
     // Contadores
     switch (result.status) {
-      case 'IDÊNTICO': identicos++; break;
-      case 'DIVERGENTE': divergentes++; break;
-      case 'AUSENTE': ausentes++; break;
-      case 'ERRO': erros++; break;
+      case 'IDÊNTICO':
+        identicos++;
+        break;
+      case 'DIVERGENTE':
+        divergentes++;
+        break;
+      case 'AUSENTE':
+        ausentes++;
+        break;
+      case 'ERRO':
+        erros++;
+        break;
     }
   }
 
@@ -371,7 +395,9 @@ function generateAuditReport(auditResults: AuditResult[], mappingObject: { [key:
 
   // SUMÁRIO ESTATÍSTICO
   console.log('\n📊 SUMÁRIO ESTATÍSTICO:');
-  console.log(`✅ Campos Idênticos: ${identicos}/${auditResults.length} (${((identicos/auditResults.length)*100).toFixed(1)}%)`);
+  console.log(
+    `✅ Campos Idênticos: ${identicos}/${auditResults.length} (${((identicos / auditResults.length) * 100).toFixed(1)}%)`
+  );
   console.log(`❌ Campos Divergentes: ${divergentes}/${auditResults.length}`);
   console.log(`⚠️ Campos Ausentes: ${ausentes}/${auditResults.length}`);
   console.log(`💥 Erros de Validação: ${erros}/${auditResults.length}`);
@@ -390,7 +416,9 @@ function generateAuditReport(auditResults: AuditResult[], mappingObject: { [key:
   }
 
   console.log('\n🔗 EVIDÊNCIA TÉCNICA:');
-  console.log(`   Mapeamento ativo: USER_CCB_COORDINATES (${Object.keys(USER_CCB_COORDINATES).length} campos)`);
+  console.log(
+    `   Mapeamento ativo: USER_CCB_COORDINATES (${Object.keys(USER_CCB_COORDINATES).length} campos)`
+  );
   console.log(`   Serviço: ccbGenerationService.ts`);
   console.log(`   Template: server/templates/template_ccb.pdf`);
   console.log(`   Proposta ID: ${GOLDEN_PROPOSAL_ID}`);
@@ -422,7 +450,6 @@ async function executeAudit(): Promise<void> {
 
     console.log('\n✅ [AUDIT] DATA-AUDIT-003 executado com sucesso');
     console.log('📋 [AUDIT] Relatório de integridade gerado acima');
-
   } catch (error) {
     console.error('💥 [AUDIT] Erro crítico durante auditoria:', error);
   }

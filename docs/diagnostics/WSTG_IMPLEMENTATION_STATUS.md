@@ -7,6 +7,7 @@
 ## 🎯 PRONTIDÃO DO SISTEMA
 
 ### ✅ Fundação de Segurança Estabelecida
+
 - **ASVS Level 1**: 100% completo (26/26 requisitos)
 - **Cheat Sheets**: 111/111 implementados
 - **SAMM Maturity**: 51% alcançado
@@ -18,6 +19,7 @@
 - **Security Headers**: Helmet ativo
 
 ### 🏗️ Infraestrutura WSTG Criada
+
 - **Serviço WSTG**: `owaspWstgService.ts` pronto
 - **Estrutura de Dados**: Interfaces definidas
 - **Categorias WSTG**: 12 categorias mapeadas
@@ -25,20 +27,20 @@
 
 ## 📊 CATEGORIAS WSTG PLANEJADAS
 
-| Categoria | ID | Testes Esperados | Status |
-|-----------|-----|-----------------|---------|
-| Information Gathering | WSTG-INFO | 10 | Aguardando |
-| Configuration | WSTG-CONF | 10 | Aguardando |
-| Identity Management | WSTG-IDNT | 10 | Aguardando |
-| Authentication | WSTG-ATHN | 10 | Aguardando |
-| Authorization | WSTG-ATHZ | 10 | Aguardando |
-| Session Management | WSTG-SESS | 10 | Aguardando |
-| Input Validation | WSTG-INPV | 20 | Aguardando |
-| Error Handling | WSTG-ERRH | 5 | Aguardando |
-| Cryptography | WSTG-CRYP | 5 | Aguardando |
-| Business Logic | WSTG-BUSLOGIC | 10 | Aguardando |
-| Client-side | WSTG-CLIENT | 10 | Aguardando |
-| API Testing | WSTG-API | 10 | Aguardando |
+| Categoria             | ID            | Testes Esperados | Status     |
+| --------------------- | ------------- | ---------------- | ---------- |
+| Information Gathering | WSTG-INFO     | 10               | Aguardando |
+| Configuration         | WSTG-CONF     | 10               | Aguardando |
+| Identity Management   | WSTG-IDNT     | 10               | Aguardando |
+| Authentication        | WSTG-ATHN     | 10               | Aguardando |
+| Authorization         | WSTG-ATHZ     | 10               | Aguardando |
+| Session Management    | WSTG-SESS     | 10               | Aguardando |
+| Input Validation      | WSTG-INPV     | 20               | Aguardando |
+| Error Handling        | WSTG-ERRH     | 5                | Aguardando |
+| Cryptography          | WSTG-CRYP     | 5                | Aguardando |
+| Business Logic        | WSTG-BUSLOGIC | 10               | Aguardando |
+| Client-side           | WSTG-CLIENT   | 10               | Aguardando |
+| API Testing           | WSTG-API      | 10               | Aguardando |
 
 **TOTAL**: 210 testes planejados
 
@@ -62,6 +64,7 @@
 ## 💪 CAPACIDADES DO SISTEMA
 
 O Simpix está preparado para:
+
 - Processar batch de URLs WSTG
 - Executar análises de segurança automatizadas
 - Gerar relatórios de conformidade

@@ -1,14 +1,14 @@
 /**
  * BullMQ Metrics Service - Production-Ready Observability
  * Implements comprehensive queue and worker instrumentation using Sentry
- * 
+ *
  * Features:
  * - Job counters (active, completed, failed) per queue
  * - Processing duration metrics with percentiles
  * - DLQ monitoring and alerting thresholds
  * - Real-time queue health metrics
  * - Integration with existing Sentry infrastructure
- * 
+ *
  * Architecture: Singleton pattern with centralized metric collection
  * Integration: Leverages Sentry metrics API for production observability
  */
@@ -27,10 +27,10 @@ type JobStatus = 'active' | 'completed' | 'failed' | 'stalled' | 'waiting' | 'de
  * Production-tuned values based on banking system requirements
  */
 interface QueueThresholds {
-  maxFailureRate: number;     // Maximum acceptable failure rate (%)
-  maxProcessingTime: number;  // Maximum processing time (ms)
-  maxQueueSize: number;       // Maximum queue backlog
-  maxDLQSize: number;         // Maximum DLQ size before alerting
+  maxFailureRate: number; // Maximum acceptable failure rate (%)
+  maxProcessingTime: number; // Maximum processing time (ms)
+  maxQueueSize: number; // Maximum queue backlog
+  maxDLQSize: number; // Maximum DLQ size before alerting
 }
 
 /**
@@ -57,13 +57,13 @@ export class MetricsService {
   private metrics: Map<string, QueueMetrics> = new Map();
   private processingTimes: Map<string, number[]> = new Map();
   private isInitialized: boolean = false;
-  
+
   // Production-ready thresholds for banking system
   private readonly defaultThresholds: QueueThresholds = {
-    maxFailureRate: 5.0,      // 5% failure rate threshold
+    maxFailureRate: 5.0, // 5% failure rate threshold
     maxProcessingTime: 30000, // 30 seconds max processing
-    maxQueueSize: 1000,       // 1000 jobs maximum backlog
-    maxDLQSize: 10,           // 10 DLQ jobs trigger alert
+    maxQueueSize: 1000, // 1000 jobs maximum backlog
+    maxDLQSize: 10, // 10 DLQ jobs trigger alert
   };
 
   private constructor() {
@@ -93,7 +93,7 @@ export class MetricsService {
 
       this.isInitialized = true;
       logger.info('📊 MetricsService initialized with Sentry integration');
-      
+
       // Log successful initialization to Sentry
       Sentry.addBreadcrumb({
         message: 'BullMQ MetricsService initialized',
@@ -104,7 +104,6 @@ export class MetricsService {
           timestamp: new Date().toISOString(),
         },
       });
-
     } catch (error) {
       logger.error('❌ Failed to initialize Sentry metrics', { error });
       this.isInitialized = false;
@@ -151,7 +150,6 @@ export class MetricsService {
 
       // Check thresholds and alert if necessary
       this.checkThresholds(queueName);
-
     } catch (error) {
       logger.error('❌ Failed to increment job counter', {
         queue: queueName,
@@ -171,10 +169,10 @@ export class MetricsService {
       if (!this.processingTimes.has(queueName)) {
         this.processingTimes.set(queueName, []);
       }
-      
+
       const times = this.processingTimes.get(queueName)!;
       times.push(durationMs);
-      
+
       // Keep only last 1000 measurements for memory efficiency
       if (times.length > 1000) {
         times.shift();
@@ -209,7 +207,6 @@ export class MetricsService {
       if (durationMs > this.defaultThresholds.maxProcessingTime) {
         this.alertSlowJob(queueName, durationMs, jobId);
       }
-
     } catch (error) {
       logger.error('❌ Failed to record job duration', {
         queue: queueName,
@@ -228,10 +225,10 @@ export class MetricsService {
       // Increment DLQ counter and capture via Sentry
       if (this.isInitialized) {
         Sentry.setTag('dlq_queue', queueName);
-        
+
         // Capture as message for visibility
         Sentry.captureMessage(`Job moved to Dead Letter Queue: ${queueName}`, 'warning');
-        
+
         Sentry.addBreadcrumb({
           message: 'Job moved to DLQ',
           category: 'dlq',
@@ -261,7 +258,6 @@ export class MetricsService {
       if (metrics.dlqSize >= this.defaultThresholds.maxDLQSize) {
         this.alertHighDLQSize(queueName, metrics.dlqSize);
       }
-
     } catch (error) {
       logger.error('❌ Failed to record DLQ job', {
         queue: queueName,
@@ -283,9 +279,7 @@ export class MetricsService {
    * Returns complete observability data for all monitored queues
    */
   public getAllMetrics(): QueueMetrics[] {
-    return Array.from(this.metrics.values()).sort((a, b) => 
-      a.queueName.localeCompare(b.queueName)
-    );
+    return Array.from(this.metrics.values()).sort((a, b) => a.queueName.localeCompare(b.queueName));
   }
 
   /**
@@ -308,8 +302,10 @@ export class MetricsService {
     trackedQueues: number;
     totalJobs: number;
   } {
-    const totalJobs = Array.from(this.metrics.values())
-      .reduce((sum, metrics) => sum + metrics.totalJobs, 0);
+    const totalJobs = Array.from(this.metrics.values()).reduce(
+      (sum, metrics) => sum + metrics.totalJobs,
+      0
+    );
 
     return {
       healthy: true,
@@ -320,12 +316,12 @@ export class MetricsService {
   }
 
   // Private helper methods
-  
+
   private updateLocalMetrics(queueName: string, status: JobStatus): void {
     const metrics = this.getOrCreateMetrics(queueName);
-    
+
     metrics.totalJobs += 1;
-    
+
     switch (status) {
       case 'active':
         metrics.activeJobs += 1;
@@ -339,12 +335,13 @@ export class MetricsService {
         metrics.activeJobs = Math.max(0, metrics.activeJobs - 1);
         break;
     }
-    
+
     // Calculate failure rate
     if (metrics.completedJobs + metrics.failedJobs > 0) {
-      metrics.failureRate = (metrics.failedJobs / (metrics.completedJobs + metrics.failedJobs)) * 100;
+      metrics.failureRate =
+        (metrics.failedJobs / (metrics.completedJobs + metrics.failedJobs)) * 100;
     }
-    
+
     metrics.lastUpdated = new Date();
   }
 
@@ -389,9 +386,12 @@ export class MetricsService {
     if (this.isInitialized) {
       Sentry.setTag('alert_type', 'high_failure_rate');
       Sentry.setTag('queue_name', queueName);
-      
-      Sentry.captureMessage(`High failure rate detected in queue ${queueName}: ${failureRate.toFixed(2)}%`, 'warning');
-      
+
+      Sentry.captureMessage(
+        `High failure rate detected in queue ${queueName}: ${failureRate.toFixed(2)}%`,
+        'warning'
+      );
+
       Sentry.addBreadcrumb({
         message: 'High failure rate alert',
         category: 'alert',
@@ -402,7 +402,7 @@ export class MetricsService {
         },
       });
     }
-    
+
     logger.warn('🚨 High failure rate detected', {
       queue: queueName,
       failureRate: failureRate,
@@ -414,9 +414,12 @@ export class MetricsService {
     if (this.isInitialized) {
       Sentry.setTag('alert_type', 'slow_processing');
       Sentry.setTag('queue_name', queueName);
-      
-      Sentry.captureMessage(`Slow job processing detected in ${queueName}: ${duration}ms`, 'warning');
-      
+
+      Sentry.captureMessage(
+        `Slow job processing detected in ${queueName}: ${duration}ms`,
+        'warning'
+      );
+
       Sentry.addBreadcrumb({
         message: 'Slow job processing alert',
         category: 'alert',
@@ -428,7 +431,7 @@ export class MetricsService {
         },
       });
     }
-    
+
     logger.warn('🐌 Slow job processing detected', {
       queue: queueName,
       duration: duration,
@@ -441,9 +444,9 @@ export class MetricsService {
     if (this.isInitialized) {
       Sentry.setTag('alert_type', 'high_dlq_size');
       Sentry.setTag('queue_name', queueName);
-      
+
       Sentry.captureMessage(`High DLQ size detected in ${queueName}: ${dlqSize} jobs`, 'error');
-      
+
       Sentry.addBreadcrumb({
         message: 'High DLQ size alert',
         category: 'alert',
@@ -454,7 +457,7 @@ export class MetricsService {
         },
       });
     }
-    
+
     logger.error('🚨 High DLQ size detected', {
       queue: queueName,
       dlqSize: dlqSize,

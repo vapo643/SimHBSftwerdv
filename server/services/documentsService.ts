@@ -15,7 +15,8 @@ export class DocumentsService {
 
   constructor(storageProvider?: IStorageProvider) {
     // Usar provider injetado ou criar instância padrão do Supabase
-    const provider = storageProvider || new SupabaseStorageAdapter(createServerSupabaseAdminClient());
+    const provider =
+      storageProvider || new SupabaseStorageAdapter(createServerSupabaseAdminClient());
     this.documentsRepository = new DocumentsRepository(provider);
   }
 

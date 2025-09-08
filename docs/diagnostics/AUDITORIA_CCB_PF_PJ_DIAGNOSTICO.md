@@ -11,12 +11,14 @@
 **Pergunta:** Como o sistema diferencia um cliente PF de um PJ?
 
 **Resposta:**
+
 - ❌ **Não existe coluna específica `tipo_pessoa`** na tabela propostas
 - ✅ A diferenciação é **inferida** pela presença de campos específicos no JSON `cliente_data`:
   - **PF:** Tem `cpf` e `nome`, não tem `razaoSocial` nem `cnpj`
   - **PJ:** Tem `cnpj` e `razaoSocial`, pode ter `cpf` do representante
 
 **Evidência na Proposta Atual:**
+
 ```sql
 cliente_data: {
   "nome": "Gabriel Santana Jesus",
@@ -35,21 +37,24 @@ cliente_data: {
 ### ✅ Status: MAPEAMENTO CONFIRMADO
 
 **Campos Exclusivos para PESSOA FÍSICA:**
+
 - `clienteRg` - Número do RG
 - `clienteOrgaoEmissor` - Órgão expedidor (SSP)
-- `clienteRgUf` - UF de emissão do RG 
+- `clienteRgUf` - UF de emissão do RG
 - `clienteRgDataEmissao` - Data de emissão
 - `clienteEstadoCivil` - Estado civil (solteiro, casado)
 - `clienteLocalNascimento` - Local de nascimento
 - `clienteNacionalidade` - Nacionalidade
 
 **Campos Exclusivos para PESSOA JURÍDICA:**
+
 - `devedorRazaoSocial` - Razão social da empresa
-- `devedorCnpj` - CNPJ da empresa  
+- `devedorCnpj` - CNPJ da empresa
 - `devedorInscricaoEstadual` - Inscrição estadual
 - **Dados Bancários PJ** (seção separada no PDF)
 
 **Campos Compartilhados:**
+
 - Nome/CPF (para PF) ou Razão Social/CNPJ (para PJ)
 - Endereço, telefone, email
 - Dados de empréstimo e financiamento
@@ -65,18 +70,20 @@ cliente_data: {
 **Resposta:** **NÃO** - A função `generateCcbFromTemplate` **tenta renderizar TODOS os campos para TODOS os tipos de cliente incondicionalmente**.
 
 **Evidência no Código:**
+
 ```typescript
 // NO server/services/ccbGenerationService.ts
 // Linha 155: Definição do tipo (mas não usada para conditionals)
 const dadosCliente = {
   // ...outros campos...
-  tipo: proposalData.cliente_data?.tipo || "PF",  // ← Define tipo mas não usa
-  razaoSocial: proposalData.cliente_data?.razaoSocial || "",  // ← Sempre tenta preencher
-  cnpj: proposalData.cliente_data?.cnpj || ""  // ← Sempre tenta preencher
+  tipo: proposalData.cliente_data?.tipo || 'PF', // ← Define tipo mas não usa
+  razaoSocial: proposalData.cliente_data?.razaoSocial || '', // ← Sempre tenta preencher
+  cnpj: proposalData.cliente_data?.cnpj || '', // ← Sempre tenta preencher
 };
 ```
 
 **Problema Confirmado:**
+
 - Sistema **define** `tipo: "PF"` mas **não usa** essa informação para condicional
 - **TODOS os campos são renderizados** independente do tipo
 - Campos específicos de PJ aparecem como **"NÃO INFORMADO"** em documentos PF
@@ -107,18 +114,20 @@ const dadosCliente = {
 ### 🎯 SOLUÇÕES RECOMENDADAS:
 
 1. **Implementar Detecção Inteligente de Tipo:**
+
    ```typescript
    const isPJ = !!(proposalData.cliente_data?.razaoSocial || proposalData.cliente_data?.cnpj);
    const isPF = !isPJ;
    ```
 
 2. **Implementar Renderização Condicional:**
+
    ```typescript
    if (isPJ) {
      // Renderizar apenas campos relevantes para PJ
      renderizarCamposPJ(dadosCliente);
    } else {
-     // Renderizar apenas campos relevantes para PF  
+     // Renderizar apenas campos relevantes para PF
      renderizarCamposPF(dadosCliente);
    }
    ```

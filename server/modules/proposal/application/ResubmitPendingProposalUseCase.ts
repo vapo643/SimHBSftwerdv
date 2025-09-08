@@ -1,7 +1,7 @@
 /**
  * Resubmit Pending Proposal Use Case - P0.2 GREEN CORRECTION
  * Elimina violação DIP no controller.resubmitFromPending()
- * 
+ *
  * Controller não deve resolver repository diretamente
  * Encapsula lógica de reenvio + persistência
  */
@@ -21,16 +21,14 @@ export interface ResubmitPendingProposalResponse {
 }
 
 export class ResubmitPendingProposalUseCase {
-  constructor(
-    private readonly proposalRepository: IProposalRepository
-  ) {}
+  constructor(private readonly proposalRepository: IProposalRepository) {}
 
   async execute(request: ResubmitPendingProposalRequest): Promise<ResubmitPendingProposalResponse> {
     const { id } = request;
 
     // Buscar proposta
     const proposal = await this.proposalRepository.findById(id);
-    
+
     if (!proposal) {
       throw new Error(`Proposta ${id} não encontrada`);
     }

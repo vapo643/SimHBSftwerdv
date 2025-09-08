@@ -4,7 +4,7 @@
 **Categoria:** Frontend  
 **Severidade:** CRÍTICA  
 **Impacto:** Sistema inacessível (tela branca total)  
-**Tempo de Resolução:** ~2 horas  
+**Tempo de Resolução:** ~2 horas
 
 ## 📋 Resumo Executivo
 
@@ -13,6 +13,7 @@ Aplicação React apresentando tela branca completa após implementação da arq
 ## 🔍 Análise Técnica
 
 ### **Sintomas Observados**
+
 ```
 1. Tela branca completa em todas as páginas
 2. Erro no console: GET .../src/mappers/proposta.mapper.ts 400 (Bad Request)
@@ -24,7 +25,8 @@ Aplicação React apresentando tela branca completa após implementação da arq
 ### **Root Cause Analysis**
 
 **CAUSA PRIMÁRIA:** Configuração JSX incorreta no `tsconfig.json`
-- ❌ **Antes:** `"jsx": "preserve"`  
+
+- ❌ **Antes:** `"jsx": "preserve"`
 - ✅ **Depois:** `"jsx": "react-jsx"`
 
 **CAUSA SECUNDÁRIA:** Script do banner Replit violando Content Security Policy
@@ -32,6 +34,7 @@ Aplicação React apresentando tela branca completa após implementação da arq
 **CAUSA TERCIÁRIA:** Estrutura de dados incompatível entre API e componente React
 
 ### **Stacktrace e Evidências**
+
 ```typescript
 // Erro principal (linha 214 em analise.tsx):
 TypeError: Cannot read properties of undefined (reading 'nome')
@@ -54,22 +57,25 @@ TypeError: Cannot read properties of undefined (reading 'nome')
 ## 🔧 Solução Implementada
 
 ### **1. Correção da Configuração TypeScript**
+
 ```json
 // tsconfig.json
 {
   "compilerOptions": {
-    "jsx": "react-jsx"  // ← Mudança crítica
+    "jsx": "react-jsx" // ← Mudança crítica
   }
 }
 ```
 
 ### **2. Remoção do Script Problemático**
+
 ```html
 <!-- client/index.html - REMOVIDO -->
 <script src="https://replit.com/public/js/replit-dev-banner.js"></script>
 ```
 
 ### **3. Implementação de Mapper Inline Anti-Frágil**
+
 ```typescript
 // Mapper inline com proteção contra dados inconsistentes
 const mapProposta = (rawData: any) => {
@@ -97,6 +103,7 @@ const mapProposta = (rawData: any) => {
 ## ✅ Validação da Correção
 
 ### **Evidências de Sucesso**
+
 1. ✅ **Hot reload funcionando:** `hmr update` detectado nos logs
 2. ✅ **Aplicação carregando:** Console mostra feature flags carregadas
 3. ✅ **API respondendo:** Requisições 200 para `/api/propostas/*`
@@ -104,36 +111,42 @@ const mapProposta = (rawData: any) => {
 5. ✅ **Dados mapeados corretamente:** Fallbacks aplicados onde necessário
 
 ### **Testes Realizados**
+
 - [x] Página de análise carrega sem erros
-- [x] Dados do cliente exibidos corretamente  
+- [x] Dados do cliente exibidos corretamente
 - [x] Formulário de decisão funcional
 - [x] Hot reload preservado para desenvolvimento
 
 ## 🛡️ Medidas Preventivas
 
 ### **1. Validação de Configuração TypeScript**
+
 ```bash
 # Adicionar ao CI/CD:
 npm run check  # Valida configuração TypeScript
 ```
 
 ### **2. Padrão Anti-Corruption Layer**
+
 - Sempre implementar mappers para transformar dados da API
 - Usar fallbacks seguros (`|| 'N/A'`) em todos os campos
 - Validar estrutura de dados antes do uso
 
 ### **3. Monitoramento de CSP**
+
 - Logs de CSP violations devem ser tratados como erros críticos
 - Scripts externos devem ser auditados antes da inclusão
 
 ## 📊 Métricas de Impacto
 
 **Antes do Fix:**
+
 - ❌ 100% das páginas inacessíveis
 - ❌ 0% de funcionalidade disponível
 - ❌ Desenvolvimento completamente bloqueado
 
 **Depois do Fix:**
+
 - ✅ 100% das páginas funcionais
 - ✅ API response time: ~1.5s (dentro do normal)
 - ✅ Zero erros críticos no runtime
@@ -142,7 +155,7 @@ npm run check  # Valida configuração TypeScript
 
 **Roadmap Executado:** PAM V2.5 - Implementação de ACL Pattern  
 **Arquitetura Aplicada:** Anti-Corruption Layer inline para proteção contra dados inconsistentes  
-**Padrão de Segurança:** Fallbacks seguros + validação de tipos  
+**Padrão de Segurança:** Fallbacks seguros + validação de tipos
 
 ## 📝 Lições Aprendidas
 

@@ -39,10 +39,12 @@ export async function createApp() {
   if (redisHealth.status === 'healthy') {
     logInfo('✅ Conexão com Redis Cloud estabelecida com sucesso', {
       latency: redisHealth.latency,
-      service: 'redis-cloud'
+      service: 'redis-cloud',
     });
   } else {
-    console.error('❌ FALHA CRÍTICA: Não foi possível conectar ao Redis Cloud. Sistema não pode iniciar sem Redis.');
+    console.error(
+      '❌ FALHA CRÍTICA: Não foi possível conectar ao Redis Cloud. Sistema não pode iniciar sem Redis.'
+    );
     console.error(`Erro: ${redisHealth.error}`);
     process.exit(1);
   }

@@ -3,6 +3,7 @@
 ## SEÇÃO 1: CONTEXTO ESTRATÉGICO E INTENÇÃO
 
 ### O Objetivo de Negócio
+
 Esta integração com a ClickSign é o **coração pulsante** da nossa "Fila de Formalização" no sistema Simpix. É uma funcionalidade absolutamente crítica que permite ao perfil `ATENDENTE` enviar o Contrato de Crédito Bancário (CCB) para assinatura eletrônica do cliente, gerando um link de assinatura que é fundamental para o fluxo de crédito.
 
 **Por que é crítico:** Sem esta funcionalidade, todo o processo de formalização de crédito fica travado. É o gargalo que impede a conversão de propostas aprovadas em contratos legalmente válidos.
@@ -26,7 +27,9 @@ Esta integração com a ClickSign é o **coração pulsante** da nossa "Fila de 
 **Interação 19-20:** Mudamos de `content_base64` para `content`, mas o erro voltou para `content_base64 deve ser informado(a)`.
 
 ### O Padrão de Falha
+
 Estamos presos num **loop infinito** onde:
+
 1. API pede `content_base64` → implementamos → API pede `content`
 2. API pede `content` → implementamos → API pede `content_base64`
 3. Quando enviamos ambos, recebe erro de campos duplicados
@@ -34,6 +37,7 @@ Estamos presos num **loop infinito** onde:
 ## SEÇÃO 3: O ERRO ATUAL - A FALHA PERSISTENTE
 
 ### O Sintoma Atual
+
 - **Frontend:** Botão "Enviar para ClickSign" aparece corretamente
 - **Backend:** Ao clicar, recebemos erro alternado entre:
   - `Error: content_base64 deve ser informado(a)`
@@ -41,11 +45,13 @@ Estamos presos num **loop infinito** onde:
   - `Error: MimeType não informado no campo content_base64`
 
 ### Comportamento Observado
+
 A API parece ter validações contraditórias que mudam baseadas em alguma lógica interna não documentada.
 
 ## SEÇÃO 4: A EVIDÊNCIA BRUTA - LOGS COMPLETOS
 
 ### Logs do Último Erro (01/08/2025 20:58)
+
 ```
 [CLICKSIGN V3] 📡 POST /envelopes/9e3d3a66-1ca9-44d2-8f15-5e7ce21bfdb1/documents
 [CLICKSIGN V3] Headers: {
@@ -81,22 +87,26 @@ A API parece ter validações contraditórias que mudam baseadas em alguma lógi
 ```
 
 ### Observação Crítica
+
 Note que enviamos campo `content` mas a API reclama sobre `content_base64`! Isso sugere que a API tem expectativas diferentes do que está documentado.
 
 ## SEÇÃO 5: INTELIGÊNCIA EXTERNA - DOCUMENTAÇÃO OFICIAL
 
 ### URLs Oficiais da Documentação ClickSign
+
 1. **Portal Principal:** https://developers.clicksign.com/
 2. **API v3 Reference:** https://developers.clicksign.com/reference/api-upload-documentos
 3. **Primeiros Passos:** https://developers.clicksign.com/docs/primeiros-passos
 4. **Mensagens de Erro:** https://developers.clicksign.com/docs/mensagens-de-erro
 
 ### Informações Confirmadas pela Documentação
+
 - Endpoint correto: `POST /api/v3/envelopes/{envelope_id}/documents`
 - Headers obrigatórios: `Content-Type: application/vnd.api+json`
 - Estrutura JSON:API com `data.type` e `data.attributes`
 
 ### O Que a Documentação NÃO Esclarece
+
 - Se o campo deve ser `content` ou `content_base64`
 - Se o formato deve ser Base64 puro ou Data URI
 - Por que recebemos erros sobre campos que não enviamos
@@ -104,23 +114,30 @@ Note que enviamos campo `content` mas a API reclama sobre `content_base64`! Isso
 ## SEÇÃO 6: ANÁLISE DE LINHAS DE RACIOCÍNIO
 
 ### Hipótese Principal: Problema de Versionamento da API
+
 A API pode estar em transição entre versões, onde:
+
 - Alguns endpoints esperam formato v2 (`content_base64`)
 - Outros esperam formato v3 (`content`)
 - A validação está inconsistente entre os dois
 
 ### Hipótese Secundária: Problema de Serialização JSON:API
+
 O padrão JSON:API pode exigir uma estrutura específica que não estamos seguindo corretamente:
+
 - Talvez precisemos usar `relationships` em vez de atributos diretos
 - Talvez o documento precise ser criado como um recurso `included`
 
 ### Hipótese Terciária: Problema de Autenticação/Conta
+
 - Token pode ter permissões limitadas
 - Conta pode estar em modo trial com limitações
 - Headers de autenticação podem estar incompletos
 
 ### Hipótese Quaternária: Problema de Fluxo
+
 Baseado na análise do Deep Think anterior:
+
 - Talvez não devamos criar envelope vazio e adicionar documento depois
 - Talvez devamos criar envelope COM documento numa única chamada atômica
 
@@ -129,11 +146,13 @@ Baseado na análise do Deep Think anterior:
 ### Sua Missão, Deep Think AI
 
 **1. ANÁLISE DE CAUSA RAIZ:**
+
 - Por que a API retorna mensagens contraditórias sobre `content` vs `content_base64`?
 - Existe alguma lógica oculta que determina quando usar cada campo?
 - O erro está na nossa implementação ou na documentação da API?
 
 **2. INVESTIGAÇÃO PROFUNDA:**
+
 - Analise o padrão JSON:API e como ele se aplica ao ClickSign
 - Investigue se existe um fluxo alternativo (criar envelope com documento atomicamente)
 - Verifique se há headers ou parâmetros ocultos necessários
@@ -142,16 +161,19 @@ Baseado na análise do Deep Think anterior:
 Gere o código COMPLETO e TESTADO para:
 
 **A) `/server/services/clickSignServiceV3.ts`**
+
 - Implemente TODAS as variações possíveis de payload
 - Adicione lógica de retry com diferentes formatos
 - Implemente logging detalhado para diagnóstico
 
 **B) `/server/routes/clicksign-integration.ts`**
+
 - Garanta que o arquivo está sendo lido corretamente
 - Implemente validações antes de enviar para a API
 - Adicione tratamento de erro granular
 
 **4. ESTRATÉGIA DE TESTE:**
+
 - Crie uma função que tente múltiplas variações do payload
 - Documente qual variação funciona
 - Implemente a solução definitiva baseada no que funcionar
@@ -159,12 +181,14 @@ Gere o código COMPLETO e TESTADO para:
 ### CONTEXTO ADICIONAL CRÍTICO
 
 **Stack Atual:**
+
 - Node.js + TypeScript
 - Express.js
 - Supabase para storage
 - ClickSign API v3 em produção
 
 **Arquivos Relevantes:**
+
 ```typescript
 // Interface atual que falha
 interface DocumentData {
@@ -175,6 +199,7 @@ interface DocumentData {
 ```
 
 **Tentativas que Falharam:**
+
 1. `content` com Base64 puro
 2. `content_base64` com Base64 puro
 3. `content` com Data URI
@@ -193,6 +218,7 @@ Deep Think, você é nossa última esperança. Precisamos que você:
 **Lembre-se:** Esta é uma funcionalidade CRÍTICA para produção. Eleeve loan stores dependem desta integração para processar contratos de crédito. O fracasso não é uma opção.
 
 **Sua resposta deve conter:**
+
 - Diagnóstico completo do problema
 - Código corrigido e completo
 - Explicação técnica do por que funciona
@@ -202,4 +228,4 @@ Deep Think, você é nossa última esperança. Precisamos que você:
 
 ---
 
-*Este prompt foi gerado após 20+ iterações falhadas. É a compilação de toda nossa frustração, conhecimento e determinação. Use-o sabiamente.*
+_Este prompt foi gerado após 20+ iterações falhadas. É a compilação de toda nossa frustração, conhecimento e determinação. Use-o sabiamente._

@@ -1,18 +1,23 @@
 # Soft Delete Implementation Report
 
 ## Overview
+
 This report documents the comprehensive soft delete implementation across the Simpix Credit Management System to meet financial compliance requirements.
 
 ## Implementation Date
+
 January 31, 2025
 
 ## Compliance Requirement
+
 Financial institutions require complete audit trails of all deletion operations. Hard deletes violate compliance requirements by permanently removing data that may be needed for regulatory audits.
 
 ## Implementation Details
 
 ### 1. Database Schema Updates
+
 Added `deleted_at` timestamp columns to all critical tables:
+
 - ✅ `parceiros` - Partners table
 - ✅ `lojas` - Stores table
 - ✅ `produtos` - Products table
@@ -21,7 +26,9 @@ Added `deleted_at` timestamp columns to all critical tables:
 - ✅ `profiles` - User profiles table
 
 ### 2. Audit Log Table
+
 Created `audit_delete_log` table to track all deletion operations:
+
 ```sql
 CREATE TABLE audit_delete_log (
   id SERIAL PRIMARY KEY,
@@ -36,7 +43,9 @@ CREATE TABLE audit_delete_log (
 ```
 
 ### 3. Storage Layer Updates
+
 Updated all delete methods to use soft delete:
+
 - ✅ `deleteLoja()` - Sets deleted_at timestamp
 - ✅ `deleteProposta()` - Sets deleted_at timestamp
 - ✅ `deletarProduto()` - Sets deleted_at timestamp
@@ -44,7 +53,9 @@ Updated all delete methods to use soft delete:
 - ✅ DELETE endpoints for tabelas_comerciais - Sets deleted_at timestamp
 
 ### 4. Query Updates
+
 All SELECT queries now filter out soft-deleted records using `isNull(deleted_at)`:
+
 - ✅ `getLojas()` - Filters deleted stores
 - ✅ `getLojaById()` - Excludes deleted stores
 - ✅ `getPropostas()` - Filters deleted proposals
@@ -56,7 +67,9 @@ All SELECT queries now filter out soft-deleted records using `isNull(deleted_at)
 - ✅ `checkLojaDependencies()` - Only counts non-deleted dependencies
 
 ### 5. API Endpoint Updates
+
 All DELETE endpoints now perform soft deletes:
+
 - ✅ `/api/admin/parceiros/:id` - Soft delete partners
 - ✅ `/api/admin/tabelas-comerciais/:id` - Soft delete commercial tables
 - ✅ `/api/produtos/:id` - Soft delete products (via controller)

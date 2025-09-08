@@ -1,10 +1,10 @@
 /**
  * Use Case: Pendenciar Proposta
- * 
+ *
  * Implementação da funcionalidade de pendência para o fluxo do analista.
  * Este use case permite que analistas marquem propostas como pendentes
  * quando necessitam de documentação adicional ou esclarecimentos.
- * 
+ *
  * Data: 2025-09-03
  * PAM V2.5 - OPERAÇÃO VISÃO CLARA - Missão P0
  */
@@ -37,7 +37,7 @@ export class PendenciarPropostaUseCase {
     try {
       // 1. Validar proposta existe e buscar estado atual
       const proposta = await this.proposalRepository.findById(propostaId);
-      
+
       if (!proposta) {
         throw new Error(`Proposta com ID ${propostaId} não encontrada`);
       }
@@ -47,7 +47,9 @@ export class PendenciarPropostaUseCase {
 
       // 2. Validar se a proposta está em estado que permite pendência
       if (!['aguardando_analise', 'em_analise'].includes(statusAtual)) {
-        throw new Error(`Não é possível pendenciar proposta com status '${statusAtual}'. Status deve ser 'aguardando_analise' ou 'em_analise'.`);
+        throw new Error(
+          `Não é possível pendenciar proposta com status '${statusAtual}'. Status deve ser 'aguardando_analise' ou 'em_analise'.`
+        );
       }
 
       // 3. Validar parâmetros obrigatórios
@@ -57,7 +59,7 @@ export class PendenciarPropostaUseCase {
 
       // 4. Aplicar transição FSM para 'pendenciado'
       console.log(`[PENDENCIAR USE CASE] 🔄 Aplicando transição FSM: ${statusAtual} → pendenciado`);
-      
+
       await transitionTo({
         propostaId,
         novoStatus: 'pendenciado',
@@ -69,7 +71,7 @@ export class PendenciarPropostaUseCase {
           analistaId,
           acao: 'pendenciar_proposta',
           timestamp: new Date().toISOString(),
-        }
+        },
       });
 
       console.log(`[PENDENCIAR USE CASE] ✅ Transição aplicada com sucesso`);
@@ -89,7 +91,6 @@ export class PendenciarPropostaUseCase {
         propostaId,
         novoStatus: 'pendenciado',
       };
-
     } catch (error: any) {
       console.error(`[PENDENCIAR USE CASE] ❌ Erro ao pendenciar proposta:`, error);
 

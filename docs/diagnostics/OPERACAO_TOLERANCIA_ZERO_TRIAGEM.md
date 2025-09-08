@@ -1,4 +1,5 @@
 # OPERAÇÃO TOLERÂNCIA ZERO - TRIAGEM FINAL
+
 **Data:** 2025-09-02  
 **Protocolo:** PAM V1.0 - Fase 1 (Diagnóstico Final)  
 **Auditoria:** Quarta Execução (Veredito Definitivo)  
@@ -9,9 +10,10 @@
 ## 🎯 SUMÁRIO EXECUTIVO
 
 **DISTRIBUIÇÃO DE FALHAS POR CATEGORIA:**
+
 - **45% (14 falhas)** - Redis Connection Errors (ECONNREFUSED)
 - **29% (9 falhas)** - Database Query Method Errors (innerJoin undefined)
-- **16% (5 falhas)** - HTTP Status Code Mismatches 
+- **16% (5 falhas)** - HTTP Status Code Mismatches
 - **10% (3 falhas)** - Mock/Test Infrastructure Issues
 
 **IMPACTO TOTAL:** 31 testes falhando de 173 ativos (taxa de falha: 18%)
@@ -21,12 +23,14 @@
 ## 📊 CATEGORIAS DE FALHAS DETALHADAS
 
 ### **P0 - CRÍTICA: Redis Connection Failures**
+
 **🔥 Prioridade: MÁXIMA (45% das falhas)**
 
 **Descrição da Causa Raiz:**
 Testes de integração tentando conectar ao Redis local (`127.0.0.1:6379`) que não está disponível no ambiente de teste, mas o código em produção usa Redis Cloud.
 
 **Stack Trace Tipo:**
+
 ```
 Error: connect ECONNREFUSED 127.0.0.1:6379
   at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)
@@ -34,6 +38,7 @@ Error: connect ECONNREFUSED 127.0.0.1:6379
 ```
 
 **Testes Afetados:**
+
 - `tests/integration/idempotency.test.ts` (múltiplas falhas)
 - `tests/payment-idempotency.test.ts`
 - Todos os testes que dependem de BullMQ/Redis queues
@@ -44,18 +49,21 @@ Error: connect ECONNREFUSED 127.0.0.1:6379
 ---
 
 ### **P0 - CRÍTICA: Database Query Method Errors**
+
 **🔥 Prioridade: MÁXIMA (29% das falhas)**
 
 **Descrição da Causa Raiz:**
 Erro `db2.select(...).from(...).innerJoin is not a function` indica inconsistência na instância do Drizzle ORM sendo utilizada nos testes vs produção.
 
 **Stack Trace Tipo:**
+
 ```
 TypeError: db2.select(...).from(...).innerJoin is not a function
   at /home/runner/workspace/server/routes.ts:1982:14
 ```
 
 **Testes Afetados:**
+
 - `tests/routes/tabelasComerciais.test.ts` (múltiplos cenários)
 - Queries de tabelas personalizadas e gerais
 - Endpoints de busca de tabelas comerciais
@@ -65,18 +73,21 @@ TypeError: db2.select(...).from(...).innerJoin is not a function
 ---
 
 ### **P1 - ALTA: HTTP Status Code Mismatches**
+
 **⚠️ Prioridade: ALTA (16% das falhas)**
 
 **Descrição da Causa Raiz:**
 Testes esperando códigos de erro específicos (500, 404) mas recebendo 200 OK, indicando que o error handling não está funcionando conforme esperado.
 
 **Stack Trace Tipo:**
+
 ```
 expected 500 "Internal Server Error", got 200 "OK"
 expected 404 "Not Found", got 200 "OK"
 ```
 
 **Testes Afetados:**
+
 - `tests/routes/tabelasComerciais.test.ts` > "should handle database errors gracefully"
 - Testes de edge cases e error handling
 - Scenarios de validação de entrada inválida
@@ -86,12 +97,14 @@ expected 404 "Not Found", got 200 "OK"
 ---
 
 ### **P2 - MÉDIA: Mock/Test Infrastructure Issues**
+
 **📋 Prioridade: MÉDIA (10% das falhas)**
 
 **Descrição da Causa Raiz:**
 Problemas diversos com setup de testes, mocks não configurados adequadamente, ou dependências de teste ausentes.
 
 **Testes Afetados:**
+
 - `tests/integration/proposal-api.test.ts` (cenários específicos)
 - `tests/unit/value-objects.test.ts` (alguns value objects)
 - `tests/components/Button.test.tsx`
@@ -103,7 +116,9 @@ Problemas diversos com setup de testes, mocks não configurados adequadamente, o
 ## 🚀 ROADMAP DE REMEDIAÇÃO PRIORIZADO
 
 ### **MISSÃO P0-A: Correção Redis Connection (Estimativa: 2h)**
+
 **Objetivos:**
+
 - Configurar Redis connection para ambiente de teste
 - Implementar Redis mock para testes unitários
 - Validar testes de idempotency e queues
@@ -113,7 +128,9 @@ Problemas diversos com setup de testes, mocks não configurados adequadamente, o
 ---
 
 ### **MISSÃO P0-B: Correção Database Query Methods (Estimativa: 1h)**
+
 **Objetivos:**
+
 - Corrigir instanciação do Drizzle ORM nos testes
 - Validar queries de tabelas comerciais
 - Garantir consistência entre test/prod DB connections
@@ -123,7 +140,9 @@ Problemas diversos com setup de testes, mocks não configurados adequadamente, o
 ---
 
 ### **MISSÃO P1: Error Handling Validation (Estimativa: 1.5h)**
+
 **Objetivos:**
+
 - Revisar e corrigir error handling em rotas
 - Ajustar expectativas dos testes para comportamento real
 - Implementar error handling consistente
@@ -133,7 +152,9 @@ Problemas diversos com setup de testes, mocks não configurados adequadamente, o
 ---
 
 ### **MISSÃO P2: Test Infrastructure Cleanup (Estimativa: 1h)**
+
 **Objetivos:**
+
 - Corrigir mocks e setup de testes restantes
 - Limpar dependências de teste órfãs
 - Ajustar configurações de ambiente

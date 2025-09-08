@@ -1,7 +1,7 @@
 /**
  * Módulo de Repositórios - Banking-Grade Repository Pattern
  * Sprint 2 S2-002 - PAM V1.0
- * 
+ *
  * Centralizador de exports para todos os repositórios implementados
  * com padrão Repository Pattern e paginação baseada em cursor.
  */
@@ -9,7 +9,10 @@
 // ========================================================================
 // INTERFACES (DOMAIN LAYER)
 // ========================================================================
-export type { IProposalRepository, ProposalRepository } from './proposal/domain/IProposalRepository';
+export type {
+  IProposalRepository,
+  ProposalRepository,
+} from './proposal/domain/IProposalRepository';
 export type { ICcbRepository, CcbRepository } from './ccb/domain/ICcbRepository';
 export type { IBoletoRepository, BoletoRepository } from './boleto/domain/IBoletoRepository';
 
@@ -23,10 +26,10 @@ export { BoletoRepository as BoletoRepositoryImpl } from './boleto/infrastructur
 // ========================================================================
 // TIPOS COMPARTILHADOS
 // ========================================================================
-export type { 
+export type {
   PaginatedResult,
   CursorPaginationOptions,
-  RepositoryFilters 
+  RepositoryFilters,
 } from '@shared/types/pagination';
 
 export { CursorUtils } from '@shared/types/pagination';

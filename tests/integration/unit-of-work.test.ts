@@ -1,6 +1,6 @@
 /**
  * Unit of Work Pattern - Integration Tests
- * 
+ *
  * AUDITORIA FORENSE - PAM V1.2
  * Testa atomicidade de transações e rollback em cenários de falha
  */
@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 describe('Unit of Work - Auditoria Forense', () => {
   const testPropostaId = uuidv4();
   const testUserId = '3fff3936-3cee-4e02-ab27-4e4b452e3efe'; // Usuário real do Supabase Auth
-  
+
   beforeEach(async () => {
     // Criar dados de teste válidos - executar separadamente devido à limitação do PostgreSQL
     await db.execute(sql`
@@ -23,19 +23,19 @@ describe('Unit of Work - Auditoria Forense', () => {
       VALUES (999, 'Parceiro Teste LTDA', '12345678000199', 5.00)
       ON CONFLICT (id) DO NOTHING
     `);
-    
+
     await db.execute(sql`
       INSERT INTO lojas (id, parceiro_id, nome_loja, endereco, is_active)
       VALUES (999, 999, 'Loja Teste Integração', 'Rua Teste, 123', true)
       ON CONFLICT (id) DO NOTHING
     `);
-    
+
     await db.execute(sql`
       INSERT INTO produtos (id, nome_produto)
       VALUES (999, 'Produto Teste Integração')
       ON CONFLICT (id) DO NOTHING
     `);
-    
+
     // Criar profile para usuário real do Supabase - ESSENTIAL para business rule validation
     await db.execute(sql`
       INSERT INTO profiles (id, full_name, role, loja_id)
@@ -45,7 +45,7 @@ describe('Unit of Work - Auditoria Forense', () => {
         role = EXCLUDED.role,
         loja_id = EXCLUDED.loja_id
     `);
-    
+
     // CRITICAL: Criar associação gerente-loja para satisfazer validate_proposta_integrity()
     // gerente_id é UUID que referencia profiles.id, não users.id
     await db.execute(sql`
@@ -53,7 +53,7 @@ describe('Unit of Work - Auditoria Forense', () => {
       VALUES (${testUserId}, 999)
       ON CONFLICT (gerente_id, loja_id) DO NOTHING
     `);
-    
+
     // Limpar dados de teste existentes
     await db.delete(propostaLogs).where(eq(propostaLogs.propostaId, testPropostaId));
     await db.delete(propostas).where(eq(propostas.id, testPropostaId));
@@ -100,7 +100,10 @@ describe('Unit of Work - Auditoria Forense', () => {
     expect(savedProposta[0].status).toBe('RASCUNHO');
 
     // VERIFICAR: Log foi criado
-    const savedLogs = await db.select().from(propostaLogs).where(eq(propostaLogs.propostaId, testPropostaId));
+    const savedLogs = await db
+      .select()
+      .from(propostaLogs)
+      .where(eq(propostaLogs.propostaId, testPropostaId));
     expect(savedLogs).toHaveLength(1);
     expect(savedLogs[0].statusNovo).toBe('RASCUNHO');
 
@@ -124,7 +127,7 @@ describe('Unit of Work - Auditoria Forense', () => {
       await unitOfWork.withTransaction(async (tx) => {
         // 1. Criar proposta (sucesso)
         await tx.insert(propostas).values(mockPropostaFalha);
-        
+
         // 2. Forçar erro: tentar criar log com autorId null (violação NOT NULL)
         await tx.insert(propostaLogs).values({
           propostaId: testPropostaId,
@@ -132,7 +135,7 @@ describe('Unit of Work - Auditoria Forense', () => {
           statusNovo: 'RASCUNHO',
         });
       });
-      
+
       // Se chegou aqui, o teste falhou
       expect.fail('Transação deveria ter falhado');
     } catch (error) {
@@ -140,11 +143,17 @@ describe('Unit of Work - Auditoria Forense', () => {
     }
 
     // VERIFICAR: Nenhuma proposta foi salva (ROLLBACK funcionou)
-    const savedPropostas = await db.select().from(propostas).where(eq(propostas.id, testPropostaId));
+    const savedPropostas = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, testPropostaId));
     expect(savedPropostas).toHaveLength(0);
 
     // VERIFICAR: Nenhum log foi salvo (ROLLBACK funcionou)
-    const savedLogs = await db.select().from(propostaLogs).where(eq(propostaLogs.propostaId, testPropostaId));
+    const savedLogs = await db
+      .select()
+      .from(propostaLogs)
+      .where(eq(propostaLogs.propostaId, testPropostaId));
     expect(savedLogs).toHaveLength(0);
 
     console.log('✅ UoW ROLLBACK Test: Transação revertida com sucesso - ZERO DADOS PERSISTIDOS');
@@ -164,7 +173,7 @@ describe('Unit of Work - Auditoria Forense', () => {
         lojaId: 999,
         userId: testUserId, // CRITICAL: Field required by enforce_proposta_integrity trigger
         // Add missing required fields for schema compatibility
-        valor: 5000.00,
+        valor: 5000.0,
         prazo: 12,
         taxaJuros: 2.5,
       };
@@ -182,7 +191,10 @@ describe('Unit of Work - Auditoria Forense', () => {
     const savedProposta = await db.select().from(propostas).where(eq(propostas.id, result.id));
     expect(savedProposta).toHaveLength(1);
 
-    const savedLogs = await db.select().from(propostaLogs).where(eq(propostaLogs.propostaId, result.id));
+    const savedLogs = await db
+      .select()
+      .from(propostaLogs)
+      .where(eq(propostaLogs.propostaId, result.id));
     expect(savedLogs).toHaveLength(1);
 
     console.log('✅ Business Operation Test: Repositórios transacionais funcionando');

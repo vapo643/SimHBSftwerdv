@@ -3,11 +3,13 @@
 ## 📋 Checklist para Deploy
 
 ### ✅ 1. Domínio Oficial
+
 - [ ] Registrar domínio da empresa (ex: `sistema.eleeve.com.br`)
 - [ ] Configurar SSL/TLS (certificado HTTPS)
 - [ ] Apontar DNS para servidor de produção
 
 ### ✅ 2. Servidor de Produção
+
 - [ ] Deploy do sistema no servidor (AWS, Google Cloud, Azure, etc.)
 - [ ] Configurar variáveis de ambiente:
   ```bash
@@ -19,11 +21,13 @@
   ```
 
 ### ✅ 3. URL Final do Webhook
+
 ```
 https://sistema.eleeve.com.br/api/clicksign/webhook
 ```
 
 ### ✅ 4. Configuração no ClickSign
+
 1. **Ambiente de Produção do ClickSign**
    - Usar conta real (não sandbox)
    - URL: https://app.clicksign.com (não sandbox)
@@ -34,6 +38,7 @@ https://sistema.eleeve.com.br/api/clicksign/webhook
    - Configurar todos os eventos necessários
 
 ### ✅ 5. Segurança em Produção
+
 - [ ] Firewall configurado
 - [ ] Rate limiting ativo
 - [ ] Logs de auditoria ativos
@@ -43,6 +48,7 @@ https://sistema.eleeve.com.br/api/clicksign/webhook
 ## 🔄 Processo de Migração
 
 ### Passo 1: Preparar Produção
+
 ```bash
 # 1. Deploy do código para produção
 git clone seu-repositorio
@@ -55,12 +61,14 @@ pm2 save
 ```
 
 ### Passo 2: Configurar Webhook Produção
+
 1. No painel ClickSign (conta real)
 2. Desativar webhook de desenvolvimento
 3. Criar novo webhook com URL de produção
 4. Testar com documento real
 
 ### Passo 3: Validar Integração
+
 - [ ] Teste completo: CCB → Assinatura → Boleto
 - [ ] Verificar logs de produção
 - [ ] Confirmar webhooks funcionando
@@ -69,11 +77,13 @@ pm2 save
 ## 🏢 Exemplo para Eleeve
 
 ### URLs Sugeridas:
+
 - **Sistema Principal**: `https://sistema.eleeve.com.br`
-- **Webhook ClickSign**: `https://sistema.eleeve.com.br/api/clicksign/webhook`  
+- **Webhook ClickSign**: `https://sistema.eleeve.com.br/api/clicksign/webhook`
 - **API**: `https://api.eleeve.com.br`
 
 ### Infraestrutura Recomendada:
+
 - **Servidor**: AWS EC2 ou Google Cloud Compute
 - **Banco**: PostgreSQL (AWS RDS)
 - **SSL**: Let's Encrypt ou Cloudflare

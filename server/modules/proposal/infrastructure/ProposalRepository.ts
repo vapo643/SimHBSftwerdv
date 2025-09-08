@@ -7,16 +7,29 @@
 
 import { eq, and, gte, lte, or, isNull, sql, inArray, desc, asc, gt, lt } from 'drizzle-orm';
 import { db } from '../../../lib/supabase';
-import { propostas, ccbs, boletos, produtos, tabelasComerciais, lojas, parceiros } from '@shared/schema';
+import {
+  propostas,
+  ccbs,
+  boletos,
+  produtos,
+  tabelasComerciais,
+  lojas,
+  parceiros,
+} from '@shared/schema';
 import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { IProposalRepository, ProposalSearchCriteria } from '../domain/IProposalRepository';
-import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
+import {
+  PaginatedResult,
+  CursorPaginationOptions,
+  RepositoryFilters,
+  CursorUtils,
+} from '@shared/types/pagination';
 import { EventDispatcher } from '../../../infrastructure/events/EventDispatcher';
 
 export class ProposalRepository implements IProposalRepository {
   async save(proposal: Proposal): Promise<void> {
     const data = proposal.toPersistence();
-    
+
     console.log('🔍 [REPOSITORY DEBUG] Starting save for proposal:', proposal.id);
     console.log('🔍 [REPOSITORY DEBUG] Persistence data keys:', Object.keys(data));
     console.log('🔍 [REPOSITORY DEBUG] analista_id:', data.analista_id);
@@ -29,7 +42,7 @@ export class ProposalRepository implements IProposalRepository {
       // Attempt INSERT for new proposal
       const numeroProposta = await this.getNextNumeroProposta();
       console.log('🔍 [REPOSITORY DEBUG] Next numero proposta:', numeroProposta);
-      
+
       const insertValues = {
         id: proposal.id, // UUID do domínio
         numeroProposta: numeroProposta, // ID sequencial começando em 300001
@@ -40,8 +53,10 @@ export class ProposalRepository implements IProposalRepository {
         // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar TODOS os campos individuais do cliente
         clienteEmail: data.cliente_data.email,
         clienteTelefone: data.cliente_data.telefone,
-        clienteDataNascimento: data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
-        clienteRenda: data.cliente_data.rendaMensal?.toString() || data.cliente_data.renda_mensal?.toString(),
+        clienteDataNascimento:
+          data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
+        clienteRenda:
+          data.cliente_data.rendaMensal?.toString() || data.cliente_data.renda_mensal?.toString(),
         clienteRg: data.cliente_data.rg,
         clienteOrgaoEmissor: data.cliente_data.orgaoEmissor,
         clienteEstadoCivil: data.cliente_data.estadoCivil,
@@ -52,14 +67,17 @@ export class ProposalRepository implements IProposalRepository {
         prazo: data.prazo,
         taxaJuros: data.taxa_juros.toString(),
         taxaJurosAnual: data.taxa_juros_anual?.toString() || (data.taxa_juros * 12).toString(), // Campo obrigatório
-        valorTac: data.valor_tac?.toString() || '0', // Campo obrigatório  
+        valorTac: data.valor_tac?.toString() || '0', // Campo obrigatório
         valorIof: data.valor_iof?.toString() || '0', // Campo obrigatório
         valorTotalFinanciado: data.valor_total_financiado?.toString() || data.valor.toString(), // Campo obrigatório
         produtoId: data.produto_id,
         tabelaComercialId: data.tabela_comercial_id,
         lojaId: data.loja_id,
         metodoPagamento: data.dados_pagamento?.metodo,
-        dadosPagamentoTipo: data.dados_pagamento?.tipo_conta || data.dados_pagamento?.pixTipo || data.dados_pagamento?.pix_tipo,
+        dadosPagamentoTipo:
+          data.dados_pagamento?.tipo_conta ||
+          data.dados_pagamento?.pixTipo ||
+          data.dados_pagamento?.pix_tipo,
         dadosPagamentoBanco: data.dados_pagamento_banco,
         dadosPagamentoAgencia: data.dados_pagamento?.agencia,
         dadosPagamentoConta: data.dados_pagamento?.conta,
@@ -83,23 +101,22 @@ export class ProposalRepository implements IProposalRepository {
         biometriaConcluida: false, // Valor padrão para nova proposta
         // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia
         finalidade: data.finalidade,
-        garantia: data.garantia
+        garantia: data.garantia,
       };
-      
+
       console.log('🔍 [REPOSITORY DEBUG] Insert values userId:', insertValues.userId);
       console.log('🔍 [REPOSITORY DEBUG] Insert values analistaId:', insertValues.analistaId);
       console.log('🔍 [REPOSITORY DEBUG] Insert values ccbGerado:', insertValues.ccbGerado);
-      
+
       await db.insert(propostas).values([insertValues]);
-      
+
       console.log('[REPOSITORY] New proposal inserted:', proposal.id);
-      
     } catch (insertError: any) {
       console.log('🚨 [REPOSITORY DEBUG] INSERT FAILED:', insertError.message);
       console.log('🚨 [REPOSITORY DEBUG] Error code:', insertError.code);
       console.log('🚨 [REPOSITORY DEBUG] Error detail:', insertError.detail);
       console.log('🚨 [REPOSITORY DEBUG] Full error:', insertError);
-      
+
       // If insert fails due to unique constraint (proposal already exists), then update
       if (insertError.code === '23505' || insertError.message?.includes('duplicate key')) {
         console.log('[REPOSITORY] Proposal exists, updating:', proposal.id);
@@ -112,8 +129,11 @@ export class ProposalRepository implements IProposalRepository {
             // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar TODOS os campos individuais do cliente no UPDATE
             clienteEmail: data.cliente_data.email,
             clienteTelefone: data.cliente_data.telefone,
-            clienteDataNascimento: data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
-            clienteRenda: data.cliente_data.rendaMensal?.toString() || data.cliente_data.renda_mensal?.toString(),
+            clienteDataNascimento:
+              data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
+            clienteRenda:
+              data.cliente_data.rendaMensal?.toString() ||
+              data.cliente_data.renda_mensal?.toString(),
             clienteRg: data.cliente_data.rg,
             clienteOrgaoEmissor: data.cliente_data.orgaoEmissor,
             clienteEstadoCivil: data.cliente_data.estadoCivil,
@@ -126,7 +146,10 @@ export class ProposalRepository implements IProposalRepository {
             produtoId: data.produto_id,
             tabelaComercialId: data.tabela_comercial_id,
             lojaId: data.loja_id,
-            dadosPagamentoTipo: data.dados_pagamento?.tipo_conta || data.dados_pagamento?.pixTipo || data.dados_pagamento?.pix_tipo,
+            dadosPagamentoTipo:
+              data.dados_pagamento?.tipo_conta ||
+              data.dados_pagamento?.pixTipo ||
+              data.dados_pagamento?.pix_tipo,
             dadosPagamentoBanco: data.dados_pagamento_banco,
             dadosPagamentoAgencia: data.dados_pagamento?.agencia,
             dadosPagamentoConta: data.dados_pagamento?.conta,
@@ -153,18 +176,22 @@ export class ProposalRepository implements IProposalRepository {
 
     // Processar eventos de domínio (comentado temporariamente para load test)
     const events = proposal.getUncommittedEvents();
-    
+
     // Em desenvolvimento, apenas log dos eventos sem despachar para Redis
     if (process.env.NODE_ENV === 'development') {
       for (const event of events) {
-        console.log(`[DOMAIN EVENT LOGGED] ${event.eventType} for aggregate ${event.aggregateId} (Redis disabled in dev)`);
+        console.log(
+          `[DOMAIN EVENT LOGGED] ${event.eventType} for aggregate ${event.aggregateId} (Redis disabled in dev)`
+        );
       }
       proposal.markEventsAsCommitted();
     } else {
       const eventDispatcher = EventDispatcher.getInstance();
       for (const event of events) {
         await eventDispatcher.dispatch(event);
-        console.log(`[DOMAIN EVENT DISPATCHED] ${event.eventType} for aggregate ${event.aggregateId}`);
+        console.log(
+          `[DOMAIN EVENT DISPATCHED] ${event.eventType} for aggregate ${event.aggregateId}`
+        );
       }
       proposal.markEventsAsCommitted();
     }
@@ -172,7 +199,7 @@ export class ProposalRepository implements IProposalRepository {
 
   async findById(id: string): Promise<Proposal | null> {
     console.log('🔍 [findById] PAM V1.0 - Replicating findByCriteriaLightweight logic for ID:', id);
-    
+
     // PAM V1.0 CORREÇÃO MANDATÓRIA: Query completa com TODOS os campos do cliente
     const result = await db
       .select({
@@ -210,7 +237,7 @@ export class ProposalRepository implements IProposalRepository {
         parceiro_nome: parceiros.razaoSocial,
         atendente_id: propostas.userId,
         created_at: propostas.createdAt,
-        updated_at: propostas.updatedAt
+        updated_at: propostas.updatedAt,
       })
       .from(propostas)
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
@@ -228,12 +255,12 @@ export class ProposalRepository implements IProposalRepository {
     console.log('🔍 [findById] PAM V1.0 SUCCESS - Found complete data:', {
       parceiro: result[0].parceiro_nome,
       loja: result[0].loja_nome,
-      produto: result[0].produto_nome
+      produto: result[0].produto_nome,
     });
 
     // PAM V1.0 CORREÇÃO CRÍTICA: Usar o mesmo mapeador que funciona no findByCriteriaLightweight
     const mappedData = this.mapRowToProposalDTO(result[0]);
-    
+
     // PAM V1.0 UNIFICAÇÃO: Retornar DTO diretamente com fallback JSON funcionando
     return mappedData;
   }
@@ -268,7 +295,7 @@ export class ProposalRepository implements IProposalRepository {
     }
 
     console.log('🔍 [PAM V4.1] Executing optimized proposal query with JOINs...');
-    
+
     // OPTIMIZATION: Single query with LEFT JOINs para eliminar N+1
     const results = await db
       .select({
@@ -296,7 +323,7 @@ export class ProposalRepository implements IProposalRepository {
     if (criteria.status) {
       conditions.push(eq(propostas.status, criteria.status));
     }
-    
+
     // CORREÇÃO CRÍTICA: Suporte para múltiplos status na fila de análise
     if (criteria.statusArray && Array.isArray(criteria.statusArray)) {
       conditions.push(inArray(propostas.status, criteria.statusArray));
@@ -324,7 +351,7 @@ export class ProposalRepository implements IProposalRepository {
     }
 
     console.log('⚡ [PERF-BOOST-001] Executing lightweight query without Value Objects...');
-    
+
     // OPTIMIZATION: Retornar dados diretos do banco sem conversão para domínio
     // OPERAÇÃO VISÃO CLARA V1.0: Adicionado JOIN com parceiros
     // CORREÇÃO CRÍTICA P3: Adicionar campos ausentes que causavam N/A no frontend
@@ -363,7 +390,7 @@ export class ProposalRepository implements IProposalRepository {
       .orderBy(desc(propostas.createdAt));
 
     console.log(`⚡ [PERF-BOOST-001] Query executed: ${results.length} proposals (lightweight)`);
-    
+
     // PAM V1.0 DEBUG: Log do primeiro resultado para análise
     if (results.length > 0) {
       console.log('🔍 [PAM DEBUG] First result keys:', Object.keys(results[0]));
@@ -378,7 +405,7 @@ export class ProposalRepository implements IProposalRepository {
     // PAM V1.0 - RECONSTRUÇÃO DO CONTRATO DE DADOS: Usar mapeador completo
     console.log('🔍 [PAM DEBUG] ANTES DO MAPEADOR - Total results:', results.length);
     console.log('🔍 [PAM DEBUG] CHAMANDO MAPEADOR...');
-    
+
     try {
       const mappedResults = results.map((row) => this.mapRowToProposalDTO(row));
       console.log('🔍 [PAM DEBUG] MAPEADOR CONCLUÍDO - Total mapped:', mappedResults.length);
@@ -409,20 +436,20 @@ export class ProposalRepository implements IProposalRepository {
       console.warn('⚠️ [MAPEADOR] Erro ao fazer parse do clienteData JSON:', e);
       clienteDataFromJson = {};
     }
-    
+
     // PAM V1.0 DEBUG: Log para análise do mapeamento
     console.log('🔍 [MAPEADOR DEBUG] parceiro_id:', row.parceiro_id);
     console.log('🔍 [MAPEADOR DEBUG] parceiro_nome:', row.parceiro_nome);
     console.log('🔍 [MAPEADOR DEBUG] loja_id:', row.loja_id);
     console.log('🔍 [MAPEADOR DEBUG] loja_nome:', row.loja_nome);
     console.log('🔍 [MAPEADOR DEBUG] clienteDataFromJson keys:', Object.keys(clienteDataFromJson));
-    
+
     const result = {
       // Dados básicos da proposta
       id: row.id,
       status: row.status,
       numeroProposta: row.numero_proposta,
-      
+
       // Dados do cliente (snake_case → camelCase) COM FALLBACK PARA JSON
       nomeCliente: row.cliente_nome,
       clienteNome: row.cliente_nome,
@@ -431,8 +458,15 @@ export class ProposalRepository implements IProposalRepository {
       emailCliente: row.cliente_email || clienteDataFromJson.email || null,
       telefoneCliente: row.cliente_telefone || clienteDataFromJson.telefone || null,
       // NOVOS CAMPOS COM FALLBACK JSON
-      clienteDataNascimento: row.cliente_data_nascimento || clienteDataFromJson.dataNascimento || clienteDataFromJson.data_nascimento || null,
-      clienteRenda: row.cliente_renda || (clienteDataFromJson.rendaMensal ? clienteDataFromJson.rendaMensal.toString() : null) || (clienteDataFromJson.renda_mensal ? clienteDataFromJson.renda_mensal.toString() : null),
+      clienteDataNascimento:
+        row.cliente_data_nascimento ||
+        clienteDataFromJson.dataNascimento ||
+        clienteDataFromJson.data_nascimento ||
+        null,
+      clienteRenda:
+        row.cliente_renda ||
+        (clienteDataFromJson.rendaMensal ? clienteDataFromJson.rendaMensal.toString() : null) ||
+        (clienteDataFromJson.renda_mensal ? clienteDataFromJson.renda_mensal.toString() : null),
       clienteRg: row.cliente_rg || clienteDataFromJson.rg || null,
       clienteOrgaoEmissor: row.cliente_orgao_emissor || clienteDataFromJson.orgaoEmissor || null,
       clienteEstadoCivil: row.cliente_estado_civil || clienteDataFromJson.estadoCivil || null,
@@ -440,7 +474,7 @@ export class ProposalRepository implements IProposalRepository {
       clienteCep: row.cliente_cep || clienteDataFromJson.cep || null,
       clienteEndereco: row.cliente_endereco || clienteDataFromJson.endereco || null,
       clienteOcupacao: row.cliente_ocupacao || clienteDataFromJson.ocupacao || null,
-      
+
       // Dados financeiros (snake_case → camelCase)
       valor: row.valor,
       valorSolicitado: row.valor, // Frontend espera valorSolicitado
@@ -457,11 +491,11 @@ export class ProposalRepository implements IProposalRepository {
         prazo: row.prazo,
         taxaJuros: row.taxa_juros,
         finalidade: row.finalidade || 'Capital de Giro', // Valor padrão para propostas antigas
-        garantia: row.garantia || 'Sem Garantia' // Valor padrão para propostas antigas
+        garantia: row.garantia || 'Sem Garantia', // Valor padrão para propostas antigas
       },
       cliente_data: clienteDataFromJson,
       clienteData: clienteDataFromJson,
-      
+
       // Dados de produtos e tabelas COM FALLBACK
       produtoId: row.produto_id,
       produto_id: row.produto_id,
@@ -475,27 +509,31 @@ export class ProposalRepository implements IProposalRepository {
       loja_id: row.loja_id,
       lojaNome: row.loja_nome || null,
       loja_nome: row.loja_nome || null,
-      
+
       // Dados de datas (snake_case → camelCase)
       createdAt: row.created_at,
       updatedAt: row.updated_at,
-      
+
       // Dados estruturados de parceiro
-      parceiro: row.parceiro_id ? {
-        id: row.parceiro_id,
-        razaoSocial: row.parceiro_nome
-      } : null,
-      
-      // Dados estruturados de loja  
-      loja: row.loja_id ? {
-        id: row.loja_id,
-        nomeLoja: row.loja_nome
-      } : null,
-      
+      parceiro: row.parceiro_id
+        ? {
+            id: row.parceiro_id,
+            razaoSocial: row.parceiro_nome,
+          }
+        : null,
+
+      // Dados estruturados de loja
+      loja: row.loja_id
+        ? {
+            id: row.loja_id,
+            nomeLoja: row.loja_nome,
+          }
+        : null,
+
       // Dados do atendente
       atendenteId: row.atendente_id,
       userId: row.atendente_id, // Compatibilidade
-      
+
       // Cálculo de parcela (mantido do código anterior)
       valorParcela: Proposal.calculateMonthlyPaymentStatic(
         parseFloat(row.valor || '0'),
@@ -503,16 +541,16 @@ export class ProposalRepository implements IProposalRepository {
         row.prazo || 1
       ),
     };
-    
+
     console.log('🔍 [MAPEADOR DEBUG] OBJETO RESULT CRIADO COM SUCESSO');
-    
+
     // PAM V1.0 DEBUG: Log do resultado final do mapeamento
     console.log('🔍 [MAPEADOR DEBUG] ANTES JSON STRINGIFY');
     console.log('🔍 [MAPEADOR DEBUG] result.parceiro existe?', !!result.parceiro);
     console.log('🔍 [MAPEADOR DEBUG] result.loja existe?', !!result.loja);
     console.log('🔍 [MAPEADOR DEBUG] RESULTADO FINAL parceiro:', result.parceiro);
     console.log('🔍 [MAPEADOR DEBUG] RESULTADO FINAL loja:', result.loja);
-    
+
     return result;
   }
 
@@ -601,7 +639,7 @@ export class ProposalRepository implements IProposalRepository {
 
   async findByClienteCpfAndStatus(cpf: string, status: ProposalStatus[]): Promise<Proposal[]> {
     const cleanCPF = cpf.replace(/\D/g, '');
-    
+
     const results = await db
       .select()
       .from(propostas)
@@ -621,20 +659,15 @@ export class ProposalRepository implements IProposalRepository {
     options: CursorPaginationOptions,
     filters?: RepositoryFilters
   ): Promise<PaginatedResult<Proposal>> {
-    const {
-      limit = 50,
-      cursor,
-      cursorField = 'created_at',
-      direction = 'desc'
-    } = options;
+    const { limit = 50, cursor, cursorField = 'created_at', direction = 'desc' } = options;
 
     // Validar limite
     const safeLimit = Math.min(Math.max(limit, 1), 100);
-    
+
     // Construir condições base
     const conditions = [
       eq(propostas.status, ProposalStatus.EM_ANALISE),
-      isNull(propostas.deletedAt)
+      isNull(propostas.deletedAt),
     ];
 
     // Adicionar filtros opcionais
@@ -648,12 +681,13 @@ export class ProposalRepository implements IProposalRepository {
     // Adicionar condição do cursor
     if (cursor && CursorUtils.isValid(cursor)) {
       const cursorValue = CursorUtils.decode(cursor);
-      
+
       if (cursorField === 'created_at') {
         const cursorDate = new Date(cursorValue);
-        const cursorCondition = direction === 'desc' 
-          ? lt(propostas.createdAt, cursorDate)
-          : gt(propostas.createdAt, cursorDate);
+        const cursorCondition =
+          direction === 'desc'
+            ? lt(propostas.createdAt, cursorDate)
+            : gt(propostas.createdAt, cursorDate);
         conditions.push(cursorCondition);
       }
     }
@@ -665,7 +699,7 @@ export class ProposalRepository implements IProposalRepository {
         produto: produtos,
         tabelaComercial: tabelasComerciais,
         loja: lojas,
-        parceiro: parceiros
+        parceiro: parceiros,
       })
       .from(propostas)
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
@@ -683,27 +717,31 @@ export class ProposalRepository implements IProposalRepository {
     }
 
     const results = await query;
-    
+
     // Verificar se há próxima página
     const hasNextPage = results.length > safeLimit;
     const data = hasNextPage ? results.slice(0, safeLimit) : results;
-    
+
     // Gerar cursors
     let nextCursor: string | null = null;
     let prevCursor: string | null = null;
-    
+
     if (hasNextPage && data.length > 0) {
       const lastItem = data[data.length - 1];
       nextCursor = CursorUtils.createFromItem(lastItem.proposta, cursorField);
     }
-    
+
     if (cursor && data.length > 0) {
       const firstItem = data[0];
       prevCursor = CursorUtils.createFromItem(firstItem.proposta, cursorField);
     }
 
-    console.log('🚀 [PERF-OPT] findPendingForAnalysis optimized with JOINs:', data.length, 'proposals');
-    
+    console.log(
+      '🚀 [PERF-OPT] findPendingForAnalysis optimized with JOINs:',
+      data.length,
+      'proposals'
+    );
+
     return {
       data: data.map((row) => this.mapToDomainWithJoinedData(row)),
       pagination: {
@@ -711,8 +749,8 @@ export class ProposalRepository implements IProposalRepository {
         prevCursor,
         pageSize: data.length,
         hasNextPage,
-        hasPrevPage: !!cursor
-      }
+        hasPrevPage: !!cursor,
+      },
     };
   }
 
@@ -801,21 +839,21 @@ export class ProposalRepository implements IProposalRepository {
    */
   private mapToDomainWithJoinedData(row: any): Proposal {
     const proposal = this.mapToDomain(row.proposta);
-    
+
     // Anexar dados relacionados ao agregado para evitar N+1 queries
     if (row.produto) {
       (proposal as any)._relatedProductName = row.produto.nomeProduto;
     }
-    
+
     if (row.tabelaComercial) {
       (proposal as any)._relatedCommercialTableName = row.tabelaComercial.nomeTabela;
       (proposal as any)._relatedCommercialTableRate = row.tabelaComercial.taxaJuros;
     }
-    
+
     if (row.loja) {
       (proposal as any)._relatedStoreName = row.loja.nomeLoja;
     }
-    
+
     return proposal;
   }
 
@@ -891,7 +929,9 @@ export class ProposalRepository implements IProposalRepository {
       // CORREÇÃO: Incluir campos que estavam ausentes - USANDO NOMES CORRETOS DO DRIZZLE SCHEMA
       valor_tac: row.valorTac ? parseFloat(row.valorTac) : 0,
       valor_iof: row.valorIof ? parseFloat(row.valorIof) : 0,
-      valor_total_financiado: row.valorTotalFinanciado ? parseFloat(row.valorTotalFinanciado) : parseFloat(row.valor),
+      valor_total_financiado: row.valorTotalFinanciado
+        ? parseFloat(row.valorTotalFinanciado)
+        : parseFloat(row.valor),
       finalidade: row.finalidade,
       garantia: row.garantia,
       dados_pagamento: row.dadosPagamentoMetodo

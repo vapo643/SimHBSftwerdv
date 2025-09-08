@@ -15,6 +15,7 @@ A auditoria identificou **3 pontos de falha** na cadeia de comunicação "Webhoo
 ## 🔧 RELATÓRIO 1 - AUDITORIA DO BACKEND (O RECEPTOR DO EVENTO)
 
 ### ✅ **ENCONTRADO:**
+
 - **Endpoint:** `/api/webhooks/clicksign` em `server/routes/webhooks.ts`
 - **Eventos processados:** `document.signed`, `document.finished`, `auto_close`
 - **Validação:** ✅ HMAC implementada corretamente
@@ -24,6 +25,7 @@ A auditoria identificou **3 pontos de falha** na cadeia de comunicação "Webhoo
 ### ❌ **PROBLEMA CRÍTICO IDENTIFICADO:**
 
 **Linha 134-138** em `server/routes/webhooks.ts`:
+
 ```typescript
 const result = await documentProcessingService.processSignedDocument(
   proposal.id as string,
@@ -35,9 +37,10 @@ const result = await documentProcessingService.processSignedDocument(
 **O `documentProcessingService` NÃO ATUALIZA O STATUS DA PROPOSTA!**
 
 **Linhas 119-126** em `server/services/documentProcessingService.ts`:
+
 ```sql
-UPDATE propostas 
-SET 
+UPDATE propostas
+SET
   caminho_ccb_assinado = ${storagePath},
   data_assinatura = NOW(),
   atualizado_em = NOW()
@@ -52,13 +55,14 @@ WHERE id = ${proposalId}
 **Existe `clickSignWebhookService.ts`** que atualiza o status corretamente:
 
 **Linhas 374-398**:
+
 ```typescript
 const updateData = {
-  clicksignStatus: "signed",
+  clicksignStatus: 'signed',
   clicksignSignedAt: new Date(),
   assinaturaEletronicaConcluida: true,
   dataAssinatura: new Date(),
-  status: "contratos_assinados", // ✅ ATUALIZA O STATUS!
+  status: 'contratos_assinados', // ✅ ATUALIZA O STATUS!
 };
 ```
 
@@ -85,6 +89,7 @@ const updateData = {
 **Arquivo:** `client/src/pages/formalizacao.tsx`
 
 **Encontrado:** Apenas 1 `useEffect` na linha 620:
+
 ```typescript
 React.useEffect(() => {
   if (initialClickSignData) {
@@ -105,15 +110,16 @@ React.useEffect(() => {
 
 ### 🔴 **A CADEIA DE COMUNICAÇÃO ESTÁ QUEBRADA EM 3 PONTOS:**
 
-| **Camada** | **Status** | **Problema Identificado** |
-|------------|------------|----------------------------|
-| **Backend** | ❌ **FALHA CRÍTICA** | Webhook não atualiza `status` da proposta |
-| **Realtime** | ❌ **AUSENTE** | Supabase Realtime não configurado |
-| **Frontend** | ❌ **AUSENTE** | Não há escuta de eventos em tempo real |
+| **Camada**   | **Status**           | **Problema Identificado**                 |
+| ------------ | -------------------- | ----------------------------------------- |
+| **Backend**  | ❌ **FALHA CRÍTICA** | Webhook não atualiza `status` da proposta |
+| **Realtime** | ❌ **AUSENTE**       | Supabase Realtime não configurado         |
+| **Frontend** | ❌ **AUSENTE**       | Não há escuta de eventos em tempo real    |
 
 ### 🔧 **SOLUÇÃO NECESSÁRIA (3 ETAPAS):**
 
 #### **ETAPA 1 - Corrigir Backend (CRÍTICO):**
+
 ```typescript
 // SUBSTITUIR em server/routes/webhooks.ts linha 134:
 // ❌ await documentProcessingService.processSignedDocument(...)
@@ -122,22 +128,25 @@ React.useEffect(() => {
 await clickSignWebhookService.processEvent({
   event: event.name,
   data: webhookData,
-  occurred_at: event.occurred_at
+  occurred_at: event.occurred_at,
 });
 ```
 
 #### **ETAPA 2 - Configurar Supabase Realtime:**
+
 - Ativar Realtime para tabela `propostas`
 - Configurar publication para eventos UPDATE
 - Testar transmissão de mudanças
 
 #### **ETAPA 3 - Implementar Frontend Subscription:**
+
 ```typescript
 // Adicionar em formalizacao.tsx:
 useEffect(() => {
   const channel = supabase
     .channel('propostas-changes')
-    .on('postgres_changes', 
+    .on(
+      'postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'propostas' },
       (payload) => {
         if (payload.new.id === propostaId) {

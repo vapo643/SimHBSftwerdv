@@ -4,11 +4,12 @@
 
 **SINTOMA**: Boletos exibindo valores incorretos (R$ 1.000) que não correspondiam à proposta  
 **IMPACTO**: Timeline mostrando informações financeiras incorretas  
-**CAUSA RAIZ**: Dados de teste criados com valores arbitrários ao invés dos dados reais da proposta  
+**CAUSA RAIZ**: Dados de teste criados com valores arbitrários ao invés dos dados reais da proposta
 
 ## 🔍 ANÁLISE DETALHADA DA DISCREPÂNCIA
 
 ### 📊 DADOS REAIS DA PROPOSTA
+
 ```sql
 -- Proposta ID: 88a44696-9b63-42ee-aa81-15f9519d24cb
 Valor do empréstimo: R$ 20.000,00
@@ -18,6 +19,7 @@ Cliente: Gabriel Santana Jesus
 ```
 
 ### ❌ BOLETOS INCORRETOS (ANTES)
+
 ```sql
 -- Dados de teste errôneos criados por mim
 Valor por parcela: R$ 1.000,00
@@ -27,6 +29,7 @@ Status: ❌ VALORES INCORRETOS
 ```
 
 ### ✅ BOLETOS CORRETOS (DEPOIS)
+
 ```sql
 -- Dados corrigidos baseados na proposta real
 Valor por parcela: R$ 833,33
@@ -38,9 +41,10 @@ Status: ✅ VALORES CORRETOS
 ## 🔧 CORREÇÕES APLICADAS
 
 ### 1. **Auditoria Completa dos Dados**
+
 ```sql
 -- Verificação da proposta real
-SELECT 
+SELECT
   condicoes_data->>'valor' as valor_emprestimo,      -- R$ 20.000
   condicoes_data->>'prazo' as prazo_parcelas         -- 24 parcelas
 FROM propostas WHERE id = '88a44696-9b63-42ee-aa81-15f9519d24cb';
@@ -49,19 +53,21 @@ FROM propostas WHERE id = '88a44696-9b63-42ee-aa81-15f9519d24cb';
 ```
 
 ### 2. **Remoção dos Dados Incorretos**
+
 ```sql
 -- Deletar boletos de teste com valores errados
-DELETE FROM inter_collections 
+DELETE FROM inter_collections
 WHERE proposta_id = '88a44696-9b63-42ee-aa81-15f9519d24cb'
   AND codigo_solicitacao LIKE 'TEST-%';
 -- Resultado: 2 boletos incorretos removidos
 ```
 
 ### 3. **Criação de Dados Corretos**
+
 ```sql
 -- Gerar 24 boletos com valores corretos
 INSERT INTO inter_collections (...)
-SELECT 
+SELECT
   proposta_id,
   valor_por_parcela,    -- R$ 833,33 (calculado dinamicamente)
   numero_parcela,       -- 1 a 24
@@ -74,16 +80,18 @@ CROSS JOIN generate_series(1, 24);
 ## 📊 VALIDAÇÃO FINAL
 
 ### ✅ Verificação de Integridade
+
 ```sql
 numero_parcela | valor_nominal | valor_esperado | status
 1              | 833.33        | 833.33         | ✅ CORRETO
-2              | 833.33        | 833.33         | ✅ CORRETO  
+2              | 833.33        | 833.33         | ✅ CORRETO
 3              | 833.33        | 833.33         | ✅ CORRETO
 ...
 24             | 833.33        | 833.33         | ✅ CORRETO
 ```
 
 ### 🧮 Matemática Financeira
+
 - **Valor total**: 24 × R$ 833,33 = R$ 20.000,00 ✅
 - **Parcelas**: 24 mensais (conforme proposta) ✅
 - **Vencimentos**: Sequenciais mensais ✅
@@ -92,11 +100,13 @@ numero_parcela | valor_nominal | valor_esperado | status
 ## 🎯 LIÇÕES APRENDIDAS
 
 ### ❌ O QUE CAUSOU O ERRO
+
 1. **Pressa na criação de dados de teste**
 2. **Não verificação dos dados reais da proposta**
 3. **Uso de valores arbitrários (R$ 1.000 e 12 parcelas)**
 
 ### ✅ MEDIDAS PREVENTIVAS
+
 1. **Sempre consultar dados reais antes de criar testes**
 2. **Validar cálculos financeiros com precisão**
 3. **Usar dados derivados da proposta, nunca arbitrários**
@@ -127,6 +137,7 @@ graph TD
 ## 🧪 TESTE DE REGRESSÃO
 
 ### Cenário: Visualizar Timeline
+
 1. **Acessar proposta 88a44696-9b63-42ee-aa81-15f9519d24cb**
 2. **Verificar seção de boletos**
 3. **Confirmar valores: R$ 833,33 por parcela**

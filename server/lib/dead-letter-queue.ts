@@ -1,7 +1,7 @@
 /**
  * Dead-Letter Queue Management Service
  * Implements comprehensive DLQ pattern for BullMQ failed jobs
- * 
+ *
  * Features:
  * - Automatic transfer of permanently failed jobs to DLQ
  * - Rich error context and audit trail preservation
@@ -23,17 +23,17 @@ interface DLQJobData {
   originalJobId: string | undefined;
   originalData: any;
   originalJobName: string;
-  
+
   // Failure context
   failureReason: string;
   failureStack?: string;
   attemptsMade: number;
   maxAttempts: number;
-  
+
   // Audit trail
   failedAt: Date;
   processingDuration?: number;
-  
+
   // Metadata for compliance and investigation
   metadata: {
     environment: string;
@@ -48,16 +48,16 @@ interface DLQJobData {
  */
 export class DeadLetterQueueManager {
   private static instance: DeadLetterQueueManager;
-  
+
   private constructor() {}
-  
+
   public static getInstance(): DeadLetterQueueManager {
     if (!DeadLetterQueueManager.instance) {
       DeadLetterQueueManager.instance = new DeadLetterQueueManager();
     }
     return DeadLetterQueueManager.instance;
   }
-  
+
   /**
    * Checks if a job should be moved to DLQ
    * A job qualifies for DLQ if it has exhausted all retry attempts
@@ -66,14 +66,14 @@ export class DeadLetterQueueManager {
     if (!job) {
       return false;
     }
-    
+
     const maxAttempts = job.opts?.attempts ?? 1;
     const attemptsMade = job.attemptsMade;
-    
+
     // Job should move to DLQ if it has exhausted all attempts
     return attemptsMade >= maxAttempts;
   }
-  
+
   /**
    * Moves a permanently failed job to the Dead-Letter Queue
    * Preserves all original data plus failure context for audit trail
@@ -88,7 +88,7 @@ export class DeadLetterQueueManager {
       logger.error('Cannot move undefined job to DLQ', { queueName });
       return;
     }
-    
+
     try {
       // Build comprehensive DLQ job data
       const dlqJobData: DLQJobData = {
@@ -97,17 +97,17 @@ export class DeadLetterQueueManager {
         originalJobId: job.id,
         originalData: job.data,
         originalJobName: job.name,
-        
+
         // Failure context
         failureReason: error instanceof Error ? error.message : String(error),
         failureStack: error instanceof Error ? error.stack : undefined,
         attemptsMade: job.attemptsMade,
         maxAttempts: job.opts?.attempts ?? 1,
-        
+
         // Audit trail
         failedAt: new Date(),
         processingDuration,
-        
+
         // Metadata for compliance
         metadata: {
           environment: process.env.NODE_ENV || 'unknown',
@@ -115,19 +115,15 @@ export class DeadLetterQueueManager {
           correlationId: this.extractCorrelationId(job.data),
         },
       };
-      
+
       // Add job to Dead-Letter Queue with high priority for investigation
-      await deadLetterQueue.add(
-        `dlq-${queueName}-${job.name}`,
-        dlqJobData,
-        {
-          priority: 1, // High priority for investigation
-          delay: 0,    // Process immediately
-          removeOnComplete: false, // Keep for compliance
-          removeOnFail: false,     // Never remove DLQ jobs
-        }
-      );
-      
+      await deadLetterQueue.add(`dlq-${queueName}-${job.name}`, dlqJobData, {
+        priority: 1, // High priority for investigation
+        delay: 0, // Process immediately
+        removeOnComplete: false, // Keep for compliance
+        removeOnFail: false, // Never remove DLQ jobs
+      });
+
       logger.error('Job moved to Dead-Letter Queue', {
         queueName,
         jobId: job.id,
@@ -137,10 +133,9 @@ export class DeadLetterQueueManager {
         maxAttempts: dlqJobData.maxAttempts,
         dlqJobId: `dlq-${queueName}-${job.name}`,
       });
-      
+
       // Emit metric/alert for monitoring (if monitoring service exists)
       this.emitDLQMetric(queueName, job.name, dlqJobData);
-      
     } catch (dlqError) {
       // Critical: If we can't move to DLQ, this is a system-level failure
       logger.error('CRITICAL: Failed to move job to Dead-Letter Queue', {
@@ -149,12 +144,12 @@ export class DeadLetterQueueManager {
         originalError: error instanceof Error ? error.message : String(error),
         dlqError: dlqError instanceof Error ? dlqError.message : String(dlqError),
       });
-      
+
       // Don't throw - we don't want to cause further failures
       // But this should trigger alerts in production
     }
   }
-  
+
   /**
    * Sets up global failed event listeners for a Worker
    * This is the primary integration point for existing workers
@@ -176,23 +171,25 @@ export class DeadLetterQueueManager {
         });
       }
     });
-    
+
     logger.info(`DLQ handler registered for worker: ${queueName}`);
   }
-  
+
   /**
    * Extracts correlation ID from job data for tracking
    * Helps with distributed tracing and debugging
    */
   private extractCorrelationId(jobData: any): string | undefined {
     // Try common correlation ID fields
-    return jobData?.correlationId || 
-           jobData?.traceId || 
-           jobData?.aggregateId ||
-           jobData?.proposalId ||
-           undefined;
+    return (
+      jobData?.correlationId ||
+      jobData?.traceId ||
+      jobData?.aggregateId ||
+      jobData?.proposalId ||
+      undefined
+    );
   }
-  
+
   /**
    * Emits DLQ metrics for monitoring and alerting
    * In production, this would integrate with metrics services
@@ -209,7 +206,7 @@ export class DeadLetterQueueManager {
       timestamp: dlqData.failedAt.toISOString(),
     });
   }
-  
+
   /**
    * Health check for DLQ system
    * Returns DLQ status and statistics
@@ -221,7 +218,7 @@ export class DeadLetterQueueManager {
   }> {
     try {
       const jobCounts = await deadLetterQueue.getJobCounts();
-      
+
       return {
         healthy: true,
         jobCounts,

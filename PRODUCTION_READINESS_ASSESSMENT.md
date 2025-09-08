@@ -1,4 +1,5 @@
 # 📊 Análise de Prontidão para Produção - Simpix
+
 ## Data: 20/08/2025 | Meta: 10 usuários ativos/dia
 
 ---
@@ -14,6 +15,7 @@ O sistema pode funcionar em produção para 10 usuários, mas precisa de melhori
 ## ✅ O QUE JÁ ESTÁ PRONTO (Pontos Fortes)
 
 ### 1. **Segurança (95% completo)**
+
 - ✅ Autenticação Supabase com JWT
 - ✅ RBAC com 3 níveis de acesso
 - ✅ Rate limiting configurado
@@ -24,6 +26,7 @@ O sistema pode funcionar em produção para 10 usuários, mas precisa de melhori
 - ✅ XSS protection
 
 ### 2. **Funcionalidades Core (90% completo)**
+
 - ✅ CRUD de propostas funcional
 - ✅ Sistema de status FSM robusto
 - ✅ Integração Banco Inter (boletos/PIX)
@@ -33,6 +36,7 @@ O sistema pode funcionar em produção para 10 usuários, mas precisa de melhori
 - ✅ Busca por CPF
 
 ### 3. **Infraestrutura Básica (85% completo)**
+
 - ✅ PostgreSQL Supabase configurado
 - ✅ BullMQ para processamento assíncrono
 - ✅ Health check endpoint
@@ -48,10 +52,11 @@ O sistema pode funcionar em produção para 10 usuários, mas precisa de melhori
 **Problema:** Sem visibilidade real do que acontece em produção
 
 **O que falta:**
+
 ```typescript
 // NECESSÁRIO: Integração com APM
 // Exemplo: Sentry, DataDog, New Relic
-import * as Sentry from "@sentry/node";
+import * as Sentry from '@sentry/node';
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -75,20 +80,21 @@ process.on('uncaughtException', (error) => {
 **Problema:** Servidor não fecha conexões adequadamente
 
 **Implementação necessária:**
+
 ```typescript
 // server/index.ts
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received, shutting down gracefully...');
-  
+
   // 1. Parar de aceitar novas requisições
   server.close();
-  
+
   // 2. Fechar conexões de banco
   await db.end();
-  
+
   // 3. Fechar Redis/BullMQ
   await queue.close();
-  
+
   // 4. Aguardar requisições em andamento
   setTimeout(() => {
     process.exit(0);
@@ -101,6 +107,7 @@ process.on('SIGTERM', async () => {
 **Problema:** Sem métricas de latência, throughput, erros
 
 **Solução necessária:**
+
 ```typescript
 // Prometheus metrics
 import { register, Counter, Histogram } from 'prom-client';
@@ -123,22 +130,25 @@ const httpRequestTotal = new Counter({
 **Problema:** Usando memorystore (não persiste)
 
 **Solução necessária:**
+
 ```typescript
 // Mudar de memorystore para Redis
 import connectRedis from 'connect-redis';
 
 const RedisStore = connectRedis(session);
-app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true, // HTTPS only
-    httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24 // 24 hours
-  }
-}));
+app.use(
+  session({
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: true, // HTTPS only
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    },
+  })
+);
 ```
 
 ### 5. **🗄️ Database Connection Pool (60% completo) - MÉDIO**
@@ -146,6 +156,7 @@ app.use(session({
 **Problema:** Pool não otimizado para produção
 
 **Otimização necessária:**
+
 ```typescript
 // Configuração adequada para 10 usuários
 const pool = postgres(DATABASE_URL, {
@@ -161,6 +172,7 @@ const pool = postgres(DATABASE_URL, {
 **Problema:** Logs apenas no console, não persistidos
 
 **Solução necessária:**
+
 ```typescript
 // Winston para logging estruturado
 import winston from 'winston';
@@ -179,6 +191,7 @@ const logger = winston.createLogger({
 **Problema:** Jobs falhos não são tratados adequadamente
 
 **Solução necessária:**
+
 ```typescript
 // BullMQ com DLQ
 const queue = new Queue('main', {
@@ -199,6 +212,7 @@ const queue = new Queue('main', {
 **Problema:** Secrets em variáveis de ambiente simples
 
 **Melhoria recomendada:**
+
 - Usar Replit Secrets (já parcialmente implementado)
 - Rotação de secrets
 - Auditoria de acesso
@@ -264,13 +278,13 @@ const queue = new Queue('main', {
 
 ## 💰 ESTIMATIVA DE CUSTOS MENSAIS (10 usuários)
 
-| Serviço | Custo Estimado | Observação |
-|---------|---------------|------------|
-| Replit Core | $20/mês | Plano atual |
-| Supabase | $0-25/mês | Free tier pode ser suficiente |
-| Sentry | $0/mês | Free tier: 5k erros/mês |
-| Redis (Upstash) | $0/mês | Free tier: 10k comandos/dia |
-| **TOTAL** | **$20-45/mês** | Para 10 usuários |
+| Serviço         | Custo Estimado | Observação                    |
+| --------------- | -------------- | ----------------------------- |
+| Replit Core     | $20/mês        | Plano atual                   |
+| Supabase        | $0-25/mês      | Free tier pode ser suficiente |
+| Sentry          | $0/mês         | Free tier: 5k erros/mês       |
+| Redis (Upstash) | $0/mês         | Free tier: 10k comandos/dia   |
+| **TOTAL**       | **$20-45/mês** | Para 10 usuários              |
 
 ---
 
@@ -294,6 +308,7 @@ const queue = new Queue('main', {
 ### Para 10 usuários ativos/dia:
 
 **✅ PODE FAZER DEPLOY COM:**
+
 1. Implementação do graceful shutdown (1h)
 2. Sentry básico para error tracking (1h)
 3. Health check melhorado (1h)
@@ -301,11 +316,13 @@ const queue = new Queue('main', {
 **Total: 3-4 horas de trabalho**
 
 ### Risco Aceitável:
+
 - Sistema funcionará adequadamente
 - Terá observabilidade mínima
 - Poderá escalar até ~50 usuários/dia
 
 ### Limitações Conhecidas:
+
 - Sessions não persistem em restart (usar Redis em P1)
 - Logs não estruturados (implementar em P1)
 - Sem métricas detalhadas (implementar em P2)
@@ -314,12 +331,12 @@ const queue = new Queue('main', {
 
 ## 📈 ROADMAP DE ESCALABILIDADE
 
-| Usuários/dia | Mudanças Necessárias | Custo Estimado |
-|--------------|---------------------|----------------|
-| 10-50 | Config atual + melhorias P0 | $20-45/mês |
-| 50-200 | + Redis, CDN, APM | $100-200/mês |
-| 200-1000 | + Load balancer, replicas | $300-500/mês |
-| 1000+ | + Microserviços, Kubernetes | $1000+/mês |
+| Usuários/dia | Mudanças Necessárias        | Custo Estimado |
+| ------------ | --------------------------- | -------------- |
+| 10-50        | Config atual + melhorias P0 | $20-45/mês     |
+| 50-200       | + Redis, CDN, APM           | $100-200/mês   |
+| 200-1000     | + Load balancer, replicas   | $300-500/mês   |
+| 1000+        | + Microserviços, Kubernetes | $1000+/mês     |
 
 ---
 

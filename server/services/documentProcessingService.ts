@@ -102,12 +102,15 @@ export class DocumentProcessingService {
       }
 
       // CONF-002: Log document integrity verification
-      console.log(`🔐 [DOCUMENT PROCESSING] CONF-002: Document integrity verified for ${proposalId}:`, {
-        hash: documentData.documentHash,
-        auditTrailEvents: documentData.auditTrail.events.length,
-        auditTrailSignatures: documentData.auditTrail.signatures.length,
-        verifiedAt: documentData.verifiedAt
-      });
+      console.log(
+        `🔐 [DOCUMENT PROCESSING] CONF-002: Document integrity verified for ${proposalId}:`,
+        {
+          hash: documentData.documentHash,
+          auditTrailEvents: documentData.auditTrail.events.length,
+          auditTrailSignatures: documentData.auditTrail.signatures.length,
+          verifiedAt: documentData.verifiedAt,
+        }
+      );
 
       const pdfBuffer = documentData.documentBuffer;
 
@@ -122,10 +125,12 @@ export class DocumentProcessingService {
         integrity_verified_at: documentData.verifiedAt.toISOString(),
         clicksign_document_key: clickSignDocId as string,
         original_size_bytes: pdfBuffer.length,
-        processing_timestamp: new Date().toISOString()
+        processing_timestamp: new Date().toISOString(),
       };
 
-      console.log(`💾 [DOCUMENT PROCESSING] Saving to Storage with integrity metadata: ${storagePath}`);
+      console.log(
+        `💾 [DOCUMENT PROCESSING] Saving to Storage with integrity metadata: ${storagePath}`
+      );
       const { error: uploadError } = await supabase.storage
         .from('documents')
         .upload(storagePath, pdfBuffer, {

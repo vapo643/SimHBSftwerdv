@@ -3,18 +3,22 @@
 ## ✅ STATUS: CORRIGIDO
 
 ### 📋 PROBLEMA IDENTIFICADO
+
 O sistema estava enviando o **mesmo** `seuNumero` para todas as parcelas ao criar boletos em lote para o Banco Inter, causando:
+
 - ✅ Primeira parcela: Criada com sucesso
 - ❌ Parcelas 2-24: Rejeitadas como duplicatas
 
 ### 🔍 CAUSA RAIZ
+
 ```typescript
 // ANTES (bug):
-seuNumero: proposalData.id.substring(0, 15)
+seuNumero: proposalData.id.substring(0, 15);
 // Resultado: "88a44696-9b63-4" para TODAS as parcelas!
 ```
 
 O `substring(0, 15)` estava cortando o sufixo único das parcelas:
+
 - `"88a44696-9b63-42ee-aa81-15f9519d24cb-1"` → `"88a44696-9b63-4"`
 - `"88a44696-9b63-42ee-aa81-15f9519d24cb-2"` → `"88a44696-9b63-4"` (IGUAL!)
 
@@ -44,6 +48,7 @@ if (seuNumeroUnico.length > 15) {
 ### 📊 RESULTADOS ESPERADOS
 
 **ANTES (com bug):**
+
 ```
 [INTER] 🔑 seuNumero único gerado: 88a44696-9b63-4
 [INTER] 🔑 seuNumero único gerado: 88a44696-9b63-4  // DUPLICADO!
@@ -52,6 +57,7 @@ if (seuNumeroUnico.length > 15) {
 ```
 
 **DEPOIS (corrigido):**
+
 ```
 [INTER] 🔑 seuNumero único gerado: 88a44696-9b6-1
 [INTER] 🔑 seuNumero único gerado: 88a44696-9b6-2  // ÚNICO!
@@ -71,9 +77,10 @@ if (seuNumeroUnico.length > 15) {
    - Clicar em "Gerar Boletos" no Banco Inter
 
 3. **Verificar logs do servidor:**
+
    ```bash
    # Procurar por:
-   [INTER] 🔑 seuNumero único gerado: 
+   [INTER] 🔑 seuNumero único gerado:
    [INTER] ✅ XX boletos criados com sucesso, 0 erros
    ```
 
@@ -85,6 +92,7 @@ if (seuNumeroUnico.length > 15) {
 ### 🔒 CORREÇÕES ADICIONAIS
 
 Também foram corrigidos erros de TypeScript:
+
 - `proposta_id` → `propostaId` (camelCase correto)
 - `eq(propostas.id, string)` → `eq(propostas.id, parseInt(string))`
 

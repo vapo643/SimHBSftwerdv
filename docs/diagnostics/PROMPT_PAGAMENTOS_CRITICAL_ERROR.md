@@ -1,9 +1,11 @@
 # PROMPT CRÍTICO: Erro de Tipos PostgreSQL na Tela de Pagamentos - Sistema Financeiro Simpix
 
 ## CONTEXTO DO SISTEMA
+
 Sistema de gestão de crédito financeiro com integração bancária (Banco Inter) e assinatura eletrônica (ClickSign). A tela de Pagamentos está completamente quebrada devido a um erro persistente de comparação de tipos no PostgreSQL.
 
 ## ERRO PRINCIPAL
+
 ```
 PostgresError: operator does not exist: text = uuid
 hint: 'No operator matches the given name and argument types. You might need to add explicit type casts.'
@@ -11,30 +13,38 @@ position: '216'
 ```
 
 Este erro acontece quando tentamos fazer JOIN entre:
+
 - Tabela `propostas`: campo `id` é tipo UUID
 - Tabela `inter_collections`: campo `proposta_id` é tipo TEXT
 
 ## HISTÓRICO DE TENTATIVAS FALHAS
 
 ### Tentativa 1: Query original com Drizzle ORM
+
 ```typescript
 .innerJoin(propostas, eq(propostas.id, interCollections.propostaId))
 ```
+
 Resultado: `operator does not exist: uuid = integer` (erro na posição 2571)
 
 ### Tentativa 2: Usar inArray do Drizzle
+
 ```typescript
-inArray(propostas.id, idsComBoletos as string[])
+inArray(propostas.id, idsComBoletos as string[]);
 ```
+
 Resultado: Mesmo erro de tipos
 
 ### Tentativa 3: SQL raw com cast
+
 ```typescript
 .innerJoin(propostas, sql`${propostas.id} = ${interCollections.propostaId}::uuid`)
 ```
+
 Resultado: `operator does not exist: text = uuid` (erro mudou de posição para 216)
 
 ### Tentativa 4: Buscar dados separadamente
+
 ```typescript
 // Primeiro buscar propostas elegíveis
 const propostasElegiveis = await db.select()...
@@ -43,18 +53,22 @@ const boletosInfo = await db.select()...
 // Filtrar em memória
 const result = propostasElegiveis.filter(...)
 ```
+
 Resultado: Mesmo erro ao tentar buscar boletos
 
 ## IMPLEMENTAÇÃO CRÍTICA QUE PODE ESTAR CAUSANDO O PROBLEMA
 
 ### 1. Sistema de Segurança OWASP (implementado recentemente)
+
 - **Row Level Security (RLS)** no Supabase
 - **Políticas de segurança por role** (ADMINISTRADOR, FINANCEIRO, ATENDENTE)
 - **Middleware de validação JWT** que enriquece req.user com roles
 - **Guards de autorização** em todas as rotas
 
 ### 2. Migração de Banco de Dados
+
 O campo `proposta_id` na tabela `inter_collections` foi definido como TEXT referenciando UUID:
+
 ```sql
 CREATE TABLE inter_collections (
   id SERIAL PRIMARY KEY,
@@ -64,7 +78,9 @@ CREATE TABLE inter_collections (
 ```
 
 ### 3. Sistema de Filtragem Complexa
+
 A rota `/api/pagamentos` aplica múltiplos filtros de segurança:
+
 - CCB deve estar assinada (`ccb_gerado = true`)
 - Assinatura eletrônica concluída (`assinatura_eletronica_concluida = true`)
 - Boletos devem estar gerados (JOIN com inter_collections)
@@ -106,6 +122,7 @@ Erro ao buscar pagamentos: PostgresError: operator does not exist: text = uuid
 ## TEORIA DO PROBLEMA
 
 Acredito que o problema está na incompatibilidade de tipos entre:
+
 1. Como o Drizzle ORM está gerando o SQL
 2. Como o PostgreSQL está interpretando os tipos
 3. Possível interferência das políticas RLS do Supabase
@@ -120,10 +137,12 @@ Acredito que o problema está na incompatibilidade de tipos entre:
 ## SOLUÇÃO NECESSÁRIA
 
 Precisamos de uma forma de fazer JOIN entre:
-- `propostas.id` (UUID) 
+
+- `propostas.id` (UUID)
 - `inter_collections.proposta_id` (TEXT)
 
 Sem quebrar:
+
 - As políticas de segurança RLS
 - A integridade referencial
 - A performance da query

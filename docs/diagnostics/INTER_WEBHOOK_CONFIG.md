@@ -3,11 +3,13 @@
 ## URLs dos Webhooks
 
 ### ClickSign (Assinaturas)
+
 - **URL**: `https://SEU_DOMINIO/webhooks/clicksign`
 - **Função**: Recebe notificações quando documentos são assinados
 - **Eventos**: `document.signed`, `signer.signed`, etc.
 
 ### Banco Inter (Pagamentos)
+
 - **URL**: `https://SEU_DOMINIO/webhooks/inter`
 - **Função**: Recebe notificações quando boletos são pagos
 - **Eventos**: `cobranca-paga`, `cobranca-vencida`, `cobranca-cancelada`
@@ -36,6 +38,7 @@
 ## Problema Principal
 
 O erro 400 na autenticação OAuth2 indica que:
+
 - As credenciais podem não estar corretas
 - O certificado pode não estar associado às credenciais
 - A aplicação pode não estar ativa no portal do Inter

@@ -5,16 +5,19 @@
 ## 🎯 O QUE FOI CORRIGIDO
 
 ### 1. **Mapeamento de Campos RG e Endereço**
+
 - ✅ **ANTES**: Campos `clienteRg` e `clienteEndereco` existiam no banco mas não eram usados
 - ✅ **DEPOIS**: Agora são corretamente mapeados para o PDF
 
 ### 2. **Dados Bancários**
+
 - ✅ **ANTES**: Campos `banco` e `conta` genéricos que não existiam
 - ✅ **DEPOIS**: Usa corretamente:
   - `dadosPagamentoBanco` → Extrai código do banco automaticamente
   - `dadosPagamentoAgencia` + `dadosPagamentoConta` → Formata como "Ag: XXXX / C/C: XXXXX"
 
 ### 3. **Cálculo do CET (Custo Efetivo Total)**
+
 - ✅ **ANTES**: Valor fixo "2,5% a.m."
 - ✅ **DEPOIS**: Calcula dinamicamente baseado em:
   - Taxa de juros da proposta
@@ -24,14 +27,17 @@
   - Resultado: "X,XX% a.m. / XX,XX% a.a."
 
 ### 4. **Data de Emissão**
+
 - ✅ **ANTES**: Sempre data atual
 - ✅ **DEPOIS**: Usa `dataAprovacao` se disponível, senão `createdAt`
 
 ### 5. **Cálculo de Parcelas**
+
 - ✅ **ANTES**: Divisão simples do valor
 - ✅ **DEPOIS**: Usa Tabela Price para cálculo correto com juros compostos
 
 ### 6. **Datas de Vencimento**
+
 - ✅ **ANTES**: Cálculo incorreto
 - ✅ **DEPOIS**: Calcula corretamente baseado na data de aprovação + meses
 
@@ -39,25 +45,26 @@
 
 ### Campos que AGORA funcionam corretamente:
 
-| Campo PDF | Dados da Proposta | Status |
-|-----------|-------------------|--------|
-| **numeroCedula** | `id` → "CCB-XXXXXXXX" | ✅ |
-| **dataEmissao** | `dataAprovacao` ou `createdAt` | ✅ |
-| **cpfCnpj** | `clienteCpf` | ✅ |
-| **nomeRazaoSocial** | `clienteNome` | ✅ |
-| **rg** | `clienteRg` | ✅ CORRIGIDO |
-| **enderecoEmitente** | `clienteEndereco` | ✅ CORRIGIDO |
-| **finalidadeOperacao** | `finalidade` | ✅ |
-| **valorPrincipal** | `valor` | ✅ |
-| **custoEfetivoTotal** | Calculado de `taxaJuros` + IOF + TAC | ✅ CORRIGIDO |
-| **numeroBancoEmitente** | Extraído de `dadosPagamentoBanco` | ✅ CORRIGIDO |
+| Campo PDF               | Dados da Proposta                               | Status       |
+| ----------------------- | ----------------------------------------------- | ------------ |
+| **numeroCedula**        | `id` → "CCB-XXXXXXXX"                           | ✅           |
+| **dataEmissao**         | `dataAprovacao` ou `createdAt`                  | ✅           |
+| **cpfCnpj**             | `clienteCpf`                                    | ✅           |
+| **nomeRazaoSocial**     | `clienteNome`                                   | ✅           |
+| **rg**                  | `clienteRg`                                     | ✅ CORRIGIDO |
+| **enderecoEmitente**    | `clienteEndereco`                               | ✅ CORRIGIDO |
+| **finalidadeOperacao**  | `finalidade`                                    | ✅           |
+| **valorPrincipal**      | `valor`                                         | ✅           |
+| **custoEfetivoTotal**   | Calculado de `taxaJuros` + IOF + TAC            | ✅ CORRIGIDO |
+| **numeroBancoEmitente** | Extraído de `dadosPagamentoBanco`               | ✅ CORRIGIDO |
 | **contaNumeroEmitente** | `dadosPagamentoAgencia` + `dadosPagamentoConta` | ✅ CORRIGIDO |
-| **valorPagamento1-6** | Calculado com Tabela Price | ✅ CORRIGIDO |
-| **dataPagamento1-6** | Calculado com vencimentos corretos | ✅ CORRIGIDO |
+| **valorPagamento1-6**   | Calculado com Tabela Price                      | ✅ CORRIGIDO |
+| **dataPagamento1-6**    | Calculado com vencimentos corretos              | ✅ CORRIGIDO |
 
 ## 🧪 COMO TESTAR
 
 ### 1. Testar com Dados Completos de Teste:
+
 ```bash
 curl -X POST http://localhost:5000/api/ccb-corrected/test/teste-123 \
   -H "Authorization: Bearer SEU_TOKEN" \
@@ -66,6 +73,7 @@ curl -X POST http://localhost:5000/api/ccb-corrected/test/teste-123 \
 ```
 
 ### 2. Testar com Proposta Real:
+
 ```bash
 curl -X POST http://localhost:5000/api/ccb-corrected/test/ID_DA_PROPOSTA \
   -H "Authorization: Bearer SEU_TOKEN" \
@@ -74,12 +82,14 @@ curl -X POST http://localhost:5000/api/ccb-corrected/test/ID_DA_PROPOSTA \
 ```
 
 ### 3. Validar se Proposta tem Dados Necessários:
+
 ```bash
 curl -X POST http://localhost:5000/api/ccb-corrected/validate-proposal/ID_DA_PROPOSTA \
   -H "Authorization: Bearer SEU_TOKEN"
 ```
 
 ### 4. Ver Mapeamento Atual:
+
 ```bash
 curl -X GET http://localhost:5000/api/ccb-corrected/field-mapping \
   -H "Authorization: Bearer SEU_TOKEN"
@@ -90,14 +100,16 @@ curl -X GET http://localhost:5000/api/ccb-corrected/field-mapping \
 Para gerar um CCB completo, garanta que a proposta tenha:
 
 ### Obrigatórios:
+
 - ✅ `clienteNome`
 - ✅ `clienteCpf`
 - ✅ `valor`
 - ✅ `prazo`
 
 ### Importantes (aparecerão vazios se não preenchidos):
+
 - ⚠️ `clienteRg` - Adicionar no formulário
-- ⚠️ `clienteEndereco` - Adicionar no formulário  
+- ⚠️ `clienteEndereco` - Adicionar no formulário
 - ⚠️ `dadosPagamentoBanco` - Já existe no formulário
 - ⚠️ `dadosPagamentoAgencia` - Já existe no formulário
 - ⚠️ `dadosPagamentoConta` - Já existe no formulário
@@ -132,10 +144,10 @@ Ao gerar um CCB agora, você verá:
   "success": true,
   "stats": {
     "totalFields": 29,
-    "successFields": 25,  // Campos preenchidos com sucesso
-    "warningFields": 2,   // Avisos (campos opcionais vazios)
-    "errorFields": 0,     // Erros (deve ser 0)
-    "emptyFields": 2      // Campos sem dados
+    "successFields": 25, // Campos preenchidos com sucesso
+    "warningFields": 2, // Avisos (campos opcionais vazios)
+    "errorFields": 0, // Erros (deve ser 0)
+    "emptyFields": 2 // Campos sem dados
   },
   "analysis": {
     "completeness": "86%",

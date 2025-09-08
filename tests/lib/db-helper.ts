@@ -25,13 +25,16 @@ export async function cleanTestDatabase(): Promise<void> {
   // 🛡️ CAMADA 1: VALIDAÇÃO ABSOLUTA DE NODE_ENV
   const nodeEnv = process.env.NODE_ENV;
   if (nodeEnv !== 'test') {
-    const errorMsg = `🚨 FATAL SECURITY VIOLATION: cleanTestDatabase() chamada com NODE_ENV='${nodeEnv}'. ` +
-                    `Esta função SOMENTE pode executar com NODE_ENV='test'. OPERAÇÃO NEGADA.`;
-    
+    const errorMsg =
+      `🚨 FATAL SECURITY VIOLATION: cleanTestDatabase() chamada com NODE_ENV='${nodeEnv}'. ` +
+      `Esta função SOMENTE pode executar com NODE_ENV='test'. OPERAÇÃO NEGADA.`;
+
     // Log crítico de segurança
     console.error(errorMsg);
-    console.error(`🚨 SECURITY LOG: ${new Date().toISOString()} - ${process.env.USER || 'unknown'} - ${process.cwd()}`);
-    
+    console.error(
+      `🚨 SECURITY LOG: ${new Date().toISOString()} - ${process.env.USER || 'unknown'} - ${process.cwd()}`
+    );
+
     throw new Error(errorMsg);
   }
 
@@ -41,7 +44,7 @@ export async function cleanTestDatabase(): Promise<void> {
   if (envResult.error) {
     throw new Error(
       `🚨 FATAL: Falha ao carregar .env.test: ${envResult.error.message}. ` +
-      `Arquivo .env.test é obrigatório para testes de banco.`
+        `Arquivo .env.test é obrigatório para testes de banco.`
     );
   }
 
@@ -50,7 +53,7 @@ export async function cleanTestDatabase(): Promise<void> {
   if (!testDatabaseUrl) {
     throw new Error(
       '🚨 FATAL: TEST_DATABASE_URL não definida. Esta função NUNCA pode usar DATABASE_URL de produção. ' +
-      'Configure TEST_DATABASE_URL no arquivo .env.test'
+        'Configure TEST_DATABASE_URL no arquivo .env.test'
     );
   }
 
@@ -71,48 +74,40 @@ export async function cleanTestDatabase(): Promise<void> {
     'prod.supabase.co',
     'production.supabase.co',
     'prod-db.domain.com',
-    'main.supabase.co'
+    'main.supabase.co',
   ];
 
-  const isProhibitedHost = prohibitedHostnames.some(prohibited => 
-    hostname.includes(prohibited)
-  );
+  const isProhibitedHost = prohibitedHostnames.some((prohibited) => hostname.includes(prohibited));
 
   if (isProhibitedHost) {
     throw new Error(
       `🚨 FATAL: Hostname '${hostname}' é um ambiente de PRODUÇÃO. ` +
-      `OPERAÇÃO NEGADA por segurança.`
+        `OPERAÇÃO NEGADA por segurança.`
     );
   }
 
   // 🛡️ CAMADA 5: VALIDAÇÃO DE NOME DE BANCO SEGURO
-  const allowedTestDatabases = [
-    'postgres',
-    'test',
-    'testing'
-  ];
+  const allowedTestDatabases = ['postgres', 'test', 'testing'];
 
-  const isTestDatabase = dbName.endsWith('-test') || 
-                         dbName.endsWith('_test') || 
-                         allowedTestDatabases.includes(dbName);
+  const isTestDatabase =
+    dbName.endsWith('-test') || dbName.endsWith('_test') || allowedTestDatabases.includes(dbName);
 
   if (!isTestDatabase) {
     throw new Error(
       `🚨 FATAL: Nome do banco '${dbName}' não é reconhecido como seguro para testes. ` +
-      `Banco deve terminar com '-test' ou '_test', ou ser um dos permitidos: ${allowedTestDatabases.join(', ')}`
+        `Banco deve terminar com '-test' ou '_test', ou ser um dos permitidos: ${allowedTestDatabases.join(', ')}`
     );
   }
 
   // 🛡️ CAMADA 6: VALIDAÇÃO DE CONTEXTO DE EXECUÇÃO
   const stackTrace = new Error().stack || '';
-  const isCalledFromTest = stackTrace.includes('vitest') || 
-                          stackTrace.includes('.test.') || 
-                          stackTrace.includes('.spec.');
+  const isCalledFromTest =
+    stackTrace.includes('vitest') || stackTrace.includes('.test.') || stackTrace.includes('.spec.');
 
   if (!isCalledFromTest) {
     console.warn(
       `⚠️  WARNING: cleanTestDatabase() não foi chamada de um contexto de teste reconhecido. ` +
-      `Stack trace: ${stackTrace.split('\n')[1]}`
+        `Stack trace: ${stackTrace.split('\n')[1]}`
     );
   }
 
@@ -123,12 +118,11 @@ export async function cleanTestDatabase(): Promise<void> {
       max: 1,
       idle_timeout: 5,
       connect_timeout: 10,
-      ssl: 'require'
+      ssl: 'require',
     });
 
     // Teste de conectividade
     await directDb`SELECT 1 as test`;
-    
   } catch (error) {
     throw new Error(`🚨 FATAL: Falha na conexão com banco de teste: ${(error as Error).message}`);
   }
@@ -160,7 +154,7 @@ export async function cleanTestDatabase(): Promise<void> {
       'gerente_lojas',
       'lojas',
       'parceiros',
-      'security_logs'
+      'security_logs',
     ];
 
     // Limpeza individual para controle total
@@ -174,7 +168,6 @@ export async function cleanTestDatabase(): Promise<void> {
     }
 
     console.log(`✅ [TEST DB CLEAN] Limpeza concluída com sucesso`);
-
   } finally {
     await directDb.end();
   }
@@ -194,10 +187,12 @@ export function validateTestEnvironmentSafety(): boolean {
 
     const url = new URL(testDatabaseUrl);
     const dbName = url.pathname.substring(1);
-    
-    return dbName.endsWith('-test') || dbName.endsWith('_test') || 
-           ['postgres', 'test', 'testing'].includes(dbName);
-    
+
+    return (
+      dbName.endsWith('-test') ||
+      dbName.endsWith('_test') ||
+      ['postgres', 'test', 'testing'].includes(dbName)
+    );
   } catch {
     return false;
   }
@@ -236,17 +231,18 @@ export async function setupTestEnvironment(): Promise<{
     // Safety check: Validação por hostname para diferenciar produção de teste
     const url = new URL(databaseUrl);
     const hostname = url.hostname;
-    
+
     // VALIDAÇÃO CRÍTICA: Diferentes servidores Supabase para produção vs teste
     const isTestDatabase = hostname.includes('fkfmirnnredvhocnhost') || hostname.includes('test');
-    const isProductionDatabase = hostname.includes('dvglgxrvhmtsixaabxha') || hostname.includes('prod');
-    
+    const isProductionDatabase =
+      hostname.includes('dvglgxrvhmtsixaabxha') || hostname.includes('prod');
+
     if (isProductionDatabase) {
       console.error('🔴 CRITICAL SECURITY ALERT: Hostname de produção detectado em testes!');
       console.error(`🔴 Hostname: ${hostname}`);
       throw new Error('FATAL: Tentativa de usar banco de PRODUÇÃO em testes. Operação NEGADA.');
     }
-    
+
     if (!isTestDatabase) {
       console.warn(`[TEST DB] ⚠️ WARNING: Hostname '${hostname}' não reconhecido como teste`);
     } else {
@@ -282,10 +278,10 @@ export async function setupTestEnvironment(): Promise<{
 
     // ESTRATÉGIA SIMPLIFICADA: Usar usuário de teste fixo em vez de criar dinamicamente
     console.log('[TEST DB] 🔐 Using fixed test user strategy...');
-    
-    // Gerar UUID válido para testes de integração  
+
+    // Gerar UUID válido para testes de integração
     const testUserId = uuidv4();
-    
+
     console.log(`[TEST DB] ✅ Using test user ID: ${testUserId}`);
 
     // 2. Create test user in public.users table using same email (INTEGER ID)
@@ -361,9 +357,9 @@ export async function setupTestEnvironment(): Promise<{
 
     // 6. ESTRATÉGIA BYPASS: Desabilitar FK constraints temporariamente para testes
     console.log(`[TEST DB] 🔧 Temporarily disabling FK constraints for test setup...`);
-    
+
     await directDb`SET session_replication_role = replica;`; // Disable triggers and FK constraints
-    
+
     const profileInsertResult = await directDb`
       INSERT INTO profiles (id, role, loja_id, full_name)
       VALUES (
@@ -378,12 +374,12 @@ export async function setupTestEnvironment(): Promise<{
         full_name = 'Integration Test User'
       RETURNING id, role, loja_id, full_name
     `;
-    
+
     await directDb`SET session_replication_role = DEFAULT;`; // Re-enable constraints
-    
+
     console.log(`[TEST DB] ✅ Profile created with UUID (FK bypass): ${testUserId}`);
 
-    // 7. Create gerente_lojas association using UUID from profiles table  
+    // 7. Create gerente_lojas association using UUID from profiles table
     console.log('[TEST DB] 🔗 Creating store manager association...');
     await directDb`
       INSERT INTO gerente_lojas (gerente_id, loja_id)
@@ -393,7 +389,7 @@ export async function setupTestEnvironment(): Promise<{
       )
       ON CONFLICT (gerente_id, loja_id) DO NOTHING
     `;
-    
+
     console.log(`[TEST DB] ✅ Store manager association created (gerente_id: ${testUserId})`);
 
     // NOTE: Para compatibilidade, retornar o UUID como testUserId

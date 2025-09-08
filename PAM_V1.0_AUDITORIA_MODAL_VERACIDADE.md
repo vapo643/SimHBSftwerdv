@@ -1,4 +1,5 @@
 # 📋 RELATÓRIO DE AUDITORIA FORENSE - MODAL DE VERACIDADE
+
 ## PAM V1.0 - TELA DE PAGAMENTOS
 
 **Data da Auditoria:** 18/08/2025  
@@ -16,6 +17,7 @@
 ### **EVIDÊNCIAS DO CÓDIGO:**
 
 #### **Backend - Endpoint Principal** (`/api/pagamentos/:id/confirmar-veracidade`)
+
 ```typescript
 // Linha 1087-1200 de server/routes/pagamentos.ts
 router.post(
@@ -56,7 +58,7 @@ router.post(
       - Título: "Confirmação de Pagamento"
       - Ícone: Shield (escudo azul)
     </DialogHeader>
-    
+
     <Card> // PRINCÍPIO DO MINIMALISMO CRÍTICO - 5 campos essenciais
       1. Valor Solicitado (destaque verde, fonte 2xl)
       2. Nome do Cliente + CPF (grid 2 colunas)
@@ -64,7 +66,7 @@ router.post(
       4. Documento CCB (status + botão "Ver CCB")
       5. Observações (textarea opcional)
     </Card>
-    
+
     <DialogFooter>
       - Botão "Cancelar" (outline)
       - Botão "Confirmar Veracidade" (primário, com ícone Shield)
@@ -80,6 +82,7 @@ router.post(
 ```
 
 ### **AVALIAÇÃO DO DESIGN:**
+
 - **Tipo:** Modal de etapa única com confirmação dupla
 - **Adequação para Multi-etapas:** ❌ INADEQUADO - Design monolítico, sem suporte a fluxo progressivo
 - **Estado após confirmação:** Exibe chave PIX em Alert verde, mas não progride para próximas etapas
@@ -91,40 +94,40 @@ router.post(
 ### **O QUE FAZ O BOTÃO "CONFIRMAR VERACIDADE" HOJE?**
 
 #### **Frontend - Mutation Handler:**
+
 ```tsx
 // Linha 51-91 de pagamentos-review.tsx
 const confirmarVeracidadeMutation = useMutation({
   mutationFn: async () => {
-    return await apiRequest(
-      `/api/pagamentos/${proposta?.id}/confirmar-veracidade`,
-      {
-        method: "POST",
-        body: JSON.stringify({ observacoes }),
-      }
-    );
+    return await apiRequest(`/api/pagamentos/${proposta?.id}/confirmar-veracidade`, {
+      method: 'POST',
+      body: JSON.stringify({ observacoes }),
+    });
   },
-  onSuccess: data => {
+  onSuccess: (data) => {
     // 1. Exibe toast de sucesso
     // 2. Torna PIX visível (setPixKeyVisible(true))
     // 3. Invalida cache de pagamentos
     // 4. Chama onConfirm() callback
-  }
-})
+  },
+});
 ```
 
 #### **Backend - Processamento:**
+
 ```typescript
 // Linha 1087+ de server/routes/pagamentos.ts
-router.post("/:id/confirmar-veracidade", async (req, res) => {
+router.post('/:id/confirmar-veracidade', async (req, res) => {
   // 1. Valida proposta existe
   // 2. Verifica idempotência (já confirmado?)
   // 3. Atualiza status para "em_processamento"
   // 4. Registra auditoria
   // 5. Retorna sucesso com flag idempotente
-})
+});
 ```
 
 ### **AÇÕES EXECUTADAS:**
+
 1. ✅ Valida proposta no banco
 2. ✅ Verifica idempotência
 3. ✅ Atualiza status: `pronto_pagamento` → `em_processamento`
@@ -136,22 +139,30 @@ router.post("/:id/confirmar-veracidade", async (req, res) => {
 ## 🚫 RELATÓRIO 4: FUNCIONALIDADES AUSENTES
 
 ### **1. ANEXAR COMPROVANTE NO MODAL PRINCIPAL?**
+
 **Status:** `[FUNCIONALIDADE AUSENTE]`
+
 - Modal atual NÃO possui campo de upload de arquivo
 - Não há input type="file" no PaymentReviewModal
 
 ### **2. SEGUNDO BOTÃO DE CONFIRMAÇÃO DE PAGAMENTO?**
+
 **Status:** `[FUNCIONALIDADE AUSENTE]`
+
 - Após confirmar veracidade, apenas mostra PIX
 - Não há botão adicional "Confirmar Pagamento Realizado"
 
 ### **3. BOTÃO "ESTÁ PAGO"?**
+
 **Status:** `[FUNCIONALIDADE AUSENTE]`
+
 - Modal não possui esta ação
 - Fechamento é via botão "Fechar" genérico
 
 ### **4. FLUXO MULTI-ETAPAS?**
+
 **Status:** `[FUNCIONALIDADE AUSENTE]`
+
 - Design atual é monolítico (tela única)
 - Sem progressão visual de etapas
 - Sem estado de "pagamento em andamento"
@@ -162,15 +173,15 @@ router.post("/:id/confirmar-veracidade", async (req, res) => {
 
 ### **VISÃO DO ARQUITETO vs REALIDADE ATUAL:**
 
-| Requisito do Arquiteto | Estado Atual | Gap Identificado |
-|------------------------|--------------|------------------|
-| 1. Confirmar Veracidade | ✅ EXISTE | Funcional |
-| 2. Liberar botão "Fazer Pagamento" | ❌ AUSENTE | Só mostra PIX |
-| 3. Modal com info de pagamento | ⚠️ PARCIAL | Info existe, mas sem ação |
-| 4. Botão confirmar pagamento | ❌ AUSENTE | Não implementado |
-| 5. Anexar comprovante opcional | ❌ AUSENTE | Não implementado |
-| 6. Botão "ESTÁ PAGO" final | ❌ AUSENTE | Não implementado |
-| 7. Atualizar status para PAGO | ⚠️ PARCIAL | Atualiza para em_processamento |
+| Requisito do Arquiteto             | Estado Atual | Gap Identificado               |
+| ---------------------------------- | ------------ | ------------------------------ |
+| 1. Confirmar Veracidade            | ✅ EXISTE    | Funcional                      |
+| 2. Liberar botão "Fazer Pagamento" | ❌ AUSENTE   | Só mostra PIX                  |
+| 3. Modal com info de pagamento     | ⚠️ PARCIAL   | Info existe, mas sem ação      |
+| 4. Botão confirmar pagamento       | ❌ AUSENTE   | Não implementado               |
+| 5. Anexar comprovante opcional     | ❌ AUSENTE   | Não implementado               |
+| 6. Botão "ESTÁ PAGO" final         | ❌ AUSENTE   | Não implementado               |
+| 7. Atualizar status para PAGO      | ⚠️ PARCIAL   | Atualiza para em_processamento |
 
 ### **COMPONENTES REUTILIZÁVEIS:**
 
@@ -201,4 +212,4 @@ router.post("/:id/confirmar-veracidade", async (req, res) => {
 
 ---
 
-*Relatório gerado sob protocolo PEAF V1.4 - Realismo Cético Mandatório*
+_Relatório gerado sob protocolo PEAF V1.4 - Realismo Cético Mandatório_

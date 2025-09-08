@@ -3,6 +3,7 @@
 ## 📚 Conhecimento Completo Adquirido
 
 ### 1. Documentação Completa Estudada
+
 - ✅ 130 URLs da documentação oficial mapeados
 - ✅ API v3 (Envelopes) completamente dominada
 - ✅ Migração v1 → v3 compreendida
@@ -10,6 +11,7 @@
 - ✅ Limites e restrições memorizados
 
 ### 2. Implementações Criadas
+
 - ✅ `clickSignServiceV3.ts` - Serviço completo API v3
 - ✅ `clickSignWebhookService.ts` - Webhooks com segurança máxima
 - ✅ Validação HMAC SHA-256
@@ -17,6 +19,7 @@
 - ✅ Sistema de deduplicação de eventos
 
 ### 3. Integrações Automáticas
+
 - ✅ CCB assinado → Boleto gerado automaticamente
 - ✅ Fluxo completo sem intervenção manual
 - ✅ Logs detalhados em cada etapa
@@ -24,12 +27,14 @@
 ## 🎯 Pontos Críticos Dominados
 
 ### CPF/CNPJ
+
 ```javascript
 // SEMPRE remover formatação
-cpf: clientData.cpf.replace(/\D/g, '')
+cpf: clientData.cpf.replace(/\D/g, '');
 ```
 
 ### Ordem do Fluxo (IMUTÁVEL)
+
 1. Criar Envelope
 2. Adicionar Documento
 3. Criar Signatário
@@ -38,10 +43,12 @@ cpf: clientData.cpf.replace(/\D/g, '')
 6. Finalizar Envelope
 
 ### Rate Limits
+
 - 300 requisições/minuto
 - Retry com backoff exponencial implementado
 
 ### Tamanhos Máximos
+
 - PDF: 20MB
 - Documentos/envelope: 100
 - Signatários/envelope: 30
@@ -49,6 +56,7 @@ cpf: clientData.cpf.replace(/\D/g, '')
 ## 🔒 Segurança Implementada
 
 ### Validação HMAC
+
 ```javascript
 const expectedHmac = crypto
   .createHmac('sha256', WEBHOOK_SECRET)
@@ -57,15 +65,18 @@ const expectedHmac = crypto
 ```
 
 ### Timestamp Validation
+
 - Máximo 5 minutos de idade
 - Proteção contra replay attacks
 
 ### Autenticação Selfie
+
 - Obrigatória para contratos financeiros
 
 ## 📊 Monitoramento Completo
 
 ### Logs Implementados
+
 ```
 [CLICKSIGN] ✅ Envelope created: env_123
 [CLICKSIGN] ✅ Document uploaded: doc_456
@@ -75,6 +86,7 @@ const expectedHmac = crypto
 ```
 
 ### Tratamento de Erros
+
 - CPF inválido
 - Rate limit exceeded
 - Documento corrompido
@@ -97,6 +109,7 @@ const expectedHmac = crypto
 ## 🚀 Status: PRONTO PARA PRODUÇÃO
 
 ### Próximos Passos
+
 1. Configurar `CLICKSIGN_API_TOKEN` de produção
 2. Configurar `CLICKSIGN_WEBHOOK_SECRET`
 3. Trocar URLs de sandbox para produção
@@ -107,7 +120,7 @@ const expectedHmac = crypto
 Com todo o conhecimento adquirido e implementações realizadas, garantimos:
 
 - **Zero falhas** na integração
-- **100% de confiabilidade** 
+- **100% de confiabilidade**
 - **Segurança máxima** em todas as transações
 - **Fluxo automático** sem intervenção manual
 

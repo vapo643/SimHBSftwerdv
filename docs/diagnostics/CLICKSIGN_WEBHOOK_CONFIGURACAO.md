@@ -3,6 +3,7 @@
 ## URL do Webhook
 
 Configure no painel do ClickSign:
+
 ```
 https://SEU_DOMINIO/api/clicksign/webhook
 ```
@@ -29,6 +30,7 @@ https://SEU_DOMINIO/api/clicksign/webhook
 ## Variável de Ambiente
 
 Adicione ao `.env`:
+
 ```
 CLICKSIGN_WEBHOOK_SECRET=seu_secret_gerado_aqui
 ```
@@ -36,16 +38,19 @@ CLICKSIGN_WEBHOOK_SECRET=seu_secret_gerado_aqui
 ## Eventos Importantes
 
 ### 1. sign (Assinatura)
+
 - **Quando**: Cliente assina o documento
 - **Ação**: Atualiza `assinaturaEletronicaConcluida = true`
 - **Timeline**: Aparece "✍️ Documento assinado"
 
 ### 2. auto_close (Finalização)
+
 - **Quando**: Todos assinaram
 - **Ação**: Atualiza status e gera boleto automaticamente
 - **Timeline**: Aparece "✅ Documento finalizado"
 
 ### 3. refusal (Recusa)
+
 - **Quando**: Cliente recusa assinar
 - **Ação**: Marca como recusado
 - **Timeline**: Aparece "❌ Documento recusado"
@@ -53,11 +58,13 @@ CLICKSIGN_WEBHOOK_SECRET=seu_secret_gerado_aqui
 ## Testando o Webhook
 
 1. Use o **ngrok** para testar localmente:
+
 ```bash
 ngrok http 5000
 ```
 
 2. Configure a URL do ngrok no ClickSign:
+
 ```
 https://abc123.ngrok.io/api/clicksign/webhook
 ```
@@ -67,6 +74,7 @@ https://abc123.ngrok.io/api/clicksign/webhook
 ## Logs de Debug
 
 Monitore os logs do servidor:
+
 ```
 [CLICKSIGN WEBHOOK] Processing event: sign
 [CLICKSIGN WEBHOOK] ✍️ Document signed for proposal: ID
@@ -76,6 +84,7 @@ Monitore os logs do servidor:
 ## Segurança
 
 O webhook implementa:
+
 - ✅ Validação HMAC SHA-256
 - ✅ Validação de timestamp (máx 5 min)
 - ✅ Prevenção de duplicatas
@@ -85,16 +94,19 @@ O webhook implementa:
 ## Troubleshooting
 
 ### Webhook não está atualizando
+
 1. Verifique se o webhook está configurado no ClickSign
 2. Confirme que o secret está correto no `.env`
 3. Verifique os logs do servidor
 4. Teste com ngrok para debug
 
 ### Erro de assinatura inválida
+
 1. O secret no `.env` deve ser idêntico ao configurado no ClickSign
 2. Não adicione espaços ou quebras de linha
 
 ### Timeline não aparece
+
 1. Verifique se o webhook está recebendo os eventos
 2. Confirme que a proposta existe no banco
 3. Verifique os logs de erro

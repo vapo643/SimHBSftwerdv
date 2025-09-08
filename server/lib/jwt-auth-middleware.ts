@@ -25,7 +25,7 @@ const TOKEN_BLACKLIST_TTL = 60 * 60; // 1 hour in seconds
 // Configuração dinâmica por ambiente
 const isDevelopment = process.env.NODE_ENV === 'development';
 const MAX_AUTH_ATTEMPTS = isDevelopment ? 10000 : 50; // 10k dev, 50 prod
-const AUTH_WINDOW_MS = isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000; // 1min dev, 15min prod  
+const AUTH_WINDOW_MS = isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000; // 1min dev, 15min prod
 const AUTH_ATTEMPTS_TTL = Math.ceil(AUTH_WINDOW_MS / 1000); // Convert to seconds
 
 // REFATORADO: Redis client via Redis Manager centralizado (lazy loading)
@@ -63,28 +63,36 @@ async function checkAuthRateLimit(identifier: string): Promise<boolean> {
     const redis = await getRedisClientLazy();
     const key = `auth_attempts:${identifier}`;
     const attempts = await redis.get(key);
-    
+
     if (isDevelopment) {
-      console.log(`[JWT DEBUG] Rate limit check for ${identifier}: attempts=${attempts}, max=${MAX_AUTH_ATTEMPTS}, window=${AUTH_WINDOW_MS}ms`);
+      console.log(
+        `[JWT DEBUG] Rate limit check for ${identifier}: attempts=${attempts}, max=${MAX_AUTH_ATTEMPTS}, window=${AUTH_WINDOW_MS}ms`
+      );
     }
-    
+
     if (!attempts) {
       // First attempt - set counter with TTL
       await redis.setex(key, AUTH_ATTEMPTS_TTL, '1');
       if (isDevelopment) console.log(`[JWT DEBUG] First attempt for ${identifier}, allowing`);
       return true; // Allow
     }
-    
+
     const attemptCount = parseInt(attempts, 10);
     if (attemptCount >= MAX_AUTH_ATTEMPTS) {
-      if (isDevelopment) console.log(`[JWT DEBUG] Rate limit exceeded for ${identifier}: ${attemptCount}/${MAX_AUTH_ATTEMPTS}`);
+      if (isDevelopment)
+        console.log(
+          `[JWT DEBUG] Rate limit exceeded for ${identifier}: ${attemptCount}/${MAX_AUTH_ATTEMPTS}`
+        );
       return false; // Rate limited
     }
-    
+
     // Increment counter and refresh TTL
     await redis.incr(key);
     await redis.expire(key, AUTH_ATTEMPTS_TTL);
-    if (isDevelopment) console.log(`[JWT DEBUG] Incremented attempts for ${identifier}: ${attemptCount + 1}/${MAX_AUTH_ATTEMPTS}`);
+    if (isDevelopment)
+      console.log(
+        `[JWT DEBUG] Incremented attempts for ${identifier}: ${attemptCount + 1}/${MAX_AUTH_ATTEMPTS}`
+      );
     return true; // Allow
   } catch (error) {
     console.error('[JWT AUTH] Rate limit check failed:', error);
@@ -119,19 +127,16 @@ export async function invalidateAllUserTokens(userId: string): Promise<void> {
   try {
     // Get all tokens for user from Redis set
     const tokens = await redisClient.smembers(`user_tokens:${userId}`);
-    
+
     if (tokens.length > 0) {
       // Add each token to blacklist
-      const blacklistPromises = tokens.map(token => 
+      const blacklistPromises = tokens.map((token) =>
         redisClient.setex(`blacklist:${token}`, TOKEN_BLACKLIST_TTL, '1')
       );
-      
+
       // Remove the user tokens set
-      await Promise.all([
-        ...blacklistPromises,
-        redisClient.del(`user_tokens:${userId}`)
-      ]);
-      
+      await Promise.all([...blacklistPromises, redisClient.del(`user_tokens:${userId}`)]);
+
       securityLogger.logEvent({
         type: SecurityEventType.TOKEN_BLACKLISTED,
         severity: 'HIGH',
@@ -226,7 +231,9 @@ export async function jwtAuthMiddleware(
     // Distributed rate limiting check (SAMM Optimization)
     const clientIP = getClientIP(req);
     if (isDevelopment) {
-      console.log(`[JWT DEBUG] Checking auth rate limit for IP: ${clientIP}, environment: ${process.env.NODE_ENV}`);
+      console.log(
+        `[JWT DEBUG] Checking auth rate limit for IP: ${clientIP}, environment: ${process.env.NODE_ENV}`
+      );
     }
     const isAllowed = await checkAuthRateLimit(clientIP);
     if (!isAllowed) {
@@ -239,24 +246,26 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: 'Too many authentication attempts - rate limited' },
       });
-      return res.status(429).json({ message: 'Muitas tentativas de autenticação. Tente novamente mais tarde.' });
+      return res
+        .status(429)
+        .json({ message: 'Muitas tentativas de autenticação. Tente novamente mais tarde.' });
     }
 
     // P0.3 OPTIMIZATION: Redis Pipeline for batch operations
     let isBlacklisted = false;
     let cachedEntry: TokenCacheEntry | null = null;
-    
+
     try {
       const pipeline = redisClient.pipeline();
       pipeline.get(`blacklist:${token}`);
       pipeline.get(`token:${token}`);
       const results = await pipeline.exec();
-      
+
       // Process results from pipeline
       if (results) {
         const [blacklistResult, cacheResult] = results;
-        isBlacklisted = !!(blacklistResult[1]); // blacklistResult[0] is error, [1] is value
-        
+        isBlacklisted = !!blacklistResult[1]; // blacklistResult[0] is error, [1] is value
+
         if (cacheResult[1]) {
           cachedEntry = JSON.parse(cacheResult[1] as string);
           console.log('[JWT DEBUG] Using Redis cached token validation (pipelined)');
@@ -271,7 +280,7 @@ export async function jwtAuthMiddleware(
         console.warn('[JWT AUTH] Blacklist check failed:', e);
       }
     }
-    
+
     // Check blacklist result
     if (isBlacklisted) {
       securityLogger.logEvent({
@@ -342,22 +351,22 @@ export async function jwtAuthMiddleware(
           console.log('[JWT DEBUG] Using Supabase token validation with timeout');
           const { createServerSupabaseAdminClient } = await import('./supabase');
           const supabase = createServerSupabaseAdminClient();
-          
+
           // Add timeout to prevent hanging validation
-          const timeoutPromise = new Promise((_, reject) => 
+          const timeoutPromise = new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Token validation timeout')), VALIDATION_TIMEOUT_MS)
           );
-          
-          const supabaseResult = await Promise.race([
+
+          const supabaseResult = (await Promise.race([
             supabase.auth.getUser(token),
-            timeoutPromise
-          ]) as any;
+            timeoutPromise,
+          ])) as any;
 
           const result = {
             userId: supabaseResult.data?.user?.id,
             userEmail: supabaseResult.data?.user?.email || '',
             data: supabaseResult.data,
-            error: supabaseResult.error
+            error: supabaseResult.error,
           };
 
           // P0.1 OPTIMIZATION: Cache with profile data to eliminate DB query
@@ -367,7 +376,7 @@ export async function jwtAuthMiddleware(
               const { db } = await import('./supabase');
               const { profiles } = await import('@shared/schema');
               const { eq } = await import('drizzle-orm');
-              
+
               const profileResult = await db
                 .select({
                   role: profiles.role,
@@ -377,16 +386,20 @@ export async function jwtAuthMiddleware(
                 .from(profiles)
                 .where(eq(profiles.id, result.userId!))
                 .limit(1);
-              
+
               const profileData = profileResult.length ? profileResult[0] : null;
-              
+
               const cacheEntry: TokenCacheEntry = {
                 userId: result.userId!,
                 userEmail: result.userEmail,
                 profile: profileData || undefined,
-                timestamp: Date.now()
+                timestamp: Date.now(),
               };
-              await redisClient.setex(`token:${token}`, CACHE_TTL_SECONDS, JSON.stringify(cacheEntry));
+              await redisClient.setex(
+                `token:${token}`,
+                CACHE_TTL_SECONDS,
+                JSON.stringify(cacheEntry)
+              );
               console.log('[JWT DEBUG] Token cached in Redis with profile data');
             } catch (redisError) {
               console.warn('[JWT DEBUG] Failed to cache token in Redis:', redisError);
@@ -401,7 +414,7 @@ export async function jwtAuthMiddleware(
             userId: undefined,
             userEmail: '',
             data: null,
-            error: { message: supabaseError.message }
+            error: { message: supabaseError.message },
           };
         } finally {
           validationSemaphore.delete(token);
@@ -410,12 +423,11 @@ export async function jwtAuthMiddleware(
 
       validationSemaphore.set(token, validationPromise);
       const result = await validationPromise;
-      
+
       userId = result.userId;
       userEmail = result.userEmail;
       data = result.data;
       error = result.error;
-
     } else {
       // Use local JWT validation for local tokens
       try {
@@ -482,7 +494,7 @@ export async function jwtAuthMiddleware(
 
     // P0.1 OPTIMIZATION: Use cached profile data or query as fallback
     let profile: any;
-    
+
     if (profileFromCache) {
       console.log('[JWT DEBUG] Using cached profile data - no DB query needed');
       profile = profileFromCache;
@@ -520,10 +532,10 @@ export async function jwtAuthMiddleware(
           code: 'ORPHANED_USER',
         });
       }
-      
+
       profile = profileResult[0];
     }
-    
+
     // Security fallback - Block users without profile
     if (!profile) {
       console.error('Profile validation failed: No profile data for user', userId);

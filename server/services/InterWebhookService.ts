@@ -1,6 +1,6 @@
 /**
  * Inter Webhook Service
- * 
+ *
  * Processa webhooks do Banco Inter com segurança bancária e auditoria completa
  * Integra o MarkBoletoAsPaidUseCase para processamento de pagamentos
  * PAM V1.0 - Operação Muralha de Aço Fase 2
@@ -36,13 +36,17 @@ export class InterWebhookService {
   /**
    * Processa webhook do Inter baseado no tipo de evento
    */
-  async processWebhook(operation: string, payload: InterWebhookPayload, metadata?: any): Promise<any> {
+  async processWebhook(
+    operation: string,
+    payload: InterWebhookPayload,
+    metadata?: any
+  ): Promise<any> {
     try {
       console.log(`[INTER WEBHOOK] Processing ${operation}`, {
         eventType: payload.event,
         boletoId: payload.boletoId,
         nossoNumero: payload.nossoNumero,
-        status: payload.status
+        status: payload.status,
       });
 
       // Log início do processamento
@@ -55,8 +59,8 @@ export class InterWebhookService {
           operation,
           eventType: payload.event,
           webhookPayload: payload,
-          metadata
-        }
+          metadata,
+        },
       });
 
       // Processar baseado na operação solicitada
@@ -69,7 +73,7 @@ export class InterWebhookService {
             success: false,
             operation,
             error: 'Unknown operation',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           };
       }
     } catch (error: any) {
@@ -85,8 +89,8 @@ export class InterWebhookService {
           operation,
           error: error.message,
           errorStack: error.stack,
-          payload
-        }
+          payload,
+        },
       });
 
       throw error;
@@ -96,7 +100,10 @@ export class InterWebhookService {
   /**
    * Processa eventos específicos do webhook Inter
    */
-  private async processInterWebhookEvent(payload: InterWebhookPayload, metadata?: any): Promise<any> {
+  private async processInterWebhookEvent(
+    payload: InterWebhookPayload,
+    metadata?: any
+  ): Promise<any> {
     const eventType = payload.event?.toLowerCase();
 
     switch (eventType) {
@@ -104,15 +111,15 @@ export class InterWebhookService {
       case 'payment.confirmed':
       case 'cobranca.pagamento':
         return await this.processBoletoPayment(payload, metadata);
-      
+
       case 'boleto.cancelled':
       case 'cobranca.cancelamento':
         return await this.processBoletoCancel(payload, metadata);
-      
+
       case 'boleto.overdue':
       case 'cobranca.vencimento':
         return await this.processBoletoOverdue(payload, metadata);
-      
+
       default:
         console.warn(`[INTER WEBHOOK] Unknown event type: ${eventType}`);
         return {
@@ -120,7 +127,7 @@ export class InterWebhookService {
           processed: false,
           eventType,
           message: 'Event type not implemented yet',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
     }
   }
@@ -162,7 +169,7 @@ export class InterWebhookService {
         pixTxid,
         comprovantePagamentoUrl: comprovante,
         observacoes: `Pagamento confirmado via webhook Inter - Evento: ${payload.event}`,
-        webhookEventId: metadata?.webhookEventId || `webhook_${Date.now()}`
+        webhookEventId: metadata?.webhookEventId || `webhook_${Date.now()}`,
       });
 
       console.log(`[INTER WEBHOOK] ✅ Payment processed successfully for boleto ${finalBoletoId}`);
@@ -174,9 +181,8 @@ export class InterWebhookService {
         boletoId: finalBoletoId,
         nossoNumero,
         eventType: payload.event,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error: any) {
       console.error(`[INTER WEBHOOK] Payment processing error:`, error);
 
@@ -190,8 +196,8 @@ export class InterWebhookService {
           error: error.message,
           errorStack: error.stack,
           payload,
-          metadata
-        }
+          metadata,
+        },
       });
 
       throw error;
@@ -203,14 +209,14 @@ export class InterWebhookService {
    */
   private async processBoletoCancel(payload: InterWebhookPayload, metadata?: any): Promise<any> {
     console.log(`[INTER WEBHOOK] Processing boleto cancellation`, payload);
-    
+
     // TODO: Implementar MarkBoletoAsCancelledUseCase
     return {
       success: true,
       processed: false,
       operation: 'boleto_cancel',
       message: 'Boleto cancellation processing not implemented yet',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -219,14 +225,14 @@ export class InterWebhookService {
    */
   private async processBoletoOverdue(payload: InterWebhookPayload, metadata?: any): Promise<any> {
     console.log(`[INTER WEBHOOK] Processing boleto overdue`, payload);
-    
+
     // TODO: Implementar MarkBoletoAsOverdueUseCase
     return {
       success: true,
       processed: false,
       operation: 'boleto_overdue',
       message: 'Boleto overdue processing not implemented yet',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -253,9 +259,9 @@ export class InterWebhookService {
         dependencies: {
           unitOfWork: true,
           markBoletoAsPaidUseCase: true,
-          securityRepository: true
+          securityRepository: true,
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error: any) {
       console.error('[INTER WEBHOOK] Connection test failed:', error);
@@ -265,9 +271,9 @@ export class InterWebhookService {
         dependencies: {
           unitOfWork: false,
           markBoletoAsPaidUseCase: false,
-          securityRepository: true // Assume security is working if we reach here
+          securityRepository: true, // Assume security is working if we reach here
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }

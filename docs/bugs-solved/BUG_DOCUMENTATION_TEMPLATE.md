@@ -17,12 +17,14 @@
 # [CATEGORIA] Nome do Bug - Data Resolução
 
 ## 🔍 Descrição do Problema
+
 - **Impacto:** [Crítico/Alto/Médio/Baixo]
 - **Área Afetada:** [Frontend/Backend/Database/API/etc]
 - **Descoberto em:** [Data/Context]
 - **Reportado por:** [Fonte]
 
 ## 🚨 Sintomas Observados
+
 - Lista dos comportamentos incorretos observados
 - Screenshots ou logs se aplicável
 - Impacto no usuário final
@@ -30,48 +32,57 @@
 ## 🔬 Análise Técnica
 
 ### Root Cause Analysis
+
 - Explicação detalhada da causa raiz
 - Código problemático identificado
 - Fatores contribuintes
 
 ### Código Problemático (ANTES)
+
 ```[language]
 // Código que causava o problema
 ```
 
 ### Problemas Identificados
+
 1. **Problema 1:** Descrição
 2. **Problema 2:** Descrição
 
 ## ✅ Solução Implementada
 
 ### Código Corrigido (DEPOIS)
+
 ```[language]
 // Código corrigido
 ```
 
 ### Arquivos Modificados
+
 - `caminho/para/arquivo1.ext` - Descrição da mudança
 - `caminho/para/arquivo2.ext` - Descrição da mudança
 
 ### Estratégia de Correção
+
 - Abordagem técnica utilizada
 - Justificativa das escolhas feitas
 
 ## 🧪 Validação
 
 ### Testes Executados
+
 - [ ] **Cenário 1:** Descrição → Resultado
 - [ ] **Cenário 2:** Descrição → Resultado
 - [ ] **Cenário 3:** Descrição → Resultado
 
 ### Evidências de Correção
+
 ```
 ANTES: Comportamento incorreto
 DEPOIS: Comportamento correto
 ```
 
 ### Métricas de Sucesso
+
 - Performance melhorada
 - Erros eliminados
 - Funcionalidade restaurada
@@ -79,11 +90,13 @@ DEPOIS: Comportamento correto
 ## 📊 Impacto da Correção
 
 ### Benefícios Alcançados
+
 - **Imediatos:** Lista de benefícios diretos
 - **Longo prazo:** Impactos futuros positivos
 - **Preventivos:** Problemas evitados
 
 ### Áreas Melhoradas
+
 - Funcionalidade X melhorada
 - Performance Y otimizada
 - Segurança Z fortalecida
@@ -91,11 +104,13 @@ DEPOIS: Comportamento correto
 ## 🔄 Prevenção Futura
 
 ### Medidas Preventivas
+
 - Testes automatizados adicionados
 - Validações implementadas
 - Documentação criada
 
 ### Lições Aprendidas
+
 - O que causou o bug
 - Como evitar no futuro
 - Melhorias de processo
@@ -122,11 +137,13 @@ DEPOIS: Comportamento correto
 7. **Referencie no replit.md** se for mudança arquitetural
 
 ### Exemplos de Nomes de Arquivo:
+
 - `2025-08-21-parsing-monetario-multiplicacao-100x.md`
 - `2025-08-20-transacao-atomica-webhooks.md`
 - `2025-07-15-memory-leak-react-components.md`
 
 ### Categorização:
+
 - **Critical:** Produção quebrada, dados corrompidos, segurança
 - **High:** Funcionalidade principal afetada, UX ruim
 - **Medium:** Inconvenientes, edge cases, melhorias

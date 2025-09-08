@@ -18,7 +18,7 @@ async function validateInterWebhookHMAC(req: Request, res: Response, next: Funct
   try {
     const signature = req.headers['x-inter-signature'] as string;
     const webhookSecret = process.env.INTER_WEBHOOK_SECRET;
-    
+
     if (!webhookSecret) {
       await securityRepository.logSecurityEvent({
         eventType: 'WEBHOOK_CONFIG_ERROR',
@@ -31,8 +31,8 @@ async function validateInterWebhookHMAC(req: Request, res: Response, next: Funct
         details: {
           description: 'Inter webhook secret not configured - critical security issue',
           service: 'inter',
-          webhookEvent: 'config_missing'
-        }
+          webhookEvent: 'config_missing',
+        },
       });
       return res.status(401).json({ error: 'Webhook secret not configured' });
     }
@@ -49,8 +49,8 @@ async function validateInterWebhookHMAC(req: Request, res: Response, next: Funct
         details: {
           description: 'Inter webhook signature header missing - potential security breach attempt',
           service: 'inter',
-          webhookEvent: 'signature_missing'
-        }
+          webhookEvent: 'signature_missing',
+        },
       });
       return res.status(401).json({ error: 'Missing signature' });
     }
@@ -61,9 +61,9 @@ async function validateInterWebhookHMAC(req: Request, res: Response, next: Funct
       .createHmac('sha256', webhookSecret)
       .update(bodyString)
       .digest('hex');
-    
+
     const providedSignature = signature.replace('sha256=', '');
-    
+
     if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(providedSignature))) {
       await securityRepository.logSecurityEvent({
         eventType: 'WEBHOOK_SIGNATURE_INVALID',
@@ -78,8 +78,8 @@ async function validateInterWebhookHMAC(req: Request, res: Response, next: Funct
           service: 'inter',
           webhookEvent: 'signature_invalid',
           providedSignatureLength: providedSignature.length,
-          expectedLength: expectedSignature.length
-        }
+          expectedLength: expectedSignature.length,
+        },
       });
       return res.status(401).json({ error: 'Invalid signature' });
     }
@@ -96,8 +96,8 @@ async function validateInterWebhookHMAC(req: Request, res: Response, next: Funct
       details: {
         description: 'Inter webhook HMAC validation successful',
         service: 'inter',
-        webhookEvent: 'signature_valid'
-      }
+        webhookEvent: 'signature_valid',
+      },
     });
     next();
   } catch (error: any) {
@@ -114,8 +114,8 @@ async function validateInterWebhookHMAC(req: Request, res: Response, next: Funct
         service: 'inter',
         webhookEvent: 'validation_error',
         error: error.message,
-        errorStack: error.stack
-      }
+        errorStack: error.stack,
+      },
     });
     return res.status(500).json({ error: 'Webhook validation failed' });
   }
@@ -142,8 +142,8 @@ router.post('/', validateInterWebhookHMAC, async (req, res) => {
         service: 'inter',
         webhookEvent: 'received',
         eventType: req.body?.event || 'unknown',
-        payload: req.body // Full payload for audit trail
-      }
+        payload: req.body, // Full payload for audit trail
+      },
     });
 
     // Process webhook asynchronously with proper banking-grade service
@@ -151,7 +151,7 @@ router.post('/', validateInterWebhookHMAC, async (req, res) => {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
       headers: req.headers,
-      webhookEventId: `inter_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      webhookEventId: `inter_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     });
 
     // Return success immediately
@@ -172,10 +172,10 @@ router.post('/', validateInterWebhookHMAC, async (req, res) => {
         webhookEvent: 'processing_error',
         error: error.message,
         errorStack: error.stack,
-        payload: req.body
-      }
+        payload: req.body,
+      },
     });
-    
+
     // Return success to prevent retries
     res.status(200).json({ success: true });
   }

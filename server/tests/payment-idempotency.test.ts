@@ -25,41 +25,50 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
     // Clean up any existing jobs in the queue
     const paymentsQueue = await getPaymentsQueue();
     await paymentsQueue.obliterate({ force: true });
-    
+
     // Create test data
     testPropostaId = uuidv4();
-    
-    // Insert test loja
-    const testLoja = await db.insert(lojas).values({
-      id: uuidv4(),
-      nome: 'Loja Teste Idempotency',
-      isActive: true
-    }).returning();
 
-    // Insert test produto  
-    const testProduto = await db.insert(produtos).values({
-      id: uuidv4(),
-      nome: 'Produto Teste Idempotency',
-      isActive: true
-    }).returning();
+    // Insert test loja
+    const testLoja = await db
+      .insert(lojas)
+      .values({
+        id: uuidv4(),
+        nome: 'Loja Teste Idempotency',
+        isActive: true,
+      })
+      .returning();
+
+    // Insert test produto
+    const testProduto = await db
+      .insert(produtos)
+      .values({
+        id: uuidv4(),
+        nome: 'Produto Teste Idempotency',
+        isActive: true,
+      })
+      .returning();
 
     // Insert test proposta
-    await db.insert(propostas).values({
-      id: testPropostaId,
-      lojaId: testLoja[0].id,
-      produtoId: testProduto[0].id,
-      status: 'APROVADO',
-      ccbGerado: true,
-      assinaturaEletronicaConcluida: true,
-      valorEmprestimo: '1000.00',
-      valorTotalFinanciado: '1000.00',
-      valorLiquidoLiberado: '900.00',
-      cliente_data: {
-        nome: 'Cliente Teste',
-        cpf: '12345678901',
-        email: 'teste@exemplo.com'
-      }
-    }).returning();
+    await db
+      .insert(propostas)
+      .values({
+        id: testPropostaId,
+        lojaId: testLoja[0].id,
+        produtoId: testProduto[0].id,
+        status: 'APROVADO',
+        ccbGerado: true,
+        assinaturaEletronicaConcluida: true,
+        valorEmprestimo: '1000.00',
+        valorTotalFinanciado: '1000.00',
+        valorLiquidoLiberado: '900.00',
+        cliente_data: {
+          nome: 'Cliente Teste',
+          cpf: '12345678901',
+          email: 'teste@exemplo.com',
+        },
+      })
+      .returning();
 
     // Mock auth token (if needed)
     authToken = 'mock-jwt-token';
@@ -88,11 +97,11 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
         agencia: '1234',
         conta: '12345-6',
         tipoConta: 'corrente',
-        titular: 'Cliente Teste'
+        titular: 'Cliente Teste',
       },
       formaPagamento: 'ted',
       loja: 'Loja Teste',
-      produto: 'Produto Teste'
+      produto: 'Produto Teste',
     };
 
     const response = await request(app)
@@ -111,7 +120,7 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
     const activeJobs = await paymentsQueue.getActive();
     const waitingJobs = await paymentsQueue.getWaiting();
     const totalJobs = activeJobs.length + waitingJobs.length;
-    
+
     expect(totalJobs).toBe(1);
     console.log(`[TEST] ✅ First request created exactly 1 job in queue`);
   });
@@ -131,11 +140,11 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
         agencia: '1234',
         conta: '12345-6',
         tipoConta: 'corrente',
-        titular: 'Cliente Teste'
+        titular: 'Cliente Teste',
       },
       formaPagamento: 'ted',
       loja: 'Loja Teste',
-      produto: 'Produto Teste'
+      produto: 'Produto Teste',
     };
 
     // Simulate existing payment by creating inter_collections record
@@ -145,7 +154,7 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
       seuNumero: 'REF-12345',
       valorNominal: '900.00',
       dataVencimento: '2024-01-01',
-      situacao: 'EM_PROCESSAMENTO'
+      situacao: 'EM_PROCESSAMENTO',
     });
 
     const response = await request(app)
@@ -164,7 +173,7 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
     const activeJobs = await paymentsQueue.getActive();
     const waitingJobs = await paymentsQueue.getWaiting();
     const totalJobs = activeJobs.length + waitingJobs.length;
-    
+
     expect(totalJobs).toBe(0);
     console.log(`[TEST] ✅ Duplicate request prevented at database level - queue remained empty`);
   });
@@ -184,11 +193,11 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
         agencia: '1234',
         conta: '12345-6',
         tipoConta: 'corrente',
-        titular: 'Cliente Teste'
+        titular: 'Cliente Teste',
       },
       formaPagamento: 'ted',
       loja: 'Loja Teste',
-      produto: 'Produto Teste'
+      produto: 'Produto Teste',
     };
 
     // First request - should succeed
@@ -216,7 +225,7 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
     const activeJobs = await paymentsQueue.getActive();
     const waitingJobs = await paymentsQueue.getWaiting();
     const totalJobs = activeJobs.length + waitingJobs.length;
-    
+
     expect(totalJobs).toBe(1);
     console.log(`[TEST] ✅ Duplicate request prevented at BullMQ level - queue has exactly 1 job`);
   });
@@ -225,14 +234,14 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
     // Test that same proposal always generates same jobId
     const jobId1 = `payment-${testPropostaId}`;
     const jobId2 = `payment-${testPropostaId}`;
-    
+
     expect(jobId1).toBe(jobId2);
     console.log(`[TEST] ✅ Deterministic jobId generation: ${jobId1}`);
-    
+
     // Different proposals should generate different jobIds
     const otherPropostaId = uuidv4();
     const jobId3 = `payment-${otherPropostaId}`;
-    
+
     expect(jobId1).not.toBe(jobId3);
     console.log(`[TEST] ✅ Different proposals generate different jobIds`);
   });

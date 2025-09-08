@@ -17,8 +17,8 @@ Esta regra foi criada para resolver um problema crítico recorrente: **páginas 
 ### **Estrutura Correta de uma Página**
 
 ```tsx
-import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import DashboardLayout from '@/components/DashboardLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function MinhaPagina() {
   return (
@@ -28,9 +28,7 @@ export default function MinhaPagina() {
           <CardHeader>
             <CardTitle>Título da Seção</CardTitle>
           </CardHeader>
-          <CardContent>
-            {/* Seu conteúdo aqui */}
-          </CardContent>
+          <CardContent>{/* Seu conteúdo aqui */}</CardContent>
         </Card>
       </div>
     </DashboardLayout>
@@ -43,11 +41,7 @@ export default function MinhaPagina() {
 ```tsx
 // NUNCA faça isto - causa perda do menu lateral
 export default function MinhaPagina() {
-  return (
-    <div className="container mx-auto py-8">
-      {/* conteúdo sem DashboardLayout */}
-    </div>
-  );
+  return <div className="container mx-auto py-8">{/* conteúdo sem DashboardLayout */}</div>;
 }
 ```
 
@@ -68,21 +62,25 @@ export default function MinhaPagina() {
 ## 🔧 Outras Diretrizes de Código
 
 ### **Estrutura de Componentes**
+
 - Use sempre componentes shadcn/ui quando disponíveis
 - Mantenha consistência visual com `Card`, `CardHeader`, `CardContent`
 - Implemente estados de loading, erro e vazio
 
 ### **Gerenciamento de Estado**
+
 - Use TanStack Query para dados do servidor
 - Implemente cache adequado com `staleTime` e `refetchInterval`
 - Use loading states com `isLoading` e skeletons
 
 ### **Controle de Acesso**
+
 - Sempre verifique permissões com `user?.role`
 - Implemente mensagens de "Acesso Negado" dentro do layout
 - Use redirecionamentos adequados para usuários não autorizados
 
 ### **Qualidade de Código**
+
 - Execute `npx lint-staged` antes de commits
 - Siga as regras do ESLint configurado no projeto
 - Use nomes de variáveis e funções descritivos em português

@@ -15,21 +15,23 @@ Implementação bem-sucedida das 3 correções de segurança críticas identific
 **Arquivo**: `server/routes.ts` - Endpoint `/api/auth/login`
 
 **Implementação**:
+
 ```javascript
 // Invalidate all previous tokens for this user
 if (data.user) {
-  const { invalidateAllUserTokens } = await import("./lib/jwt-auth-middleware");
+  const { invalidateAllUserTokens } = await import('./lib/jwt-auth-middleware');
   invalidateAllUserTokens(data.user.id);
-  
+
   // Track the new token
   if (data.session?.access_token) {
-    const { trackUserToken } = await import("./lib/jwt-auth-middleware");
+    const { trackUserToken } = await import('./lib/jwt-auth-middleware');
     trackUserToken(data.user.id, data.session.access_token);
   }
 }
 ```
 
 **Comportamento**:
+
 - Ao fazer login, todos os tokens anteriores do usuário são invalidados
 - Novo token é rastreado para futura invalidação
 - Previne reutilização de sessões antigas após novo login
@@ -39,6 +41,7 @@ if (data.user) {
 **Arquivo**: `server/routes.ts` - Novo endpoint `/api/auth/change-password`
 
 **Funcionalidades**:
+
 - Requer senha atual, nova senha e confirmação
 - Valida senha atual via Supabase Auth antes de permitir mudança
 - Invalida todos os tokens após mudança (força re-login)
@@ -46,6 +49,7 @@ if (data.user) {
 - Validações: mínimo 8 caracteres, nova senha diferente de atual
 
 **Fluxo**:
+
 1. Valida entrada (3 campos obrigatórios)
 2. Verifica senha atual via `signInWithPassword`
 3. Atualiza senha via admin client
@@ -57,35 +61,37 @@ if (data.user) {
 **Arquivo**: `server/routes.ts` - Endpoints `/api/admin/users/:id/deactivate` e `/api/admin/users/:id/reactivate`
 
 **Implementação**:
+
 ```javascript
 // Desativação
-app.put("/api/admin/users/:id/deactivate", jwtAuthMiddleware, requireAdmin, async (req, res) => {
+app.put('/api/admin/users/:id/deactivate', jwtAuthMiddleware, requireAdmin, async (req, res) => {
   // Previne auto-desativação
   if (userId === req.user?.id) {
-    return res.status(400).json({ 
-      message: "Você não pode desativar sua própria conta" 
+    return res.status(400).json({
+      message: 'Você não pode desativar sua própria conta',
     });
   }
-  
+
   // Desativa no Supabase Auth
-  await supabaseAdmin.auth.admin.updateUserById(userId, { 
+  await supabaseAdmin.auth.admin.updateUserById(userId, {
     email_confirmed: false,
-    ban_duration: '876000h' // 100 anos = ban permanente
+    ban_duration: '876000h', // 100 anos = ban permanente
   });
-  
+
   // Invalida todos os tokens
   invalidateAllUserTokens(userId);
-  
+
   // Log de segurança
   securityLogger.logEvent({
     type: SecurityEventType.USER_DEACTIVATED,
-    severity: "HIGH",
+    severity: 'HIGH',
     // ...
   });
 });
 ```
 
 **Funcionalidades**:
+
 - Previne auto-desativação do administrador
 - Ban permanente via Supabase Auth (100 anos)
 - Invalida todos os tokens JWT do usuário
@@ -93,6 +99,7 @@ app.put("/api/admin/users/:id/deactivate", jwtAuthMiddleware, requireAdmin, asyn
 - Endpoint de reativação também disponível
 
 **Funcionalidades de Desativação**:
+
 - Apenas ADMINISTRADOR pode desativar contas
 - Previne auto-desativação (admin não pode desativar própria conta)
 - Define `ban_duration: '876000h'` (100 anos - ban permanente)
@@ -100,6 +107,7 @@ app.put("/api/admin/users/:id/deactivate", jwtAuthMiddleware, requireAdmin, asyn
 - Log de segurança de alta severidade
 
 **Funcionalidades de Reativação**:
+
 - Remove ban e reativa conta
 - Usuário precisa fazer novo login
 - Log de segurança da operação
@@ -111,6 +119,7 @@ app.put("/api/admin/users/:id/deactivate", jwtAuthMiddleware, requireAdmin, asyn
 **Arquivo**: `server/lib/jwt-auth-middleware.ts`
 
 **Novas Funções**:
+
 ```javascript
 // Adiciona token à blacklist
 export function addTokenToBlacklist(token: string): void
@@ -123,6 +132,7 @@ export function trackUserToken(userId: string, token: string): void
 ```
 
 **Recursos**:
+
 - Token blacklist com limpeza automática (1h intervalo)
 - Mapeamento usuário → tokens para invalidação em massa
 - Integração com SecurityLogger para auditoria
@@ -132,10 +142,10 @@ export function trackUserToken(userId: string, token: string): void
 ### Novos Tipos de Eventos
 
 ```javascript
-SecurityEventType.PASSWORD_CHANGED      // Mudança de senha bem-sucedida
-SecurityEventType.PASSWORD_CHANGE_FAILED // Tentativa falhada de mudança
-SecurityEventType.USER_DEACTIVATED      // Conta desativada
-SecurityEventType.USER_REACTIVATED      // Conta reativada
+SecurityEventType.PASSWORD_CHANGED; // Mudança de senha bem-sucedida
+SecurityEventType.PASSWORD_CHANGE_FAILED; // Tentativa falhada de mudança
+SecurityEventType.USER_DEACTIVATED; // Conta desativada
+SecurityEventType.USER_REACTIVATED; // Conta reativada
 ```
 
 ### Informações Capturadas
@@ -149,14 +159,17 @@ SecurityEventType.USER_REACTIVATED      // Conta reativada
 ## IMPACTO NA CONFORMIDADE
 
 ### Antes das Correções
+
 - **Conformidade ASVS Nível 1**: 72% (18 de 25 requisitos)
 - **Lacunas Críticas**: 3 de alta prioridade
 
 ### Após as Correções
+
 - **Conformidade ASVS Nível 1**: 84% (21 de 25 requisitos) ✅
 - **Lacunas Restantes**: 4 de média/baixa prioridade
 
 ### Requisitos Agora Cumpridos
+
 1. **V7.1.3** - Término de sessões após re-autenticação
 2. **V6.2.3** - Verificação de senha atual para mudanças
 3. **V8.3.7** - Invalidação de sessões ao desativar conta
@@ -164,21 +177,25 @@ SecurityEventType.USER_REACTIVATED      // Conta reativada
 ## PRÓXIMOS PASSOS RECOMENDADOS
 
 ### Prioridade Média (Para 92% conformidade)
+
 1. **V6.2.4** - Implementar validação contra lista de senhas comuns
 2. **V4.4.1** - Forçar WSS para WebSocket em produção
 3. **V8.1.1** - Criar documentação formal de políticas de autorização
 
 ### Prioridade Baixa (Para 96% conformidade)
+
 4. **V6.1.1** - Documentar configuração de rate limiting
 
 ## VALIDAÇÃO E TESTES
 
 ### Testes Recomendados
+
 1. **Rotação de Token**: Login múltiplo e verificar invalidação
 2. **Mudança de Senha**: Testar com senha incorreta e correta
 3. **Desativação**: Verificar logout forçado em todas as sessões
 
 ### Monitoramento
+
 - Verificar logs de segurança para eventos de alta severidade
 - Monitorar tentativas de uso de tokens invalidados
 - Acompanhar mudanças de senha suspeitas

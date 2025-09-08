@@ -137,14 +137,12 @@ export class UserRepository extends BaseRepository<Profile> {
       return;
     }
 
-    const associations = lojaIds.map(lojaId => ({
+    const associations = lojaIds.map((lojaId) => ({
       gerente_id: gerenteId,
       loja_id: lojaId,
     }));
 
-    const { error } = await this.supabaseAdmin
-      .from('gerente_lojas')
-      .insert(associations);
+    const { error } = await this.supabaseAdmin.from('gerente_lojas').insert(associations);
 
     if (error) {
       throw new Error(`Failed to create gerente-loja associations: ${error.message}`);
@@ -157,7 +155,7 @@ export class UserRepository extends BaseRepository<Profile> {
   async createUser(userData: z.infer<typeof UserDataSchema>): Promise<UserWithAuth> {
     // CACHE FIX: Force refresh Supabase client to clear schema cache
     this.refreshSupabaseClient();
-    
+
     // Step 1: Create auth user
     const { data: authData, error: authError } = await this.supabaseAdmin.auth.admin.createUser({
       email: userData.email,
@@ -324,12 +322,14 @@ export class UserRepository extends BaseRepository<Profile> {
     // Get GERENTEs via gerente_lojas junction table
     const { data: gerentesData, error: gerentesError } = await this.supabaseAdmin
       .from('gerente_lojas')
-      .select(`
+      .select(
+        `
         gerente_id,
         profiles!inner(
           id, full_name, role, loja_id
         )
-      `)
+      `
+      )
       .eq('loja_id', lojaId);
 
     if (gerentesError) {
@@ -341,8 +341,8 @@ export class UserRepository extends BaseRepository<Profile> {
 
     // Combine both arrays and remove duplicates
     const allUsers = [...(atendentes || []), ...gerentes];
-    const uniqueUsers = allUsers.filter((user, index, arr) => 
-      arr.findIndex(u => u.id === user.id) === index
+    const uniqueUsers = allUsers.filter(
+      (user, index, arr) => arr.findIndex((u) => u.id === user.id) === index
     );
 
     return uniqueUsers as Profile[];

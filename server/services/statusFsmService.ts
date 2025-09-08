@@ -93,7 +93,6 @@ const transitionGraph: Record<string, string[]> = {
   // Boletos emitidos - aguardando autorização de pagamento
   [ProposalStatus.BOLETOS_EMITIDOS]: [ProposalStatus.PAGAMENTO_AUTORIZADO, ProposalStatus.SUSPENSA],
 
-
   // Estados finais - não podem transicionar
   [ProposalStatus.PAGAMENTO_AUTORIZADO]: [], // Estado final de sucesso
   [ProposalStatus.REJEITADO]: [], // Estado final de rejeição

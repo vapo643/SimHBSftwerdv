@@ -11,7 +11,12 @@ import { db } from '../../../lib/supabase';
 import { ccbs, propostas } from '@shared/schema';
 import { Ccb } from '@shared/schema';
 import { ICcbRepository, CcbStatus } from '../domain/ICcbRepository';
-import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
+import {
+  PaginatedResult,
+  CursorPaginationOptions,
+  RepositoryFilters,
+  CursorUtils,
+} from '@shared/types/pagination';
 
 export class CcbRepository implements ICcbRepository {
   async save(ccb: Ccb): Promise<void> {
@@ -98,7 +103,7 @@ export class CcbRepository implements ICcbRepository {
           observacoes: ccbs.observacoes,
           createdAt: ccbs.createdAt,
           updatedAt: ccbs.updatedAt,
-          deletedAt: ccbs.deletedAt
+          deletedAt: ccbs.deletedAt,
         })
         .from(ccbs)
         .innerJoin(propostas, eq(ccbs.propostaId, propostas.id))
@@ -164,12 +169,7 @@ export class CcbRepository implements ICcbRepository {
     const results = await db
       .select()
       .from(ccbs)
-      .where(
-        and(
-          eq(ccbs.clicksignStatus, clickSignStatus),
-          isNull(ccbs.deletedAt)
-        )
-      )
+      .where(and(eq(ccbs.clicksignStatus, clickSignStatus), isNull(ccbs.deletedAt)))
       .orderBy(desc(ccbs.updatedAt));
 
     return results;
@@ -199,15 +199,10 @@ export class CcbRepository implements ICcbRepository {
       clickSignStatus?: string;
     }
   ): Promise<PaginatedResult<Ccb>> {
-    const {
-      limit = 50,
-      cursor,
-      cursorField = 'created_at',
-      direction = 'desc'
-    } = options;
+    const { limit = 50, cursor, cursorField = 'created_at', direction = 'desc' } = options;
 
     const safeLimit = Math.min(Math.max(limit, 1), 100);
-    
+
     const conditions = [isNull(ccbs.deletedAt)];
 
     // Filtros específicos
@@ -230,12 +225,11 @@ export class CcbRepository implements ICcbRepository {
     // Condição do cursor
     if (cursor && CursorUtils.isValid(cursor)) {
       const cursorValue = CursorUtils.decode(cursor);
-      
+
       if (cursorField === 'created_at') {
         const cursorDate = new Date(cursorValue);
-        const cursorCondition = direction === 'desc' 
-          ? lt(ccbs.createdAt, cursorDate)
-          : gt(ccbs.createdAt, cursorDate);
+        const cursorCondition =
+          direction === 'desc' ? lt(ccbs.createdAt, cursorDate) : gt(ccbs.createdAt, cursorDate);
         conditions.push(cursorCondition);
       }
     }
@@ -253,18 +247,18 @@ export class CcbRepository implements ICcbRepository {
     }
 
     const results = await query;
-    
+
     const hasNextPage = results.length > safeLimit;
     const data = hasNextPage ? results.slice(0, safeLimit) : results;
-    
+
     let nextCursor: string | null = null;
     let prevCursor: string | null = null;
-    
+
     if (hasNextPage && data.length > 0) {
       const lastItem = data[data.length - 1];
       nextCursor = CursorUtils.createFromItem(lastItem, cursorField);
     }
-    
+
     if (cursor && data.length > 0) {
       const firstItem = data[0];
       prevCursor = CursorUtils.createFromItem(firstItem, cursorField);
@@ -277,8 +271,8 @@ export class CcbRepository implements ICcbRepository {
         prevCursor,
         pageSize: data.length,
         hasNextPage,
-        hasPrevPage: !!cursor
-      }
+        hasPrevPage: !!cursor,
+      },
     };
   }
 
@@ -287,11 +281,7 @@ export class CcbRepository implements ICcbRepository {
       .select()
       .from(ccbs)
       .where(
-        and(
-          gte(ccbs.createdAt, startDate),
-          lte(ccbs.createdAt, endDate),
-          isNull(ccbs.deletedAt)
-        )
+        and(gte(ccbs.createdAt, startDate), lte(ccbs.createdAt, endDate), isNull(ccbs.deletedAt))
       )
       .orderBy(desc(ccbs.createdAt));
 
@@ -332,7 +322,7 @@ export class CcbRepository implements ICcbRepository {
       )
       .orderBy(desc(ccbs.createdAt));
 
-    return results.map(row => row.ccb);
+    return results.map((row) => row.ccb);
   }
 
   async exists(id: string): Promise<boolean> {
@@ -360,7 +350,9 @@ export class CcbRepository implements ICcbRepository {
 
   async getNextNumeroCcb(): Promise<string> {
     const result = await db
-      .select({ maxNumero: sql<number>`COALESCE(MAX(CAST(SUBSTRING(numero_ccb FROM '[0-9]+') AS INTEGER)), 100000)` })
+      .select({
+        maxNumero: sql<number>`COALESCE(MAX(CAST(SUBSTRING(numero_ccb FROM '[0-9]+') AS INTEGER)), 100000)`,
+      })
       .from(ccbs);
 
     const nextNumber = result[0].maxNumero + 1;

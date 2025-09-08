@@ -3,14 +3,16 @@
 **Categoria:** Testing  
 **Data:** 2025-09-02  
 **Prioridade:** P2 (Medium)  
-**Status:** ✅ RESOLVIDO  
+**Status:** ✅ RESOLVIDO
 
 ## Sumário Executivo
+
 Testes do endpoint `/api/tabelas-comerciais-disponiveis` falhavam com erro "innerJoin is not a function" devido a mocks incompletos do Drizzle ORM que não incluíam o método `innerJoin` necessário para consultas com relacionamentos.
 
 ## Análise Técnica Detalhada
 
 ### Código Problemático Original
+
 ```typescript
 // Mock incompleto - faltava innerJoin
 const mockChain = {
@@ -23,18 +25,21 @@ dbMock.select.mockReturnValue(mockChain);
 ```
 
 ### Root Cause
+
 - **Mock chain incompleto** não cobria todos os métodos utilizados pela query real
 - **Drizzle ORM queries** utilizam `innerJoin` para relacionamentos entre tabelas
 - **Falta de mapeamento** entre métodos reais do ORM e métodos mockados
 - **Query complexity** não foi antecipada durante criação dos mocks iniciais
 
 ### Evidência do Problema
+
 ```bash
 # Erro em tabelasComerciais.test.ts:
 TypeError: dbMock.select(...).from(...).innerJoin is not a function
 ```
 
 ### Query Real Que Causava o Problema
+
 ```typescript
 // A query real usa innerJoin para relacionar tabelas
 const personalizedTables = await db
@@ -44,29 +49,30 @@ const personalizedTables = await db
     parceiroId: tabelasComerciais.parceiroId,
   })
   .from(tabelasComerciais)
-  .innerJoin(produtos, eq(produtos.id, tabelasComerciais.produtoId))  // ← Este método faltava no mock
-  .where(and(
-    eq(tabelasComerciais.produtoId, produtoId),
-    eq(tabelasComerciais.parceiroId, parceiroId)
-  ))
+  .innerJoin(produtos, eq(produtos.id, tabelasComerciais.produtoId)) // ← Este método faltava no mock
+  .where(
+    and(eq(tabelasComerciais.produtoId, produtoId), eq(tabelasComerciais.parceiroId, parceiroId))
+  )
   .orderBy(tabelasComerciais.nomeTabela);
 ```
 
 ## Solução Implementada
 
 ### Mock Builder Function
+
 ```typescript
 // Função helper para criar mock query builders completos
 const createMockQueryBuilder = (mockData: any[] = []) => ({
   select: vi.fn().mockReturnThis(),
   from: vi.fn().mockReturnThis(),
-  innerJoin: vi.fn().mockReturnThis(),     // ← Método adicionado
+  innerJoin: vi.fn().mockReturnThis(), // ← Método adicionado
   where: vi.fn().mockReturnThis(),
   orderBy: vi.fn().mockResolvedValue(mockData),
 });
 ```
 
 ### Implementação nos Testes
+
 ```typescript
 it('should return only personalized tables for a partner with custom tables', async () => {
   // Setup: Mock retorna tabelas personalizadas na primeira consulta
@@ -85,6 +91,7 @@ it('should return only personalized tables for a partner with custom tables', as
 ```
 
 ### Melhorias Implementadas
+
 1. **Mock completo** com todos os métodos da chain do Drizzle ORM
 2. **Helper function** reutilizável para diferentes cenários de teste
 3. **Validação comportamental** que verifica se innerJoin foi chamado
@@ -93,11 +100,13 @@ it('should return only personalized tables for a partner with custom tables', as
 ## Validação da Correção
 
 ### Teste de Regressão
+
 - ✅ Teste `tabelasComerciais.test.ts` passa de 2/10 para 8/10 testes
 - ✅ Não há mais erro "innerJoin is not a function"
 - ✅ Lógica hierárquica (personalizada → geral) funciona corretamente
 
 ### Métricas de Impacto
+
 - **Antes:** TypeError em 100% das execuções dos testes
 - **Depois:** 8/10 testes passando, 2 falhas não relacionadas ao mock
 - **Cobertura:** 100% dos métodos Drizzle ORM necessários
@@ -112,15 +121,18 @@ it('should return only personalized tables for a partner with custom tables', as
 ## Prevenção de Regressão
 
 ### Testing Standards
+
 - [ ] Mocks cobrem 100% dos métodos utilizados?
 - [ ] Helper functions para query builders complexos?
 - [ ] Validação comportamental além de dados?
 - [ ] Documentação de métodos necessários por ORM?
 
 ### Code Review Checklist
+
 - [ ] Novos métodos ORM têm correspondente no mock?
 - [ ] Query changes refletem em mock updates?
 - [ ] Helper functions são reutilizadas quando possível?
 
 ### Architecture Decision
+
 **ADR-MOCK-001:** Todos os mocks de ORM devem incluir métodos de chain completos para evitar falhas em queries que utilizam relacionamentos complexos.

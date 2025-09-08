@@ -104,32 +104,31 @@ describe('Timing Attack Mitigation Tests', () => {
 
     for (const endpoint of endpoints) {
       const start = process.hrtime.bigint();
-      
+
       try {
         // ADICIONAR: try/catch para capturar rejeições de promessa
         const response = await request(app)
           .put(endpoint)
           .send({ status: 'aprovado' })
-          .timeout(5000);  // ADICIONAR: Timeout explícito menor
-          
+          .timeout(5000); // ADICIONAR: Timeout explícito menor
+
         // Verificar que status é um dos esperados
         expect([400, 404, 422, 500]).toContain(response.status);
-        
       } catch (error) {
         // ADICIONAR: Capturar e validar erros explicitamente
         expect(error).toBeDefined();
         // Opcional: verificar tipo específico de erro
         console.log('🧪 [TEST] Erro capturado (esperado):', error.message);
       }
-      
+
       const end = process.hrtime.bigint();
       const duration = Number(end - start) / 1e6;
-      
+
       console.log(`⏱️  ${endpoint}: ${duration.toFixed(2)}ms`);
-      
+
       // Verificar timing normalizado (deve ser implementado após P0)
       expect(duration).toBeGreaterThan(15);
       expect(duration).toBeLessThan(35);
     }
-  }, 15000);  // ADICIONAR: Timeout do teste aumentado para 15s
+  }, 15000); // ADICIONAR: Timeout do teste aumentado para 15s
 });

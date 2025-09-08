@@ -3,11 +3,13 @@
 ## ✅ Implementado em 07/08/2025
 
 ### Visão Geral
+
 Sistema à prova de falhas para geração de CCB com detecção inteligente de campos, similar ao nosso sistema polling+webhook. Garante 100% de funcionamento mesmo com pequenas variações nas coordenadas.
 
 ## 🎯 Coordenadas Precisas Implementadas
 
 ### Página 1 - Identificação e Valores
+
 ```
 ✓ Cédula Nº: (110, 750)
 ✓ Data de Emissão: (315, 750)
@@ -23,6 +25,7 @@ Sistema à prova de falhas para geração de CCB com detecção inteligente de c
 ```
 
 ### Página 2 - Dados Bancários
+
 ```
 ✓ Nº Banco: (160, 690)
 ✓ Conta Nº: (430, 690)
@@ -32,6 +35,7 @@ Sistema à prova de falhas para geração de CCB com detecção inteligente de c
 ```
 
 ### Página 8 - Tabela de Pagamentos
+
 ```
 ✓ 6 linhas de pagamento com:
   - Data: (55, Y)
@@ -43,11 +47,13 @@ Sistema à prova de falhas para geração de CCB com detecção inteligente de c
 ## 🧠 Sistema Inteligente de Detecção
 
 ### 1. **Detecção Automática de Campos**
+
 - Identifica campos baseado em labels esperadas
 - Ajusta coordenadas automaticamente
 - Valida posicionamento correto
 
 ### 2. **Sistema de Fallback Multinível**
+
 Similar ao polling+webhook, temos múltiplas estratégias:
 
 ```javascript
@@ -63,6 +69,7 @@ Log de erro detalhado
 ```
 
 ### 3. **Ajustes Inteligentes por Tipo**
+
 - **Campos de data**: +2px horizontal
 - **Valores monetários**: +5px horizontal (alinhamento)
 - **Linhas digitáveis**: Reduz fonte para 9pt
@@ -70,6 +77,7 @@ Log de erro detalhado
 ## 📋 Componentes do Sistema
 
 ### Arquivos Criados
+
 1. `ccbFieldMappingV2.ts` - Mapeamento preciso de coordenadas
 2. `ccbGenerationServiceV2.ts` - Serviço de geração inteligente
 3. `ccb-intelligent-test.ts` - Rotas de teste e validação
@@ -77,16 +85,19 @@ Log de erro detalhado
 ### Classes Principais
 
 #### `FieldDetector`
+
 - Detecta e preenche campos automaticamente
 - Gera logs detalhados do processo
 - Valida preenchimento
 
 #### `CoordinateAdjuster`
+
 - Ajusta coordenadas dinamicamente
 - Valida posicionamento
 - Aplica ajustes por tipo de campo
 
 #### `FallbackSystem`
+
 - Sistema de múltiplas tentativas
 - Garante preenchimento mesmo com variações
 - Logs de sucesso/falha
@@ -115,18 +126,19 @@ GET /api/ccb-test-v2/comparison
 
 ### Comparação V1 vs V2
 
-| Aspecto | V1 (Original) | V2 (Inteligente) |
-|---------|--------------|------------------|
-| **Coordenadas** | Fixas | Adaptativas |
-| **Tolerância a erros** | Baixa | Alta |
-| **Validação** | Não | Sim |
-| **Logs** | Básicos | Detalhados |
-| **Fallback** | Não | Multinível |
-| **Manutenção** | Difícil | Fácil |
+| Aspecto                | V1 (Original) | V2 (Inteligente) |
+| ---------------------- | ------------- | ---------------- |
+| **Coordenadas**        | Fixas         | Adaptativas      |
+| **Tolerância a erros** | Baixa         | Alta             |
+| **Validação**          | Não           | Sim              |
+| **Logs**               | Básicos       | Detalhados       |
+| **Fallback**           | Não           | Multinível       |
+| **Manutenção**         | Difícil       | Fácil            |
 
 ## 🎯 Testes de Validação
 
 ### Teste com Dados Reais
+
 ```javascript
 // Teste com proposta existente
 curl -X POST http://localhost:5000/api/ccb-test-v2/generate/6492cfeb-8b66-4fa7-beb6-c7998be61b78 \
@@ -136,6 +148,7 @@ curl -X POST http://localhost:5000/api/ccb-test-v2/generate/6492cfeb-8b66-4fa7-b
 ```
 
 ### Teste com Dados Simulados
+
 ```javascript
 // Teste com dados completos de teste
 curl -X POST http://localhost:5000/api/ccb-test-v2/generate/teste-123 \
@@ -147,14 +160,15 @@ curl -X POST http://localhost:5000/api/ccb-test-v2/generate/teste-123 \
 ## 📈 Métricas de Sucesso
 
 O sistema retorna estatísticas detalhadas:
+
 ```json
 {
   "success": true,
   "stats": {
     "totalLogs": 45,
-    "successLogs": 42,  // 93% sucesso
-    "warningLogs": 3,   // 7% avisos
-    "errorLogs": 0      // 0% erros
+    "successLogs": 42, // 93% sucesso
+    "warningLogs": 3, // 7% avisos
+    "errorLogs": 0 // 0% erros
   }
 }
 ```
@@ -184,6 +198,7 @@ O sistema retorna estatísticas detalhadas:
 Similar ao nosso sistema polling+webhook que garante processamento de assinaturas, o CCB V2 garante preenchimento correto mesmo com variações no template.
 
 ### Próximos Passos Opcionais
+
 1. Adicionar OCR para validação visual
 2. Machine Learning para detectar campos automaticamente
 3. Dashboard de monitoramento de geração
@@ -191,4 +206,4 @@ Similar ao nosso sistema polling+webhook que garante processamento de assinatura
 
 ---
 
-*Sistema implementado com sucesso - Pronto para produção!*
+_Sistema implementado com sucesso - Pronto para produção!_

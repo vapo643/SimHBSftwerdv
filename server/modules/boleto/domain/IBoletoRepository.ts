@@ -6,28 +6,22 @@
  * para o sistema de cobrança e pagamentos.
  */
 
-import { PaginatedResult, CursorPaginationOptions, RepositoryFilters } from '@shared/types/pagination';
+import {
+  PaginatedResult,
+  CursorPaginationOptions,
+  RepositoryFilters,
+} from '@shared/types/pagination';
 import { Boleto } from '@shared/schema';
 
-export type BoletoStatus = 
-  | 'emitido'
-  | 'enviado'
-  | 'visualizado'
-  | 'pago'
-  | 'vencido'
-  | 'cancelado';
+export type BoletoStatus = 'emitido' | 'enviado' | 'visualizado' | 'pago' | 'vencido' | 'cancelado';
 
-export type FormaPagamento = 
-  | 'boleto'
-  | 'pix'
-  | 'transferencia'
-  | 'cartao';
+export type FormaPagamento = 'boleto' | 'pix' | 'transferencia' | 'cartao';
 
 export interface BoletoRepository {
   // ========================================================================
   // CRUD BÁSICO
   // ========================================================================
-  
+
   /**
    * Salva um boleto (create ou update)
    */
@@ -124,7 +118,10 @@ export interface BoletoRepository {
    * Busca estatísticas de pagamento por período
    * Para dashboards executivos
    */
-  getPaymentStatsByPeriod(startDate: Date, endDate: Date): Promise<{
+  getPaymentStatsByPeriod(
+    startDate: Date,
+    endDate: Date
+  ): Promise<{
     totalEmitidos: number;
     totalPagos: number;
     totalVencidos: number;

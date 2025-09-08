@@ -45,9 +45,11 @@ export class FormalizationWorker {
     } catch (error) {
       this.isQueueAvailable = false;
       logger.warn('⚠️ [FormalizationWorker] Queue unavailable - async processing disabled', {
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
-      logger.warn('💡 [FormalizationWorker] Events will be processed synchronously (development mode)');
+      logger.warn(
+        '💡 [FormalizationWorker] Events will be processed synchronously (development mode)'
+      );
     }
   }
 
@@ -132,30 +134,29 @@ export class FormalizationWorker {
     }
 
     // DLQ functionality is built-in to SupabaseWorker
-    
+
     // METRICS INTEGRATION - Track job lifecycle events
     this.worker.on('active', (job) => {
       // Record active job metric
       metricsService.incrementJobCounter('formalization-queue', 'active', job.id);
-      
+
       logger.info('Formalization job started', {
         jobId: job.id,
         proposalId: job.data.aggregateId,
       });
     });
-    
+
     this.worker.on('completed', (job) => {
       // Calculate processing duration
-      const processingTime = job.processedOn && job.timestamp 
-        ? job.processedOn - job.timestamp 
-        : undefined;
-      
+      const processingTime =
+        job.processedOn && job.timestamp ? job.processedOn - job.timestamp : undefined;
+
       // Record completion metrics
       metricsService.incrementJobCounter('formalization-queue', 'completed', job.id);
       if (processingTime) {
         metricsService.recordJobDuration('formalization-queue', processingTime, job.id);
       }
-      
+
       logger.info('Formalization job completed', {
         jobId: job.id,
         proposalId: job.data.aggregateId,
@@ -168,9 +169,9 @@ export class FormalizationWorker {
     this.worker.on('failed', (job, error) => {
       // Record failure metric (includes retryable failures)
       metricsService.incrementJobCounter('formalization-queue', 'failed', job?.id);
-      
+
       // Note: Dead Letter Queue functionality is built-in to SupabaseWorker
-      
+
       logger.error('Formalization job failed (worker-level logging)', {
         jobId: job?.id,
         proposalId: job?.data.aggregateId,
@@ -183,14 +184,16 @@ export class FormalizationWorker {
     this.worker.on('stalled', (jobId) => {
       // Record stalled job metric
       metricsService.incrementJobCounter('formalization-queue', 'stalled', jobId);
-      
+
       logger.warn('Formalization job stalled', { jobId });
     });
   }
 
   public async start(): Promise<void> {
     if (!this.isQueueAvailable) {
-      logger.warn('⚠️ [FormalizationWorker] Start called but Queue unavailable - no async processing');
+      logger.warn(
+        '⚠️ [FormalizationWorker] Start called but Queue unavailable - no async processing'
+      );
       return;
     }
     // Worker já está rodando quando criado no constructor
