@@ -193,8 +193,8 @@ const FilaAnalise: React.FC = () => {
 
   const today = new Date().toISOString().split('T')[0];
   const propostasHoje = propostas?.filter((p) => {
-    const createdAt = p.createdAt || p.created_at;
-    return createdAt && createdAt.split('T')[0] === today;
+    const createdAt = p.createdAt;
+    return createdAt && typeof createdAt === 'string' && createdAt.split('T')[0] === today;
   }).length || 0;
 
   const propostasPendentes =
@@ -413,8 +413,8 @@ const FilaAnalise: React.FC = () => {
                           {proposta.id}
                         </TableCell>
                         <TableCell className="text-gray-900 dark:text-white">
-                          {proposta.createdAt || proposta.created_at ? 
-                            format(new Date(proposta.createdAt || proposta.created_at), 'dd/MM/yyyy', { locale: ptBR }) : 
+                          {proposta.createdAt ? 
+                            format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR }) : 
                             '-'
                           }
                         </TableCell>
