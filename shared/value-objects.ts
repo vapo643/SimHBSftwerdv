@@ -71,6 +71,11 @@ export class CPF {
     return this.getFormatted();
   }
 
+  // 🔧 CRITICAL FIX: Ensure value objects serialize correctly to JSON
+  toJSON(): string {
+    return this.value;
+  }
+
   // Zod schema for form validation
   static readonly schema = z
     .string()
@@ -139,6 +144,11 @@ export class CNPJ {
 
   toString(): string {
     return this.getFormatted();
+  }
+
+  // 🔧 CRITICAL FIX: Ensure CNPJ objects serialize correctly to JSON
+  toJSON(): string {
+    return this.value;
   }
 
   // Zod schema for form validation
@@ -265,6 +275,11 @@ export class Money {
     return this.toFormattedString();
   }
 
+  // 🔧 CRITICAL FIX: Ensure Money objects serialize correctly to JSON
+  toJSON(): string {
+    return this.getReais().toString();
+  }
+
   // Zod schema for form validation
   static readonly schema = z.union([
     z.number().min(0, 'Valor deve ser positivo'),
@@ -323,6 +338,11 @@ export class Email {
   }
 
   toString(): string {
+    return this.value;
+  }
+
+  // 🔧 CRITICAL FIX: Ensure Email objects serialize correctly to JSON
+  toJSON(): string {
     return this.value;
   }
 
@@ -390,6 +410,11 @@ export class PhoneNumber {
     return this.getFormatted();
   }
 
+  // 🔧 CRITICAL FIX: Ensure PhoneNumber objects serialize correctly to JSON
+  toJSON(): string {
+    return this.value;
+  }
+
   // Zod schema for form validation
   static readonly schema = z
     .string()
@@ -432,6 +457,11 @@ export class CEP {
 
   toString(): string {
     return this.getFormatted();
+  }
+
+  // 🔧 CRITICAL FIX: Ensure CEP objects serialize correctly to JSON
+  toJSON(): string {
+    return this.value;
   }
 
   // Zod schema for form validation
