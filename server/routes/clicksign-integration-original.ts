@@ -327,11 +327,11 @@ router.post(
       }
 
       console.log(
-        `[CLICKSIGN] Proposta encontrada: ${proposta.id}, Status: ${proposta.status}, CCB Gerado: ${proposta.ccbGerado}`
+        `[CLICKSIGN] Proposta encontrada: ${proposta.id}, Status: ${proposta.status}, CCB Gerado: ${proposta.ccbGerado}, caminhoCcb: ${proposta.caminhoCcb}`
       );
 
       // Verificar se CCB foi gerado
-      if (!proposta.ccbGerado || !proposta.caminhoCcbAssinado) {
+      if (!proposta.ccbGerado || !proposta.caminhoCcb) {
         return res.status(400).json({
           message: 'CCB deve ser gerada antes de enviar para assinatura eletrônica',
         });
@@ -361,7 +361,7 @@ router.post(
       const supabase = createServerSupabaseAdminClient();
 
       // Extrair caminho correto do CCB
-      let ccbPath = proposta.caminhoCcbAssinado;
+      let ccbPath = proposta.caminhoCcb;
       const documentsIndex = ccbPath.indexOf('/documents/');
       if (documentsIndex !== -1) {
         ccbPath = ccbPath.substring(documentsIndex + '/documents/'.length);
