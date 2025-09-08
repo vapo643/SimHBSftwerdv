@@ -11,12 +11,13 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
-import express from 'express';
+import type { Express } from 'express';
+import { createApp } from '../../app';
 import { ProposalOutputSchema } from '../../schemas/proposalOutput.schema';
 import { cleanTestDatabase, setupTestEnvironment } from '../../../tests/lib/db-helper';
 
-// Import do servidor Express - mesmo setup da aplicação real
-let app: express.Application;
+// Express application instance
+let app: Express;
 
 describe('🛡️ PROPOSAL CONTRACT INTEGRATION TEST - PAM V1.0', () => {
   let testEnvironment: Awaited<ReturnType<typeof setupTestEnvironment>>;
@@ -29,13 +30,8 @@ describe('🛡️ PROPOSAL CONTRACT INTEGRATION TEST - PAM V1.0', () => {
     console.log('🔧 [SETUP] Setting up test environment...');
     testEnvironment = await setupTestEnvironment();
     
-    // Setup minimal Express app with the same configuration as production
-    app = express();
-    app.use(express.json());
-    
-    // Import and configure the routes exactly as in production
-    const { default: routes } = await import('../../routes');
-    routes(app);
+    // Create the Express app exactly as in production
+    app = await createApp();
     
     console.log('📝 [SETUP] Creating test proposal...');
     // Create a test proposal with complete data using the production endpoint
