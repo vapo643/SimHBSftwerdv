@@ -417,11 +417,25 @@ export class ProposalRepository implements IProposalRepository {
    * Converte snake_case para camelCase e estrutura dados corretamente
    */
   private mapRowToProposalDTO(row: any): any {
+    // CORREÇÃO MANDATÓRIA PAM V1.0: Parse do clienteData JSON para fallback
+    let clienteDataFromJson: any = {};
+    try {
+      if (row.clienteData && typeof row.clienteData === 'string') {
+        clienteDataFromJson = JSON.parse(row.clienteData);
+      } else if (row.clienteData && typeof row.clienteData === 'object') {
+        clienteDataFromJson = row.clienteData;
+      }
+    } catch (e) {
+      console.warn('⚠️ [MAPEADOR] Erro ao fazer parse do clienteData JSON:', e);
+      clienteDataFromJson = {};
+    }
+    
     // PAM V1.0 DEBUG: Log para análise do mapeamento
     console.log('🔍 [MAPEADOR DEBUG] parceiro_id:', row.parceiro_id);
     console.log('🔍 [MAPEADOR DEBUG] parceiro_nome:', row.parceiro_nome);
     console.log('🔍 [MAPEADOR DEBUG] loja_id:', row.loja_id);
     console.log('🔍 [MAPEADOR DEBUG] loja_nome:', row.loja_nome);
+    console.log('🔍 [MAPEADOR DEBUG] clienteDataFromJson keys:', Object.keys(clienteDataFromJson));
     
     const result = {
       // Dados básicos da proposta
@@ -429,13 +443,23 @@ export class ProposalRepository implements IProposalRepository {
       status: row.status,
       numeroProposta: row.numero_proposta,
       
-      // Dados do cliente (snake_case → camelCase)
+      // Dados do cliente (snake_case → camelCase) COM FALLBACK PARA JSON
       nomeCliente: row.cliente_nome,
       clienteNome: row.cliente_nome,
       cpfCliente: row.cliente_cpf,
       clienteCpf: row.cliente_cpf,
-      emailCliente: row.cliente_email || null,
-      telefoneCliente: row.cliente_telefone || null,
+      emailCliente: row.cliente_email || clienteDataFromJson.email || null,
+      telefoneCliente: row.cliente_telefone || clienteDataFromJson.telefone || null,
+      // NOVOS CAMPOS COM FALLBACK JSON
+      clienteDataNascimento: row.cliente_data_nascimento || clienteDataFromJson.dataNascimento || clienteDataFromJson.data_nascimento || null,
+      clienteRenda: row.cliente_renda || (clienteDataFromJson.rendaMensal ? clienteDataFromJson.rendaMensal.toString() : null) || (clienteDataFromJson.renda_mensal ? clienteDataFromJson.renda_mensal.toString() : null),
+      clienteRg: row.cliente_rg || clienteDataFromJson.rg || null,
+      clienteOrgaoEmissor: row.cliente_orgao_emissor || clienteDataFromJson.orgaoEmissor || null,
+      clienteEstadoCivil: row.cliente_estado_civil || clienteDataFromJson.estadoCivil || null,
+      clienteNacionalidade: row.cliente_nacionalidade || clienteDataFromJson.nacionalidade || null,
+      clienteCep: row.cliente_cep || clienteDataFromJson.cep || null,
+      clienteEndereco: row.cliente_endereco || clienteDataFromJson.endereco || null,
+      clienteOcupacao: row.cliente_ocupacao || clienteDataFromJson.ocupacao || null,
       
       // Dados financeiros (snake_case → camelCase)
       valor: row.valor,
@@ -445,13 +469,32 @@ export class ProposalRepository implements IProposalRepository {
       valorTac: row.valor_tac,
       valorIof: row.valor_iof,
       valorTotalFinanciado: row.valor_total_financiado,
-      finalidade: row.finalidade,
-      garantia: row.garantia,
+      finalidade: row.finalidade || null,
+      garantia: row.garantia || null,
+      // DADOS COMPLETOS PARA FRONTEND
+      condicoesData: {
+        valor: row.valor,
+        prazo: row.prazo,
+        taxaJuros: row.taxa_juros,
+        finalidade: row.finalidade || null,
+        garantia: row.garantia || null
+      },
+      cliente_data: clienteDataFromJson,
+      clienteData: clienteDataFromJson,
       
-      // Dados de produtos e tabelas
+      // Dados de produtos e tabelas COM FALLBACK
       produtoId: row.produto_id,
-      nomeProduto: row.produto_nome,
-      tabelaComercialNome: row.tabela_comercial_nome,
+      produto_id: row.produto_id,
+      nomeProduto: row.produto_nome || null,
+      produto_nome: row.produto_nome || null,
+      produtoNome: row.produto_nome || null,
+      tabelaComercialNome: row.tabela_comercial_nome || null,
+      tabela_comercial_nome: row.tabela_comercial_nome || null,
+      // DADOS DE LOJA/PARCEIRO PARA FRONTEND
+      lojaId: row.loja_id,
+      loja_id: row.loja_id,
+      lojaNome: row.loja_nome || null,
+      loja_nome: row.loja_nome || null,
       
       // Dados de datas (snake_case → camelCase)
       createdAt: row.created_at,
