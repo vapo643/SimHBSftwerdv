@@ -40,14 +40,20 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   } = useQuery({
     queryKey: [`/api/propostas/${proposalId}`],
     refetchInterval: isGenerating ? 2000 : false, // Poll enquanto gera
-    select: (data: any) => ({
-      ccbPath: data?.ccbPath || data?.caminhoCcb,
-      signedUrl: data?.signedUrl,
-      generatedAt: data?.ccbGeradoEm || data?.ccb_gerado_em,
-      status: data?.status,
-      caminhoCcbAssinado: data?.caminhoCcbAssinado || data?.caminho_ccb_assinado,
-      dataAssinatura: data?.dataAssinatura || data?.data_assinatura
-    })
+    select: (data: any) => {
+      console.log('🔍 [CCBViewer] Raw API data:', data);
+      const result = {
+        ccbPath: data?.data?.caminho_ccb || data?.caminhoCcb || data?.ccbPath,
+        signedUrl: data?.data?.caminho_ccb || data?.caminhoCcb || data?.signedUrl,
+        generatedAt: data?.data?.ccb_gerado_em || data?.ccbGeradoEm || data?.ccb_gerado_em,
+        status: data?.data?.status || data?.status,
+        caminhoCcbAssinado: data?.data?.caminho_ccb_assinado || data?.caminhoCcbAssinado || data?.caminho_ccb_assinado,
+        dataAssinatura: data?.data?.data_assinatura || data?.dataAssinatura || data?.data_assinatura,
+        ccbGerado: data?.data?.ccb_gerado || data?.ccbGerado || data?.ccb_gerado
+      };
+      console.log('🔍 [CCBViewer] Mapped data:', result);
+      return result;
+    }
   });
 
   // PAM V1.0: Compatibilidade - criar ccbStatus para não quebrar código existente
@@ -220,7 +226,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     );
   }
 
-  const hasCCB = ccbStatus && ccbStatus.signedUrl;
+  const hasCCB = ccbStatus && (ccbStatus.signedUrl || proposalData?.ccbGerado);
 
   return (
     <Card>
