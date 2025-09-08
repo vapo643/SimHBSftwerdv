@@ -769,7 +769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             observacoes_formalizacao: proposta.observacoes_formalizacao,
             // 🔥 NOVO: Campos de tracking do Banco Inter
             interBoletoGerado: proposta.inter_boleto_gerado,
-            interBoletoGeradoEm: proposta.inter_boleto_gerado_em,
+            interBoletoGeradoEm: proposta.inter_boleto_gerado_em
           };
         });
 
@@ -888,7 +888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             documentos_adicionais: proposta.documentos_adicionais,
             observacoes_analise: proposta.observacoes_analise,
             data_analise: proposta.data_analise,
-            analista_id: proposta.analista_id,
+            analista_id: proposta.analista_id
           };
         });
 
@@ -1146,7 +1146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     url: newSignedUrl.signedUrl,
                     filename: `CCB-${id}.pdf`,
                     contentType: 'application/pdf',
-                    regenerated: true,
+                    regenerated: true
                   });
                 }
               }
@@ -1210,133 +1210,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // MOVED TO server/routes/propostas/core.ts - POST /api/propostas
-
-  // Import document routes - REACTIVATED FOR DIAGNOSIS
-  const { getPropostaDocuments, uploadPropostaDocument } = await import('./routes/documents');
-
-          // Transform to match expected format with proper camelCase conversion
-          const formattedProposta = {
-            ...proposta,
-            // Convert snake_case to camelCase for frontend compatibility
-            clienteData: proposta.cliente_data,
-            condicoesData: proposta.condicoes_data,
-            createdAt: proposta.created_at,
-            lojaId: proposta.loja_id,
-            produtoId: proposta.produto_id,
-            tabelaComercialId: proposta.tabela_comercial_id,
-            userId: proposta.user_id,
-            analistaId: proposta.analista_id,
-            dataAnalise: proposta.data_analise,
-            motivoPendencia: proposta.motivo_pendencia,
-            dataAprovacao: proposta.data_aprovacao,
-            documentosAdicionais: proposta.documentos_adicionais,
-            contratoGerado: proposta.contrato_gerado,
-            contratoAssinado: proposta.contrato_assinado,
-            dataAssinatura: proposta.data_assinatura,
-            dataPagamento: proposta.data_pagamento,
-            observacoesFormalização: proposta.observacoes_formalizacao,
-            // Nested objects with proper structure
-            lojas: proposta.loja
-              ? {
-                  ...proposta.loja,
-                  parceiros: proposta.parceiro,
-                }
-              : null,
-            produtos: proposta.produto,
-            tabelas_comerciais: proposta.tabela_comercial,
-            // Include documents with signed URLs
-            documentos: documentosComUrls || [],
-          };
-
-          res.json(formattedProposta);
-        }
-
-  // Document routes for proposals - REACTIVATED FOR DIAGNOSIS  
-  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
-
-  // Import propostas routes
-  const { togglePropostaStatus, getCcbAssinada } = await import('./routes/propostas');
-                });
-
-                // Extrair o caminho do arquivo a partir da URL salva
-                const documentsIndex = doc.url.indexOf('/documents/');
-                let filePath;
-
-                if (documentsIndex !== -1) {
-                  // Extrair caminho após '/documents/'
-                  filePath = doc.url.substring(documentsIndex + '/documents/'.length);
-                } else {
-                  // Fallback: construir caminho baseado no nome do arquivo
-                  const fileName = doc.nome_arquivo;
-                  filePath = `proposta-${idParam}/${fileName}`;
-                }
-
-                console.log(`🔍 [ANÁLISE-OUTROS] Caminho extraído para URL assinada: ${filePath}`);
-
-                const { data: signedUrlData, error: urlError } = await supabase.storage
-                  .from('documents')
-                  .createSignedUrl(filePath, 3600); // 1 hora
-
-                if (!urlError && signedUrlData) {
-                  documentosComUrls.push({
-                    ...doc,
-                    // Mapeamento para formato esperado pelo DocumentViewer
-                    name: doc.nome_arquivo,
-                    url: signedUrlData.signedUrl,
-                    type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
-                    uploadDate: doc.created_at,
-                    // Manter campos originais também
-                    url_visualizacao: signedUrlData.signedUrl,
-                  });
-                  console.log(
-                    `🔍 [ANÁLISE-OUTROS] ✅ URL gerada para documento: ${doc.nome_arquivo}`
-                  );
-                } else {
-                  console.log(
-                    `🔍 [ANÁLISE-OUTROS] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`,
-                    urlError?.message
-                  );
-                  console.log(`🔍 [ANÁLISE-OUTROS] ❌ Caminho tentado: ${filePath}`);
-                  documentosComUrls.push({
-                    ...doc,
-                    // Mesmo sem URL, mapear para formato esperado
-                    name: doc.nome_arquivo,
-                    url: '',
-                    type: doc.tipo || 'application/octet-stream',
-                    uploadDate: doc.created_at,
-                  }); // Adiciona sem URL em caso de erro
-                }
-              } catch (error) {
-                console.log(
-                  `🔍 [ANÁLISE-OUTROS] ❌ Erro ao processar documento ${doc.nome_arquivo}:`,
-                  error
-                );
-                documentosComUrls.push({
-                  ...doc,
-                  // Mesmo com erro, mapear para formato esperado
-                  name: doc.nome_arquivo,
-                  url: '',
-                  type: doc.tipo || 'application/octet-stream',
-                  uploadDate: doc.created_at,
-                }); // Adiciona sem URL em caso de erro
-              }
-            }
-          }
-
-          // Incluir documentos formatados na resposta
-          const propostaComDocumentos = {
-            ...proposta,
-            documentos: documentosComUrls || [],
-          };
-
-          console.log(
-            `🔍 [ANÁLISE-OUTROS] ✅ Retornando proposta ${idParam} com ${documentosComUrls.length} documentos formatados`
-          );
-          res.json(propostaComDocumentos);
-        }
+  
+  // Busca uma proposta individual pelo ID (Rota DDD Canônica)
+  app.get(
+    '/api/propostas/:id',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res, next) => {
+      try {
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
+        const proposalController = new ProposalController();
+        
+        // Log para auditoria do fluxo de dados
+        console.log(`[DDD ROUTE] Rota GET /api/propostas/:id acessada para o ID: ${req.params.id}`);
+        
+        return proposalController.getById(req, res, next);
       } catch (error) {
-        console.error('Get proposta error:', error);
-        res.status(500).json({ message: 'Failed to fetch proposta' });
+        console.error('GET /api/propostas/:id error:', error);
+        next(error);
       }
     }
   );
@@ -1600,11 +1490,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Import document routes - REACTIVATED FOR DIAGNOSIS
-  const { getPropostaDocuments, uploadPropostaDocument } = await import('./routes/documents');
 
-  // Document routes for proposals - REACTIVATED FOR DIAGNOSIS
-  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
+
+  // Document routes for proposals - TEMPORARILY DISABLED FOR RECOVERY
+  // app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
   // app.post(
   //   "/api/propostas/:id/documents",
   //   jwtAuthMiddleware as any,
@@ -1613,14 +1502,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   //   uploadPropostaDocument
   // );
 
-  // Import propostas routes
-  const { togglePropostaStatus, getCcbAssinada } = await import('./routes/propostas');
 
-  // Rota para alternar status entre ativa/suspensa
-  app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as any, togglePropostaStatus);
+  // Rota para alternar status entre ativa/suspensa - TEMPORARILY DISABLED
+  // app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as any, togglePropostaStatus);
 
-  // Rota para buscar CCB assinada
-  app.get('/api/propostas/:id/ccb', jwtAuthMiddleware as any, getCcbAssinada);
+  // Rota para buscar CCB assinada - TEMPORARILY DISABLED
+  // app.get('/api/propostas/:id/ccb', jwtAuthMiddleware as any, getCcbAssinada);
 
   // Emergency route to setup storage bucket (temporary - no auth for setup)
   app.post('/api/setup-storage', async (req, res) => {
@@ -1916,7 +1803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               return {
                 ...tabela,
-                produtoIds: associations.map((a) => a.produtoId),
+                produtoIds: associations.map((a) => a.produtoId)
               };
             })
           );
@@ -2301,7 +2188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
                   uploadDate: doc.created_at,
                   // Manter campos originais também
-                  url_visualizacao: signedUrlData.signedUrl,
+                  url_visualizacao: signedUrlData.signedUrl
                 });
                 console.log(
                   `[${getBrasiliaTimestamp()}] ✅ URL gerada para documento: ${doc.nome_arquivo}`
@@ -2318,7 +2205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   name: doc.nome_arquivo,
                   url: '',
                   type: doc.tipo || 'application/octet-stream',
-                  uploadDate: doc.created_at,
+                  uploadDate: doc.created_at
                 }); // Adiciona sem URL em caso de erro
               }
             } catch (error) {
@@ -3568,12 +3455,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           checks[table] = {
             status: error ? 'error' : 'ok',
-            error: error?.message || null,
+            error: error?.message || null
           };
         } catch (err) {
           checks[table] = {
             status: 'error',
-            error: err instanceof Error ? err.message : 'Unknown error',
+            error: err instanceof Error ? err.message : 'Unknown error'
           };
         }
       }
