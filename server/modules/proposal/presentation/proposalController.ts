@@ -297,29 +297,39 @@ export class ProposalController {
       const listUseCase = this.container.resolve<ListProposalsByCriteriaUseCase>(TOKENS.LIST_PROPOSALS_BY_CRITERIA_USE_CASE);
       const rawData = await listUseCase.execute(criteria);
 
+      // PAM V1.0 DEBUG: Log crítico para entender o que chega no controller
+      console.log('🔍 [CONTROLLER DEBUG] rawData do UseCase - Total:', rawData.length);
+      if (rawData.length > 0) {
+        console.log('🔍 [CONTROLLER DEBUG] Primeiro item do UseCase:', JSON.stringify({
+          id: rawData[0].id,
+          parceiro: rawData[0].parceiro,
+          loja: rawData[0].loja
+        }));
+      }
+
       // TODO P1.2: Remover este adaptador quando o repositório for consolidado para retornar o DTO correto
       // OPERAÇÃO AÇO LÍQUIDO P0.3: Adaptador de Contrato API para blindagem do frontend
       const data = rawData.map(row => ({
         id: row.id,
         status: row.status,
         nomeCliente: row.nomeCliente, // ← Já mapeado pelo repository
-        cpfCliente: row.cliente_cpf,
-        emailCliente: null, // ← Campo não retornado pelo repository (TODO P1.2)
-        telefoneCliente: null, // ← Campo não retornado pelo repository (TODO P1.2)  
-        valorSolicitado: row.valor,
+        cpfCliente: row.cpfCliente,   // ← CORREÇÃO: Use Case agora retorna camelCase
+        emailCliente: row.emailCliente || null, // ← CORREÇÃO: Use Case agora retorna camelCase
+        telefoneCliente: row.telefoneCliente || null, // ← CORREÇÃO: Use Case agora retorna camelCase  
+        valorSolicitado: row.valorSolicitado, // ← CORREÇÃO: Use Case agora retorna camelCase
         prazo: row.prazo,
-        taxaJuros: row.taxa_juros,
+        taxaJuros: row.taxaJuros,     // ← CORREÇÃO: Use Case agora retorna camelCase
         // CORREÇÃO CRÍTICA P3: Incluir campos que estavam ausentes
-        valorTac: row.valor_tac,
-        valorIof: row.valor_iof,
-        valorTotalFinanciado: row.valor_total_financiado,
+        valorTac: row.valorTac,       // ← CORREÇÃO: Use Case agora retorna camelCase
+        valorIof: row.valorIof,       // ← CORREÇÃO: Use Case agora retorna camelCase
+        valorTotalFinanciado: row.valorTotalFinanciado, // ← CORREÇÃO: Use Case agora retorna camelCase
         finalidade: row.finalidade,
         garantia: row.garantia,
-        lojaId: row.loja_id,
+        lojaId: row.lojaId,           // ← CORREÇÃO: Use Case agora retorna camelCase
         parceiro: row.parceiro, // ← Já estruturado pelo repository
         loja: row.loja, // ← Já estruturado pelo repository
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
+        createdAt: row.createdAt,     // ← CORREÇÃO: Use Case agora retorna camelCase
+        updatedAt: row.updatedAt,     // ← CORREÇÃO: Use Case agora retorna camelCase
       }));
 
       

@@ -49,36 +49,48 @@ export class ListProposalsByCriteriaUseCase {
   ) {}
 
   async execute(criteria: ListProposalsCriteria): Promise<ProposalListItem[]> {
+    console.log('🚨 [USE CASE ENTRY] ListProposalsByCriteriaUseCase.execute STARTED');
     // 🏡 P0.2 - Delegar para repositório usando método lightweight
     const rawData = await this.proposalRepository.findByCriteriaLightweight(criteria);
+    console.log('🚨 [USE CASE REPO] Repository returned data - Count:', rawData?.length || 0);
 
-    // Mapear para formato esperado pelo frontend
-    return rawData.map((row: any) => ({
+    // PAM V1.0 DEBUG: Log dos dados que chegam do repositório
+    console.log('🔍 [USE CASE DEBUG] Dados do repositório:', rawData.length);
+    if (rawData.length > 0) {
+      console.log('🔍 [USE CASE DEBUG] Primeiro item:', JSON.stringify({
+        parceiro: rawData[0].parceiro,
+        loja: rawData[0].loja
+      }));
+    }
+
+    console.log('🚨 [USE CASE MAPPING] Starting mapping of', rawData.length, 'items');
+    
+    // PAM V1.0 CORREÇÃO: Use Case deve usar dados já mapeados pelo repositório
+    // Repositório agora retorna DTOs estruturados, não dados raw
+    const result = rawData.map((row: any) => ({
       id: row.id,
       status: row.status,
-      nomeCliente: row.cliente_nome,
-      cpfCliente: row.cliente_cpf,
-      emailCliente: row.cliente_email || null,
-      telefoneCliente: row.cliente_telefone || null,
+      nomeCliente: row.nomeCliente, // ← Repositório já converte snake_case → camelCase
+      cpfCliente: row.cpfCliente,   // ← Repositório já converte snake_case → camelCase  
+      emailCliente: row.emailCliente || null,
+      telefoneCliente: row.telefoneCliente || null,
       valorSolicitado: row.valor,
       prazo: row.prazo,
-      taxaJuros: row.taxa_juros,
-      valorTac: row.valor_tac,
-      valorIof: row.valor_iof,
-      valorTotalFinanciado: row.valor_total_financiado,
+      taxaJuros: row.taxaJuros,     // ← Repositório já converte snake_case → camelCase
+      valorTac: row.valorTac,       // ← Repositório já converte snake_case → camelCase
+      valorIof: row.valorIof,       // ← Repositório já converte snake_case → camelCase
+      valorTotalFinanciado: row.valorTotalFinanciado, // ← Repositório já converte
       finalidade: row.finalidade,
       garantia: row.garantia,
-      lojaId: row.loja_id,
-      parceiro: row.parceiro_id ? {
-        id: row.parceiro_id,
-        razaoSocial: row.parceiro_nome,
-      } : null,
-      loja: row.loja_id ? {
-        id: row.loja_id,
-        nomeLoja: row.loja_nome,
-      } : null,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      lojaId: row.lojaId,           // ← Repositório já converte loja_id → lojaId
+      // PAM V1.0 CORREÇÃO CRÍTICA: Usar dados estruturados do repositório
+      parceiro: row.parceiro,       // ← JÁ ESTRUTURADO: { id: 1, razaoSocial: '...' }
+      loja: row.loja,               // ← JÁ ESTRUTURADO: { id: 1, nomeLoja: '...' }
+      createdAt: row.createdAt,     // ← Repositório já converte snake_case → camelCase
+      updatedAt: row.updatedAt,     // ← Repositório já converte snake_case → camelCase
     }));
+    
+    console.log('🚨 [USE CASE RETURN] Returning', result.length, 'mapped items');
+    return result;
   }
 }

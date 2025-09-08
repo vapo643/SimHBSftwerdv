@@ -319,7 +319,7 @@ export class ProposalRepository implements IProposalRepository {
       const mappedResults = results.map((row) => this.mapRowToProposalDTO(row));
       console.log('🔍 [PAM DEBUG] MAPEADOR CONCLUÍDO - Total mapped:', mappedResults.length);
       return mappedResults;
-    } catch (error) {
+    } catch (error: any) {
       console.error('🚨 [PAM DEBUG] ERRO NO MAPEADOR:', error);
       console.error('🚨 [PAM DEBUG] Stack trace:', error.stack);
       // FALLBACK: Retornar dados brutos se o mapeador falhar
@@ -339,7 +339,7 @@ export class ProposalRepository implements IProposalRepository {
     console.log('🔍 [MAPEADOR DEBUG] loja_id:', row.loja_id);
     console.log('🔍 [MAPEADOR DEBUG] loja_nome:', row.loja_nome);
     
-    return {
+    const result = {
       // Dados básicos da proposta
       id: row.id,
       status: row.status,
@@ -396,6 +396,17 @@ export class ProposalRepository implements IProposalRepository {
         row.prazo || 1
       ),
     };
+    
+    console.log('🔍 [MAPEADOR DEBUG] OBJETO RESULT CRIADO COM SUCESSO');
+    
+    // PAM V1.0 DEBUG: Log do resultado final do mapeamento
+    console.log('🔍 [MAPEADOR DEBUG] ANTES JSON STRINGIFY');
+    console.log('🔍 [MAPEADOR DEBUG] result.parceiro existe?', !!result.parceiro);
+    console.log('🔍 [MAPEADOR DEBUG] result.loja existe?', !!result.loja);
+    console.log('🔍 [MAPEADOR DEBUG] RESULTADO FINAL parceiro:', result.parceiro);
+    console.log('🔍 [MAPEADOR DEBUG] RESULTADO FINAL loja:', result.loja);
+    
+    return result;
   }
 
   async findAll(): Promise<Proposal[]> {
