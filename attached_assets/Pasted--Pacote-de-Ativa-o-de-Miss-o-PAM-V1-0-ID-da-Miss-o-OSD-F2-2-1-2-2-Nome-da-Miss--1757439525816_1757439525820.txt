@@ -1,0 +1,38 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **ID da Missão:** OSD-F2-2.1-2.2
+* **Nome da Missão:** Operação Soberania dos Dados - Gerador de Cenários de Teste
+* **Sumário da Missão (O Quê):** Implementar um sistema de seeding robusto que popule os bancos de dados de não-produção com dados sintéticos, coesos e realistas.
+* **Intenção Estratégica (O Porquê):** Testar em um banco de dados vazio é inútil. Usar dados de produção é ilegal e perigoso. A única solução de nível bancário é gerar dados sintéticos que simulem cenários de negócio reais. Esta missão criará a ferramenta que nos permitirá validar novas funcionalidades em um ambiente de `staging` que espelha a complexidade da produção, sem nunca tocar em um dado de cliente real.
+* **Histórico Relevante (Consulta Obrigatória):** A sua execução deve seguir o plano operacional definido em nosso debate técnico, especificamente a estrutura de pastas em `/scripts/seeding` e a lógica de criação de um cenário de negócio interligado.
+* **Modelo Mental (Como se Encaixa):** Você está a construir uma "fábrica de realidades alternativas". O script que você vai criar será o nosso "gerador de mundos", capaz de construir, sob demanda, um ecossistema funcional dentro do nosso banco de dados, com atendentes, clientes e propostas que se relacionam de forma lógica.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** O script de seeding torna-se lento e difícil de manter à medida que o schema cresce.
+    * **Contramedida:** Projete os geradores de forma modular (um para cada entidade principal: clientes, produtos, propostas) e use um orquestrador (`/scripts/seeding/index.js`) para compor os cenários. Isso garante que cada parte possa ser mantida de forma independente.
+
+---
+
+**IMPLEMENTAR:**
+Sistema de Seeding de Dados Sintéticos com Cenários de Negócio
+
+**CURRENT STATE:**
+O projeto não possui nenhum mecanismo para popular os bancos de dados de `development` ou `staging` com dados de teste. Estão vazios após as migrações. Isso impede testes funcionais e de E2E eficazes.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A estrutura de pastas `/scripts/seeding` existe e está populada com os scripts geradores modulares e o orquestrador.
+2.  O `package.json` foi atualizado com os scripts `seed:dev` e `seed:staging`.
+3.  Executar `npm run seed:staging` limpa as tabelas relevantes e popula o banco de `staging` com um cenário de negócio determinístico e coeso (usando `faker.seed`), contendo pelo menos 1 atendente, 2 clientes e 3 propostas com status diferentes (`APROVADA`, `REJEITADA`, `PENDENTE`) e relacionamentos corretos.
+4.  O script é idempotente: executá-lo várias vezes produz o mesmo estado final no banco de dados.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Crie a Estrutura de Pastas:** Crie a estrutura `/scripts/seeding/` com as subpastas `generators`, `environments` e `utils`.
+2.  **Implemente os Geradores Modulares:** Crie arquivos separados em `/scripts/seeding/generators/` para `clients.js`, `proposals.js`, etc. Cada arquivo deve exportar funções que geram dados sintéticos para aquela entidade usando `faker.js`.
+3.  **Implemente o Orquestrador de Cenários:** No arquivo `/scripts/seeding/business-scenarios.js`, crie a classe `BusinessScenarioSeeder` que importa os geradores modulares e os utiliza para criar um cenário de negócio coeso, como detalhado na nossa discussão. Use `faker.seed()` para garantir que os dados gerados sejam sempre os mesmos para o ambiente de `staging`.
+4.  **Crie o Ponto de Entrada:** Em `/scripts/seed-database.js`, crie a lógica que lê o `NODE_ENV`, limpa as tabelas do banco de dados correspondente e chama o `BusinessScenarioSeeder` para popular os dados.
+5.  **Atualize o `package.json`:** Adicione os scripts `seed:dev` e `seed:staging` que invocam o ponto de entrada da etapa anterior com o `NODE_ENV` apropriado.
+
+---
+**[PGI INATIVO | ROADMAP PRINCIPAL ATIVO]**
+- **Roadmap Ativo:** "Operação Soberania dos Dados"
+- **Próximo Passo:** Fase 2: Soberania dos Dados de Teste
+---
