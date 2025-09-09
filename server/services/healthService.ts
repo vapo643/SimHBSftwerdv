@@ -97,8 +97,13 @@ export class HealthService {
     const startTime = Date.now();
 
     try {
-      const supabaseUrl = process.env.SUPABASE_URL;
-      const supabaseKey = process.env.SUPABASE_ANON_KEY;
+      const isProd = process.env.NODE_ENV === 'production';
+      const supabaseUrl = isProd 
+        ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL)
+        : process.env.SUPABASE_URL;
+      const supabaseKey = isProd
+        ? (process.env.PROD_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY)
+        : process.env.SUPABASE_ANON_KEY;
 
       if (!supabaseUrl || !supabaseKey) {
         return {

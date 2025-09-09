@@ -192,9 +192,15 @@ export function loadConfig(): AppConfig {
         url: process.env.DATABASE_URL || null,
       },
       supabase: {
-        url: process.env.SUPABASE_URL || null,
-        anonKey: process.env.SUPABASE_ANON_KEY || null,
-        serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || null,
+        url: process.env.NODE_ENV === 'production' 
+          ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL || null)
+          : (process.env.SUPABASE_URL || null),
+        anonKey: process.env.NODE_ENV === 'production'
+          ? (process.env.PROD_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || null)
+          : (process.env.SUPABASE_ANON_KEY || null),
+        serviceKey: process.env.NODE_ENV === 'production'
+          ? (process.env.PROD_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || null)
+          : (process.env.SUPABASE_SERVICE_ROLE_KEY || null),
       },
       security: {
         enableRateLimit: process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL,

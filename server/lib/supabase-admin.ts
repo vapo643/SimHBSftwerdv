@@ -9,7 +9,7 @@ function getSupabaseAdminCredentials() {
     : (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '');
     
   const supabaseServiceKey = isProd
-    ? (process.env.PROD_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '')
+    ? (process.env.PROD_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '')
     : (process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 
   return { supabaseUrl, supabaseServiceKey };
@@ -21,7 +21,7 @@ const { supabaseUrl, supabaseServiceKey } = getSupabaseAdminCredentials();
 if (!supabaseUrl || !supabaseServiceKey) {
   console.warn('⚠️ Supabase admin environment variables not configured. Admin operations will be limited.');
   if (process.env.NODE_ENV === 'production') {
-    console.warn('ℹ️  Configure PROD_SUPABASE_URL and PROD_SUPABASE_SERVICE_KEY in deployment secrets');
+    console.warn('ℹ️  Configure PROD_SUPABASE_URL and PROD_SUPABASE_SERVICE_ROLE_KEY in deployment secrets');
   }
 }
 
