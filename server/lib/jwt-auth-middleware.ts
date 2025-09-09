@@ -436,8 +436,8 @@ export async function jwtAuthMiddleware(
         
         // Tentar diferentes naming conventions para credenciais
         const JWT_SECRET = process.env.NODE_ENV === 'production' 
-          ? (process.env.PROD_SUPABASE_JWT_SECRET || process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET)
-          : (process.env.DEV_SUPABASE_JWT_SECRET || process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET);
+          ? (process.env.PROD_SUPABASE_JWT_SECRET || process.env.PROD_JWT_SECRET || process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET)
+          : (process.env.DEV_SUPABASE_JWT_SECRET || process.env.DEV_JWT_SECRET || process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET);
         
         console.log(`[JWT DEBUG] SECRET encontrado: ${!!JWT_SECRET} (ambiente: ${process.env.NODE_ENV})`);
         

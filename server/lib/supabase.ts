@@ -9,11 +9,11 @@ function getSupabaseCredentials() {
   
   const supabaseUrl = isProd 
     ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '')
-    : (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '');
+    : (process.env.DEV_SUPABASE_URL || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '');
     
   const supabaseAnonKey = isProd
     ? (process.env.PROD_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '')
-    : (process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '');
+    : (process.env.DEV_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '');
     
   const databaseUrl = isProd
     ? (process.env.PROD_DATABASE_URL || process.env.DATABASE_URL || '')
@@ -51,7 +51,7 @@ export function createServerSupabaseAdminClient() {
   const isProd = process.env.NODE_ENV === 'production';
   const serviceKey = isProd 
     ? (process.env.PROD_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)
-    : (process.env.DEV_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
+    : (process.env.DEV_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
   const url = isProd
     ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL)
     : (process.env.DEV_SUPABASE_URL || process.env.SUPABASE_URL);
