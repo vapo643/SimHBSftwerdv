@@ -34,27 +34,13 @@ export async function createApp() {
     logging: true,
   });
 
-  // FASE 0 - Redis Cloud Health Check (PAM V3.3 - PRIC requirement) - GRACEFUL
-  const redisHealth = await checkRedisHealth();
-  if (redisHealth.status === 'healthy') {
-    logInfo('✅ Conexão com Redis Cloud estabelecida com sucesso', {
-      latency: redisHealth.latency,
-      service: 'redis-cloud',
-    });
-  } else {
-    console.warn(
-      '⚠️ Redis não disponível - aplicação continuará em modo degradado'
-    );
-    console.warn(`Detalhes do erro Redis: ${redisHealth.error}`);
-    console.warn('📋 Funcionalidades afetadas: cache, filas de background, sessões');
-    console.warn('💡 Para funcionalidade completa, configure REDIS_URL nos secrets de deploy');
-    
-    logInfo('🔄 Aplicação iniciando em modo degradado sem Redis', {
-      redis_available: false,
-      degraded_mode: true,
-      service: 'redis-fallback',
-    });
-  }
+  // FASE 0 - Redis Cloud Health Check (LAZY LOADING - NO STARTUP TIMEOUTS)
+  // Health check será feito on-demand quando Redis for necessário
+  logInfo('🔄 Aplicação iniciando com Redis lazy loading (graceful degradation)', {
+    redis_available: 'on-demand-check',
+    degraded_mode: false,
+    service: 'redis-lazy',
+  });
 
   // Disable X-Powered-By header - OWASP ASVS V14.4.1
   app.disable('x-powered-by');
