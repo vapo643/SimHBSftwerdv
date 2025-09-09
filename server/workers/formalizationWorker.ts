@@ -27,14 +27,20 @@ export class FormalizationWorker {
 
   private async initializeWorker() {
     try {
-      // Create BullMQ worker
+      // Check if Redis is available first
+      const redisConnection = await getRedisClient();
+      if (!redisConnection) {
+        throw new Error('Redis connection not available - using synchronous processing');
+      }
+
+      // Create BullMQ worker only if Redis is available
       this.worker = new Worker(
         'formalization-queue',
         async (job: Job<ProposalApprovedPayload>) => {
           return this.processFormalization(job);
         },
         {
-          connection: await getRedisClient(),
+          connection: redisConnection,
           concurrency: 5, // Processar até 5 propostas simultaneamente
         }
       );
@@ -48,7 +54,7 @@ export class FormalizationWorker {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
       logger.warn(
-        '💡 [FormalizationWorker] Events will be processed synchronously (development mode)'
+        '💡 [FormalizationWorker] Events will be processed synchronously (graceful degradation)'
       );
     }
   }

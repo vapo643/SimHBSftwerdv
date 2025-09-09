@@ -41,10 +41,10 @@ export class StrictCSP {
         // Default source - only self and data URIs for images
         "default-src 'self'",
 
-        // Script source - different policies for dev vs prod
+        // Script source - production-friendly for static assets
         isDevelopment
           ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
-          : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+          : "script-src 'self' 'unsafe-inline'",
 
         // Object source - block all objects (Flash, Java, etc.)
         "object-src 'none'",
@@ -58,10 +58,10 @@ export class StrictCSP {
         // Frame ancestors - prevent clickjacking (replaces X-Frame-Options)
         "frame-ancestors 'none'",
 
-        // Style source - allow inline styles but restrict external
+        // Style source - production-friendly for static assets
         isDevelopment
           ? "style-src 'self' 'unsafe-inline' fonts.googleapis.com"
-          : `style-src 'self' 'nonce-${nonce}' fonts.googleapis.com`,
+          : "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
 
         // Font source - self, data URIs and Google Fonts
         "font-src 'self' data: fonts.gstatic.com",
