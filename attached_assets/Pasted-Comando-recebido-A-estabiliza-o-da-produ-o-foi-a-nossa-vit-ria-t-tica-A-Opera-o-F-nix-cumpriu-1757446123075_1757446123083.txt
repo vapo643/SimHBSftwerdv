@@ -1,0 +1,94 @@
+Comando recebido. A estabilização da produção foi a nossa vitória tática. A "Operação Fênix" cumpriu seu dever. Agora, voltamos ao campo de batalha original com foco total.
+
+**Veredito da Situação:**
+
+  * **Produção:** Estável. A crise P0 está encerrada. O PGI para a falha do Redis é desativado.
+  * **Desenvolvimento:** Inoperante. A falha de autenticação P1 persiste, bloqueando todo o avanço.
+
+A sua análise está correta. O problema não está mais no Redis, mas sim na dissonância fundamental entre os nossos ambientes que havíamos começado a investigar antes da crise em produção. Os logs que você forneceu são idênticos aos anteriores, confirmando que a causa raiz no ambiente de desenvolvimento nunca foi resolvida.
+
+Ativo um novo protocolo de interrupção focado exclusivamente neste problema.
+
+-----
+
+### **PROTOCOLO DE GERENCIAMENTO DE INTERRUPÇÃO (PGI) V1.1 ATIVADO**
+
+**ALERTA:** Interrupção de fluxo de desenvolvimento detectada.
+
+**Roadmap em Standby:** Todos os roadmaps de novas funcionalidades.
+**Causa da Interrupção:** Bug Crítico P1 - Ambiente de desenvolvimento (preview) inoperante devido a falha de autenticação `401 Unauthorized`.
+**Novo Foco (Missão de Emergência):** Diagnóstico e estabilização do ambiente de desenvolvimento.
+
+## **STATUS:** STANDBY (AGUARDANDO DIAGNÓSTICO DE AMBIENTE)
+
+### **Análise Forense e Plano de Batalha**
+
+Retomamos a nossa hipótese anterior, que agora é o nosso principal e único suspeito: **As credenciais do Supabase para o ambiente de desenvolvimento estão ausentes, incorretas ou não estão a ser carregadas corretamente pelo backend.** O frontend obtém um token de `dev`, mas o backend não consegue validá-lo com o Supabase de `dev` porque não consegue estabelecer uma comunicação de serviço a serviço.
+
+Precisamos de uma prova definitiva, não de mais tentativas de correção às cegas. A missão de diagnóstico que delineamos anteriormente (`PGI-DEV-STAB-01`) é agora a nossa única prioridade.
+
+Executor Humano, a sua próxima diretriz é executar esta missão de diagnóstico. Envie o seguinte PAM ao agente. Ele foi projetado para nos dar uma resposta inequívoca sobre o estado da conectividade do nosso ambiente de desenvolvimento.
+
+```markdown
+### Pacote de Ativação de Missão (PAM) - EMERGÊNCIA (DIAGNÓSTICO DE AMBIENTE)
+
+* **ID da Missão:** PGI-DEV-STAB-01
+* **Nome da Missão:** Operação Toque de Realidade - Validação de Conectividade do Ambiente DEV
+* **Sumário da Missão (O Quê):** Criar e executar um script de diagnóstico que valide ativamente a conectividade do backend com todos os seus serviços externos essenciais (`Supabase`, `Redis`) usando **exclusivamente** as variáveis de ambiente de desenvolvimento.
+* **Intenção Estratégica (O Porquê):** Estamos a operar às cegas. O ambiente de desenvolvimento, a nossa ferramenta mais fundamental, não é confiável. Esta missão visa restaurar a visibilidade, executando um "check-up" completo e ao vivo nas conexões do ambiente. O resultado deste script nos dará um mapa exato do ponto de falha, permitindo uma correção cirúrgica e definitiva.
+
+---
+
+**IMPLEMENTAR:**
+Script de Diagnóstico de Conectividade de Ambiente
+
+**CURRENT STATE:**
+O ambiente de desenvolvimento está inoperante. As requisições de API autenticadas falham com `401 Unauthorized`. A hipótese é que as variáveis de ambiente (`secrets`) para os serviços externos (`Supabase`, `Redis`) estão incorretas, impedindo a comunicação do backend.
+
+**EXPECTED (Estado Final de Sucesso):**
+A execução de um novo script de diagnóstico que produz um relatório claro no console, indicando o status de cada conexão de serviço crítico para o ambiente de **desenvolvimento**. O relatório deve ser semelhante a isto:
+
+```
+
+## [DIAGNÓSTICO DE AMBIENTE DEV]
+
+1.  Verificando Conexão com Supabase (Admin Client)...
+      - DEV\_SUPABASE\_URL: https://\<id\>.supabase.co (CARREGADA)
+      - DEV\_SUPABASE\_SERVICE\_KEY: \*\*\*\*\*\* (CARREGADA)
+      - STATUS: ✅ SUCESSO - Conexão com Supabase Admin estabelecida.
+
+-----
+
+2.  Verificando Conexão com Redis...
+      - REDIS\_URL: \*\*\*\*\*\* (CARREGADA)
+      - STATUS: ❌ FALHA - Não foi possível conectar ao Redis. Erro: [Mensagem de erro real da conexão]
+
+-----
+
+Veredito: Falha crítica na conexão com o Redis.
+
+```
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Crie o Script de Diagnóstico:**
+    * Crie um novo arquivo temporário em `scripts/diagnostics/check-dev-env.ts`.
+
+2.  **Implemente a Lógica de Verificação:**
+    * Dentro do script, importe as bibliotecas necessárias (`postgres`, `ioredis`, etc.).
+    * **NÃO confie em nenhuma abstração existente.** Carregue as variáveis de ambiente de desenvolvimento (`process.env.DEV_SUPABASE_URL`, `process.env.DEV_SUPABASE_SERVICE_KEY`, `process.env.REDIS_URL`) diretamente.
+    * Escreva blocos de código `try/catch` separados para cada serviço:
+        * **Para o Supabase:** Tente inicializar o cliente admin (`createServerClient`) e execute uma query simples e inofensiva (ex: `SELECT 1`). Reporte sucesso ou o erro exato da falha.
+        * **Para o Redis:** Tente inicializar o cliente `ioredis` e execute um comando `PING`. Reporte sucesso ou o erro exato da falha na conexão.
+    * O script deve imprimir o progresso e os resultados no console de forma clara, como no exemplo da seção `EXPECTED`.
+
+3.  **Execute e Reporte:**
+    * Execute o script no ambiente Replit.
+    * Forneça o **output completo e literal** do script como o seu relatório de missão.
+
+---
+**[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]**
+-   **Roadmap em Standby:** Todos.
+-   **Missão de Emergência Atual:** "Operação Toque de Realidade - Validação de Conectividade do Ambiente DEV (PGI-DEV-STAB-01)"
+---
+```
