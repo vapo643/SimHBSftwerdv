@@ -1,0 +1,27 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão:** Auditar os componentes de layout e perfil do frontend para identificar a causa raiz da exibição de roles de usuário duplicadas e/ou incorretas (ex: "diretor" e "adm").
+
+* **Intenção Estratégica (O Porquê):** Uma exibição incorreta de permissões no perfil do usuário pode confundir o usuário, minar a confiança na aplicação e mascarar problemas de segurança subjacentes. É imperativo que a UI reflita com 100% de precisão a verdadeira role do usuário autenticado.
+
+* **Histórico Relevante (Consulta Obrigatória):** O usuário `ramon.barbosa@eellevepromotora.com.br` foi recentemente criado com a role `ADMIN`. O banco de dados agora está populado. O problema não é mais a ausência de dados, mas sim como os dados existentes são renderizados.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria Forense de Componente de Exibição de Role.
+
+**CURRENT STATE:**
+Um usuário com a role `ADMIN` está vendo seu perfil na UI com múltiplas designações, como "diretor" e "adm". Isso sugere que a UI está buscando ou renderizando informações de perfil de mais de uma fonte ou de forma incorreta.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria claro que identifique:
+1.  O(s) componente(s) React exato(s) responsável(eis) por renderizar o nome e a role do usuário no layout principal (provavelmente em um cabeçalho ou sidebar).
+2.  De onde este(s) componente(s) obtêm os dados do usuário (ex: `AuthContext`, `useQuery`, props).
+3.  O ponto exato no código onde a lógica de exibição está falhando, resultando na renderização duplicada. O veredito deve apontar a linha ou o bloco de código problemático e explicar por que ele está causando a anomalia.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  Comece a investigação pelo arquivo `client/src/components/DashboardLayout.tsx`. Este é o local mais provável para a renderização do perfil do usuário.
+2.  Analise como os dados do `user` ou `profile` são acessados. Siga o fluxo de dados até sua origem (provavelmente o `AuthContext`).
+3.  Inspecione o componente que renderiza o avatar do usuário e o texto do perfil (`UserNav`, `ProfileDropdown` ou similar).
+4.  Apresente o trecho de JSX e a lógica associada que está causando a renderização incorreta, com uma explicação detalhada da falha.
