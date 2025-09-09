@@ -40,6 +40,59 @@ class RedisManager {
     const isProduction = process.env.NODE_ENV === 'production';
     const isTest = process.env.NODE_ENV === 'test';
 
+    // PRIORITY 1: Parse REDIS_URL if available (Redis Cloud format)
+    if (process.env.REDIS_URL) {
+      console.log('[REDIS MANAGER] 🔗 Using REDIS_URL for connection');
+      try {
+        const redisUrl = new URL(process.env.REDIS_URL);
+        const baseConfig: RedisOptions = {
+          host: redisUrl.hostname,
+          port: parseInt(redisUrl.port || '6379'),
+          password: redisUrl.password || undefined,
+          username: redisUrl.username || 'default',
+          db: isTest ? 1 : 0, // DB separado para testes
+
+          // Configurações de produção baseadas em melhores práticas
+          lazyConnect: true,
+          connectTimeout: 10000,  // Increased timeout for Redis Cloud
+          commandTimeout: 5000,   // Increased timeout for Redis Cloud
+          maxRetriesPerRequest: null, // CRÍTICO para BullMQ - evita timeouts
+          enableOfflineQueue: true, // Permite queue de comandos quando Redis não está disponível
+          keepAlive: 30000,
+
+          // Estratégia de reconexão mais agressiva para deploy
+          retryStrategy: (times: number) => {
+            const delay = Math.min(times * 50, 1000);
+            if (times > 3) { // Máximo 3 tentativas para deploy mais rápido
+              console.error('[REDIS MANAGER] Máximo de tentativas de reconexão atingido (deploy mode)');
+              return null;
+            }
+            return delay;
+          },
+
+          // Reconexão automática em erros específicos
+          reconnectOnError: (err: Error) => {
+            const reconnectErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT'];
+            return reconnectErrors.some((error) => err.message.includes(error));
+          },
+        };
+
+        console.log('[REDIS MANAGER] 📍 Parsed Redis config:', {
+          host: baseConfig.host,
+          port: baseConfig.port,
+          username: baseConfig.username,
+          hasPassword: !!baseConfig.password,
+          db: baseConfig.db,
+        });
+
+        return this.applyEnvironmentOverrides(baseConfig, isProduction, isTest);
+      } catch (error) {
+        console.error('[REDIS MANAGER] ❌ Failed to parse REDIS_URL:', (error as Error).message);
+        console.log('[REDIS MANAGER] 🔄 Fallback to individual env vars');
+      }
+    }
+
+    // FALLBACK: Use individual environment variables
     const baseConfig: RedisOptions = {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
@@ -48,8 +101,8 @@ class RedisManager {
 
       // Configurações de produção baseadas em melhores práticas
       lazyConnect: true,
-      connectTimeout: 500,  // TIMEOUT ULTRA RÁPIDO - falha imediatamente
-      commandTimeout: 300,  // Comando timeout ultra rápido
+      connectTimeout: 10000,  // Increased timeout for Redis Cloud
+      commandTimeout: 5000,   // Increased timeout for Redis Cloud  
       maxRetriesPerRequest: null, // CRÍTICO para BullMQ - evita timeouts
       enableOfflineQueue: true, // Permite queue de comandos quando Redis não está disponível
       keepAlive: 30000,
@@ -70,6 +123,14 @@ class RedisManager {
         return reconnectErrors.some((error) => err.message.includes(error));
       },
     };
+
+    return this.applyEnvironmentOverrides(baseConfig, isProduction, isTest);
+  }
+
+  /**
+   * Aplica configurações específicas de ambiente
+   */
+  private applyEnvironmentOverrides(baseConfig: RedisOptions, isProduction: boolean, isTest: boolean): RedisOptions {
 
     // Configurações específicas para teste
     if (isTest) {
