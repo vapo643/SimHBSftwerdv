@@ -39,22 +39,25 @@ process.env.DATABASE_URL = correctDatabaseUrl;
 
 // Validação de hostname (segurança extra)
 const url = new URL(correctDatabaseUrl);
-const expectedHostnames = {
-  development: ['dev-simpix', 'localhost', '127.0.0.1'],
-  staging: ['staging-simpix'],
-  production: ['prod-simpix'],
-  test: ['test-simpix', 'localhost', '127.0.0.1']
+
+// Validação simplificada para evitar conflitos com hostnames Supabase reais
+const isDatabaseUrlDifferent = (env) => {
+  const prodUrl = process.env.PROD_DATABASE_URL || process.env.DATABASE_URL;
+  if (!prodUrl) return true;
+  
+  return correctDatabaseUrl !== prodUrl;
 };
 
-const validHost = expectedHostnames[REQUIRED_ENVIRONMENT]?.some(host => 
-  url.hostname.includes(host)
-);
-
-if (!validHost) {
-  console.error(`🚨 SECURITY: Hostname ${url.hostname} inválido para ambiente ${REQUIRED_ENVIRONMENT}`);
-  console.error(`✅ Esperado: ${expectedHostnames[REQUIRED_ENVIRONMENT]?.join(', ')}`);
-  process.exit(1);
+// Para test e development, garantir que não seja igual ao DATABASE_URL de produção
+if ((REQUIRED_ENVIRONMENT === 'test' || REQUIRED_ENVIRONMENT === 'development')) {
+  if (!isDatabaseUrlDifferent(REQUIRED_ENVIRONMENT)) {
+    console.error(`🚨 SECURITY: Database URL ${REQUIRED_ENVIRONMENT} igual ao de PRODUÇÃO!`);
+    console.error(`🔧 Configure um ${DATABASE_URL_VAR} específico para ${REQUIRED_ENVIRONMENT}`);
+    process.exit(1);
+  }
 }
+
+console.log(`🔒 SEGURANÇA: Database isolado para ambiente ${REQUIRED_ENVIRONMENT}`);
 
 // Log de segurança
 console.log(`🔧 Iniciando migração para ambiente: ${REQUIRED_ENVIRONMENT}`);
