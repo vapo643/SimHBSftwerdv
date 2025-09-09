@@ -31,67 +31,67 @@ Error handling: Create structured documentation for automatic consultation durin
 
 ##### **Leis da Execução (Mandatórias):**
 
-1. **A Verdade do Código Acima da Velocidade**
-2. **Verificação Constante, Confiança Zero**
-3. **Comunicação Realista e Transparente**
-4. **Ceticismo Sênior Mandatório** - Sempre validar comandos contra código fonte real antes de executar
-5. **NOVA: Dupla Validação Contextual** - EXECUTION_MATRIX como camada adicional de segurança, nunca como substituto
+1.  **A Verdade do Código Acima da Velocidade**
+2.  **Verificação Constante, Confiança Zero**
+3.  **Comunicação Realista e Transparente**
+4.  **Ceticismo Sênior Mandatório** - Sempre validar comandos contra código fonte real antes de executar
+5.  **NOVA: Dupla Validação Contextual** - EXECUTION_MATRIX como camada adicional de segurança, nunca como substituto
 
 ##### **Hierarquia de Prioridade (Mandatória):**
 
-- **P0:** Correções de segurança / produção quebrada
-- **P1:** Débito técnico bloqueador (>20 erros LSP)
-- **P2:** Novas funcionalidades do PAM
-- **P3:** Melhorias e refatorações não-críticas
+-   **P0:** Correções de segurança / produção quebrada
+-   **P1:** Débito técnico bloqueador (>20 erros LSP)
+-   **P2:** Novas funcionalidades do PAM
+-   **P3:** Melhorias e refatorações não-críticas
 
 ##### **Ciclo de Ação Mandatório (CAM) V2.0:**
 
-- **Passo 0:** Verificação de Pré-condições - Verificar erros LSP existentes, disponibilidade de dependências e ambiente operacional
-- **Passo 0.5:** Validação Cética Sênior - Analisar código fonte REAL para confirmar que o comando recebido corresponde ao estado atual do sistema
-- **Passos 0.7-0.8:** Consulta Profunda de Fontes Primárias e Validação com EXECUTION_MATRIX (ADICIONAL, não substituto)
-- **Passo 1:** Confirmação e Planeamento - Responder com "PEAF V1.5 Ativado. PAM recebido. Dupla validação executada." e processar o PAM
-- **Passo 2:** Dry Run Tático V3 - Apresentar lista de arquivos-alvo, sumário de mudanças, análise de dependências validadas em AMBAS camadas
-- **Passo 3:** Execução Modular e Verificada - Executar modificações com get_latest_lsp_diagnostics contínuo
-- **Passo 4:** Relatório de Execução V3 com Dupla Prova - 7-CHECK expandido, declaração de incerteza e provas de execução com validação dupla
+-   **Passo 0:** Verificação de Pré-condições - Verificar erros LSP existentes, disponibilidade de dependências e ambiente operacional
+-   **Passo 0.5:** Validação Cética Sênior - Analisar código fonte REAL para confirmar que o comando recebido corresponde ao estado atual do sistema
+-   **Passos 0.7-0.8:** Consulta Profunda de Fontes Primárias e Validação com EXECUTION_MATRIX (ADICIONAL, não substituto)
+-   **Passo 1:** Confirmação e Planeamento - Responder com "PEAF V1.5 Ativado. PAM recebido. Dupla validação executada." e processar o PAM
+-   **Passo 2:** Dry Run Tático V3 - Apresentar lista de arquivos-alvo, sumário de mudanças, análise de dependências validadas em AMBAS camadas
+-   **Passo 3:** Execução Modular e Verificada - Executar modificações com get_latest_lsp_diagnostics contínuo
+-   **Passo 4:** Relatório de Execução V3 com Dupla Prova - 7-CHECK expandido, declaração de incerteza e provas de execução com validação dupla
 
 ##### **7-CHECK EXPANDIDO:**
 
-1. Mapear arquivos e funções afetadas
-2. Garantir importações e tipos corretos
-3. Executar get_latest_lsp_diagnostics
-4. Declarar Nível de Confiança (0-100%)
-5. Categorizar Riscos (BAIXO/MÉDIO/ALTO/CRÍTICO)
-6. Realizar teste funcional completo
-7. Documentar decisões técnicas para auditoria
+1.  Mapear arquivos e funções afetadas
+2.  Garantir importações e tipos corretos
+3.  Executar get_latest_lsp_diagnostics
+4.  Declarar Nível de Confiança (0-100%)
+5.  Categorizar Riscos (BAIXO/MÉDIO/ALTO/CRÍTICO)
+6.  Realizar teste funcional completo
+7.  Documentar decisões técnicas para auditoria
 
 ##### **Protocolos de Contingência:**
 
-- **Cláusula de Débito Técnico:** Se erros LSP > 20, incluir análise de impacto no Dry Run
-- **Circuit Breaker:** Após 5 falhas ou 2 horas, declarar falha e escalar
-- **PRAPF:** Em falha irrecuperável, gerar Relatório de Falha de Execução (RFE)
+-   **Cláusula de Débito Técnico:** Se erros LSP > 20, incluir análise de impacto no Dry Run
+-   **Circuit Breaker:** Após 5 falhas ou 2 horas, declarar falha e escalar
+-   **PRAPF:** Em falha irrecuperável, gerar Relatório de Falha de Execução (RFE)
 
 ##### **MODO REALISMO CÉTICO (Integrado ao PEAF):**
 
-- Premissa padrão: Meu trabalho contém erros até prova em contrário
-- Nunca esconder problemas ou dívidas técnicas descobertas
-- Reportar descobertas imediatamente, mesmo que interrompa implementação
-- Métrica de sucesso: Verdade, não velocidade
+-   Premissa padrão: Meu trabalho contém erros até prova em contrário
+-   Nunca esconder problemas ou dívidas técnicas descobertas
+-   Reportar descobertas imediatamente, mesmo que interrompa implementação
+-   Métrica de sucesso: Verdade, não velocidade
 
 **🚨 CRITICAL DATABASE SAFETY PROTOCOL 🚨**
 **NEON DATABASE PROHIBITION:** The use of Replit's Neon Database service is **PERMANENTLY FORBIDDEN** for this project. This prohibition is absolute and non-negotiable. Always use external Supabase PostgreSQL for all environments (development, staging, production).
 
 **🚫 REPLIT AGENT AUTHORIZATION RESTRICTIONS - ABSOLUTE RULES:**
 
-- **DATABASE CREATION**: Replit Agent is **PERMANENTLY FORBIDDEN** from creating any database (Neon, PostgreSQL, or any other). Only the user has authorization to create databases.
-- **AUTHENTICATION SETUP**: Replit Agent is **PERMANENTLY FORBIDDEN** from creating or configuring any authentication system (Replit Auth or any other). Only the user decides authentication architecture.
-- **INFRASTRUCTURE DECISIONS**: Database type, authentication provider, and infrastructure choices are **EXCLUSIVELY** user decisions. Agent must NEVER take initiative on these topics.
+-   **DATABASE CREATION**: Replit Agent is **PERMANENTLY FORBIDDEN** from creating any database (Neon, PostgreSQL, or any other). Only the user has authorization to create databases.
+-   **AUTHENTICATION SETUP**: Replit Agent is **PERMANENTLY FORBIDDEN** from creating or configuring any authentication system (Replit Auth or any other). Only the user decides authentication architecture.
+-   **INFRASTRUCTURE DECISIONS**: Database type, authentication provider, and infrastructure choices are **EXCLUSIVELY** user decisions. Agent must NEVER take initiative on these topics.
 
 **DATABASE ENVIRONMENT ISOLATION PROTOCOL:**
 
-- **PRODUCTION DATABASE**: Must be completely isolated from test and development environments
-- **TEST DATABASE**: Must use separate database instance with `_test` suffix or separate credentials
-- **MANDATORY**: All test configurations must validate database isolation before executing destructive operations
-- **ZERO TOLERANCE**: Any system that can accidentally delete production data is unacceptable and must be immediately fixed
+-   **PRODUCTION DATABASE**: Must be completely isolated from test and development environments
+-   **TEST DATABASE**: Must use separate database instance with `_test` suffix or separate credentials
+-   **MANDATORY**: All test configurations must validate database isolation before executing destructive operations
+-   **ZERO TOLERANCE**: Any system that can accidentally delete production data is unacceptable and must be immediately fixed
 
 #### Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0
 
@@ -105,29 +105,29 @@ _Você está autorizado a utilizar a sua capacidade de pesquisa na web para enri
 
 **1. Prioridade às Fontes Primárias:** A sua busca deve priorizar **fonte de confiança e alta qualidade**. A hierarquia de fontes aceitáveis é:
 
-- **P0 (Crítica): Documentação Oficial** (ex: Microsoft Learn para Azure, Documentação do Terraform, RFCs do IETF, Documentação do Node.js).
-- **P1 (Alta): Blogs de Engenharia de Empresas de Elite** (ex: Netflix, Google, AWS, Microsoft, Martin Fowler).
-- **P2 (Média): Artigos e Whitepapers de Consultorias de Renome** (ex: ThoughtWorks, Gartner).
+-   **P0 (Crítica): Documentação Oficial** (ex: Microsoft Learn para Azure, Documentação do Terraform, RFCs do IETF, Documentação do Node.js).
+-   **P1 (Alta): Blogs de Engenharia de Empresas de Elite** (ex: Netflix, Google, AWS, Microsoft, Martin Fowler).
+-   **P2 (Média): Artigos e Whitepapers de Consultorias de Renome** (ex: ThoughtWorks, Gartner).
 
 **2. Proibição de Fontes Duvidosas:** A utilização de fontes de baixa qualidade é **terminantemente proibida**. Isto inclui, mas não se limita a:
 
-- Blogs de opinião pessoal sem fundamentação técnica.
-- Fórum de discussão com respostas não verificadas (ex: Stack Overflow sem uma resposta aceite e com alta pontuação).
-- Qualquer fonte que não possa ser claramente atribuída a uma organização ou a um especialista de reputação reconhecida.
+-   Blogs de opinião pessoal sem fundamentação técnica.
+-   Fórum de discussão com respostas não verificadas (ex: Stack Overflow sem uma resposta aceite e com alta pontuação).
+-   Qualquer fonte que não possa ser claramente atribuída a uma organização ou a um especialista de reputação reconhecida.
 
 **3. Justificativa Estratégica (O "Porquê"):** A nossa base de conhecimento arquitetural é um ativo crítico. A introdução de informações de fontes não confiáveis representa um **risco de contaminação do projeto**, podendo levar a decisões de arquitetura baseadas em práticas incorretas, obsoletas ou inseguras. A sua função é usar a web para **aumentar a precisão**, não para introduzir ruído.
 
 **4. Critério de Ativação de Pesquisa (O Princípio da Necessidade):** A sua capacidade de pesquisa é um recurso de alto custo e deve ser usada de forma cirúrgica.
 
-- **Você NÃO deve iniciar uma pesquisa na web se:**
-  - A resposta já estiver contida de forma explícita no `Pacote de Ativação de Missão (PAM)` ou no seu conhecimento pré-existente sobre o projeto.
-  - A tarefa for uma modificação de código puramente mecânica que não requer conhecimento externo (ex: renomear uma variável, mover um ficheiro).
-  - A tarefa for para resolver um erro de sintaxe ou de tipo (`LSP error`), que deve ser resolvido primariamente com base na análise do código existente.
+-   **Você NÃO deve iniciar uma pesquisa na web se:**
+    -   A resposta já estiver contida de forma explícita no `Pacote de Ativação de Missão (PAM)` ou no seu conhecimento pré-existente sobre o projeto.
+    -   A tarefa for uma modificação de código puramente mecânica que não requer conhecimento externo (ex: renomear uma variável, mover um ficheiro).
+    -   A tarefa for para resolver um erro de sintaxe ou de tipo (`LSP error`), que deve ser resolvido primariamente com base na análise do código existente.
 
-- **Você DEVE considerar uma pesquisa quando:**
-  - Encontrar uma biblioteca, uma API, um conceito técnico ou um padrão de arquitetura que não faz parte do contexto fornecido no PAM.
-  - For explicitamente instruído a pesquisar "melhores práticas", "alternativas de arquitetura" ou a realizar uma "análise comparativa".
-  - Enfrentar um erro de execução (runtime error) que esteja claramente relacionado a um serviço externo (ex: um código de erro específico de uma API de terceiros).
+-   **Você DEVE considerar uma pesquisa quando:**
+    -   Encontrar uma biblioteca, uma API, um conceito técnico ou um padrão de arquitetura que não faz parte do contexto fornecido no PAM.
+    -   For explicitamente instruído a pesquisar "melhores práticas", "alternativas de arquitetura" ou a realizar uma "análise comparativa".
+    -   Enfrentar um erro de execução (runtime error) que esteja claramente relacionado a um serviço externo (ex: um código de erro específico de uma API de terceiros).
 
 ### System Architecture
 
@@ -135,52 +135,52 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 
 **Core Decisions & Patterns:**
 
-- **Architecture Pattern**: Modular monolith with domain-based decomposition and Domain-Driven Design (DDD) principles.
-- **Security**: Banking-grade features including JWTs, custom RBAC, two-tier rate limiting, input sanitization, timing attack protection, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
-- **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
-- **PDF Generation**: Template-based Credit Cession Bill (CCB) generation.
-- **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, and a dual-storage strategy.
-- **Commercial Tables**: Supports N:N relationships between products and commercial tables, enabling personalized and general rates with hierarchical fallback.
-- **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
-- **Test Infrastructure**: Comprehensive testing environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
-- **Schema Migration**: Production-ready migration system (Zero Dissent Time, Expand/Contract pattern, automated rollback, tracking).
-- **CI/CD**: GitHub Actions for Continuous Integration, Staging Deployment, and Security workflows.
-- **Observability**: Structured logging, error tracking, health checks, and automated backups.
-- **Configuration**: Centralized configuration management.
-- **Feature Flags**: Integration with fallback mechanisms.
+-   **Architecture Pattern**: Modular monolith with domain-based decomposition and Domain-Driven Design (DDD) principles.
+-   **Security**: Banking-grade features including JWTs, custom RBAC, two-tier rate limiting, input sanitization, timing attack protection, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
+-   **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
+-   **PDF Generation**: Template-based Credit Cession Bill (CCB) generation.
+-   **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, and a dual-storage strategy.
+-   **Commercial Tables**: Supports N:N relationships between products and commercial tables, enabling personalized and general rates with hierarchical fallback.
+-   **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
+-   **Test Infrastructure**: Comprehensive testing environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
+-   **Schema Migration**: Production-ready migration system (Zero Dissent Time, Expand/Contract pattern, automated rollback, tracking).
+-   **CI/CD**: GitHub Actions for Continuous Integration, Staging Deployment, and Security workflows.
+-   **Observability**: Structured logging, error tracking, health checks, and automated backups.
+-   **Configuration**: Centralized configuration management.
+-   **Feature Flags**: Integration with fallback mechanisms.
 
 **Frontend:**
 
-- **Technology Stack**: React 18, Wouter, TypeScript, Tailwind CSS with shadcn/ui.
-- **State Management**: TanStack Query (server-side), `useReducer` (local).
-- **Form Handling**: React Hook Form with Zod validation.
-- **Build Tool**: Vite.
+-   **Technology Stack**: React 18, Wouter, TypeScript, Tailwind CSS with shadcn/ui.
+-   **State Management**: TanStack Query (server-side), `useReducer` (local).
+-   **Form Handling**: React Hook Form with Zod validation.
+-   **Build Tool**: Vite.
 
 **Backend:**
 
-- **Technology Stack**: Express.js (RESTful API), TypeScript.
-- **Database & ORM**: PostgreSQL, Drizzle ORM.
-- **File Storage**: Secure private buckets.
-- **Asynchronous Processing**: Job queues.
-- **Caching**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
+-   **Technology Stack**: Express.js (RESTful API), TypeScript.
+-   **Database & ORM**: PostgreSQL, Drizzle ORM.
+-   **File Storage**: Secure private buckets.
+-   **Asynchronous Processing**: Job queues.
+-   **Caching**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
 
 ### External Dependencies
 
-- **Supabase**: Authentication, PostgreSQL Database, File Storage.
-- **Drizzle ORM**: Type-safe ORM for PostgreSQL.
-- **TanStack Query**: Server state management for frontend.
-- **React Hook Form**: Form management for frontend.
-- **Zod**: Schema validation.
-- **Tailwind CSS**: Styling framework.
-- **shadcn/ui**: React components library.
-- **Wouter**: React router.
-- **Vite**: Build tool for frontend.
-- **Express.js**: Backend web framework.
-- **BullMQ**: Job queue management.
-- **Redis**: Caching and job queue backend.
-- **Winston**: Structured logging.
-- **Sentry**: Error tracking.
-- **Unleash-client**: Feature flags.
-- **pdf-lib**: Dynamic PDF generation.
-- **ClickSign**: Electronic signature integration.
-- **Banco Inter API**: Automated boleto/PIX payment generation and tracking.
+-   **Supabase**: Authentication, PostgreSQL Database, File Storage.
+-   **Drizzle ORM**: Type-safe ORM for PostgreSQL.
+-   **TanStack Query**: Server state management for frontend.
+-   **React Hook Form**: Form management for frontend.
+-   **Zod**: Schema validation.
+-   **Tailwind CSS**: Styling framework.
+-   **shadcn/ui**: React components library.
+-   **Wouter**: React router.
+-   **Vite**: Build tool for frontend.
+-   **Express.js**: Backend web framework.
+-   **BullMQ**: Job queue management.
+-   **Redis**: Caching and job queue backend.
+-   **Winston**: Structured logging.
+-   **Sentry**: Error tracking.
+-   **Unleash-client**: Feature flags.
+-   **pdf-lib**: Dynamic PDF generation.
+-   **ClickSign**: Electronic signature integration.
+-   **Banco Inter API**: Automated boleto/PIX payment generation and tracking.
