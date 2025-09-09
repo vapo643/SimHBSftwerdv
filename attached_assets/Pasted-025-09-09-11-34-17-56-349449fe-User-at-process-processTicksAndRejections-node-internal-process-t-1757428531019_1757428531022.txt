@@ -1,0 +1,160 @@
+025-09-09 11:34:17.56
+349449fe
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+2025-09-09 11:34:17.56
+349449fe
+User
+__isStorageError: true,
+2025-09-09 11:34:17.56
+349449fe
+User
+status: 400,
+2025-09-09 11:34:17.56
+349449fe
+User
+statusCode: '404'
+2025-09-09 11:34:17.56
+349449fe
+User
+}
+2025-09-09 11:34:17.99
+349449fe
+User
+[JWT DEBUG] Failed to cache token in Redis: TypeError: Cannot read properties of null (reading 'setex')
+2025-09-09 11:34:17.99
+349449fe
+User
+at file:///home/runner/workspace/dist/index.js:4284:33
+2025-09-09 11:34:17.99
+349449fe
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-09 11:34:17.99
+349449fe
+User
+at async jwtAuthMiddleware (file:///home/runner/workspace/dist/index.js:4308:22)
+2025-09-09 11:34:18.10
+349449fe
+User
+[ERROR] Erro ao gerar URL assinada para proposta-29e80705-89bb-43a5-bbc8-960b3139939c/cpf_comprovante.pdf: StorageApiError: Object not found
+2025-09-09 11:34:18.10
+349449fe
+User
+at /home/runner/workspace/node_modules/@supabase/storage-js/dist/main/lib/fetch.js:24:20
+2025-09-09 11:34:18.10
+349449fe
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+2025-09-09 11:34:18.10
+349449fe
+User
+__isStorageError: true,
+2025-09-09 11:34:18.10
+349449fe
+User
+status: 400,
+2025-09-09 11:34:18.10
+349449fe
+User
+statusCode: '404'
+2025-09-09 11:34:18.10
+349449fe
+User
+}
+2025-09-09 11:34:18.29
+349449fe
+User
+[JWT AUTH] Failed to track user token: TypeError: Cannot read properties of null (reading 'sadd')
+2025-09-09 11:34:18.29
+349449fe
+User
+at trackUserToken (file:///home/runner/workspace/dist/index.js:4107:23)
+2025-09-09 11:34:18.29
+349449fe
+User
+at jwtAuthMiddleware (file:///home/runner/workspace/dist/index.js:4416:11)
+2025-09-09 11:34:18.29
+349449fe
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-09 11:34:18.59
+349449fe
+User
+[ERROR] Erro ao gerar URL assinada para proposta-29e80705-89bb-43a5-bbc8-960b3139939c/comprovante_renda.pdf: StorageApiError: Object not found
+2025-09-09 11:34:18.59
+349449fe
+User
+at /home/runner/workspace/node_modules/@supabase/storage-js/dist/main/lib/fetch.js:24:20
+2025-09-09 11:34:18.59
+349449fe
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+2025-09-09 11:34:18.59
+349449fe
+User
+__isStorageError: true,
+2025-09-09 11:34:18.59
+349449fe
+User
+status: 400,
+2025-09-09 11:34:18.59
+349449fe
+User
+statusCode: '404'
+2025-09-09 11:34:18.59
+349449fe
+User
+}
+2025-09-09 11:34:25.86
+349449fe
+User
+[JWT AUTH] Rate limit check failed: TypeError: Cannot read properties of null (reading 'get')
+2025-09-09 11:34:25.86
+349449fe
+User
+at checkAuthRateLimit (file:///home/runner/workspace/dist/index.js:4050:34)
+2025-09-09 11:34:25.86
+349449fe
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-09 11:34:25.86
+349449fe
+User
+at async jwtAuthMiddleware (file:///home/runner/workspace/dist/index.js:4161:23)
+2025-09-09 11:34:25.86
+349449fe
+User
+[JWT AUTH] Redis pipeline failed, proceeding with fallback: TypeError: Cannot read properties of null (reading 'pipeline')
+2025-09-09 11:34:25.86
+349449fe
+User
+at jwtAuthMiddleware (file:///home/runner/workspace/dist/index.js:4177:36)
+2025-09-09 11:34:25.86
+349449fe
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-09 11:34:25.86
+349449fe
+User
+[JWT AUTH] Blacklist check failed: TypeError: Cannot read properties of null (reading 'get')
+2025-09-09 11:34:25.86
+349449fe
+User
+at jwtAuthMiddleware (file:///home/runner/workspace/dist/index.js:4192:45)
+2025-09-09 11:34:25.86
+349449fe
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-09 11:34:26.43
+349449fe
+User
+[JWT DEBUG] Failed to cache token in Redis: TypeError: Cannot read properties of null (reading 'setex')
+2025-09-09 11:34:26.43
+349449fe
+User
+at file:///home/runner/workspace/dist/index.js:4284:33
+2025-09-09 11:34:26.43
+349449fe
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
