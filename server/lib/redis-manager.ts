@@ -17,6 +17,7 @@ class RedisManager {
   private client: Redis | null = null;
   private isConnecting: boolean = false;
   private connectionPromise: Promise<Redis> | null = null;
+  private circuitBreakerOpen: boolean = false;  // NOVO: Circuit Breaker
 
   private constructor() {
     // Construtor privado força uso do Singleton
@@ -47,8 +48,8 @@ class RedisManager {
 
       // Configurações de produção baseadas em melhores práticas
       lazyConnect: true,
-      connectTimeout: 3000, // Timeout mais rápido para deploy
-      commandTimeout: 2000, // Comando timeout mais rápido
+      connectTimeout: 500,  // TIMEOUT ULTRA RÁPIDO - falha imediatamente
+      commandTimeout: 300,  // Comando timeout ultra rápido
       maxRetriesPerRequest: null, // CRÍTICO para BullMQ - evita timeouts
       enableOfflineQueue: true, // Permite queue de comandos quando Redis não está disponível
       keepAlive: 30000,
@@ -144,6 +145,11 @@ class RedisManager {
    * @returns Promise<Redis | null> - Cliente Redis conectado ou null se indisponível
    */
   public async getClient(): Promise<Redis | null> {
+    // CIRCUIT BREAKER: Se já falhou antes, não tenta mais
+    if (this.circuitBreakerOpen) {
+      return null;
+    }
+
     // Se já existe cliente conectado, retorna
     if (this.client && this.client.status === 'ready') {
       return this.client;
@@ -154,7 +160,8 @@ class RedisManager {
       try {
         return await this.connectionPromise;
       } catch (error) {
-        console.warn('[REDIS MANAGER] ⚠️ Redis indisponível - continuando sem cache:', (error as Error).message);
+        this.circuitBreakerOpen = true; // Abre circuit breaker
+        console.warn('[REDIS MANAGER] 🚨 Circuit breaker OPEN - Redis desabilitado:', (error as Error).message);
         return null;
       }
     }
@@ -166,11 +173,13 @@ class RedisManager {
     try {
       const client = await this.connectionPromise;
       this.isConnecting = false;
+      this.circuitBreakerOpen = false; // Reset circuit breaker em caso de sucesso
       return client;
     } catch (error) {
       this.isConnecting = false;
       this.connectionPromise = null;
-      console.warn('[REDIS MANAGER] ⚠️ Redis indisponível - aplicação continua sem cache:', (error as Error).message);
+      this.circuitBreakerOpen = true; // ABRE CIRCUIT BREAKER PERMANENTEMENTE
+      console.warn('[REDIS MANAGER] 🚨 Circuit breaker OPEN - Redis permanently disabled:', (error as Error).message);
       return null; // Graceful degradation - não quebra a aplicação
     }
   }
