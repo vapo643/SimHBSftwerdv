@@ -1,0 +1,40 @@
+Entendido. ALERTA VERMELHO. Falha crítica em produção. Vazamento de dados e quebra de fluxo de negócio principal.
+
+Ativando **Protocolo de Gerenciamento de Interrupção (PGI) V1.1**. Todas as missões anteriores estão em espera. Foco total na estabilização do ambiente de produção.
+
+**Causa da Interrupção:** Múltiplos Bugs Críticos em Produção.
+**Novo Foco (Missão de Emergência):** Diagnóstico e erradicação de vulnerabilidade de segurança de dados e falha funcional no fluxo de criação de propostas.
+
+**STATUS:** STANDBY (INICIANDO PROTOCOLO DE DESIGN DE MISSÃO DE ELITE)
+
+---
+
+A situação é inaceitável e exige uma resposta que não apenas corrija os sintomas, mas erradique a causa raiz. A execução impulsiva de correções é uma violação do meu protocolo mestre. Antes de qualquer linha de código ser alterada, ativarei o **Protocolo de Design de Missão de Elite (PDME) V1.3**.
+
+**Análise de Complexidade de Missão (ACM) V1.0:**
+* **Pontuação:** 9 (Crítica)
+* **Estratégia Requerida:** Auditoria Crítica. Um roadmap de alta granularidade e múltiplas missões de reconhecimento são mandatórios antes de qualquer plano de correção.
+
+A seguir, o plano de batalha para a **Fase 2: Auditoria Forense**. Dividiremos a operação em duas frentes de investigação simultâneas para máxima eficiência.
+
+### **Roadmap de Auditoria Forense: Operação "Estanque de Aço"**
+
+**Objetivo:** Obter um diagnóstico preciso e irrefutável da causa raiz dos dois bugs críticos antes de arquitetar a solução.
+
+**Thread de Investigação A: Vulnerabilidade de Segurança (Isolamento de Dados do Atendente)**
+* `[🎯 EM EXECUÇÃO]` **Passo A.1: Auditoria de Comportamento via Cenário de Negócio (PACN):** Gerar um Pacote de Ativação de Missão (PAM) para o 'Sniper' (Assistente Replit) para auditar a política de Row Level Security (RLS) da tabela `propostas`, forçando a validação da regra de negócio "Atendente vê apenas suas próprias propostas" contra a implementação SQL atual.
+* `[PENDENTE]` **Passo A.2: Análise de Perfis de Acesso (RBAC):** Com base nos achados do passo A.1, comandar uma auditoria em todas as `custom types` e `roles` do PostgreSQL para identificar outras configurações de permissão potencialmente falhas ou excessivamente permissivas.
+* `[PENDENTE]` **Passo A.3: Validação de Endpoint da API:** Auditar a rota `GET /api/propostas` no backend (Express.js) para garantir que não haja nenhuma lógica de bypass ou modificação da query que possa anular a proteção RLS.
+
+**Thread de Investigação B: Falha Funcional (Carregamento de Produtos)**
+* `[🎯 EM EXECUÇÃO]` **Passo B.1: Mapeamento do Fluxo de Dados do Frontend:** Gerar um PAM para o 'Sniper' para rastrear o fluxo de dados na interface, partindo do componente responsável pela "etapa de condição de empréstimo" no formulário de criação de proposta. O objetivo é identificar:
+    1.  O componente React exato.
+    2.  A query `TanStack Query` utilizada para buscar os produtos.
+    3.  O endpoint da API que é consumido por essa query.
+* `[PENDENTE]` **Passo B.2: Auditoria do Endpoint de Produtos:** Investigar o endpoint da API de produtos identificado no passo B.1. A análise deve verificar a lógica de negócio, a consulta ao banco de dados e quaisquer filtros que possam estar a impedir o retorno dos dados para o perfil `ATENDENTE`.
+* `[PENDENTE]` **Passo B.3: Análise de Logs e Erros de Rede:** Formular uma consulta para buscar nos logs da aplicação por erros específicos relacionados à falha de carregamento de produtos, correlacionando com a data e hora dos incidentes reportados.
+
+Apenas após a conclusão bem-sucedida de **ambas as threads de auditoria** teremos a clareza necessária para arquitetar uma solução de correção que seja cirúrgica e definitiva.
+
+**Próxima Ação:**
+Vou gerar o **Pacote de Ativação de Missão (PAM)** para o **Passo A.1** e para o **Passo B.1**. Executor Humano, aguarde as diretrizes para enviar os prompts ao 'Sniper'. Não haverá implementação de código até que o diagnóstico esteja completo.

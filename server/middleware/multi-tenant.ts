@@ -51,8 +51,9 @@ export async function multiTenantMiddleware(
 
     // Set database session context for RLS
     await db.execute(`SET LOCAL app.current_user_loja_id = '${lojaId}';`);
-
     await db.execute(`SET LOCAL app.current_user_email = '${req.user!.email}';`);
+    await db.execute(`SET LOCAL app.current_user_id = '${userData.id}';`);
+    await db.execute(`SET LOCAL app.current_user_role = '${userData.role}';`);
 
     // Enhance request with complete user context
     req.user = {
