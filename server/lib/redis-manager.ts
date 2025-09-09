@@ -207,7 +207,7 @@ class RedisManager {
    */
   public async getClient(): Promise<Redis | null> {
     // INTELLIGENT ACTIVATION: Check if Redis is needed based on real metrics
-    if (!this.shouldActivateRedis()) {
+    if (!(await this.shouldActivateRedis())) {
       return null;
     }
 
@@ -330,10 +330,10 @@ class RedisManager {
    * Intelligent Redis activation based on real system metrics
    * Analyzes performance data to determine if Redis caching is needed
    */
-  private shouldActivateRedis(): boolean {
+  private async shouldActivateRedis(): Promise<boolean> {
     try {
-      // Dynamic import to avoid circular dependency
-      const { getPerformanceStats } = require('../middleware/performance-monitor');
+      // Import performance stats dynamically to avoid circular dependency
+      const { getPerformanceStats } = await import('../middleware/performance-monitor');
       const perfStats = getPerformanceStats();
       
       // ACTIVATION CRITERIA:
