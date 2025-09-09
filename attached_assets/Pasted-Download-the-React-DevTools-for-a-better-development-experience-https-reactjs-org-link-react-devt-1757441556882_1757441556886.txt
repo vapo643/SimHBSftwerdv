@@ -1,0 +1,102 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+login:1 [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) <input data-replit-metadata=​"client/​src/​pages/​login.tsx:​96:​14" data-component-name=​"Input" type=​"password" class=​"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:​border-0 file:​bg-transparent file:​text-sm file:​font-medium file:​text-foreground placeholder:​text-muted-foreground focus-visible:​outline-none focus-visible:​ring-2 focus-visible:​ring-ring focus-visible:​ring-offset-2 disabled:​cursor-not-allowed disabled:​opacity-50 md:​text-sm" id=​"password" required name=​"password" data-testid=​"input-password">​
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:443 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:447 [API Client] After dual-key transformation: Object
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+apiClient.ts:443 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:447 [API Client] After dual-key transformation: Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+apiClient.ts:443 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:447 [API Client] After dual-key transformation: Object
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+supabase-auth-provider.ts:63 [PASSO 1 - LOGIN] Object
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:395 [PASSO 3 - ENVIO] Object
+dashboard.tsx:358 DEBUG - First 3 proposals values: Array(0)
+apiClient.ts:395 [PASSO 3 - ENVIO] Object
+api/debug/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+apiClient.ts:443 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:447 [API Client] After dual-key transformation: Object
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+api/debug/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+AuthContext.tsx:111 Error fetching profile data: ApiError: Token inválido ou expirado
+    at apiClient (apiClient.ts:538:13)
+    at async AuthContext.tsx:95:28
+(anonymous) @ AuthContext.tsx:111Understand this error
+dashboard.tsx:358 DEBUG - First 3 proposals values: Array(0)
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:395 [PASSO 3 - ENVIO] Object
+dashboard.tsx:358 DEBUG - First 3 proposals values: Array(0)
+api/debug/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+apiClient.ts:443 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:447 [API Client] After dual-key transformation: Object
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+api/debug/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+AuthContext.tsx:111 Error fetching profile data: ApiError: Token inválido ou expirado
+    at apiClient (apiClient.ts:538:13)
+    at async AuthContext.tsx:95:28
+(anonymous) @ AuthContext.tsx:111Understand this error
+dashboard.tsx:358 DEBUG - First 3 proposals values: Array(0)
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:395 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.PwyCruMjtc85rfKyOZ1fzuv7we9N1DTe-_DCmYRE91c', hasToken: true, isFormData: false}
+dashboard.tsx:358 DEBUG - First 3 proposals values: []
+apiClient.ts:443 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:447 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:315
+apiClient @ apiClient.ts:423
+await in apiClient
+get @ apiClient.ts:603
+(anonymous) @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:183
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:6975
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=a751b20f:6973
+_recoverAndRefresh @ @supabase_supabase-js.js?v=a751b20f:6916
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:7188
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:6219
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:5336Understand this error
+apiClient.ts:443 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Token inválido ou expirado'}
+apiClient.ts:447 [API Client] After dual-key transformation: {message: 'Token inválido ou expirado'}
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:315
+apiClient @ apiClient.ts:475
+await in apiClient
+get @ apiClient.ts:603
+(anonymous) @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:183
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:6975
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=a751b20f:6973
+_recoverAndRefresh @ @supabase_supabase-js.js?v=a751b20f:6916
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:7188
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:6219
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:5336Understand this error
+AuthContext.tsx:111 Error fetching profile data: ApiError: Token inválido ou expirado
+    at apiClient (apiClient.ts:538:13)
+    at async AuthContext.tsx:95:28
+(anonymous) @ AuthContext.tsx:111
+await in (anonymous)
+(anonymous) @ AuthContext.tsx:183
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:6975
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=a751b20f:6973
+_recoverAndRefresh @ @supabase_supabase-js.js?v=a751b20f:6916
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:7188
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:6219
+(anonymous) @ @supabase_supabase-js.js?v=a751b20f:5336Understand this error
+dashboard.tsx:358 DEBUG - First 3 proposals values: []

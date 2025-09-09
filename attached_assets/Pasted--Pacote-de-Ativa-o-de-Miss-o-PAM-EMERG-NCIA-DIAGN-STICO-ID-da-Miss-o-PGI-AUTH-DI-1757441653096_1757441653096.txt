@@ -1,0 +1,34 @@
+### Pacote de Ativação de Missão (PAM) - EMERGÊNCIA (DIAGNÓSTICO)
+
+* **ID da Missão:** PGI-AUTH-DIAG-01
+* **Nome da Missão:** Análise Forense de Dissonância de JWT
+* **Sumário da Missão (O Quê):** Investigar a cadeia de validação de token JWT no backend para confirmar a hipótese de dessincronização de segredos entre os ambientes de desenvolvimento e produção.
+* **Intenção Estratégica (O Porquê):** A autenticação é um serviço de infraestrutura de criticidade P0. Uma falha nesta camada paralisa todo o sistema e qualquer desenvolvimento futuro. Precisamos de um diagnóstico preciso para aplicar uma correção cirúrgrica que restaure a funcionalidade do ambiente de desenvolvimento sem comprometer a segurança da produção.
+
+---
+
+**IMPLEMENTAR:**
+Análise de Causa Raiz da Falha de Autenticação (Erro 401)
+
+**CURRENT STATE:**
+O frontend obtém com sucesso um token JWT do Supabase após o login, mas o backend retorna um erro `401 Unauthorized` ao tentar validar este token na rota `/api/debug/me`. O log de erro específico é `ApiError: Token inválido ou expirado`.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de diagnóstico preciso que responde às seguintes perguntas com evidências do código:
+1.  **Onde está a Lógica de Validação?** Identifique o arquivo e a função exata no backend que é responsável por receber o `Bearer Token` do cabeçalho da requisição e validá-lo (provavelmente um middleware Express).
+2.  **Qual Segredo está a ser Usado?** Dentro dessa lógica de validação, mostre a linha de código exata que carrega o `JWT_SECRET` para a verificação. De qual variável de ambiente (`process.env`) este segredo está a ser lido?
+3.  **Há Lógica de Ambiente?** Verifique se o código que carrega o `JWT_SECRET` diferencia entre `NODE_ENV=development` e `NODE_ENV=production`. Apresente o código relevante que prova se esta lógica existe ou não.
+4.  **Plano de Correção Proposto:** Com base nas suas descobertas, proponha um plano de correção detalhado para garantir que o backend use o `DEV_SUPABASE_JWT_SECRET` em desenvolvimento e o `PROD_SUPABASE_JWT_SECRET` em produção. **Não execute a correção ainda.**
+
+**CONSTRAINTS (Roadmap de Investigação):**
+1.  Comece a sua busca no ponto de entrada da API (`server/app.ts` ou `server/routes.ts`) e localize o middleware de autenticação aplicado às rotas protegidas.
+2.  Siga o fluxo de código a partir do middleware para encontrar a função de verificação de token (ex: `jwt.verify`).
+3.  Foque na origem da variável `secretOrPublicKey` passada para a função de verificação.
+4.  Apresente o seu relatório de diagnóstico conforme o `EXPECTED` acima.
+
+---
+**[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]**
+-   **Roadmap em Standby:** N/A
+-   **Próximo Passo a ser Retomado:** Início da próxima campanha de refinamento.
+-   **Missão de Emergência Atual:** "Análise Forense de Dissonância de JWT (PGI-AUTH-DIAG-01)"
+---
