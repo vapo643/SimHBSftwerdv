@@ -433,7 +433,14 @@ export async function jwtAuthMiddleware(
       try {
         console.log('[JWT DEBUG] Using local JWT validation');
         const jwt = await import('jsonwebtoken');
-        const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
+        const JWT_SECRET = process.env.NODE_ENV === 'production' 
+          ? process.env.PROD_SUPABASE_JWT_SECRET 
+          : process.env.DEV_SUPABASE_JWT_SECRET;
+        
+        // Verificação de segurança: não permitir chaves nulas ou indefinidas
+        if (!JWT_SECRET) {
+          throw new Error(`JWT_SECRET não configurado para ambiente ${process.env.NODE_ENV}. Configure ${process.env.NODE_ENV === 'production' ? 'PROD_SUPABASE_JWT_SECRET' : 'DEV_SUPABASE_JWT_SECRET'}`);
+        }
 
         const decoded = jwt.default.verify(token, JWT_SECRET) as any;
         console.log('[JWT DEBUG] JWT decoded successfully:', {
