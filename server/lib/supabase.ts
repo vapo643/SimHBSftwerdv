@@ -51,10 +51,10 @@ export function createServerSupabaseAdminClient() {
   const isProd = process.env.NODE_ENV === 'production';
   const serviceKey = isProd 
     ? (process.env.PROD_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)
-    : process.env.SUPABASE_SERVICE_ROLE_KEY;
+    : (process.env.DEV_SUPABASE_SERVICE_ROLE_KEY || process.env.DEV_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
   const url = isProd
     ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL)
-    : process.env.SUPABASE_URL;
+    : (process.env.DEV_SUPABASE_URL || process.env.SUPABASE_URL);
 
   if (!serviceKey || !url) {
     console.warn('⚠️ Supabase admin credentials not configured. Admin operations will be limited.');

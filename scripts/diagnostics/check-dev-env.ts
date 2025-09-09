@@ -15,9 +15,11 @@ console.log('1. Verificando Conexão com Supabase (Admin Client)...');
 
 async function checkSupabaseDev() {
   try {
-    // Carregar variáveis diretamente (sem abstrações)
+    // Carregar variáveis diretamente (verificando todas as opções)
     const supabaseUrl = process.env.DEV_SUPABASE_URL || process.env.SUPABASE_URL;
-    const supabaseServiceKey = process.env.DEV_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseServiceKey = process.env.DEV_SUPABASE_SERVICE_ROLE_KEY || 
+                               process.env.DEV_SUPABASE_SERVICE_KEY ||
+                               process.env.SUPABASE_SERVICE_ROLE_KEY;
     
     console.log(`   - DEV_SUPABASE_URL: ${supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'NÃO CARREGADA'}`);
     console.log(`   - DEV_SUPABASE_SERVICE_KEY: ${supabaseServiceKey ? '******** (CARREGADA)' : 'NÃO CARREGADA'}`);
