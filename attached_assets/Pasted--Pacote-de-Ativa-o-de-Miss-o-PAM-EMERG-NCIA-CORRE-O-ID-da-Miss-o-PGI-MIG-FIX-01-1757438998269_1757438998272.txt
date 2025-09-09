@@ -1,0 +1,47 @@
+### Pacote de Ativação de Missão (PAM) - EMERGÊNCIA (CORREÇÃO)
+
+* **ID da Missão:** PGI-MIG-FIX-01
+* **Nome da Missão:** Sincronização Cirúrgica do Schema de Desenvolvimento
+* **Sumário da Missão (O Quê):** Executar o seu plano de "Sincronização Cirúrgica" de 4 fases para restaurar a integridade e o versionamento do banco de dados de desenvolvimento.
+* **Intenção Estratégica (O Porquê):** A confiança no nosso processo de migração automatizada é a espinha dorsal do nosso pipeline de CI/CD. Sem ela, cada deploy é um risco inaceitável. Esta missão visa restaurar essa confiança a 100%, garantindo que o Drizzle Kit se torne a única e absoluta fonte da verdade para o estado do nosso schema de banco de dados, começando pelo ambiente de desenvolvimento.
+
+---
+
+**IMPLEMENTAR:**
+Plano de Correção "Sincronização Cirúrgica"
+
+**CURRENT STATE:**
+O banco de dados de desenvolvimento (`DEV_DATABASE_URL`) está em um estado inconsistente: ele contém alterações de schema (como a coluna `cliente_empresa_nome`) que não estão registradas na ferramenta de migração, pois a tabela `__drizzle_migrations` está ausente. Qualquer tentativa de rodar `drizzle-kit migrate` falha, bloqueando todo o desenvolvimento.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um backup completo do banco de dados de desenvolvimento foi criado e está seguro.
+2.  A tabela `__drizzle_migrations` existe no banco de dados de desenvolvimento.
+3.  As migrações de `0000` a `0005` estão registradas na tabela `__drizzle_migrations` como se tivessem sido aplicadas, sincronizando o histórico com a realidade.
+4.  O comando `./scripts/migrate-dev.sh` agora executa **com sucesso e sem erros**, aplicando quaisquer novas migrações pendentes (se houver) ou reportando "Nada a migrar".
+5.  O sistema permanece funcional após a operação, com todos os dados existentes preservados.
+
+**CONSTRAINTS (Roadmap de Execução):**
+Você deve executar **exatamente** o plano de 4 fases que você mesmo propôs, com o rigor que a missão exige:
+
+1.  **FASE 1: PREPARAÇÃO (Defensiva)**
+    * Execute `pg_dump` na `DEV_DATABASE_URL` para criar um backup SQL completo. Nomeie o arquivo como `backup_dev_pre_sync_[timestamp].sql` e armazene-o no diretório `/backups`.
+
+2.  **FASE 2: INICIALIZAÇÃO DO CONTROLE DE VERSÃO (Fundação)**
+    * Execute um comando SQL direto para criar a tabela `__drizzle_migrations` no banco de desenvolvimento, usando a estrutura exata que o Drizzle espera.
+    * Para cada uma das 6 migrações existentes (de `0000` a `0005`), insira manualmente um registro na tabela `__drizzle_migrations`. Você precisará gerar um hash fictício (pode ser o nome do arquivo, por exemplo) e usar um timestamp `created_at` para registrar que estas migrações já foram "aplicadas".
+
+3.  **FASE 3: CORREÇÃO DE DIVERGÊNCIAS (Cirúrgica)**
+    * Após a Fase 2, gere uma nova migração "hotfix" usando o Drizzle Kit. Analise o SQL gerado. Ele deve conter **apenas** as diferenças reais entre o que já existe no banco e o que está no seu `schema.ts`. Se ele tentar recriar colunas existentes, sua Fase 2 falhou; **pare imediatamente e reporte**.
+    * Se a migração "hotfix" parecer correta (mínima ou vazia), execute-a usando `./scripts/migrate-dev.sh`.
+
+4.  **FASE 4: VALIDAÇÃO E NORMALIZAÇÃO (Selo de Qualidade)**
+    * Execute `./scripts/migrate-dev.sh` novamente. A saída esperada é "Nothing to migrate".
+    * Execute um `SELECT COUNT(*)` em tabelas críticas como `propostas` e `clientes` para garantir que nenhum dado foi perdido.
+    * Declare a missão concluída.
+
+---
+**[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]**
+- **Roadmap em Standby:** "Operação Soberania dos Dados"
+- **Próximo Passo a ser Retomado:** Fase 2: Soberania dos Dados de Teste
+- **Missão de Emergência Atual:** "Sincronização Cirúrgica do Schema de Desenvolvimento (PGI-MIG-FIX-01)"
+---
