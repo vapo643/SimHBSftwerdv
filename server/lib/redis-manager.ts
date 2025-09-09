@@ -201,14 +201,13 @@ class RedisManager {
 
   /**
    * Obtém o cliente Redis (método principal de acesso)
-   * DEVELOPMENT MODE: Redis desabilitado para volumes baixos (<50 propostas/dia)
+   * INTELLIGENT ACTIVATION: Redis ativa automaticamente baseado em volume real
    *
    * @returns Promise<Redis | null> - Cliente Redis conectado ou null se indisponível
    */
   public async getClient(): Promise<Redis | null> {
-    // DEVELOPMENT MODE: Skip Redis for low volume operations
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('[REDIS MANAGER] 💡 Redis desabilitado em desenvolvimento (volume baixo)');
+    // INTELLIGENT ACTIVATION: Check if Redis is needed based on real metrics
+    if (!this.shouldActivateRedis()) {
       return null;
     }
 
@@ -324,6 +323,63 @@ class RedisManager {
         this.connectionPromise = null;
         this.isConnecting = false;
       }
+    }
+  }
+
+  /**
+   * Intelligent Redis activation based on real system metrics
+   * Analyzes performance data to determine if Redis caching is needed
+   */
+  private shouldActivateRedis(): boolean {
+    try {
+      // Dynamic import to avoid circular dependency
+      const { getPerformanceStats } = require('../middleware/performance-monitor');
+      const perfStats = getPerformanceStats();
+      
+      // ACTIVATION CRITERIA:
+      const slowRequestThreshold = 10;          // 10+ slow requests indicate load
+      const proposalVolumeThreshold = 50;       // 50+ proposals/day needs caching
+      const criticalBreachThreshold = 1;        // Any critical endpoint breach
+      
+      // Check current performance metrics
+      const hasSlowRequests = perfStats.summary.slowRequests >= slowRequestThreshold;
+      const hasCriticalBreaches = perfStats.summary.criticalEndpointsBreachingSLA.length >= criticalBreachThreshold;
+      
+      // Count proposal-related endpoints activity
+      const proposalEndpoints = Object.entries(perfStats.endpoints).filter(([endpoint]) =>
+        endpoint.includes('/api/propostas') || endpoint.includes('proposta')
+      );
+      
+      const totalProposalRequests = proposalEndpoints.reduce(
+        (sum, [, stats]) => sum + (stats as any).totalRequests, 0
+      );
+      
+      const highProposalVolume = totalProposalRequests >= proposalVolumeThreshold;
+      
+      // DECISION LOGIC
+      if (hasSlowRequests || hasCriticalBreaches || highProposalVolume) {
+        console.log('[REDIS MANAGER] 🚀 Redis ATIVADO - Alta demanda detectada:', {
+          slowRequests: perfStats.summary.slowRequests,
+          criticalBreaches: perfStats.summary.criticalEndpointsBreachingSLA.length,
+          proposalRequests: totalProposalRequests,
+          reason: hasSlowRequests ? 'SLOW_REQUESTS' : 
+                 hasCriticalBreaches ? 'SLA_BREACH' : 'HIGH_VOLUME'
+        });
+        return true;
+      }
+      
+      console.log('[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo:', {
+        slowRequests: perfStats.summary.slowRequests,
+        proposalRequests: totalProposalRequests,
+        threshold: `${proposalVolumeThreshold} proposals/day`
+      });
+      
+      return false;
+      
+    } catch (error) {
+      // Fallback: disable Redis if performance monitor unavailable
+      console.warn('[REDIS MANAGER] ⚠️ Performance metrics unavailable - Redis disabled:', (error as Error).message);
+      return false;
     }
   }
 

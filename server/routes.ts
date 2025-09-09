@@ -627,6 +627,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // TEMPORARY: Test intelligent Redis activation
+  app.get('/api/debug/redis-intelligence', async (req, res) => {
+    try {
+      const { getRedisClient } = await import('./lib/redis-manager');
+      const { getPerformanceStats } = await import('./middleware/performance-monitor');
+      
+      console.log('🧠 [REDIS INTELLIGENCE] Testing activation logic...');
+      
+      const perfStats = getPerformanceStats();
+      const redisClient = await getRedisClient(); // This will trigger our intelligent logic
+      
+      res.json({
+        success: true,
+        timestamp: new Date().toISOString(),
+        intelligentDecision: {
+          redisActivated: redisClient !== null,
+          reason: redisClient ? 'HIGH_DEMAND_DETECTED' : 'LOW_VOLUME',
+        },
+        currentMetrics: {
+          totalRequests: perfStats.summary.totalRequests,
+          slowRequests: perfStats.summary.slowRequests,
+          criticalBreaches: perfStats.summary.criticalEndpointsBreachingSLA.length,
+          avgResponseTime: Math.round(perfStats.summary.avgResponseTime),
+        },
+        thresholds: {
+          slowRequestThreshold: 10,
+          proposalVolumeThreshold: 50,
+          criticalBreachThreshold: 1
+        }
+      });
+    } catch (error: any) {
+      console.error('🧠 [REDIS INTELLIGENCE] Test failed:', error.message);
+      res.json({
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   // Debug endpoint for RBAC validation
   app.get('/api/debug/me', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
