@@ -3,7 +3,12 @@
  * Operação Soberania dos Dados - Seeding System V1.0
  */
 import { faker } from '@faker-js/faker';
-import { db } from '../../server/db/index.js';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+
+// Create database connection
+const client = postgres(process.env.DATABASE_URL);
+const db = drizzle(client);
 import { profiles, propostas } from '../../shared/schema.ts';
 import { ProfileGenerator } from './generators/profiles.js';
 import { ProposalGenerator } from './generators/proposals.js';

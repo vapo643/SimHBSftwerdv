@@ -2,7 +2,12 @@
  * Database Cleaner - Utilitário para limpeza segura de tabelas
  * Operação Soberania dos Dados - Seeding System V1.0
  */
-import { db } from '../../../server/db/index.js';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+
+// Create database connection
+const client = postgres(process.env.DATABASE_URL);
+const db = drizzle(client);
 import { sql } from 'drizzle-orm';
 
 /**

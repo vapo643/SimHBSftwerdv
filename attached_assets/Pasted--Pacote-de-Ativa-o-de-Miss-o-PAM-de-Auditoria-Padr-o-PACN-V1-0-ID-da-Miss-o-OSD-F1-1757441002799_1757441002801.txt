@@ -1,0 +1,32 @@
+### Pacote de Ativação de Missão (PAM) de Auditoria (Padrão PACN V1.0)
+
+* **ID da Missão:** OSD-F1-VALIDATION-01
+* **Nome da Missão:** Operação Soberania dos Dados - Prova de Isolamento
+* **Sumário da Missão:** Validar, com evidências irrefutáveis do código-fonte e do comportamento do sistema em execução, que a separação entre os ambientes de `development` (Replit Preview) e `production` (`sistemasimpix.com.br`) é total e à prova de falhas.
+
+* **Cenário de Negócio (O "Caso de Teste"):**
+    1.  Um desenvolvedor está a trabalhar no ambiente de preview do Replit. Ele executa uma operação que modifica dados (ex: `npm run seed:dev`). A regra de negócio dita que esta operação deve ocorrer **exclusivamente** no banco de dados de desenvolvimento (`DEV_DATABASE_URL`).
+    2.  Simultaneamente, um cliente final acede ao sistema em produção em `https://sistemasimpix.com.br/login`. A regra de negócio dita que ele deve ver **apenas** os dados do banco de dados de produção (`PROD_DATABASE_URL`), completamente intocados pela operação do desenvolvedor.
+
+* **Vetor de Ataque / Ponto de Falha (O "Risco"):** O risco principal é uma falha na lógica de seleção de ambiente, onde o `NODE_ENV` ou outra variável é interpretada incorretamente, fazendo com que o ambiente de preview do Replit leia ou, no pior cenário, escreva no banco de dados de produção, causando corrupção ou vazamento de dados.
+
+* **Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+    Você deve fornecer um relatório de auditoria detalhado que prove, sem margem para dúvidas, que o vetor de ataque está mitigado. O relatório deve conter:
+
+    1.  **Prova Lógica (Análise de Código):**
+        * **a.** Aponte o(s) arquivo(s) e linha(s) exatas onde a aplicação determina em qual ambiente ela está a ser executada (ex: lendo `process.env.NODE_ENV`).
+        * **b.** Aponte o(s) arquivo(s) e linha(s) exatas onde a `connection string` do banco de dados é selecionada com base no ambiente detectado no passo anterior.
+        * **c.** Apresente o código do script `scripts/migration/validate-and-migrate.js` e explique, em detalhe, como a lógica de validação de **hostname** impede que o script `migrate:dev` seja executado contra o hostname de produção.
+
+    2.  **Prova Prática (Execução em Ambiente Real):**
+        * **a.** Execute o comando `./scripts/audit-env-staging.sh` e apresente o output completo para provar que a ferramenta de auditoria está funcional.
+        * **b.** Execute um comando `psql` no `DEV_DATABASE_URL` para mostrar a contagem de registos na tabela `propostas` **antes** do seeding (deve ser 0, assumindo um banco limpo).
+        * **c.** Execute o comando `./scripts/seed-dev.sh`.
+        * **d.** Execute novamente o comando `psql` no `DEV_DATABASE_URL` para mostrar a contagem de registos na tabela `propostas` **depois** do seeding (deve ser > 0).
+        * **e.** **(A PROVA FINAL):** Execute um comando `psql` na **`PROD_DATABASE_URL`** para mostrar a contagem de registos na tabela `propostas` e prove que ela permanece inalterada pela operação de seeding de desenvolvimento.
+
+---
+**[PGI INATIVO | ROADMAP PRINCIPAL ATIVO]**
+- **Roadmap Ativo:** "Operação Soberania dos Dados"
+- **Próximo Passo:** Conclusão da Fase 1, aguardando validação.
+---
