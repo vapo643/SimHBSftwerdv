@@ -1,0 +1,160 @@
+2025-09-09 10:05:58.98
+b2864075
+User
+{"correlationId":"760e2977-818c-4d87-bd17-59173f3f85c9","environment":"production","ip":"127.0.0.1","level":"info","message":"📥 Request received","method":"GET","path":"/","query":{},"service":"simpix-api","timestamp":"2025-09-09 13:05:58","url":"/","userAgent":"Go-http-client/1.1","version":"1.0.0"}
+2025-09-09 10:05:59.10
+fdb9fe63
+User
+Error: Command timed out
+2025-09-09 10:05:59.10
+fdb9fe63
+User
+at Timeout._onTimeout (/home/runner/workspace/node_modules/ioredis/built/Command.js:192:33)
+2025-09-09 10:05:59.10
+fdb9fe63
+User
+at listOnTimeout (node:internal/timers:581:17)
+2025-09-09 10:05:59.10
+fdb9fe63
+User
+at process.processTimers (node:internal/timers:519:7)
+2025-09-09 10:05:59.19
+b2864075
+User
+1:05:59 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+2025-09-09 10:06:01.20
+fdb9fe63
+User
+Error: Command timed out
+2025-09-09 10:06:01.20
+fdb9fe63
+User
+at Timeout._onTimeout (/home/runner/workspace/node_modules/ioredis/built/Command.js:192:33)
+2025-09-09 10:06:01.20
+fdb9fe63
+User
+at listOnTimeout (node:internal/timers:581:17)
+2025-09-09 10:06:01.20
+fdb9fe63
+User
+at process.processTimers (node:internal/timers:519:7)
+2025-09-09 10:06:03.30
+fdb9fe63
+User
+Error: Command timed out
+2025-09-09 10:06:03.30
+fdb9fe63
+User
+at Timeout._onTimeout (/home/runner/workspace/node_modules/ioredis/built/Command.js:192:33)
+2025-09-09 10:06:03.30
+fdb9fe63
+User
+at listOnTimeout (node:internal/timers:581:17)
+2025-09-09 10:06:03.30
+fdb9fe63
+User
+at process.processTimers (node:internal/timers:519:7)
+2025-09-09 10:06:05.39
+b2864075
+System
+starting up user application
+2025-09-09 10:06:05.40
+fdb9fe63
+User
+Error: Command timed out
+2025-09-09 10:06:05.40
+fdb9fe63
+User
+at Timeout._onTimeout (/home/runner/workspace/node_modules/ioredis/built/Command.js:192:33)
+2025-09-09 10:06:05.40
+fdb9fe63
+User
+at listOnTimeout (node:internal/timers:581:17)
+2025-09-09 10:06:05.40
+fdb9fe63
+User
+at process.processTimers (node:internal/timers:519:7)
+2025-09-09 10:06:05.61
+b2864075
+System
+forwarding local port 5000 to external port 80 (mapped as 1104)
+2025-09-09 10:06:06.77
+b2864075
+User
+> rest-express@1.0.0 start
+2025-09-09 10:06:06.77
+b2864075
+User
+> NODE_ENV=production node dist/index.js
+2025-09-09 10:06:07.51
+fdb9fe63
+User
+Error: Command timed out
+2025-09-09 10:06:07.51
+fdb9fe63
+User
+at Timeout._onTimeout (/home/runner/workspace/node_modules/ioredis/built/Command.js:192:33)
+2025-09-09 10:06:07.51
+fdb9fe63
+User
+at listOnTimeout (node:internal/timers:581:17)
+2025-09-09 10:06:07.51
+fdb9fe63
+User
+at process.processTimers (node:internal/timers:519:7)
+2025-09-09 10:06:09.61
+fdb9fe63
+User
+Error: Command timed out
+2025-09-09 10:06:09.61
+fdb9fe63
+User
+at Timeout._onTimeout (/home/runner/workspace/node_modules/ioredis/built/Command.js:192:33)
+2025-09-09 10:06:09.61
+fdb9fe63
+User
+at listOnTimeout (node:internal/timers:581:17)
+2025-09-09 10:06:09.61
+fdb9fe63
+User
+at process.processTimers (node:internal/timers:519:7)
+2025-09-09 10:06:11.71
+fdb9fe63
+User
+Error: Command timed out
+2025-09-09 10:06:11.71
+fdb9fe63
+User
+at Timeout._onTimeout (/home/runner/workspace/node_modules/ioredis/built/Command.js:192:33)
+2025-09-09 10:06:11.71
+fdb9fe63
+User
+at listOnTimeout (node:internal/timers:581:17)
+2025-09-09 10:06:11.71
+fdb9fe63
+User
+at process.processTimers (node:internal/timers:519:7)
+2025-09-09 10:06:11.26
+b2864075
+User
+✅ Database: Configuring Supabase connection...
+2025-09-09 10:06:11.26
+b2864075
+User
+✅ Database: Connection pool configured with 20 max connections (Mission 3 optimization)
+2025-09-09 10:06:11.26
+b2864075
+User
+📊 Pool Config: idle_timeout=30s, connect_timeout=10s, prepared_statements=disabled
+2025-09-09 10:06:11.27
+b2864075
+User
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+2025-09-09 10:06:11.27
+b2864075
+User
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+2025-09-09 10:06:11.27
+b2864075
+User
+[CLICKSIGN V1] Token configured: b73b3b90-c87...
