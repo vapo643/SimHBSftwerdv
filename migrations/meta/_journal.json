@@ -43,6 +43,13 @@
       "when": 1756823192669,
       "tag": "0005_large_ultragirl",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1757439112035,
+      "tag": "0006_brown_deathstrike",
+      "breakpoints": true
     }
   ]
 }
