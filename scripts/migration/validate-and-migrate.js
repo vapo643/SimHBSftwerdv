@@ -24,7 +24,7 @@ process.env.NODE_ENV = REQUIRED_ENVIRONMENT;
 
 const DATABASE_URL_VAR = REQUIRED_ENVIRONMENT === 'development' ? 'DEV_DATABASE_URL' :
                         REQUIRED_ENVIRONMENT === 'staging' ? 'STAGING_DATABASE_URL' :
-                        REQUIRED_ENVIRONMENT === 'production' ? 'DATABASE_URL' :
+                        REQUIRED_ENVIRONMENT === 'production' ? 'PROD_DATABASE_URL' :
                         'TEST_DATABASE_URL';
 
 if (!process.env[DATABASE_URL_VAR]) {

@@ -1,0 +1,69 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **ID da Missão:** OSD-F1-1.3-1.4
+* **Nome da Missão:** Operação Soberania dos Dados - Fundação do Isolamento
+* **Sumário da Missão (O Quê):** Implementar a governança de migrações e a blindagem da configuração para garantir o isolamento total dos ambientes de banco de dados.
+* **Intenção Estratégica (O Porquê):** O estado atual, onde as configurações de banco de dados não são estritamente isoladas por ambiente, representa um risco **crítico e inaceitável** para a integridade dos dados de produção. Um erro humano ou de script poderia levar à corrupção de dados sensíveis de clientes. Esta missão visa erradicar essa classe de risco, estabelecendo um "guardião" automatizado que garanta que apenas o banco de dados correto seja acessado pelo ambiente correto, o tempo todo, sem exceções. O sucesso desta missão é a fundação para toda a estabilidade futura do sistema.
+* **Histórico Relevante (Consulta Obrigatória):** A sua execução deve ser informada pela sua própria análise e debate técnico, registrados em `PROPOSTA_SEPARACAO_AMBIENTES_DATABASE.md` (versão revisada), e pelo "Roadmap Mestre de Implementação" que selou o nosso plano.
+* **Modelo Mental (Como se Encaixa):** Você está construindo o sistema nervoso central da nossa governança de banco de dados. Os novos scripts (`validate-and-migrate.js`) e as configurações atualizadas (`drizzle.config.ts`, `package.json`) atuarão como um "firewall" lógico. Nenhuma migração poderá ser executada sem antes passar por uma rigorosa verificação de identidade (qual ambiente estamos? qual banco de dados deveríamos estar a usar?).
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** Configuração incorreta do script de validação, levando-o a aprovar uma migração no ambiente errado.
+    * **Contramedida:** O script deve ter uma lógica de "defesa em profundidade", validando não apenas a variável de ambiente (`NODE_ENV`), mas também o *hostname* da connection string, como definido em nossa discussão. A falha em qualquer uma das verificações deve interromper a execução com um erro explícito.
+
+---
+
+**IMPLEMENTAR:**
+Governança de Migração e Blindagem de Configuração de Ambiente
+
+**CURRENT STATE:**
+Conforme sua própria análise, o arquivo `drizzle.config.ts` não respeita as variáveis de ambiente, utilizando uma única `DATABASE_URL` genérica. O `package.json` não possui scripts seguros para executar migrações por ambiente, e o `server/config/environment.ts`, embora já possua uma estrutura de ambientes, não está sendo utilizado como a fonte única da verdade para as migrações. Este estado permite que uma migração de desenvolvimento seja acidentalmente executada em produção.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um novo script `scripts/migration/validate-and-migrate.js` existe e é funcional.
+2.  O `package.json` contém os novos scripts `migrate:dev`, `migrate:staging`, e `migrate:prod`.
+3.  O comando `npm run migrate:dev` executa com sucesso e aponta **exclusivamente** para a `DEV_DATABASE_URL`.
+4.  Qualquer tentativa de executar um script de migração contra um ambiente que não corresponda ao hostname esperado (ex: rodar `npm run migrate:prod` mas o hostname na URL ser de `dev`) deve falhar com uma mensagem de erro de segurança clara.
+5.  O arquivo `drizzle.config.ts` foi refatorado para ser 100% dinâmico, lendo a configuração do ambiente (`NODE_ENV`) e carregando a `DATABASE_URL` correta.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Criação do Guardião de Migração:**
+    * Crie o arquivo em `scripts/migration/validate-and-migrate.js`.
+    * Implemente a lógica Node.js que:
+        * Lê o ambiente (`development`, `staging`, `production`) como um argumento de linha de comando.
+        * Falha com erro claro se o argumento do ambiente estiver ausente ou for inválido.
+        * Define `process.env.NODE_ENV` com base no argumento recebido.
+        * Seleciona a variável de ambiente correta (`DEV_DATABASE_URL`, `STAGING_DATABASE_URL`, `PROD_DATABASE_URL`) com base no ambiente.
+        * Executa a validação de segurança por **hostname**, comparando o hostname da URL do banco com uma lista de hostnames permitidos para aquele ambiente. Falhe ruidosamente se não houver correspondência.
+        * Se todas as validações passarem, executa o comando `drizzle-kit migrate` usando `execSync` com `stdio: 'inherit'`.
+
+2.  **Atualização do `package.json`:**
+    * Adicione os seguintes scripts na seção `"scripts"`:
+        ```json
+        "migrate:dev": "node scripts/migration/validate-and-migrate.js development",
+        "migrate:staging": "NODE_ENV=staging node scripts/migration/validate-and-migrate.js staging",
+        "migrate:prod": "NODE_ENV=production node scripts/migration/validate-and-migrate.js production"
+        ```
+
+3.  **Refatoração do `drizzle.config.ts`:**
+    * Modifique o arquivo para que ele não contenha nenhuma URL de banco de dados hardcoded.
+    * Ele deve ler `process.env.NODE_ENV` para determinar o ambiente atual.
+    * Com base no ambiente, ele deve carregar a variável de ambiente correta (`DEV_DATABASE_URL`, etc.).
+    * A exportação `dbCredentials` deve ser populada dinamicamente com a URL correta.
+
+---
+
+**PROTOCOLO DE EXECUÇÃO E VALIDAÇÃO:**
+* Você **DEVE** seguir seu **Protocolo de Execução Anti-Frágil (PEAF) V1.5**, incluindo a **Dupla Validação Contextual**.
+* Adira estritamente à **Estratégia Zero Micro Erros**, executando `get_latest_lsp_diagnostics` continuamente.
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que eu (GEM 02) ou o QA devem validar]
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute o seu protocolo 7-CHECK completo antes de declarar a missão concluída. A falha em qualquer um destes pontos resultará na rejeição do seu trabalho.
