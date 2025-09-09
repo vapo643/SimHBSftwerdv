@@ -1,0 +1,32 @@
+### Pacote de Ativação de Missão (PAM) - NÍVEL DE CRISE (EXECUÇÃO IMEDIATA)
+
+* **ID da Missão:** PGI-REDIS-FIX-01
+* **Nome da Missão:** Operação Fênix - Contenção da Falha do Redis
+* **Sumário da Missão (O Quê):** Implementar um "graceful degradation" (degradação graciosa) no middleware de autenticação (`jwt-auth-middleware.ts`) para que ele contorne as falhas de conexão com o Redis em vez de quebrar, permitindo que a validação de token prossiga pelas vias alternativas (Supabase/JWT local).
+* **Intenção Estratégica (O Porquê):** O sistema de produção está offline porque a falha de um serviço secundário (Redis) está a causar uma falha em cascata no serviço primário (Autenticação). Esta missão visa isolar a falha, restaurando o serviço de autenticação para um estado operacional mínimo e trazendo a aplicação de volta à vida imediatamente. A otimização e a correção definitiva do Redis virão depois; agora, o foco é a **continuidade do negócio**.
+
+---
+
+**IMPLEMENTAR:**
+By-pass de Emergência para Falha de Conexão Redis
+
+**CURRENT STATE:**
+O arquivo `server/lib/jwt-auth-middleware.ts` tenta executar operações no cliente Redis sem verificar se a conexão foi estabelecida com sucesso. Quando o cliente Redis está `null`, o código lança um `TypeError`, interrompendo o fluxo de autenticação e retornando `401 Unauthorized` para todos os usuários.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O middleware de autenticação em `server/lib/jwt-auth-middleware.ts` foi modificado.
+2.  Toda e qualquer chamada a uma função do cliente Redis (ex: `redis.pipeline()`, `redis.get()`) está agora dentro de um bloco de verificação (`if (redisClient)`).
+3.  Se o cliente Redis for `null`, o código deve ignorar a verificação do Redis (ex: blacklist), registar um **log de alerta crítico** (`[REDIS OFFLINE] Blacklist check skipped.`) e continuar o fluxo de autenticação normalmente para as próximas etapas (validação Supabase/JWT).
+4.  O sistema em produção volta a ficar online, permitindo que os usuários façam login, mesmo que as funcionalidades dependentes do Redis (como a blacklist de tokens) estejam temporariamente desativadas.
+
+**CONSTRAINTS (Roadmap de Execução):**
+1.  **Localize as Chamadas Fatais:** Abra `server/lib/jwt-auth-middleware.ts` e identifique todas as linhas de código que invocam métodos do cliente Redis (as linhas que causaram o `TypeError` nos logs são os seus alvos principais).
+2.  **Implemente a Guarda de Verificação:** Envolva cada uma dessas chamadas (ou os blocos de código que as contêm) numa condição `if (redisClient && redisClient.isConnected) { ... }` ou similar.
+3.  **Adicione Logging Crítico:** Dentro de um bloco `else` ou se a verificação falhar, adicione um log de erro de alta visibilidade (`logger.error` ou `console.error`) que nos alerte de que o sistema está a operar em modo degradado sem o Redis.
+4.  **Execute o 7-CHECK** e prepare o sistema para um deploy de emergência assim que a correção for validada.
+
+---
+**[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]**
+-   **Roadmap em Standby:** Todos.
+-   **Missão de Emergência Atual:** "Operação Fênix - Contenção da Falha do Redis (PGI-REDIS-FIX-01)"
+---

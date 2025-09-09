@@ -61,6 +61,13 @@ interface TokenCacheEntry {
 async function checkAuthRateLimit(identifier: string): Promise<boolean> {
   try {
     const redis = await getRedisClientLazy();
+    
+    // OPERAÇÃO FÊNIX: Graceful degradation para falha Redis
+    if (!redis || redis.status !== 'ready') {
+      console.error('[REDIS OFFLINE] Rate limit check skipped - graceful degradation');
+      return true; // Allow authentication to continue
+    }
+    
     const key = `auth_attempts:${identifier}`;
     const attempts = await redis.get(key);
 
@@ -106,6 +113,13 @@ async function checkAuthRateLimit(identifier: string): Promise<boolean> {
 export async function addToBlacklist(token: string): Promise<void> {
   try {
     const redis = await getRedisClientLazy();
+    
+    // OPERAÇÃO FÊNIX: Graceful degradation para falha Redis
+    if (!redis || redis.status !== 'ready') {
+      console.error('[REDIS OFFLINE] Blacklist add skipped - graceful degradation');
+      return; // Skip Redis operations but don't throw error
+    }
+    
     await redis.setex(`blacklist:${token}`, TOKEN_BLACKLIST_TTL, '1');
     securityLogger.logEvent({
       type: SecurityEventType.TOKEN_BLACKLISTED,
@@ -125,17 +139,25 @@ export async function addToBlacklist(token: string): Promise<void> {
  */
 export async function invalidateAllUserTokens(userId: string): Promise<void> {
   try {
+    const redis = await getRedisClientLazy();
+    
+    // OPERAÇÃO FÊNIX: Graceful degradation para falha Redis
+    if (!redis || redis.status !== 'ready') {
+      console.error('[REDIS OFFLINE] Token invalidation skipped - graceful degradation');
+      return; // Skip Redis operations but don't throw error
+    }
+    
     // Get all tokens for user from Redis set
-    const tokens = await redisClient.smembers(`user_tokens:${userId}`);
+    const tokens = await redis.smembers(`user_tokens:${userId}`);
 
     if (tokens.length > 0) {
       // Add each token to blacklist
       const blacklistPromises = tokens.map((token: string) =>
-        redisClient.setex(`blacklist:${token}`, TOKEN_BLACKLIST_TTL, '1')
+        redis.setex(`blacklist:${token}`, TOKEN_BLACKLIST_TTL, '1')
       );
 
       // Remove the user tokens set
-      await Promise.all([...blacklistPromises, redisClient.del(`user_tokens:${userId}`)]);
+      await Promise.all([...blacklistPromises, redis.del(`user_tokens:${userId}`)]);
 
       securityLogger.logEvent({
         type: SecurityEventType.TOKEN_BLACKLISTED,
@@ -159,9 +181,17 @@ export async function invalidateAllUserTokens(userId: string): Promise<void> {
  */
 export async function trackUserToken(userId: string, token: string): Promise<void> {
   try {
+    const redis = await getRedisClientLazy();
+    
+    // OPERAÇÃO FÊNIX: Graceful degradation para falha Redis
+    if (!redis || redis.status !== 'ready') {
+      console.error('[REDIS OFFLINE] Token tracking skipped - graceful degradation');
+      return; // Skip Redis operations but don't throw error
+    }
+    
     // Add token to user's Redis set with TTL matching token cache
-    await redisClient.sadd(`user_tokens:${userId}`, token);
-    await redisClient.expire(`user_tokens:${userId}`, CACHE_TTL_SECONDS);
+    await redis.sadd(`user_tokens:${userId}`, token);
+    await redis.expire(`user_tokens:${userId}`, CACHE_TTL_SECONDS);
   } catch (error) {
     console.error('[JWT AUTH] Failed to track user token:', error);
     // Log error but don't throw to prevent blocking auth flow
@@ -256,29 +286,32 @@ export async function jwtAuthMiddleware(
     let cachedEntry: TokenCacheEntry | null = null;
 
     try {
-      const pipeline = redisClient.pipeline();
-      pipeline.get(`blacklist:${token}`);
-      pipeline.get(`token:${token}`);
-      const results = await pipeline.exec();
+      // OPERAÇÃO FÊNIX: Verificação crítica Redis antes de pipeline
+      const redis = await getRedisClientLazy();
+      if (!redis || redis.status !== 'ready') {
+        console.error('[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation');
+        // Continue with authentication flow without Redis
+      } else {
+        const pipeline = redis.pipeline();
+        pipeline.get(`blacklist:${token}`);
+        pipeline.get(`token:${token}`);
+        const results = await pipeline.exec();
 
-      // Process results from pipeline
-      if (results) {
-        const [blacklistResult, cacheResult] = results;
-        isBlacklisted = !!blacklistResult[1]; // blacklistResult[0] is error, [1] is value
+        // Process results from pipeline
+        if (results) {
+          const [blacklistResult, cacheResult] = results;
+          isBlacklisted = !!blacklistResult[1]; // blacklistResult[0] is error, [1] is value
 
-        if (cacheResult[1]) {
-          cachedEntry = JSON.parse(cacheResult[1] as string);
-          console.log('[JWT DEBUG] Using Redis cached token validation (pipelined)');
+          if (cacheResult[1]) {
+            cachedEntry = JSON.parse(cacheResult[1] as string);
+            console.log('[JWT DEBUG] Using Redis cached token validation (pipelined)');
+          }
         }
       }
     } catch (redisError) {
-      console.warn('[JWT AUTH] Redis pipeline failed, proceeding with fallback:', redisError);
-      // Fallback to individual operations if pipeline fails
-      try {
-        isBlacklisted = !!(await redisClient.get(`blacklist:${token}`));
-      } catch (e) {
-        console.warn('[JWT AUTH] Blacklist check failed:', e);
-      }
+      console.error('[REDIS OFFLINE] Pipeline failed - graceful degradation:', redisError);
+      // OPERAÇÃO FÊNIX: Não tentar fallback individual se Redis está offline
+      // Continue sem blacklist check - authentication prossegue normalmente
     }
 
     // Check blacklist result
@@ -395,12 +428,17 @@ export async function jwtAuthMiddleware(
                 profile: profileData || undefined,
                 timestamp: Date.now(),
               };
-              await redisClient.setex(
-                `token:${token}`,
-                CACHE_TTL_SECONDS,
-                JSON.stringify(cacheEntry)
-              );
-              console.log('[JWT DEBUG] Token cached in Redis with profile data');
+              const redis = await getRedisClientLazy();
+              if (redis && redis.status === 'ready') {
+                await redis.setex(
+                  `token:${token}`,
+                  CACHE_TTL_SECONDS,
+                  JSON.stringify(cacheEntry)
+                );
+                console.log('[JWT DEBUG] Token cached in Redis with profile data');
+              } else {
+                console.error('[REDIS OFFLINE] Token caching skipped - graceful degradation');
+              }
             } catch (redisError) {
               console.warn('[JWT DEBUG] Failed to cache token in Redis:', redisError);
               // Continue without cache - not critical
