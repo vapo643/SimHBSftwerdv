@@ -1,0 +1,229 @@
+{
+  "manifest_version": "1.0",
+  "description": "Environment Compliance Manifest - Simpix Banking Grade Security",
+  "last_updated": "2025-09-09",
+  
+  "environments": {
+    "development": {
+      "database_security": {
+        "rls_policies": {
+          "required": true,
+          "tables": {
+            "propostas": {
+              "select_policy": "authenticated_users_only",
+              "insert_policy": "authenticated_users_only", 
+              "update_policy": "authenticated_users_only",
+              "delete_policy": "soft_delete_only"
+            },
+            "profiles": {
+              "select_policy": "public_read",
+              "insert_policy": "service_role_only",
+              "update_policy": "owner_or_service_role",
+              "delete_policy": "service_role_only"
+            },
+            "user_sessions": {
+              "select_policy": "owner_only",
+              "insert_policy": "authenticated_users_only",
+              "update_policy": "owner_only", 
+              "delete_policy": "owner_or_service_role"
+            }
+          }
+        },
+        "backup_config": {
+          "enabled": true,
+          "frequency": "daily",
+          "retention_days": 7,
+          "point_in_time_recovery": true
+        }
+      },
+      "application_security": {
+        "environment_variables": {
+          "required": [
+            "DEV_SUPABASE_URL",
+            "DEV_SUPABASE_ANON_KEY", 
+            "DEV_JWT_SECRET",
+            "NODE_ENV"
+          ],
+          "forbidden_in_logs": [
+            "DEV_JWT_SECRET",
+            "DEV_SUPABASE_SERVICE_ROLE_KEY"
+          ]
+        },
+        "rate_limiting": {
+          "enabled": true,
+          "max_requests_per_minute": 1000,
+          "burst_limit": 100
+        }
+      }
+    },
+    
+    "staging": {
+      "database_security": {
+        "rls_policies": {
+          "required": true,
+          "tables": {
+            "propostas": {
+              "select_policy": "authenticated_users_only",
+              "insert_policy": "authenticated_users_only",
+              "update_policy": "authenticated_users_only", 
+              "delete_policy": "soft_delete_only"
+            },
+            "profiles": {
+              "select_policy": "public_read",
+              "insert_policy": "service_role_only",
+              "update_policy": "owner_or_service_role",
+              "delete_policy": "service_role_only"
+            },
+            "user_sessions": {
+              "select_policy": "owner_only",
+              "insert_policy": "authenticated_users_only",
+              "update_policy": "owner_only",
+              "delete_policy": "owner_or_service_role"
+            }
+          }
+        },
+        "backup_config": {
+          "enabled": true,
+          "frequency": "every_6_hours",
+          "retention_days": 14,
+          "point_in_time_recovery": true,
+          "automated_restore_testing": true
+        }
+      },
+      "application_security": {
+        "environment_variables": {
+          "required": [
+            "STAGING_SUPABASE_URL",
+            "STAGING_SUPABASE_ANON_KEY",
+            "STAGING_JWT_SECRET", 
+            "NODE_ENV"
+          ],
+          "forbidden_in_logs": [
+            "STAGING_JWT_SECRET",
+            "STAGING_SUPABASE_SERVICE_ROLE_KEY"
+          ]
+        },
+        "rate_limiting": {
+          "enabled": true,
+          "max_requests_per_minute": 500,
+          "burst_limit": 50
+        }
+      }
+    },
+    
+    "production": {
+      "database_security": {
+        "rls_policies": {
+          "required": true,
+          "enforced": true,
+          "tables": {
+            "propostas": {
+              "select_policy": "authenticated_users_only",
+              "insert_policy": "authenticated_users_only",
+              "update_policy": "authenticated_users_only",
+              "delete_policy": "soft_delete_only"
+            },
+            "profiles": {
+              "select_policy": "public_read", 
+              "insert_policy": "service_role_only",
+              "update_policy": "owner_or_service_role",
+              "delete_policy": "service_role_only"
+            },
+            "user_sessions": {
+              "select_policy": "owner_only",
+              "insert_policy": "authenticated_users_only",
+              "update_policy": "owner_only",
+              "delete_policy": "owner_or_service_role"
+            },
+            "lojas": {
+              "select_policy": "authenticated_users_only",
+              "insert_policy": "admin_only",
+              "update_policy": "admin_only", 
+              "delete_policy": "admin_only"
+            },
+            "parceiros": {
+              "select_policy": "authenticated_users_only",
+              "insert_policy": "admin_only",
+              "update_policy": "admin_only",
+              "delete_policy": "admin_only"
+            }
+          }
+        },
+        "backup_config": {
+          "enabled": true,
+          "frequency": "every_4_hours",
+          "retention_days": 30,
+          "point_in_time_recovery": true,
+          "automated_restore_testing": true,
+          "cross_region_replication": true,
+          "encryption_at_rest": true
+        }
+      },
+      "application_security": {
+        "environment_variables": {
+          "required": [
+            "PROD_SUPABASE_URL",
+            "PROD_SUPABASE_ANON_KEY",
+            "PROD_JWT_SECRET",
+            "NODE_ENV"
+          ],
+          "forbidden_in_logs": [
+            "PROD_JWT_SECRET",
+            "PROD_SUPABASE_SERVICE_ROLE_KEY",
+            "INTER_CLIENT_SECRET",
+            "CLICKSIGN_ACCESS_TOKEN"
+          ]
+        },
+        "rate_limiting": {
+          "enabled": true,
+          "max_requests_per_minute": 200,
+          "burst_limit": 20,
+          "progressive_delays": true
+        },
+        "security_headers": {
+          "required": [
+            "Strict-Transport-Security",
+            "X-Content-Type-Options", 
+            "X-Frame-Options",
+            "Content-Security-Policy"
+          ]
+        },
+        "monitoring": {
+          "error_tracking": "required",
+          "performance_monitoring": "required", 
+          "security_alerts": "required",
+          "uptime_monitoring": "required"
+        }
+      }
+    }
+  },
+  
+  "compliance_checks": {
+    "database_connectivity": {
+      "description": "Verify database connection and basic functionality",
+      "query": "SELECT 1 as health_check",
+      "expected_result": {"health_check": 1}
+    },
+    
+    "rls_policies_exist": {
+      "description": "Verify RLS policies are configured on critical tables",
+      "query": "SELECT schemaname, tablename, policyname FROM pg_policies WHERE schemaname = 'public' AND tablename IN ('propostas', 'profiles', 'user_sessions')",
+      "minimum_policies_required": 3
+    },
+    
+    "backup_verification": {
+      "description": "Verify backup configuration is active",
+      "supabase_api_endpoint": "/projects/{project_id}/database/backups",
+      "required_fields": ["enabled", "scheduled"]
+    },
+    
+    "environment_isolation": {
+      "description": "Verify environment variables are properly configured",
+      "checks": [
+        "NODE_ENV is set",
+        "Database URL contains correct environment identifier",
+        "No production secrets in non-production environments"
+      ]
+    }
+  }
+}
