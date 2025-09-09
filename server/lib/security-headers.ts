@@ -129,7 +129,11 @@ export function setupCORS() {
   // In development, allow Replit preview URLs and localhost
   const allowedOrigins =
     process.env.NODE_ENV === 'production'
-      ? [process.env.FRONTEND_URL || 'https://simpix.com.br']
+      ? [
+          process.env.FRONTEND_URL || 'https://sistemasimpix.com.br',
+          'https://sistemasimpix.com.br',
+          'https://simpix.com.br', // Backward compatibility
+        ]
       : ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'];
 
   // Allow any Replit URL in development
