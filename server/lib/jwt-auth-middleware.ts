@@ -38,7 +38,7 @@ async function getRedisClientLazy() {
   return redisClient;
 }
 const CACHE_TTL_SECONDS = 600; // 10 minutes in seconds for Redis TTL (P0.1 optimization)
-const VALIDATION_TIMEOUT_MS = 5000; // 5 second timeout for token validation
+const VALIDATION_TIMEOUT_MS = 15000; // 15 second timeout for token validation
 const validationSemaphore = new Map<string, Promise<any>>(); // Prevent concurrent validation of same token
 
 // Enhanced token cache entry interface with profile data (P0.1 optimization)
