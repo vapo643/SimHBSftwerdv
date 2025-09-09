@@ -86,13 +86,13 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       databaseUrl: databaseUrl!,
       databasePoolSize: 5,
 
-      // Supabase
-      supabaseUrl: process.env.SUPABASE_URL!,
-      supabaseAnonKey: process.env.SUPABASE_ANON_KEY!,
-      supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      // Supabase (usando secrets específicos de desenvolvimento)
+      supabaseUrl: process.env.DEV_SUPABASE_URL!,
+      supabaseAnonKey: process.env.DEV_SUPABASE_ANON_KEY!,
+      supabaseServiceKey: process.env.DEV_SUPABASE_SERVICE_ROLE_KEY!,
 
-      // Security (development keys - NEVER use in production)
-      jwtSecret: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
+      // Security (usando secrets específicos de desenvolvimento)
+      jwtSecret: process.env.DEV_JTW_SECRET || 'dev-jwt-secret-change-in-production',
       csrfSecret: process.env.CSRF_SECRET || 'dev-csrf-secret-change-in-production',
       sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-production',
 
