@@ -72,10 +72,10 @@ export class StrictCSP {
         // Media source - self only
         "media-src 'self'",
 
-        // Connect source - API calls and WebSocket connections (includes Sentry)
+        // Connect source - API calls and WebSocket connections (includes Sentry + Supabase)
         isDevelopment
-          ? "connect-src 'self' ws: wss: localhost:* 127.0.0.1:* https: *.ingest.us.sentry.io data: blob:"
-          : "connect-src 'self' ws: wss: *.ingest.us.sentry.io",
+          ? "connect-src 'self' ws: wss: localhost:* 127.0.0.1:* https: *.ingest.us.sentry.io *.supabase.co data: blob:"
+          : "connect-src 'self' ws: wss: *.ingest.us.sentry.io *.supabase.co https://sistemasimpix.com.br https://dvglgxrvhmtsixaabxha.supabase.co",
 
         // Worker source - web workers and service workers (including Sentry)
         isDevelopment
