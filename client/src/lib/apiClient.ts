@@ -258,13 +258,22 @@ class ApiConfig {
         return window.location.origin;
       }
 
+      // Production domains (custom domains or sistemasimpix.com.br)
+      if (hostname.includes('sistemasimpix.com.br') || 
+          (!hostname.includes('localhost') && !hostname.includes('127.0.0.1'))) {
+        return window.location.origin;
+      }
+
       // Local development
       if (hostname === 'localhost' || hostname === '127.0.0.1') {
         return `${window.location.protocol}//${hostname}:5000`;
       }
     }
 
-    // Priority 3: Fallback
+    // Priority 3: Fallback (use current origin in production, localhost in dev)
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
     return 'http://localhost:5000';
   }
 

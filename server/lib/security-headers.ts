@@ -24,6 +24,7 @@ export function setupSecurityHeaders() {
     imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
     connectSrc: [
       "'self'",
+      'https://sistemasimpix.com.br', // Produção
       'https://*.supabase.co', // Supabase
       'https://cdn.inter.co', // Banco Inter
       'https://api.clicksign.com', // ClickSign
@@ -78,8 +79,8 @@ export function setupSecurityHeaders() {
     // Remove X-Powered-By header
     hidePoweredBy: true,
 
-    // Cross-Origin-Embedder-Policy
-    crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
+    // Cross-Origin-Embedder-Policy - Ajustado para permitir imagens Supabase
+    crossOriginEmbedderPolicy: false,
 
     // Cross-Origin-Opener-Policy
     crossOriginOpenerPolicy: { policy: 'same-origin' },

@@ -1,0 +1,1232 @@
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' ws: wss: *.ingest.us.sentry.io".
+Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+[Violation] Forced reflow while executing JavaScript took 116ms
+login:1 [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) <input type=​"password" class=​"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:​border-0 file:​bg-transparent file:​text-sm file:​font-medium file:​text-foreground placeholder:​text-muted-foreground focus-visible:​outline-none focus-visible:​ring-2 focus-visible:​ring-ring focus-visible:​ring-offset-2 disabled:​cursor-not-allowed disabled:​opacity-50 md:​text-sm" id=​"password" required name=​"password" data-testid=​"input-password">​flex
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+index-CUPF12KM.js:56 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: false, tokenLength: undefined}
+dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png:1  GET https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png net::ERR_BLOCKED_BY_RESPONSE.NotSameOriginAfterDefaultedToSameOriginByCoep 200 (OK)
+Image
+_F @ index-CUPF12KM.js:40
+wF @ index-CUPF12KM.js:40
+Vie @ index-CUPF12KM.js:40
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+onSubscribe @ index-CUPF12KM.js:83
+subscribe @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+T$ @ index-CUPF12KM.js:38
+vx @ index-CUPF12KM.js:40
+dh @ index-CUPF12KM.js:40
+NF @ index-CUPF12KM.js:40
+Vl @ index-CUPF12KM.js:38
+Xie @ index-CUPF12KM.js:40
+uu @ index-CUPF12KM.js:40
+AF @ index-CUPF12KM.js:40
+S @ index-CUPF12KM.js:25
+$ @ index-CUPF12KM.js:25Understand this error
+index-CUPF12KM.js:56 🔍 [IDLE TIMER] Tab became hidden, timer continues
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+index-CUPF12KM.js:56 🔍 [IDLE TIMER] Tab became hidden, timer continues
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+index-CUPF12KM.js:56 🔍 [IDLE TIMER] Tab became hidden, timer continues
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
+requests.js:1 Fetch API cannot load http://localhost:5000/api/features. Refused to connect because it violates the document's Content Security Policy.
+s.fetch @ requests.js:1
+(anonymous) @ index-CUPF12KM.js:56
+fetchWithTimeout @ index-CUPF12KM.js:107
+await in fetchWithTimeout
+Eu @ index-CUPF12KM.js:107
+get @ index-CUPF12KM.js:107
+queryFn @ index-CUPF12KM.js:666
+await in queryFn
+s @ index-CUPF12KM.js:83
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+Promise.then
+(anonymous) @ index-CUPF12KM.js:83
+Promise.catch
+y @ index-CUPF12KM.js:83
+start @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+#d @ index-CUPF12KM.js:83
+fetch @ index-CUPF12KM.js:83
+refetch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+batch @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+await in (anonymous)
+(anonymous) @ index-CUPF12KM.js:83
+onFocus @ index-CUPF12KM.js:83
+(anonymous) @ index-CUPF12KM.js:83
+e @ index-CUPF12KM.js:83
+n @ index-CUPF12KM.js:56Understand this error
