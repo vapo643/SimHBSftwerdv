@@ -153,7 +153,7 @@ export class BusinessScenarioSeeder {
     console.log('📊 [SEEDER] Gerando relatório do cenário...');
     
     try {
-      const profilesCount = await db.execute('SELECT COUNT(*) as count FROM profiles WHERE role = \\'atendente\\'');
+      const profilesCount = await db.execute('SELECT COUNT(*) as count FROM profiles WHERE role = \'atendente\'');
       const proposalsCount = await db.execute('SELECT status, COUNT(*) as count FROM propostas GROUP BY status ORDER BY status');
       
       console.log('📈 [CENÁRIO RELATÓRIO]');
