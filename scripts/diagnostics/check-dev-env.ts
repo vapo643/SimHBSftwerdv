@@ -34,10 +34,9 @@ async function checkSupabaseDev() {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Teste simples de conectividade
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('profiles')
-      .select('count(*)')
-      .limit(1);
+      .select('*', { count: 'exact', head: true });
     
     if (error) {
       console.log(`   - STATUS: ❌ FALHA - Erro na query: ${error.message}`);
