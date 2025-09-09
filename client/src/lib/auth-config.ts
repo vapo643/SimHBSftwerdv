@@ -12,9 +12,8 @@ import { SupabaseAuthProvider } from './providers/supabase-auth-provider';
 const defaultConfig: AuthConfig = {
   provider: (import.meta.env.VITE_AUTH_PROVIDER as AuthConfig['provider']) || 'supabase',
   options: {
-    // Usar credenciais de desenvolvimento no Replit
-    supabaseUrl: import.meta.env.VITE_DEV_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL,
-    supabaseAnonKey: import.meta.env.VITE_DEV_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
   },
 };
 

@@ -49,7 +49,7 @@ const LoginPage: React.FC = () => {
         <img
           src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png"
           alt="Simpix Logo"
-          className="relative z-10 h-40 opacity-75"
+          className="relative z-10 h-24 opacity-75"
         />
       </div>
       <div className="lg:min-h-auto flex min-h-screen items-center justify-center bg-background py-12">
