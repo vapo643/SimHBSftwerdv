@@ -1,0 +1,46 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Corrigir um bug de renderização no dropdown de perfil do usuário, substituindo a exibição duplicada do email pela exibição correta da `role` do usuário.
+* **Intenção Estratégica (O Porquê):** A precisão das informações exibidas na UI é fundamental para a confiança do usuário. Este bug, embora visual, cria confusão sobre as permissões do usuário e deve ser erradicado para garantir clareza e profissionalismo na interface.
+* **Histórico Relevante (Consulta Obrigatória):** Uma auditoria forense anterior (a sua) já confirmou que o objeto `user` disponível no componente `DashboardLayout.tsx` contém a propriedade `role` com o valor correto (ex: `ADMIN`). A falha está unicamente na renderização do JSX.
+
+---
+
+**IMPLEMENTAR:**
+Correção de Exibição de Role no Perfil do Usuário.
+
+**CURRENT STATE:**
+O arquivo `client/src/components/DashboardLayout.tsx`, especificamente na linha 548, está renderizando a propriedade `user.email` em um campo que deveria exibir a `user.role`.
+
+**Evidência Bruta (Código Falho):**
+```typescript
+// client/src/components/DashboardLayout.tsx (Linhas 547-548)
+<p className="text-sm font-medium leading-none">{user?.email}</p>
+<p className="text-xs leading-none text-muted-foreground">{user?.email}</p> 
+EXPECTED (Estado Final de Sucesso):
+
+O arquivo client/src/components/DashboardLayout.tsx deve ser modificado.
+
+A linha 548 deve ser alterada para renderizar a propriedade user.role em vez de user.email.
+
+Após a correção, o dropdown do perfil do usuário deve exibir o email na primeira linha e a role (ex: "ADMIN") na segunda linha, formatada em caixa alta. A aplicação deve compilar sem erros.
+
+CONSTRAINTS (Roadmap de Implementação):
+
+Abra o arquivo client/src/components/DashboardLayout.tsx.
+
+Navegue até a linha 548.
+
+Altere o conteúdo do parágrafo de {user?.email} para {user?.role}.
+
+Execute o protocolo 7-CHECK para validar a correção, incluindo uma verificação visual do resultado final no preview.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Listar decisões, ex: "Assumido que a propriedade user.role sempre existirá e será uma string."]
+
+VALIDAÇÃO PENDENTE: [Listar ações que o Orquestrador deve validar, ex: "Validar visualmente que a role 'ADMIN' aparece corretamente no dropdown do perfil."]
