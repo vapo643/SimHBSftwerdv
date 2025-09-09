@@ -52,7 +52,16 @@ export interface EnvironmentConfig {
  * Get configuration for current environment
  */
 export function getEnvironmentConfig(): EnvironmentConfig {
-  const env = process.env.NODE_ENV || 'development';
+  // 🎯 DETECÇÃO AUTOMÁTICA DE AMBIENTE BASEADA EM CREDENCIAIS
+  // Se as credenciais PROD_* existem, usar produção automaticamente
+  const hasProdCredentials = !!
+    (process.env.PROD_SUPABASE_URL && 
+     process.env.PROD_SUPABASE_SERVICE_KEY && 
+     process.env.PROD_DATABASE_URL);
+  
+  const env = hasProdCredentials ? 'production' : (process.env.NODE_ENV || 'development');
+  
+  console.log(`🔍 [ENV DETECTION] Produção detectada: ${hasProdCredentials}, Ambiente final: ${env}`);
 
   // Base configuration (shared across environments)
   const baseConfig: Partial<EnvironmentConfig> = {
@@ -82,8 +91,8 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       ...baseConfig,
       name: 'development',
 
-      // Database (com proteção anti-Neon)
-      databaseUrl: databaseUrl!,
+      // Database (com proteção anti-Neon) 
+      databaseUrl: databaseUrl || process.env.DATABASE_URL!,
       databasePoolSize: 5,
 
       // Supabase (usando secrets específicos de desenvolvimento)
