@@ -407,37 +407,41 @@ export async function jwtAuthMiddleware(
             try {
               // Fetch profile data once for cache
               const { db } = await import('./supabase');
-              const { profiles } = await import('@shared/schema');
-              const { eq } = await import('drizzle-orm');
-
-              const profileResult = await db
-                .select({
-                  role: profiles.role,
-                  fullName: profiles.fullName,
-                  lojaId: profiles.lojaId,
-                })
-                .from(profiles)
-                .where(eq(profiles.id, result.userId!))
-                .limit(1);
-
-              const profileData = profileResult.length ? profileResult[0] : null;
-
-              const cacheEntry: TokenCacheEntry = {
-                userId: result.userId!,
-                userEmail: result.userEmail,
-                profile: profileData || undefined,
-                timestamp: Date.now(),
-              };
-              const redis = await getRedisClientLazy();
-              if (redis && redis.status === 'ready') {
-                await redis.setex(
-                  `token:${token}`,
-                  CACHE_TTL_SECONDS,
-                  JSON.stringify(cacheEntry)
-                );
-                console.log('[JWT DEBUG] Token cached in Redis with profile data');
+              if (!db) {
+                console.warn('[JWT AUTH] Database not available for profile caching');
               } else {
-                console.error('[REDIS OFFLINE] Token caching skipped - graceful degradation');
+                const { profiles } = await import('@shared/schema');
+                const { eq } = await import('drizzle-orm');
+
+                const profileResult = await db
+                  .select({
+                    role: profiles.role,
+                    fullName: profiles.fullName,
+                    lojaId: profiles.lojaId,
+                  })
+                  .from(profiles)
+                  .where(eq(profiles.id, result.userId!))
+                  .limit(1);
+
+                const profileData = profileResult.length ? profileResult[0] : null;
+
+                const cacheEntry: TokenCacheEntry = {
+                  userId: result.userId!,
+                  userEmail: result.userEmail,
+                  profile: profileData || undefined,
+                  timestamp: Date.now(),
+                };
+                const redis = await getRedisClientLazy();
+                if (redis && redis.status === 'ready') {
+                  await redis.setex(
+                    `token:${token}`,
+                    CACHE_TTL_SECONDS,
+                    JSON.stringify(cacheEntry)
+                  );
+                  console.log('[JWT DEBUG] Token cached in Redis with profile data');
+                } else {
+                  console.error('[REDIS OFFLINE] Token caching skipped - graceful degradation');
+                }
               }
             } catch (redisError) {
               console.warn('[JWT DEBUG] Failed to cache token in Redis:', redisError);
@@ -539,6 +543,10 @@ export async function jwtAuthMiddleware(
     } else {
       console.log('[JWT DEBUG] Profile not in cache, querying database');
       const { db } = await import('./supabase');
+      if (!db) {
+        console.error('[JWT AUTH] Database not available - cannot fetch profile');
+        return res.status(500).json({ message: 'Erro interno de banco de dados' });
+      }
       const { profiles } = await import('@shared/schema');
       const { eq } = await import('drizzle-orm');
 
