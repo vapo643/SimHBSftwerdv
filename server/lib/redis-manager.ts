@@ -139,10 +139,11 @@ class RedisManager {
 
   /**
    * Obtém o cliente Redis (método principal de acesso)
+   * Modo graceful degradation: retorna null se Redis não disponível
    *
-   * @returns Promise<Redis> - Cliente Redis conectado
+   * @returns Promise<Redis | null> - Cliente Redis conectado ou null se indisponível
    */
-  public async getClient(): Promise<Redis> {
+  public async getClient(): Promise<Redis | null> {
     // Se já existe cliente conectado, retorna
     if (this.client && this.client.status === 'ready') {
       return this.client;
@@ -150,7 +151,12 @@ class RedisManager {
 
     // Se já está conectando, aguarda a conexão existente
     if (this.isConnecting && this.connectionPromise) {
-      return this.connectionPromise;
+      try {
+        return await this.connectionPromise;
+      } catch (error) {
+        console.warn('[REDIS MANAGER] ⚠️ Redis indisponível - continuando sem cache:', (error as Error).message);
+        return null;
+      }
     }
 
     // Inicia nova conexão
@@ -164,7 +170,8 @@ class RedisManager {
     } catch (error) {
       this.isConnecting = false;
       this.connectionPromise = null;
-      throw error;
+      console.warn('[REDIS MANAGER] ⚠️ Redis indisponível - aplicação continua sem cache:', (error as Error).message);
+      return null; // Graceful degradation - não quebra a aplicação
     }
   }
 
@@ -200,6 +207,13 @@ class RedisManager {
     try {
       const start = Date.now();
       const client = await this.getClient();
+      if (!client) {
+        return {
+          status: 'unhealthy',
+          error: 'Redis client unavailable',
+          timestamp: new Date().toISOString(),
+        };
+      }
       await client.ping();
       const latency = Date.now() - start;
 
@@ -252,10 +266,11 @@ class RedisManager {
 export const redisManager = RedisManager.getInstance();
 
 /**
- * Obtém cliente Redis conectado
+ * Obtém cliente Redis conectado (graceful degradation)
  * Esta é a função principal que deve ser usada em toda a aplicação
+ * @returns Redis client ou null se indisponível
  */
-export async function getRedisClient(): Promise<Redis> {
+export async function getRedisClient(): Promise<Redis | null> {
   return redisManager.getClient();
 }
 

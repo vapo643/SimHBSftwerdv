@@ -11,7 +11,7 @@ const inMemoryCache = new Map<string, { value: any; expires: number }>();
 /**
  * Inicializa o cliente Redis reutilizando a configuração centralizada
  */
-export async function initializeRedisClient(): Promise<Redis> {
+export async function initializeRedisClient(): Promise<Redis | null> {
   if (!redisClient) {
     redisClient = await getRedisClient();
   }
@@ -37,8 +37,13 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
       return null;
     }
 
-    // Em produção, usar Redis
+    // Em produção, usar Redis (se disponível)
     const client = await initializeRedisClient();
+    if (!client) {
+      console.warn(`[CACHE-REDIS] ⚠️ Redis indisponível - usando fallback para key: ${key}`);
+      return null;
+    }
+    
     const data = await client.get(key);
 
     if (data) {
@@ -76,8 +81,13 @@ export async function setToCache<T>(
       return;
     }
 
-    // Em produção, usar Redis
+    // Em produção, usar Redis (se disponível)
     const client = await initializeRedisClient();
+    if (!client) {
+      console.warn(`[CACHE-REDIS] ⚠️ Redis indisponível - não foi possível armazenar key: ${key}`);
+      return;
+    }
+    
     const serialized = JSON.stringify(value);
 
     // Armazena com TTL (EX = expire in seconds)
@@ -96,6 +106,10 @@ export async function setToCache<T>(
 export async function invalidateCache(key: string): Promise<void> {
   try {
     const client = await initializeRedisClient();
+    if (!client) {
+      console.warn(`[CACHE-REDIS] ⚠️ Redis indisponível - não foi possível invalidar key: ${key}`);
+      return;
+    }
     await client.del(key);
     console.log(`[CACHE] 🗑️ Invalidated cache key: ${key}`);
   } catch (error) {
@@ -110,6 +124,10 @@ export async function invalidateCache(key: string): Promise<void> {
 export async function invalidateCachePattern(pattern: string): Promise<void> {
   try {
     const client = await initializeRedisClient();
+    if (!client) {
+      console.warn(`[CACHE-REDIS] ⚠️ Redis indisponível - não foi possível invalidar padrão: ${pattern}`);
+      return;
+    }
     const keys = await client.keys(pattern);
 
     if (keys.length > 0) {
@@ -127,6 +145,9 @@ export async function invalidateCachePattern(pattern: string): Promise<void> {
 export async function isCacheAvailable(): Promise<boolean> {
   try {
     const client = await initializeRedisClient();
+    if (!client) {
+      return false;
+    }
     await client.ping();
     return true;
   } catch (error) {
