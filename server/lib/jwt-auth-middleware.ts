@@ -433,13 +433,24 @@ export async function jwtAuthMiddleware(
       try {
         console.log('[JWT DEBUG] Using local JWT validation');
         const jwt = await import('jsonwebtoken');
+        
+        // Tentar diferentes naming conventions para credenciais
         const JWT_SECRET = process.env.NODE_ENV === 'production' 
-          ? process.env.PROD_SUPABASE_JWT_SECRET 
-          : process.env.DEV_SUPABASE_JWT_SECRET;
+          ? (process.env.PROD_SUPABASE_JWT_SECRET || process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET)
+          : (process.env.DEV_SUPABASE_JWT_SECRET || process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET);
+        
+        console.log(`[JWT DEBUG] SECRET encontrado: ${!!JWT_SECRET} (ambiente: ${process.env.NODE_ENV})`);
         
         // Verificação de segurança: não permitir chaves nulas ou indefinidas
         if (!JWT_SECRET) {
-          throw new Error(`JWT_SECRET não configurado para ambiente ${process.env.NODE_ENV}. Configure ${process.env.NODE_ENV === 'production' ? 'PROD_SUPABASE_JWT_SECRET' : 'DEV_SUPABASE_JWT_SECRET'}`);
+          const requiredVar = process.env.NODE_ENV === 'production' ? 'PROD_SUPABASE_JWT_SECRET' : 'DEV_SUPABASE_JWT_SECRET';
+          console.error(`[JWT ERROR] Nenhuma JWT_SECRET encontrada. Variáveis tentadas:`, {
+            primary: requiredVar,
+            fallback1: 'SUPABASE_JWT_SECRET',
+            fallback2: 'JWT_SECRET',
+            environment: process.env.NODE_ENV
+          });
+          throw new Error(`JWT_SECRET não configurado para ambiente ${process.env.NODE_ENV}. Configure ${requiredVar} ou SUPABASE_JWT_SECRET`);
         }
 
         const decoded = jwt.default.verify(token, JWT_SECRET) as any;
