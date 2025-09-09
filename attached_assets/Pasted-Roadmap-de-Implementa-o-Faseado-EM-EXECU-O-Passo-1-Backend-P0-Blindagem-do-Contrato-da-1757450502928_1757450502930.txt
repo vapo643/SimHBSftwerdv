@@ -1,0 +1,78 @@
+Roadmap de Implementação Faseado:
+
+[🎯 EM EXECUÇÃO] Passo 1 (Backend - P0): Blindagem do Contrato da API. Corrigir a violação do protocolo HTTP. O endpoint GET /api/clientes/cpf/:cpf deve retornar um status 404 Not Found quando um cliente não for encontrado. Esta é a fundação para um frontend resiliente.
+
+[PENDENTE] Passo 2 (Frontend - P0): Implementação de Resiliência na UI. Refatorar o componente ClientDataStep.tsx para tratar corretamente a resposta 404 da API. O catch block deve atualizar o estado para exibir uma notificação de erro clara para o usuário (ex: "CPF não encontrado.") e impedir o crash da aplicação.
+
+[PENDENTE] Passo 3 (Dados - P0): Semeando o Ambiente de Produção. Reativar a "Operação Semente de Produção" para popular as tabelas essenciais (users, profiles, produtos, etc.) com dados válidos, incluindo a criação do usuário ramon.barbosa@eellevepromotora.com.br com a role correta de ADMIN.
+
+[PENDENTE] Passo 4 (UI - P2): Análise da Duplicidade de Role. Após a conclusão dos passos P0 e com o usuário existindo no sistema, auditar o componente responsável por exibir as roles para corrigir a lógica de visualização.
+
+Próxima Ação:
+
+Executor Humano, a seguir está o Pacote de Ativação de Missão (PAM) para o Passo 1. Entregue este comando à 'Bazuca' (Agente Replit). A correção do backend é a prioridade máxima e deve ser executada antes de qualquer outra ação.
+
+PROMPT PARA O AGENTE (BAZUCA):
+Markdown
+
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Corrigir uma violação crítica do protocolo HTTP no endpoint de busca de cliente, garantindo que ele retorne o status `404 Not Found` quando um cliente não for encontrado.
+* **Intenção Estratégica (O Porquê):** Uma resposta incorreta de `200 OK` do backend está mascarando uma falha de "dado não encontrado" e causando um crash catastrófico no frontend. Corrigir o status da API é o primeiro e mais crucial passo para construir um sistema resiliente e prevenir quebras em produção.
+* **Modelo Mental (Como se Encaixa):** Esta correção afeta a camada de apresentação da API (rotas do Express.js). Ao retornar o código de status correto, estamos fortalecendo o "contrato" entre o backend e o frontend, permitindo que o cliente (React) implemente um tratamento de erro robusto e previsível.
+
+---
+
+**IMPLEMENTAR:**
+Correção de Violação de Protocolo HTTP para Resposta 404.
+
+**CURRENT STATE:**
+O endpoint `GET /api/clientes/cpf/:cpf`, localizado em `server/routes/cliente-routes.ts`, sempre retorna um status HTTP `200 OK`, mesmo quando o `clienteService.getClientByCPF` retorna `{ exists: false }`.
+
+**Evidência Bruta (Código Falho):**
+```typescript
+// server/routes/cliente-routes.ts
+router.get('/cpf/:cpf', async (req: Request, res: Response) => {
+  try {
+    const { cpf } = req.params;
+    const result = await clientCpfService.getClientByCPF(cpf);
+    res.json(result); // <-- FALHA CRÍTICA: Sempre retorna 200 OK.
+  } catch (error: any) {
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+EXPECTED (Estado Final de Sucesso):
+
+A lógica na rota GET /api/clientes/cpf/:cpf deve ser modificada.
+
+Quando o clientCpfService.getClientByCPF(cpf) retornar um objeto contendo exists: false, a resposta da API deve ser um status HTTP 404 Not Found.
+
+O corpo da resposta para o erro 404 deve ser um JSON claro, como {"message": "Cliente não encontrado"}.
+
+Se o serviço retornar um cliente com sucesso, a resposta deve continuar sendo 200 OK com os dados do cliente.
+
+O try/catch block deve permanecer para capturar erros 500 inesperados.
+
+CONSTRAINTS (Roadmap de Implementação):
+
+Abra o arquivo server/routes/cliente-routes.ts.
+
+Localize a rota router.get('/cpf/:cpf', ...).
+
+Após a chamada const result = await clientCpfService.getClientByCPF(cpf);, adicione uma verificação condicional.
+
+Se result && result.exists === false, responda imediatamente com res.status(404).json({ message: result.message });.
+
+Caso contrário (se result.exists for true), mantenha a resposta res.json(result);.
+
+Execute o protocolo 7-CHECK para validar a correção.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Listar decisões, ex: "Assumido que a estrutura de retorno do serviço é { exists: boolean, ... }."]
+
+VALIDAÇÃO PENDENTE: [Listar ações que o Orquestrador deve validar, ex: "Validar que um teste de integração seja criado para o cenário 404."]

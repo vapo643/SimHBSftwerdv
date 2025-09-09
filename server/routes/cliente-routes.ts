@@ -35,6 +35,14 @@ router.get('/cpf/:cpf', async (req: Request, res: Response) => {
   try {
     const { cpf } = req.params;
     const result = await clientCpfService.getClientByCPF(cpf);
+    
+    // ✅ PAM V1.0: Correção de protocolo HTTP - retornar 404 se cliente não encontrado
+    if (result && result.exists === false) {
+      return res.status(404).json({ 
+        message: result.message || 'Cliente não encontrado' 
+      });
+    }
+    
     res.json(result);
   } catch (error: any) {
     console.error('[CLIENTE_ROUTES] Error getting client by CPF:', error);
