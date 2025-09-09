@@ -1,0 +1,156 @@
+2025-09-09 10:17:34.11
+be333cef
+User
+[REDIS MANAGER] 🚨 Circuit breaker OPEN - Redis desabilitado: Command timed out
+2025-09-09 10:17:34.11
+be333cef
+User
+[SEMGREP MCP] Connected to Redis via Redis Manager
+2025-09-09 10:17:34.11
+be333cef
+User
+{"environment":"production","error":"Redis connection not available - using synchronous processing","level":"warn","message":"⚠️ [FormalizationWorker] Queue unavailable - async processing disabled","service":"simpix-api","timestamp":"2025-09-09 13:17:34","version":"1.0.0"}
+2025-09-09 10:17:34.11
+be333cef
+User
+{"environment":"production","level":"warn","message":"💡 [FormalizationWorker] Events will be processed synchronously (graceful degradation)","service":"simpix-api","timestamp":"2025-09-09 13:17:34","version":"1.0.0"}
+2025-09-09 10:17:34.21
+be333cef
+User
+[REDIS MANAGER] 🚀 Cliente Redis pronto
+2025-09-09 10:17:34.60
+be333cef
+User
+1:17:34 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+2025-09-09 10:17:35.20
+be333cef
+User
+{"correlationId":"46ced84d-adad-4290-935b-d3872c65a5ec","environment":"production","ip":"127.0.0.1","level":"info","message":"📥 Request received","method":"GET","path":"/","query":{},"service":"simpix-api","timestamp":"2025-09-09 13:17:35","url":"/","userAgent":"Go-http-client/1.1","version":"1.0.0"}
+2025-09-09 10:17:38.11
+be333cef
+User
+✅ Database: Connection pool test successful
+2025-09-09 10:17:38.11
+be333cef
+User
+📊 Connection latency: 2688ms
+2025-09-09 10:17:38.11
+be333cef
+User
+🔧 Connection pool ready for high concurrency workload
+2025-09-09 10:18:01.66
+be333cef
+User
+{"correlationId":"dfb1cb34-5e9c-4aec-bc2f-c0a197b3549c","environment":"production","ip":"34.133.76.182","level":"info","message":"📥 Request received","method":"GET","path":"/login","query":{},"service":"simpix-api","timestamp":"2025-09-09 13:18:01","url":"/login","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:01.88
+be333cef
+User
+{"correlationId":"43fde0a7-6520-4c4e-a60e-c2bcccad2db8","environment":"production","ip":"34.133.76.182","level":"info","message":"📥 Request received","method":"GET","path":"/assets/index-CUPF12KM.js","query":{},"referrer":"https://sistemasimpix.com.br/login","service":"simpix-api","timestamp":"2025-09-09 13:18:01","url":"/assets/index-CUPF12KM.js","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:01.88
+be333cef
+User
+[CORS] Blocked origin: https://sistemasimpix.com.br
+2025-09-09 10:18:01.89
+be333cef
+User
+{"correlationId":"43fde0a7-6520-4c4e-a60e-c2bcccad2db8","environment":"production","error":{"message":"CORS não permitido para esta origem","name":"Error","stack":"Error: CORS não permitido para esta origem\n at origin (file:///home/runner/workspace/dist/index.js:35279:18)\n at /home/runner/workspace/node_modules/cors/lib/index.js:219:13\n at optionsCallback (/home/runner/workspace/node_modules/cors/lib/index.js:199:9)\n at corsMiddleware (/home/runner/workspace/node_modules/cors/lib/index.js:204:7)\n at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n at requestLoggingMiddleware (file:///home/runner/workspace/dist/index.js:9713:3)"},"ip":"34.133.76.182","level":"error","message":"Erro não tratado na rota GET /assets/index-CUPF12KM.js","method":"GET","path":"/assets/index-CUPF12KM.js","service":"simpix-api","timestamp":"2025-09-09 13:18:01","url":"/assets/index-CUPF12KM.js","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:01.89
+be333cef
+User
+{"correlationId":"43fde0a7-6520-4c4e-a60e-c2bcccad2db8","duration":13,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":201,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-09 13:18:01","url":"/assets/index-CUPF12KM.js","version":"1.0.0"}
+2025-09-09 10:18:01.89
+be333cef
+User
+{"correlationId":"43fde0a7-6520-4c4e-a60e-c2bcccad2db8","duration":13,"environment":"production","error":"{\"success\":false,\"error\":{\"message\":\"Ocorreu um erro interno no servidor.\",\"code\":500,\"correlationId\":\"43fde0a7-6520-4c4e-a60e-c2bcccad2db8\"},\"timestamp\":\"2025-09-09T13:18:01.893Z\"}","level":"error","message":"❌ Request error","method":"GET","service":"simpix-api","statusCode":500,"timestamp":"2025-09-09 13:18:01","url":"/assets/index-CUPF12KM.js","version":"1.0.0"}
+2025-09-09 10:18:01.91
+be333cef
+User
+[CORS] Blocked origin: https://sistemasimpix.com.br
+2025-09-09 10:18:01.91
+be333cef
+User
+{"correlationId":"1aa3804d-f0f9-4e82-84ac-ec4ca55623ca","environment":"production","ip":"34.59.60.32","level":"info","message":"📥 Request received","method":"GET","path":"/assets/index-C0Vf8MzG.css","query":{},"referrer":"https://sistemasimpix.com.br/login","service":"simpix-api","timestamp":"2025-09-09 13:18:01","url":"/assets/index-C0Vf8MzG.css","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:01.91
+be333cef
+User
+{"correlationId":"1aa3804d-f0f9-4e82-84ac-ec4ca55623ca","environment":"production","error":{"message":"CORS não permitido para esta origem","name":"Error","stack":"Error: CORS não permitido para esta origem\n at origin (file:///home/runner/workspace/dist/index.js:35279:18)\n at /home/runner/workspace/node_modules/cors/lib/index.js:219:13\n at optionsCallback (/home/runner/workspace/node_modules/cors/lib/index.js:199:9)\n at corsMiddleware (/home/runner/workspace/node_modules/cors/lib/index.js:204:7)\n at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n at requestLoggingMiddleware (file:///home/runner/workspace/dist/index.js:9713:3)"},"ip":"34.59.60.32","level":"error","message":"Erro não tratado na rota GET /assets/index-C0Vf8MzG.css","method":"GET","path":"/assets/index-C0Vf8MzG.css","service":"simpix-api","timestamp":"2025-09-09 13:18:01","url":"/assets/index-C0Vf8MzG.css","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:01.91
+be333cef
+User
+{"correlationId":"1aa3804d-f0f9-4e82-84ac-ec4ca55623ca","duration":4,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":201,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-09 13:18:01","url":"/assets/index-C0Vf8MzG.css","version":"1.0.0"}
+2025-09-09 10:18:01.91
+be333cef
+User
+{"correlationId":"1aa3804d-f0f9-4e82-84ac-ec4ca55623ca","duration":4,"environment":"production","error":"{\"success\":false,\"error\":{\"message\":\"Ocorreu um erro interno no servidor.\",\"code\":500,\"correlationId\":\"1aa3804d-f0f9-4e82-84ac-ec4ca55623ca\"},\"timestamp\":\"2025-09-09T13:18:01.917Z\"}","level":"error","message":"❌ Request error","method":"GET","service":"simpix-api","statusCode":500,"timestamp":"2025-09-09 13:18:01","url":"/assets/index-C0Vf8MzG.css","version":"1.0.0"}
+2025-09-09 10:18:01.94
+be333cef
+User
+{"environment":"production","error":{"message":"CORS não permitido para esta origem","name":"Error","stack":"Error: CORS não permitido para esta origem\n at origin (file:///home/runner/workspace/dist/index.js:35279:18)\n at /home/runner/workspace/node_modules/cors/lib/index.js:219:13\n at optionsCallback (/home/runner/workspace/node_modules/cors/lib/index.js:199:9)\n at corsMiddleware (/home/runner/workspace/node_modules/cors/lib/index.js:204:7)\n at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n at requestLoggingMiddleware (file:///home/runner/workspace/dist/index.js:9713:3)"},"eventId":"fbd19985a37747519242ce30557c78f3","level":"error","message":"🔴 Error sent to Sentry","service":"simpix-api","timestamp":"2025-09-09 13:18:01","version":"1.0.0"}
+2025-09-09 10:18:01.95
+be333cef
+User
+{"environment":"production","error":{"message":"CORS não permitido para esta origem","name":"Error","stack":"Error: CORS não permitido para esta origem\n at origin (file:///home/runner/workspace/dist/index.js:35279:18)\n at /home/runner/workspace/node_modules/cors/lib/index.js:219:13\n at optionsCallback (/home/runner/workspace/node_modules/cors/lib/index.js:199:9)\n at corsMiddleware (/home/runner/workspace/node_modules/cors/lib/index.js:204:7)\n at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n at requestLoggingMiddleware (file:///home/runner/workspace/dist/index.js:9713:3)"},"eventId":"af5bc866acad41b9a603f2df9e315654","level":"error","message":"🔴 Error sent to Sentry","service":"simpix-api","timestamp":"2025-09-09 13:18:01","version":"1.0.0"}
+2025-09-09 10:18:02.67
+be333cef
+User
+{"correlationId":"4e6ef5e4-dcde-47f8-be32-7fc7cc74a5a9","environment":"production","ip":"34.59.60.32","level":"info","message":"📥 Request received","method":"GET","path":"/favicon.ico","query":{},"referrer":"https://sistemasimpix.com.br/login","service":"simpix-api","timestamp":"2025-09-09 13:18:02","url":"/favicon.ico","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:06.34
+be333cef
+User
+{"correlationId":"631ec3f9-95cb-4caa-9732-dbcac6aa50ec","environment":"production","ip":"34.59.60.32","level":"info","message":"📥 Request received","method":"GET","path":"/login","query":{},"service":"simpix-api","timestamp":"2025-09-09 13:18:06","url":"/login","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:06.60
+be333cef
+User
+{"correlationId":"b41d58dc-eeaf-48e5-ac09-0d9585120a48","environment":"production","ip":"34.60.209.83","level":"info","message":"📥 Request received","method":"GET","path":"/assets/index-C0Vf8MzG.css","query":{},"referrer":"https://sistemasimpix.com.br/login","service":"simpix-api","timestamp":"2025-09-09 13:18:06","url":"/assets/index-C0Vf8MzG.css","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:06.60
+be333cef
+User
+[CORS] Blocked origin: https://sistemasimpix.com.br
+2025-09-09 10:18:06.60
+be333cef
+User
+{"correlationId":"b41d58dc-eeaf-48e5-ac09-0d9585120a48","environment":"production","error":{"message":"CORS não permitido para esta origem","name":"Error","stack":"Error: CORS não permitido para esta origem\n at origin (file:///home/runner/workspace/dist/index.js:35279:18)\n at /home/runner/workspace/node_modules/cors/lib/index.js:219:13\n at optionsCallback (/home/runner/workspace/node_modules/cors/lib/index.js:199:9)\n at corsMiddleware (/home/runner/workspace/node_modules/cors/lib/index.js:204:7)\n at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n at requestLoggingMiddleware (file:///home/runner/workspace/dist/index.js:9713:3)"},"ip":"34.60.209.83","level":"error","message":"Erro não tratado na rota GET /assets/index-C0Vf8MzG.css","method":"GET","path":"/assets/index-C0Vf8MzG.css","service":"simpix-api","timestamp":"2025-09-09 13:18:06","url":"/assets/index-C0Vf8MzG.css","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:06.60
+be333cef
+User
+{"correlationId":"b41d58dc-eeaf-48e5-ac09-0d9585120a48","duration":3,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":201,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-09 13:18:06","url":"/assets/index-C0Vf8MzG.css","version":"1.0.0"}
+2025-09-09 10:18:06.60
+be333cef
+User
+{"correlationId":"b41d58dc-eeaf-48e5-ac09-0d9585120a48","duration":3,"environment":"production","error":"{\"success\":false,\"error\":{\"message\":\"Ocorreu um erro interno no servidor.\",\"code\":500,\"correlationId\":\"b41d58dc-eeaf-48e5-ac09-0d9585120a48\"},\"timestamp\":\"2025-09-09T13:18:06.604Z\"}","level":"error","message":"❌ Request error","method":"GET","service":"simpix-api","statusCode":500,"timestamp":"2025-09-09 13:18:06","url":"/assets/index-C0Vf8MzG.css","version":"1.0.0"}
+2025-09-09 10:18:06.60
+be333cef
+User
+{"environment":"production","error":{"message":"CORS não permitido para esta origem","name":"Error","stack":"Error: CORS não permitido para esta origem\n at origin (file:///home/runner/workspace/dist/index.js:35279:18)\n at /home/runner/workspace/node_modules/cors/lib/index.js:219:13\n at optionsCallback (/home/runner/workspace/node_modules/cors/lib/index.js:199:9)\n at corsMiddleware (/home/runner/workspace/node_modules/cors/lib/index.js:204:7)\n at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n at requestLoggingMiddleware (file:///home/runner/workspace/dist/index.js:9713:3)"},"eventId":"b42db438cd3d4728aefeac9aef51032b","level":"error","message":"🔴 Error sent to Sentry","service":"simpix-api","timestamp":"2025-09-09 13:18:06","version":"1.0.0"}
+2025-09-09 10:18:06.61
+be333cef
+User
+[CORS] Blocked origin: https://sistemasimpix.com.br
+2025-09-09 10:18:06.61
+be333cef
+User
+{"correlationId":"9e9e4a69-d861-48bb-90f2-0cc26b3d2927","environment":"production","ip":"34.60.209.83","level":"info","message":"📥 Request received","method":"GET","path":"/assets/index-CUPF12KM.js","query":{},"referrer":"https://sistemasimpix.com.br/login","service":"simpix-api","timestamp":"2025-09-09 13:18:06","url":"/assets/index-CUPF12KM.js","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:06.61
+be333cef
+User
+{"correlationId":"9e9e4a69-d861-48bb-90f2-0cc26b3d2927","environment":"production","error":{"message":"CORS não permitido para esta origem","name":"Error","stack":"Error: CORS não permitido para esta origem\n at origin (file:///home/runner/workspace/dist/index.js:35279:18)\n at /home/runner/workspace/node_modules/cors/lib/index.js:219:13\n at optionsCallback (/home/runner/workspace/node_modules/cors/lib/index.js:199:9)\n at corsMiddleware (/home/runner/workspace/node_modules/cors/lib/index.js:204:7)\n at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n at requestLoggingMiddleware (file:///home/runner/workspace/dist/index.js:9713:3)"},"ip":"34.60.209.83","level":"error","message":"Erro não tratado na rota GET /assets/index-CUPF12KM.js","method":"GET","path":"/assets/index-CUPF12KM.js","service":"simpix-api","timestamp":"2025-09-09 13:18:06","url":"/assets/index-CUPF12KM.js","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:06.61
+be333cef
+User
+{"correlationId":"9e9e4a69-d861-48bb-90f2-0cc26b3d2927","duration":3,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":201,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-09 13:18:06","url":"/assets/index-CUPF12KM.js","version":"1.0.0"}
+2025-09-09 10:18:06.61
+be333cef
+User
+{"correlationId":"9e9e4a69-d861-48bb-90f2-0cc26b3d2927","duration":3,"environment":"production","error":"{\"success\":false,\"error\":{\"message\":\"Ocorreu um erro interno no servidor.\",\"code\":500,\"correlationId\":\"9e9e4a69-d861-48bb-90f2-0cc26b3d2927\"},\"timestamp\":\"2025-09-09T13:18:06.615Z\"}","level":"error","message":"❌ Request error","method":"GET","service":"simpix-api","statusCode":500,"timestamp":"2025-09-09 13:18:06","url":"/assets/index-CUPF12KM.js","version":"1.0.0"}
+2025-09-09 10:18:06.61
+be333cef
+User
+{"environment":"production","error":{"message":"CORS não permitido para esta origem","name":"Error","stack":"Error: CORS não permitido para esta origem\n at origin (file:///home/runner/workspace/dist/index.js:35279:18)\n at /home/runner/workspace/node_modules/cors/lib/index.js:219:13\n at optionsCallback (/home/runner/workspace/node_modules/cors/lib/index.js:199:9)\n at corsMiddleware (/home/runner/workspace/node_modules/cors/lib/index.js:204:7)\n at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n at requestLoggingMiddleware (file:///home/runner/workspace/dist/index.js:9713:3)"},"eventId":"fc155a50fa0e4d569f7adcca893a9e60","level":"error","message":"🔴 Error sent to Sentry","service":"simpix-api","timestamp":"2025-09-09 13:18:06","version":"1.0.0"}
+2025-09-09 10:18:06.95
+be333cef
+User
+{"correlationId":"061cc5a5-16ba-459c-94ec-6b5b05d356e2","environment":"production","ip":"34.133.76.182","level":"info","message":"📥 Request received","method":"GET","path":"/favicon.ico","query":{},"referrer":"https://sistemasimpix.com.br/login","service":"simpix-api","timestamp":"2025-09-09 13:18:06","url":"/favicon.ico","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-09 10:18:43.54
+b2864075
+System
+system: received signal terminated
