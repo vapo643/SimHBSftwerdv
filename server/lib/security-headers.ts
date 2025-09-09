@@ -25,7 +25,8 @@ export function setupSecurityHeaders() {
     connectSrc: [
       "'self'",
       'https://sistemasimpix.com.br', // Produção
-      'https://*.supabase.co', // Supabase
+      'https://*.supabase.co', // Supabase geral
+      'https://dvglgxrvhmtsixaabxha.supabase.co', // Supabase auth específico
       'https://cdn.inter.co', // Banco Inter
       'https://api.clicksign.com', // ClickSign
       'https://*.sentry.io', // Sentry error tracking

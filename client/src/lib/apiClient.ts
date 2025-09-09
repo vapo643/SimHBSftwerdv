@@ -258,9 +258,10 @@ class ApiConfig {
         return window.location.origin;
       }
 
-      // Production domains (custom domains or sistemasimpix.com.br)
+      // Production domains (explicit check)
       if (hostname.includes('sistemasimpix.com.br') || 
-          (!hostname.includes('localhost') && !hostname.includes('127.0.0.1'))) {
+          hostname.includes('.repl.co') || 
+          (!hostname.includes('localhost') && !hostname.includes('127.0.0.1') && !hostname.includes('replit'))) {
         return window.location.origin;
       }
 
