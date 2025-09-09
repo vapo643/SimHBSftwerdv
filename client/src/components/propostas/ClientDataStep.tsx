@@ -182,11 +182,22 @@ export function ClientDataStep() {
         }
       } catch (error) {
         console.error('Erro ao buscar dados do cliente:', error);
+        
+        // ✅ PAM V1.0: Tratamento robusto de erro 404 - Notificação ao usuário
+        toast({
+          title: "Erro na Busca",
+          description: "Cliente não encontrado. Verifique o CPF e tente novamente.",
+          variant: "destructive",
+        });
+        
+        // ✅ PAM V1.0: Reset de estados para prevenir crash do React
+        setClientFoundData(null);
+        setShowClientConfirmDialog(false);
       } finally {
         setLoadingCpfData(false);
       }
     },
-    [setClientFoundData, setShowClientConfirmDialog]
+    [setClientFoundData, setShowClientConfirmDialog, toast]
   );
 
   // ✅ NOVO: Handler para confirmação do modal
