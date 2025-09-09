@@ -201,11 +201,17 @@ class RedisManager {
 
   /**
    * Obtém o cliente Redis (método principal de acesso)
-   * Modo graceful degradation: retorna null se Redis não disponível
+   * DEVELOPMENT MODE: Redis desabilitado para volumes baixos (<50 propostas/dia)
    *
    * @returns Promise<Redis | null> - Cliente Redis conectado ou null se indisponível
    */
   public async getClient(): Promise<Redis | null> {
+    // DEVELOPMENT MODE: Skip Redis for low volume operations
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[REDIS MANAGER] 💡 Redis desabilitado em desenvolvimento (volume baixo)');
+      return null;
+    }
+
     // CIRCUIT BREAKER: Se já falhou antes, não tenta mais
     if (this.circuitBreakerOpen) {
       return null;
