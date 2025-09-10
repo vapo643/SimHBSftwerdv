@@ -103,6 +103,8 @@ export class ProposalRepository implements IProposalRepository {
         // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia no UPDATE
         finalidade: data.finalidade,
         garantia: data.garantia,
+        // PONTE DE DADOS V2.0: Adicionar documentos no UPDATE
+        documentos: data.documentos,
       };
 
       // RLS CORREÇÃO: Incluir relacionamentos APENAS se são válidos (não-zero)
@@ -207,6 +209,8 @@ export class ProposalRepository implements IProposalRepository {
         // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia
         finalidade: data.finalidade,
         garantia: data.garantia,
+        // PONTE DE DADOS V2.0: Adicionar documentos no INSERT
+        documentos: data.documentos,
       };
 
       console.log('🔍 [REPOSITORY DEBUG] Insert values userId:', insertValues.userId);
