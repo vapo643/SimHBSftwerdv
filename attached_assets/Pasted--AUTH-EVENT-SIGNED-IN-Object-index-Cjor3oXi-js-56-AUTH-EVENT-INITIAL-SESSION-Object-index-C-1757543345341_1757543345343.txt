@@ -1,0 +1,57 @@
+🔐 [AUTH EVENT] SIGNED_IN Object
+index-Cjor3oXi.js:56 🔐 [AUTH EVENT] INITIAL_SESSION Object
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 🔐 [TOKEN MANAGER] Fresh token obtained, length: 759
+index-Cjor3oXi.js:56 [PASSO 3 - ENVIO] Object
+index-Cjor3oXi.js:56 [PASSO 3 - ENVIO] Object
+index-Cjor3oXi.js:56 [PASSO 3 - ENVIO] Object
+index-Cjor3oXi.js:56 [PASSO 3 - ENVIO] Object
+/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103 : Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 [Análise] Erro ao carregar proposta: ApiError: Muitas tentativas de autenticação. Tente novamente mais tarde.
+    at Eu (index-Cjor3oXi.js:107:39517)
+    at async XRe (index-Cjor3oXi.js:679:50212)
+(anonymous) @ index-Cjor3oXi.js:56
+XRe @ index-Cjor3oXi.js:679Understand this error
+/api/debug/me:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 Error fetching profile data: ApiError: Muitas tentativas de autenticação. Tente novamente mais tarde.
+    at Eu (index-Cjor3oXi.js:107:39517)
+    at async index-Cjor3oXi.js:666:6062
+(anonymous) @ index-Cjor3oXi.js:56
+(anonymous) @ index-Cjor3oXi.js:666Understand this error
+/api/debug/me:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 Error fetching profile data: ApiError: Muitas tentativas de autenticação. Tente novamente mais tarde.
+    at Eu (index-Cjor3oXi.js:107:39517)
+    at async index-Cjor3oXi.js:666:6062
+(anonymous) @ index-Cjor3oXi.js:56
+(anonymous) @ index-Cjor3oXi.js:666Understand this error
+index-Cjor3oXi.js:56 [PASSO 3 - ENVIO] Object
+/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103 : Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 [Análise] Erro ao carregar proposta: ApiError: Muitas tentativas de autenticação. Tente novamente mais tarde.
+    at Eu (index-Cjor3oXi.js:107:39517)
+    at async XRe (index-Cjor3oXi.js:679:50212)
+(anonymous) @ index-Cjor3oXi.js:56
+XRe @ index-Cjor3oXi.js:679Understand this error
+index-Cjor3oXi.js:56 [PASSO 3 - ENVIO] Object
+/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103 : Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 [Análise] Erro ao carregar proposta: ApiError: Muitas tentativas de autenticação. Tente novamente mais tarde.
+    at Eu (index-Cjor3oXi.js:107:39517)
+    at async XRe (index-Cjor3oXi.js:679:50212)
+(anonymous) @ index-Cjor3oXi.js:56Understand this error
+index-Cjor3oXi.js:56 [PASSO 3 - ENVIO] Object
+/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103 : Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 [Análise] Erro ao carregar proposta: ApiError: Muitas tentativas de autenticação. Tente novamente mais tarde.
+    at Eu (index-Cjor3oXi.js:107:39517)
+    at async XRe (index-Cjor3oXi.js:679:50212)

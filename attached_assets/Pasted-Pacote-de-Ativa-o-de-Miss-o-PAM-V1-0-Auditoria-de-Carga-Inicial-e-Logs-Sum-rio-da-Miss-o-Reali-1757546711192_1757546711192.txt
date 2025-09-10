@@ -1,0 +1,22 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Auditoria de Carga Inicial e Logs
+Sumário da Missão: Realizar uma auditoria forense no frontend e backend para identificar todos os serviços, hooks e console.logs que são acionados durante a inicialização da aplicação (carregamento da página). O objetivo é encontrar a fonte da "tempestade de requisições" que está a causar o bloqueio por Rate Limit (429).
+
+Hipótese / Ponto de Falha: Uma combinação de um sistema de logs excessivamente verboso e uma configuração incorreta do cliente Supabase (não-Admin) para o ambiente de produção está a criar um loop de requisições falhadas ou um volume massivo de chamadas em cada carregamento de página.
+
+Evidência de Conformidade Requerida (A "Prova Irrefutável"):
+
+NÃO MODIFIQUE NENHUM CÓDIGO. A sua missão é LER, ANALISAR e APRESENTAR.
+
+1. Auditoria da Configuração do Cliente Supabase (Frontend):
+a. Localize o ficheiro onde o cliente Supabase padrão (não-Admin) é inicializado para o frontend (geralmente em client/src/lib/supabase.ts ou similar).
+b. Apresente o código completo desta inicialização.
+c. Análise Crítica: Como este cliente está a obter as secrets SUPABASE_URL e SUPABASE_ANON_KEY? Ele está a utilizar as variáveis corretas para o ambiente de produção (ex: process.env.PROD_SUPABASE_URL)?
+
+2. Auditoria de Pontos de Entrada e Logs do Frontend:
+a. Investigue o componente de layout principal da aplicação (ex: app/root.tsx, ou outro layout principal).
+b. Investigue os principais hooks de autenticação ou de dados que são chamados globalmente (ex: um hook useUser ou useAuth).
+c. Apresente qualquer trecho de código dentro destes ficheiros (layout principal, hooks globais) que execute chamadas de API ou console.logs dentro de um hook useEffect que é executado na montagem inicial do componente.
+
+3. Auditoria de Middleware e Logs Globais do Backend:
+a. Investigue os ficheiros de middleware do servidor (ex: server/middleware/, server.ts).
+b. Existe algum middleware de log global que é executado em todas as requisições de API recebidas? Se sim, apresente o código completo desse middleware.
