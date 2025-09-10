@@ -216,7 +216,7 @@ export function loadConfig(): AppConfig {
       },
       integrations: {
         clickSign: {
-          apiKey: process.env.CLICKSIGN_API_KEY || null,
+          apiKey: process.env.CLICKSIGN_API_KEY || process.env.CLICKSIGN_API_TOKEN || null,
           webhookSecret: process.env.CLICKSIGN_WEBHOOK_SECRET || null,
         },
         inter: {

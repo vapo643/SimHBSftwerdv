@@ -192,7 +192,7 @@ export class HealthService {
     }
 
     // Check ClickSign (if configured)
-    if (process.env.CLICKSIGN_API_KEY) {
+    if (process.env.CLICKSIGN_API_KEY || process.env.CLICKSIGN_API_TOKEN) {
       apis.clickSign = { status: 'unknown' }; // Would need actual check
     }
 

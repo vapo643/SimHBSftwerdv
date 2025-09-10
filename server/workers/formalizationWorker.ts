@@ -84,7 +84,7 @@ export class FormalizationWorker {
       });
 
       // Passo 2: Enviar para ClickSign (se configurado)
-      if (process.env.CLICKSIGN_API_KEY) {
+      if (process.env.CLICKSIGN_API_KEY || process.env.CLICKSIGN_API_TOKEN) {
         try {
           // Buscar a proposta para obter a URL da CCB
           const proposal = await unitOfWork.proposals.findById(proposalId);
