@@ -59,9 +59,5 @@ externalPort = 4200
 localPort = 45243
 externalPort = 3003
 
-[[ports]]
-localPort = 46353
-externalPort = 5000
-
 [agent]
 integrations = ["javascript_supabase==1.0.0"]
