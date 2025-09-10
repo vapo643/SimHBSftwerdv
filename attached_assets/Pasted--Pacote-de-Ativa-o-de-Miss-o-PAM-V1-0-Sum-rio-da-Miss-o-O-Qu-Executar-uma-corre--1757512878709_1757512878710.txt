@@ -1,0 +1,41 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Executar uma correção cirúrgica de duas partes no componente `DashboardLayout.tsx` para consertar a renderização do layout, garantindo que o menu lateral inicie aberto e que o conteúdo principal da página se expanda corretamente.
+
+* **Intenção Estratégica (O Porquê):** Restaurar a usabilidade e a consistência visual da plataforma para todos os utilizadores, especialmente para a role `ANALISTA`, cuja tela de trabalho principal está atualmente comprometida. A correção visa garantir uma experiência de utilizador profissional e sem falhas.
+
+* **Histórico Relevante (Consulta Obrigatória):** A sua própria auditoria forense anterior já identificou as duas causas raiz exatas deste problema no arquivo `client/src/components/DashboardLayout.tsx`: o estado inicial do `sidebarOpen` e a classe `overflow-hidden`.
+
+---
+
+**IMPLEMENTAR:**
+Correção de Layout e Estado Inicial da Interface.
+
+**CURRENT STATE:**
+O arquivo `client/src/components/DashboardLayout.tsx` possui duas falhas:
+1.  Na linha 53 (aproximadamente), o estado do menu lateral é inicializado como `const [sidebarOpen, setSidebarOpen] = useState(false);`.
+2.  Na linha 116 (aproximadamente), o container principal do grid possui a classe `overflow-hidden`, que restringe a expansão do conteúdo.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O menu lateral deve iniciar no estado **aberto** por padrão em dispositivos de desktop.
+2.  O conteúdo principal da página (como a "Fila de Análise") deve expandir-se para preencher todo o espaço horizontal e vertical disponível, sem ser "cortado".
+3.  A aplicação deve compilar sem erros e a funcionalidade de abrir/fechar o menu em ecrãs mobile deve permanecer intacta.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  Abra o arquivo `client/src/components/DashboardLayout.tsx`.
+2.  **Correção 1 (Estado Inicial):** Localize a linha `const [sidebarOpen, setSidebarOpen] = useState(false);` e altere-a para:
+    ```typescript
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+    ```
+3.  **Correção 2 (Layout):** Localize a `div` principal com a classe `grid` e remova **apenas** a classe `overflow-hidden`.
+    * **DE:** `<div className="grid min-h-screen w-full overflow-hidden lg:grid-cols-[280px_1fr]">`
+    * **PARA:** `<div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">`
+4.  Execute o protocolo 7-CHECK, validando visualmente no preview que a "Fila de Análise" agora carrega com o menu aberto e o conteúdo ocupando a tela cheia.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões, ex: "Assumido que `useState(true)` é a experiência de utilizador desejada para o estado inicial em todas as telas."]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador deve validar, ex: "Validar visualmente a página `/credito/fila` para confirmar que a anomalia foi erradicada."]
+---

@@ -50,7 +50,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   const [location] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // UX-003: Função para determinar qual seção do accordion deve estar aberta
   const getDefaultOpenSection = (currentPath: string): string => {
@@ -113,7 +113,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   };
 
   return (
-    <div className="grid min-h-screen w-full overflow-hidden lg:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
       {/* Pilar 12 - Progressive Enhancement: Offline Status Banner */}
       <OfflineIndicator variant="banner" />
 
