@@ -59,7 +59,10 @@ export function configureContainer(): Container {
 
   container.registerFactory(
     TOKENS.APPROVE_PROPOSAL_USE_CASE,
-    () => new ApproveProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+    () => new ApproveProposalUseCase(
+      container.resolve(TOKENS.PROPOSAL_REPOSITORY),
+      container.resolve(TOKENS.DOCUMENTS_REPOSITORY)
+    )
   );
 
   container.registerFactory(
