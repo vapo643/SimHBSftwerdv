@@ -255,6 +255,8 @@ export class ProposalController {
         // CAMPOS AUSENTES - CORREÇÃO AUDITORIA
         finalidade: proposalDto.finalidade,
         garantia: proposalDto.garantia,
+        // PONTE DE DADOS V1.0: Incluir documentos no DTO de resposta
+        documentos: proposalDto.documentos,
         // PAM V1.0 CORREÇÃO CRÍTICA: Adicionar campos de CCB
         ccb_gerado: proposalDto.ccbGerado,
         caminho_ccb: proposalDto.caminhoCcb,
