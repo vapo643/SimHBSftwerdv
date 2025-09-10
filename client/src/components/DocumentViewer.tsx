@@ -29,6 +29,8 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
   const [_selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [ccbRealUrl, setCcbRealUrl] = useState<string | null>(null);
   const [_ccbLoading, setCcbLoading] = useState(false);
+  const [apiDocuments, setApiDocuments] = useState<Document[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
 
   // Fetch real CCB URL - sempre usar endpoint padrão da API
   useEffect(() => {
@@ -60,9 +62,43 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
     fetchCcbUrl();
   }, [propostaId]);
 
-  // Prepare all documents list including CCB (apenas se foi gerada)
+  // Fetch documents from API - THREAD C.1 CORREÇÃO
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      if (propostaId) {
+        setDocumentsLoading(true);
+        try {
+          const { api } = await import('@/lib/apiClient');
+          const response = await api.get(`/api/propostas/${propostaId}/documents`);
+          
+          // Parse response - handle both data.documents and direct response
+          const responseData = response.data || response;
+          const docs = responseData?.documents ?? responseData?.data?.documents ?? [];
+          
+          if (Array.isArray(docs)) {
+            setApiDocuments(docs);
+            console.log(`[DocumentViewer] Loaded ${docs.length} documents from API`);
+          } else {
+            console.warn('[DocumentViewer] No documents found in API response');
+            setApiDocuments([]);
+          }
+        } catch (error) {
+          console.error('[DocumentViewer] Error fetching documents:', error);
+          setApiDocuments([]);
+        } finally {
+          setDocumentsLoading(false);
+        }
+      }
+    };
+
+    fetchDocuments();
+  }, [propostaId]);
+
+  // Prepare all documents list - usar API documents com fallback + CCB
   const allDocuments: Document[] = [
-    ...documents,
+    ...apiDocuments,
+    // Fallback to props documents if API failed and props have documents
+    ...(apiDocuments.length === 0 && documents.length > 0 ? documents : []),
     // Mostrar CCB apenas se foi carregada com sucesso
     ...(ccbRealUrl
       ? [
@@ -162,6 +198,23 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
       </div>
     );
   };
+
+  // Show loading state while fetching documents
+  if (documentsLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Documentos da Proposta</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="py-8 text-center text-gray-500">
+            <FileText className="mx-auto mb-2 h-12 w-12 animate-pulse" />
+            <p>Carregando documentos...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (allDocuments.length === 0) {
     return (

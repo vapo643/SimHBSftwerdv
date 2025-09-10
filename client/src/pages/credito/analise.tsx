@@ -427,13 +427,14 @@ const AnaliseManualPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Visualizador de Documentos */}
-          {propostaMapeada.documentos && propostaMapeada.documentos.length > 0 && (
+          {/* Visualizador de Documentos - THREAD C.1 CORREÇÃO */}
+          {propostaId && (
             <DocumentViewer
-              propostaId={propostaId!}
+              propostaId={propostaId}
               documents={
                 propostaMapeada.documentos?.map((fileName: string) => ({
                   name: fileName,
+                  url: '', // API will fetch real URLs
                 })) || []
               }
               ccbDocumentoUrl={undefined}
