@@ -184,15 +184,7 @@ function ProposalForm() {
         body: proposalData,
       });
 
-      // --- INÍCIO DO BLOCO DE DIAGNÓSTICO OBRIGATÓRIO ---
-      console.log('--- DIAGNÓSTICO DE ALERTA VERMELHO ---');
-      console.log('TIPO DO OBJETO propostaResponse:', typeof propostaResponse);
-      console.log('CONTEÚDO BRUTO DO propostaResponse:', JSON.stringify(propostaResponse, null, 2));
-      console.log('CHAVES DISPONÍVEIS NO OBJETO:', Object.keys(propostaResponse as any));
-      console.log('--- FIM DO DIAGNÓSTICO ---');
-      // --- FIM DO BLOCO DE DIAGNÓSTICO OBRIGATÓRIO ---
-
-      const propostaId = (propostaResponse as any).proposalId;
+      const propostaId = (propostaResponse as any).data.id;
       console.log(`[DEBUG] Proposta criada com ID: ${propostaId}`);
 
       // 2. SEGUNDO: Upload dos documentos com ID real da proposta

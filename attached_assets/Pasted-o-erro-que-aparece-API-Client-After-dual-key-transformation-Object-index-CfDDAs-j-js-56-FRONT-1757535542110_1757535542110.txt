@@ -1,0 +1,313 @@
+o erro que aparece; [API Client] After dual-key transformation: Object
+
+index-CfDDAs-j.js:56
+
+[FRONTEND] Resposta da nova API: Object
+
+index-CfDDAs-j.js:56
+
+[API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas : Object
+
+index-CfDDAs-j.js:56
+
+[API Client] After dual-key transformation: Object
+
+index-CfDDAs-j.js:56
+
+--- DIAGNÓSTICO DE ALERTA VERMELHO ---
+
+index-CfDDAs-j.js:56
+
+TIPO DO OBJETO propostaResponse: object
+
+index-CfDDAs-j.js:56
+
+CONTEÚDO BRUTO DO propostaResponse: {
+
+"success": true,
+
+"data": {
+
+"id": "6206c1e3-686a-4084-b28f-d999ef0a0e9f",
+
+"numeroSequencial": 0
+
+}
+
+}
+
+index-CfDDAs-j.js:56
+
+CHAVES DISPONÍVEIS NO OBJETO: Array(2)
+
+0
+
+:
+
+"success"
+
+1
+
+:
+
+"data"
+
+length
+
+:
+
+2
+
+[[Prototype]]
+
+:
+
+Array(0)
+
+index-CfDDAs-j.js:56
+
+--- FIM DO DIAGNÓSTICO ---
+
+index-CfDDAs-j.js:56
+
+[DEBUG] Proposta criada com ID: undefined
+
+index-CfDDAs-j.js:56
+
+[DEBUG] Iniciando upload de 1 documentos para proposta undefined
+
+index-CfDDAs-j.js:56
+
+[PASSO 3 - ENVIO] Object
+
+authorizationHeader
+
+:
+
+"Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI4MDhmNGQ1NC02ZjhlLTRkYjUtYTk5MS03YTExNGI4ZmYyOTYiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU3NTM2MDQ3LCJpYXQiOjE3NTc1MzI0NDcsImVtYWlsIjoiYXRlbmRlbGxldmVAZ21haWwuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdLCJyb2xlIjoiQVRFTkRFTlRFIn0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzU3NTA1ODUyfV0sInNlc3Npb25faWQiOiI1MDgwOTE0OS0xOGFhLTRkYmYtYThkNy0xYjZkNzkyMmJjYWUiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.jxJVUfdfCjEzRu-Uv5d3z0oouNYUdCNlJnHpt63swBY"
+
+hasToken
+
+:
+
+true
+
+isFormData
+
+:
+
+true
+
+url
+
+:
+
+"https://sistemasimpix.com.br/api/upload"
+
+[[Prototype]]
+
+:
+
+Object
+
+constructor
+
+:
+
+ƒ Object()
+
+hasOwnProperty
+
+:
+
+ƒ hasOwnProperty()
+
+isPrototypeOf
+
+:
+
+ƒ isPrototypeOf()
+
+propertyIsEnumerable
+
+:
+
+ƒ propertyIsEnumerable()
+
+toLocaleString
+
+:
+
+ƒ toLocaleString()
+
+toString
+
+:
+
+ƒ toString()
+
+valueOf
+
+:
+
+ƒ valueOf()
+
+__defineGetter__
+
+:
+
+ƒ __defineGetter__()
+
+__defineSetter__
+
+:
+
+ƒ __defineSetter__()
+
+__lookupGetter__
+
+:
+
+ƒ __lookupGetter__()
+
+__lookupSetter__
+
+:
+
+ƒ __lookupSetter__()
+
+__proto__
+
+:
+
+(...)
+
+get __proto__
+
+:
+
+ƒ __proto__()
+
+set __proto__
+
+:
+
+ƒ __proto__()
+
+/api/upload:1
+
+Failed to load resource: the server responded with a status of 400 ()
+
+index-CfDDAs-j.js:56
+
+[API Client] Raw JSON response from https://sistemasimpix.com.br/api/upload : Object
+
+index-CfDDAs-j.js:56
+
+[API Client] After dual-key transformation: Object
+
+message
+
+:
+
+"ID da proposta inválido ou não fornecido."
+
+success
+
+:
+
+false
+
+[[Prototype]]
+
+:
+
+Object
+
+constructor
+
+:
+
+ƒ Object()
+
+hasOwnProperty
+
+:
+
+ƒ hasOwnProperty()
+
+isPrototypeOf
+
+:
+
+ƒ isPrototypeOf()
+
+propertyIsEnumerable
+
+:
+
+ƒ propertyIsEnumerable()
+
+toLocaleString
+
+:
+
+ƒ toLocaleString()
+
+toString
+
+:
+
+ƒ toString()
+
+valueOf
+
+:
+
+ƒ valueOf()
+
+__defineGetter__
+
+:
+
+ƒ __defineGetter__()
+
+__defineSetter__
+
+:
+
+ƒ __defineSetter__()
+
+__lookupGetter__
+
+:
+
+ƒ __lookupGetter__()
+
+__lookupSetter__
+
+:
+
+ƒ __lookupSetter__()
+
+__proto__
+
+:
+
+(...)
+
+get __proto__
+
+:
+
+ƒ __proto__()
+
+set __proto__
+
+:
+
+ƒ __proto__()
+
+index-CfDDAs-j.js:56
+
+[ERROR] Falha ao enviar documento Create a new App - Replit - Google Chrome 15_07_2025 15_51_01.png: ApiError: ID da proposta inválido ou não fornecido. at Eu (index-CfDDAs-j.js:107:39517) at async Xe (index-CfDDAs-j.js:107:40835) at async Object.mutationFn (index-CfDDAs-j.js:679:24952)
