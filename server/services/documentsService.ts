@@ -177,14 +177,28 @@ export class DocumentsService {
         };
       }
 
-      // Save document record
-      const document = await this.documentsRepository.createDocument({
+      // --- INÍCIO DO BLOCO DE DIAGNÓSTICO OBRIGATÓRIO ---
+      const documentDataToSave = {
         proposta_id: propostaId,
         nome_arquivo: file.originalname,
         url: uploadResult.publicUrl,
         tipo: file.mimetype,
         tamanho: file.size,
-      });
+      };
+
+      console.log('--- DIAGNÓSTICO DE ESCRITA NA BASE DE DADOS ---');
+      console.log('[DB WRITE LOG] Tentando salvar os seguintes metadados:', JSON.stringify(documentDataToSave, null, 2));
+
+      let document;
+      try {
+        document = await this.documentsRepository.createDocument(documentDataToSave);
+        console.log('[DB WRITE LOG] SUCESSO! Resposta da base de dados:', document);
+      } catch (dbError) {
+        console.error('[DB WRITE LOG] ERRO EXPLÍCITO ao tentar salvar na base de dados:', dbError);
+        throw dbError; // Re-throw para manter o comportamento original
+      }
+      console.log('--- FIM DO DIAGNÓSTICO DE ESCRITA ---');
+      // --- FIM DO BLOCO DE DIAGNÓSTICO OBRIGATÓRIO ---
 
       return {
         success: true,
