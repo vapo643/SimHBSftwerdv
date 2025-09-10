@@ -3460,7 +3460,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res) => {
       try {
         const file = req.file;
-        const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
+        const { proposalId } = req.body;
+        if (!proposalId || typeof proposalId !== 'string' || proposalId === 'undefined') {
+          return res.status(400).json({ success: false, message: 'ID da proposta inválido ou não fornecido.' });
+        }
 
         if (!file) {
           return res.status(400).json({ message: 'Arquivo é obrigatório' });
