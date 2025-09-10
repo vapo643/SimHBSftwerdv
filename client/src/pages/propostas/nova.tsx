@@ -80,165 +80,162 @@ function ProposalForm() {
   // Submit mutation
   const submitProposal = useMutation({
     mutationFn: async () => {
-      // NOVO FLUXO: Criar proposta primeiro, depois upload com ID real
-      // 1. PRIMEIRO: Criar a proposta sem documentos
-      const proposalData = {
-        // ===== TIPO DE PESSOA E DADOS BÁSICOS =====
-        tipoPessoa: state.clientData.tipoPessoa, // PF ou PJ
+      console.log('[HARDENING LOG] Etapa 1: Iniciando submissão da proposta.');
+      try {
+        const proposalData = {
+          // ===== TIPO DE PESSOA E DADOS BÁSICOS =====
+          tipoPessoa: state.clientData.tipoPessoa, // PF ou PJ
 
-        // Dados Pessoa Física
-        clienteNome: state.clientData.nome,
-        clienteCpf: state.clientData.cpf,
+          // Dados Pessoa Física
+          clienteNome: state.clientData.nome,
+          clienteCpf: state.clientData.cpf,
 
-        // Dados Pessoa Jurídica (quando aplicável)
-        clienteRazaoSocial: state.clientData.razaoSocial || null,
-        clienteCnpj: state.clientData.cnpj || null,
+          // Dados Pessoa Jurídica (quando aplicável)
+          clienteRazaoSocial: state.clientData.razaoSocial || null,
+          clienteCnpj: state.clientData.cnpj || null,
 
-        // ===== DOCUMENTAÇÃO COMPLETA (RG) =====
-        clienteRg: state.clientData.rg,
-        clienteOrgaoEmissor: state.clientData.orgaoEmissor,
-        clienteRgUf: state.clientData.rgUf, // NOVO: UF de emissão do RG
-        clienteRgDataEmissao: state.clientData.rgDataEmissao, // NOVO: Data de emissão do RG
+          // ===== DOCUMENTAÇÃO COMPLETA (RG) =====
+          clienteRg: state.clientData.rg,
+          clienteOrgaoEmissor: state.clientData.orgaoEmissor,
+          clienteRgUf: state.clientData.rgUf, // NOVO: UF de emissão do RG
+          clienteRgDataEmissao: state.clientData.rgDataEmissao, // NOVO: Data de emissão do RG
 
-        // ===== DADOS PESSOAIS =====
-        clienteEmail: state.clientData.email,
-        clienteTelefone: state.clientData.telefone,
-        clienteDataNascimento: state.clientData.dataNascimento,
-        clienteLocalNascimento: state.clientData.localNascimento, // NOVO: Local de nascimento
-        clienteEstadoCivil: state.clientData.estadoCivil,
-        clienteNacionalidade: state.clientData.nacionalidade,
+          // ===== DADOS PESSOAIS =====
+          clienteEmail: state.clientData.email,
+          clienteTelefone: state.clientData.telefone,
+          clienteDataNascimento: state.clientData.dataNascimento,
+          clienteLocalNascimento: state.clientData.localNascimento, // NOVO: Local de nascimento
+          clienteEstadoCivil: state.clientData.estadoCivil,
+          clienteNacionalidade: state.clientData.nacionalidade,
 
-        // ===== ENDEREÇO DETALHADO =====
-        clienteCep: state.clientData.cep,
-        clienteLogradouro: state.clientData.logradouro, // NOVO: Rua/Avenida separado
-        clienteNumero: state.clientData.numero, // NOVO: Número do imóvel
-        clienteComplemento: state.clientData.complemento, // NOVO: Complemento
-        clienteBairro: state.clientData.bairro, // NOVO: Bairro
-        clienteCidade: state.clientData.cidade, // NOVO: Cidade
-        clienteUf: state.clientData.estado, // NOVO: Estado/UF
+          // ===== ENDEREÇO DETALHADO =====
+          clienteCep: state.clientData.cep,
+          clienteLogradouro: state.clientData.logradouro, // NOVO: Rua/Avenida separado
+          clienteNumero: state.clientData.numero, // NOVO: Número do imóvel
+          clienteComplemento: state.clientData.complemento, // NOVO: Complemento
+          clienteBairro: state.clientData.bairro, // NOVO: Bairro
+          clienteCidade: state.clientData.cidade, // NOVO: Cidade
+          clienteUf: state.clientData.estado, // NOVO: Estado/UF
 
-        // Manter endereço concatenado para compatibilidade
-        clienteEndereco:
-          `${state.clientData.logradouro || ''}, ${state.clientData.numero || ''}${state.clientData.complemento ? ', ' + state.clientData.complemento : ''}, ${state.clientData.bairro || ''}, ${state.clientData.cidade || ''}/${state.clientData.estado || ''} - CEP: ${state.clientData.cep || ''}`.trim(),
+          // Manter endereço concatenado para compatibilidade
+          clienteEndereco:
+            `${state.clientData.logradouro || ''}, ${state.clientData.numero || ''}${state.clientData.complemento ? ', ' + state.clientData.complemento : ''}, ${state.clientData.bairro || ''}, ${state.clientData.cidade || ''}/${state.clientData.estado || ''} - CEP: ${state.clientData.cep || ''}`.trim(),
 
-        // ===== DADOS PROFISSIONAIS =====
-        clienteOcupacao: state.clientData.ocupacao,
-        clienteRenda: state.clientData.rendaMensal,
-        clienteTelefoneEmpresa: state.clientData.telefoneEmpresa,
+          // ===== DADOS PROFISSIONAIS =====
+          clienteOcupacao: state.clientData.ocupacao,
+          clienteRenda: state.clientData.rendaMensal,
+          clienteTelefoneEmpresa: state.clientData.telefoneEmpresa,
 
-        // ===== MÉTODO DE PAGAMENTO =====
-        metodoPagamento: state.clientData.metodoPagamento, // 'conta_bancaria' ou 'pix'
+          // ===== MÉTODO DE PAGAMENTO =====
+          metodoPagamento: state.clientData.metodoPagamento, // 'conta_bancaria' ou 'pix'
 
-        // Dados bancários (quando conta_bancaria)
-        dadosPagamentoBanco: state.clientData.dadosPagamentoBanco || null,
-        dadosPagamentoAgencia: state.clientData.dadosPagamentoAgencia || null,
-        dadosPagamentoConta: state.clientData.dadosPagamentoConta || null,
-        dadosPagamentoDigito: state.clientData.dadosPagamentoDigito || null,
+          // Dados bancários (quando conta_bancaria)
+          dadosPagamentoBanco: state.clientData.dadosPagamentoBanco || null,
+          dadosPagamentoAgencia: state.clientData.dadosPagamentoAgencia || null,
+          dadosPagamentoConta: state.clientData.dadosPagamentoConta || null,
+          dadosPagamentoDigito: state.clientData.dadosPagamentoDigito || null,
 
-        // Dados PIX (quando pix)
-        dadosPagamentoPix: state.clientData.dadosPagamentoPix || null, // Chave PIX
-        dadosPagamentoTipoPix: state.clientData.dadosPagamentoTipoPix || null, // Tipo da chave
-        dadosPagamentoPixBanco: state.clientData.dadosPagamentoPixBanco || null,
-        dadosPagamentoPixNomeTitular: state.clientData.dadosPagamentoPixNomeTitular || null,
-        dadosPagamentoPixCpfTitular: state.clientData.dadosPagamentoPixCpfTitular || null,
+          // Dados PIX (quando pix)
+          dadosPagamentoPix: state.clientData.dadosPagamentoPix || null, // Chave PIX
+          dadosPagamentoTipoPix: state.clientData.dadosPagamentoTipoPix || null, // Tipo da chave
+          dadosPagamentoPixBanco: state.clientData.dadosPagamentoPixBanco || null,
+          dadosPagamentoPixNomeTitular: state.clientData.dadosPagamentoPixNomeTitular || null,
+          dadosPagamentoPixCpfTitular: state.clientData.dadosPagamentoPixCpfTitular || null,
 
-        // ===== REFERÊNCIAS PESSOAIS =====
-        referenciaPessoal: state.personalReferences,
+          // ===== REFERÊNCIAS PESSOAIS =====
+          referenciaPessoal: state.personalReferences,
 
-        // ===== DADOS DO EMPRÉSTIMO =====
-        produtoId: state.loanData.produtoId,
-        tabelaComercialId: state.loanData.tabelaComercialId,
-        valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')),
-        prazo: state.loanData.prazo,
+          // ===== DADOS DO EMPRÉSTIMO =====
+          produtoId: state.loanData.produtoId,
+          tabelaComercialId: state.loanData.tabelaComercialId,
+          valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')),
+          prazo: state.loanData.prazo,
 
-        // Valores calculados da simulação
-        valorTac: state.simulation?.valorTAC ? parseFloat(state.simulation.valorTAC) : 0,
-        valorIof: state.simulation?.valorIOF ? parseFloat(state.simulation.valorIOF) : 0,
-        valorTotalFinanciado: state.simulation?.valorTotalFinanciado
-          ? parseFloat(state.simulation.valorTotalFinanciado)
-          : 0,
+          // Valores calculados da simulação
+          valorTac: state.simulation?.valorTAC ? parseFloat(state.simulation.valorTAC) : 0,
+          valorIof: state.simulation?.valorIOF ? parseFloat(state.simulation.valorIOF) : 0,
+          valorTotalFinanciado: state.simulation?.valorTotalFinanciado
+            ? parseFloat(state.simulation.valorTotalFinanciado)
+            : 0,
 
-        // Data de carência (se houver)
-        dataCarencia: state.loanData.dataCarencia || null,
-        incluirTac: state.loanData.incluirTac,
+          // Data de carência (se houver)
+          dataCarencia: state.loanData.dataCarencia || null,
+          incluirTac: state.loanData.incluirTac,
 
-        // ===== DADOS ADMINISTRATIVOS =====
-        status: 'aguardando_analise',
-        lojaId: state.context?.atendente?.loja?.id,
-        finalidade: 'Empréstimo pessoal',
-        garantia: 'Sem garantia',
+          // ===== DADOS ADMINISTRATIVOS =====
+          status: 'aguardando_analise',
+          lojaId: state.context?.atendente?.loja?.id,
+          finalidade: 'Empréstimo pessoal',
+          garantia: 'Sem garantia',
 
-        // 🎯 CORREÇÃO: Enviar direto para análise em vez de rascunho
-        submitForAnalysis: true,
+          // 🎯 CORREÇÃO: Enviar direto para análise em vez de rascunho
+          submitForAnalysis: true,
 
-        // ===== CAMPOS OPCIONAIS PARA CCB =====
-        // Estes podem ser preenchidos posteriormente ou com valores padrão
-        formaLiberacao: 'deposito', // Como será liberado: deposito, ted, pix
-        formaPagamento: 'boleto', // Como cliente pagará: boleto, pix, debito
-        pracaPagamento: 'São Paulo', // Cidade de pagamento
-      };
+          // ===== CAMPOS OPCIONAIS PARA CCB =====
+          // Estes podem ser preenchidos posteriormente ou com valores padrão
+          formaLiberacao: 'deposito', // Como será liberado: deposito, ted, pix
+          formaPagamento: 'boleto', // Como cliente pagará: boleto, pix, debito
+          pracaPagamento: 'São Paulo', // Cidade de pagamento
+        };
+        
+        console.log('[HARDENING LOG] Etapa 2: Enviando requisição para criar proposta...');
+        const propostaResponse = await apiRequest('/api/propostas', {
+          method: 'POST',
+          body: proposalData,
+        });
 
-      console.log(`[DEBUG] Criando proposta primeiro...`);
-      const propostaResponse = await apiRequest('/api/propostas', {
-        method: 'POST',
-        body: proposalData,
-      });
+        const propostaId = (propostaResponse as any).data.id;
+        
+        if (!propostaId) {
+            console.error('[HARDENING LOG] ERRO CRÍTICO: ID da proposta NULO ou INDEFINIDO após criação.', propostaResponse);
+            throw new Error('ID da proposta não foi retornado pela API.');
+        }
+        console.log(`[HARDENING LOG] Etapa 3: Proposta criada com sucesso. ID: ${propostaId}`);
 
-      const propostaId = (propostaResponse as any).data.id;
-      console.log(`[DEBUG] Proposta criada com ID: ${propostaId}`);
-
-      // 2. SEGUNDO: Upload dos documentos com ID real da proposta
-      const uploadedDocuments: string[] = [];
-
-      if (state.documents.length > 0) {
-        console.log(
-          `[DEBUG] Iniciando upload de ${state.documents.length} documentos para proposta ${propostaId}`
-        );
-
-        for (const doc of state.documents) {
-          try {
+        if (state.documents.length > 0) {
+          console.log(`[HARDENING LOG] Etapa 4: Iniciando upload de ${state.documents.length} documento(s).`);
+          const uploadedDocuments: string[] = [];
+          
+          for (const doc of state.documents) {
+            console.log(`[HARDENING LOG]   - Fazendo upload do ficheiro: ${doc.file.name}`);
             const timestamp = Date.now();
             const fileName = `${timestamp}-${doc.name}`;
-
-            // Upload usando apiRequest com FormData
+            
             const formData = new FormData();
             formData.append('file', doc.file);
             formData.append('filename', fileName);
-            formData.append('proposalId', propostaId); // Usar ID real da proposta
-
-            const uploadResponse = await apiRequest('/api/upload', {
-              method: 'POST',
-              body: formData,
-            });
-
-            console.log(`[DEBUG] Documento ${doc.name} enviado com sucesso:`, uploadResponse);
+            formData.append('proposalId', propostaId);
+            
+            await apiRequest('/api/upload', { method: 'POST', body: formData });
             uploadedDocuments.push(fileName);
-          } catch (uploadError) {
-            console.error(`[ERROR] Falha ao enviar documento ${doc.name}:`, uploadError);
-            throw new Error(`Falha ao enviar documento ${doc.name}. Tente novamente.`);
+          }
+          
+          console.log('[HARDENING LOG] Etapa 5: Upload de todos os documentos concluído.');
+          
+          // Associar documentos na proposta via API específica
+          if (uploadedDocuments.length > 0) {
+            try {
+              await apiRequest(`/api/propostas/${propostaId}/documentos`, {
+                method: 'POST',
+                body: { documentos: uploadedDocuments },
+              });
+              console.log(
+                `[HARDENING LOG] ${uploadedDocuments.length} documentos associados à proposta ${propostaId}`
+              );
+            } catch (associationError) {
+              console.error(`[HARDENING LOG] Falha ao associar documentos:`, associationError);
+              // Não falhar a operação, documentos já estão no storage
+            }
           }
         }
 
-        console.log(`[DEBUG] Todos os ${uploadedDocuments.length} documentos enviados com sucesso`);
-
-        // 3. TERCEIRO: Associar documentos na proposta via API específica
-        if (uploadedDocuments.length > 0) {
-          try {
-            await apiRequest(`/api/propostas/${propostaId}/documentos`, {
-              method: 'POST',
-              body: { documentos: uploadedDocuments },
-            });
-            console.log(
-              `[DEBUG] ${uploadedDocuments.length} documentos associados à proposta ${propostaId}`
-            );
-          } catch (associationError) {
-            console.error(`[ERROR] Falha ao associar documentos:`, associationError);
-            // Não falhar a operação, documentos já estão no storage
-          }
-        }
+        console.log('[HARDENING LOG] Etapa 6: Submissão da proposta concluída com sucesso.');
+        return propostaResponse;
+      } catch (error) {
+        console.error('[HARDENING LOG] ERRO FATAL: Falha catastrófica durante o processo de submissão.', error);
+        // Re-lança o erro para que o `onError` do useMutation possa capturá-lo
+        throw error;
       }
-
-      return propostaResponse;
     },
     onSuccess: (data) => {
       toast({

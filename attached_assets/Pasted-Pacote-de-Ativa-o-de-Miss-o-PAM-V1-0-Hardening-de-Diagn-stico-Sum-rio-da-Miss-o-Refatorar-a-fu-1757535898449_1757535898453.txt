@@ -1,0 +1,84 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Hardening de Diagnóstico
+Sumário da Missão: Refatorar a função de submissão de propostas para injetar logs de rastreabilidade detalhados e um bloco try...catch abrangente.
+
+Intenção Estratégica: Aumentar a observabilidade do fluxo de criação e upload, atendendo a uma diretriz de engenharia do Arquiteto Chefe para garantir que qualquer falha futura seja imediatamente diagnosticável através dos logs do console.
+
+Histórico Relevante: Após um ciclo de depuração complexo, foi decidido instrumentar o código antes da validação final para garantir a máxima visibilidade em caso de uma nova falha. O código-alvo é a função submitProposal em client/src/pages/propostas/nova.tsx.
+
+IMPLEMENTAR:
+Envolver a lógica da função mutationFn dentro de submitProposal num bloco try...catch e adicionar console.log detalhados em cada etapa chave do processo.
+
+FICHEIRO ALVO:
+client/src/pages/propostas/nova.tsx
+
+CÓDIGO DE REFERÊNCIA (ESTADO ATUAL):
+
+TypeScript
+
+const submitProposal = useMutation({
+  mutationFn: async () => {
+    // 1. PRIMEIRO: Criar a proposta sem documentos
+    const proposalData = { /* dados da proposta */ };
+    const propostaResponse = await apiRequest('/api/propostas', {
+      method: 'POST',
+      body: proposalData,
+    });
+
+    const propostaId = (propostaResponse as any).data.id;
+
+    // 2. SEGUNDO: Upload dos documentos com ID real da proposta  
+    if (state.documents.length > 0) {
+      for (const doc of state.documents) {
+        // ... lógica de upload
+      }
+    }
+
+    return propostaResponse;
+  }
+});
+AÇÃO REQUERIDA (MODIFICAÇÃO DEFINITIVA):
+Refatore o código da mutationFn para que corresponda exatamente à seguinte estrutura, incluindo o bloco try...catch e todos os logs especificados.
+
+TypeScript
+
+mutationFn: async () => {
+  console.log('[HARDENING LOG] Etapa 1: Iniciando submissão da proposta.');
+  try {
+    const proposalData = { /* dados da proposta - manter lógica existente */ };
+    
+    console.log('[HARDENING LOG] Etapa 2: Enviando requisição para criar proposta...');
+    const propostaResponse = await apiRequest('/api/propostas', {
+      method: 'POST',
+      body: proposalData,
+    });
+
+    const propostaId = (propostaResponse as any).data.id;
+    
+    if (!propostaId) {
+        console.error('[HARDENING LOG] ERRO CRÍTICO: ID da proposta NULO ou INDEFINIDO após criação.', propostaResponse);
+        throw new Error('ID da proposta não foi retornado pela API.');
+    }
+    console.log(`[HARDENING LOG] Etapa 3: Proposta criada com sucesso. ID: ${propostaId}`);
+
+    if (state.documents.length > 0) {
+      console.log(`[HARDENING LOG] Etapa 4: Iniciando upload de ${state.documents.length} documento(s).`);
+      for (const doc of state.documents) {
+        console.log(`[HARDENING LOG]   - Fazendo upload do ficheiro: ${doc.file.name}`);
+        const formData = new FormData();
+        formData.append('file', doc.file);
+        // Manter a lógica de nome de ficheiro e outros dados existentes
+        formData.append('proposalId', propostaId); 
+        
+        await apiRequest('/api/upload', { method: 'POST', body: formData });
+      }
+      console.log('[HARDENING LOG] Etapa 5: Upload de todos os documentos concluído.');
+    }
+
+    console.log('[HARDENING LOG] Etapa 6: Submissão da proposta concluída com sucesso.');
+    return propostaResponse;
+  } catch (error) {
+    console.error('[HARDENING LOG] ERRO FATAL: Falha catastrófica durante o processo de submissão.', error);
+    // Re-lança o erro para que o `onError` do useMutation possa capturá-lo
+    throw error;
+  }
+}
