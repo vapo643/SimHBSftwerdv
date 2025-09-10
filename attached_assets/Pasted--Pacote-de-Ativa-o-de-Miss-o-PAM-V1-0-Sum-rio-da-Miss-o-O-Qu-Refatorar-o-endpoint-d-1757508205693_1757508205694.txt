@@ -1,0 +1,70 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Refatorar o endpoint de contexto de originação (`GET /api/origination/context`) para conceder à role `ADMINISTRADOR` acesso irrestrito à lista de produtos e tabelas comerciais, independentemente da sua associação com uma loja.
+
+* **Intenção Estratégica (O Porquê):** Para permitir a supervisão e a criação de propostas em qualquer contexto, a role `ADMINISTRADOR` precisa de uma visão global. A lógica atual o bloqueia indevidamente. Esta correção é essencial para habilitar a funcionalidade administrativa completa no sistema.
+
+* **Histórico Relevante (Consulta Obrigatória):** A sua própria auditoria anterior identificou um bloco de código em `server/routes/origination.routes.ts` que retorna `produtos: []` para qualquer usuário sem `loja_id`. A correção deve focar em criar uma exceção para `ADMINISTRADOR` nesta lógica.
+
+---
+
+**IMPLEMENTAR:**
+Habilitação de Criação de Proposta para a Role Administrador.
+
+**CURRENT STATE:**
+O arquivo `server/routes/origination.routes.ts` contém uma lógica que verifica se o perfil do usuário possui um `loja_id`. Se não possuir, a API retorna um array de produtos vazio, bloqueando o fluxo.
+
+**Evidência Bruta (Lógica Falha):**
+```typescript
+// server/routes/origination.routes.ts (linhas ~80-98)
+if (!profileData.loja_id) {
+  return res.json({
+    produtos: [], // <-- FALHA CRÍTICA para ADMIN
+    // ...
+  });
+}
+EXPECTED (Estado Final de Sucesso):
+
+A lógica no endpoint GET /api/origination/context deve ser modificada.
+
+Uma nova verificação deve ser adicionada para checar a role do usuário.
+
+Se a role do usuário for ADMINISTRADOR, a verificação !profileData.loja_id deve ser ignorada, e o fluxo deve prosseguir para a lógica que busca todos os produtos e tabelas comerciais do sistema (a lógica que atualmente só é executada para usuários com loja_id).
+
+Para todas as outras roles que não possuem loja_id (ex: ANALISTA), o comportamento atual de retornar produtos: [] deve ser mantido.
+
+CONSTRAINTS (Roadmap de Implementação):
+
+Abra o arquivo server/routes/origination.routes.ts.
+
+Localize o bloco condicional if (!profileData.loja_id).
+
+Modifique esta lógica. A nova estrutura deve ser algo como:
+
+TypeScript
+
+const userRole = req.user.role; // Assumindo que a role está disponível em req.user
+
+// Se o usuário NÃO é um admin E não tem loja, retorne o contexto mínimo.
+if (userRole !== 'ADMINISTRADOR' && !profileData.loja_id) {
+  return res.json({
+    produtos: [],
+    // ... resto do objeto de contexto mínimo
+  });
+}
+
+// Se for um ADMIN ou um usuário com loja, prossiga para a lógica principal de busca de dados.
+// ... (código existente que busca produtos e tabelas) ...
+Na lógica principal de busca de produtos (após a condição), adicione outra condição: se userRole === 'ADMINISTRADOR', a busca por produtos e tabelas comerciais não deve ser filtrada por loja_id. Se a role for outra (ex: ATENDENTE), o filtro por loja_id deve ser mantido.
+
+Execute o protocolo 7-CHECK, descrevendo como você validaria que um ADMINISTRADOR agora recebe a lista completa de produtos, enquanto um ANALISTA (sem loja) continua recebendo uma lista vazia.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Listar decisões, ex: "Assumido que a role do usuário está disponível em req.user.role a partir do middleware de autenticação."]
+
+VALIDAÇÃO PENDENTE: [Listar ações que o Orquestrador deve validar, ex: "Validar que a nova lógica não criou uma brecha que permita a um ATENDENTE ver produtos de outras lojas."]

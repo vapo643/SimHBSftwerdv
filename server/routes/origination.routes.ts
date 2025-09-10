@@ -27,7 +27,7 @@ interface OriginationContext {
         razaoSocial: string;
         cnpj: string;
       };
-    };
+    } | null; // PAM V1.0: Allow null for ADMINISTRADOR role
   };
   produtos: Array<{
     id: number;
@@ -77,9 +77,13 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       return res.status(404).json({ message: 'Perfil do usuário não encontrado' });
     }
 
+    // PAM V1.0: Get user role for admin privilege check
+    const userRole = req.user?.role;
+
     // CRITICAL FIX: Handle users without stores gracefully (e.g. ANALISTA role)
-    if (!profileData.loja_id) {
-      // Return minimal context for users without stores
+    // EXCEPTION: ADMINISTRADOR role gets full access regardless of loja_id
+    if (userRole !== 'ADMINISTRADOR' && !profileData.loja_id) {
+      // Return minimal context for non-admin users without stores
       return res.json({
         atendente: {
           id: userId,
@@ -97,43 +101,61 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       });
     }
 
-    // Then, get the loja and parceiro data
-    const { data: lojaData, error: lojaError } = await supabase
-      .from('lojas')
-      .select(
-        `
-        id,
-        nome_loja,
-        parceiro_id,
-        parceiros (
+    // PAM V1.0: Handle loja/parceiro data conditionally for ADMINISTRADOR
+    let userProfile: any;
+    let parceiroId: number | null = null;
+
+    if (profileData.loja_id) {
+      // Standard flow: user has a store - fetch loja and parceiro data
+      const { data: lojaData, error: lojaError } = await supabase
+        .from('lojas')
+        .select(
+          `
           id,
-          razao_social,
-          cnpj
+          nome_loja,
+          parceiro_id,
+          parceiros (
+            id,
+            razao_social,
+            cnpj
+          )
+        `
         )
-      `
-      )
-      .eq('id', profileData.loja_id)
-      .single();
+        .eq('id', profileData.loja_id)
+        .single();
 
-    if (lojaError || !lojaData) {
-      console.error('Loja fetch error:', lojaError);
-      return res.status(404).json({ message: 'Loja não encontrada' });
+      if (lojaError || !lojaData) {
+        console.error('Loja fetch error:', lojaError);
+        return res.status(404).json({ message: 'Loja não encontrada' });
+      }
+
+      // Fix: parceiros should be a single object, not an array
+      const parceiro = lojaData.parceiros as any;
+
+      userProfile = {
+        id: profileData.id,
+        nome: profileData.full_name,
+        loja_id: profileData.loja_id,
+        nome_loja: lojaData.nome_loja,
+        parceiro_id: lojaData.parceiro_id,
+        razao_social: parceiro?.razao_social,
+        cnpj: parceiro?.cnpj,
+      };
+
+      parceiroId = userProfile.parceiro_id;
+    } else {
+      // PAM V1.0: ADMINISTRADOR without store - create minimal profile
+      userProfile = {
+        id: profileData.id,
+        nome: profileData.full_name,
+        loja_id: null,
+        nome_loja: 'Administração Global',
+        parceiro_id: null,
+        razao_social: 'Sistema Administrativo',
+        cnpj: null,
+      };
+      parceiroId = null; // No partner filtering for global admin
     }
-
-    // Fix: parceiros should be a single object, not an array
-    const parceiro = lojaData.parceiros as any;
-
-    const userProfile = {
-      id: profileData.id,
-      nome: profileData.full_name,
-      loja_id: profileData.loja_id,
-      nome_loja: lojaData.nome_loja,
-      parceiro_id: lojaData.parceiro_id,
-      razao_social: parceiro?.razao_social,
-      cnpj: parceiro?.cnpj,
-    };
-
-    const parceiroId = userProfile.parceiro_id;
 
     // 2. Fetch all active products
     const produtosAtivos = await db.select().from(produtos).where(eq(produtos.isActive, true));
@@ -168,27 +190,6 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
         }
 
         // Cache miss - buscar do banco de dados
-        // First, fetch personalized tables for this partner using N:N relationship
-        const tabelasPersonalizadas = await db
-          .select({
-            id: tabelasComerciais.id,
-            nomeTabela: tabelasComerciais.nomeTabela,
-            taxaJuros: tabelasComerciais.taxaJuros,
-            prazos: tabelasComerciais.prazos,
-            comissao: tabelasComerciais.comissao,
-          })
-          .from(tabelasComerciais)
-          .innerJoin(
-            produtoTabelaComercial,
-            eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
-          )
-          .where(
-            and(
-              eq(produtoTabelaComercial.produtoId, produto.id),
-              eq(tabelasComerciais.parceiroId, parceiroId)
-            )
-          );
-
         let tabelasDisponiveis: Array<{
           id: number;
           nomeTabela: string;
@@ -196,18 +197,37 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
           prazos: number[];
           comissao: string;
           tipo: 'personalizada' | 'geral';
-        }> = tabelasPersonalizadas.map((t) => ({
-          id: t.id,
-          nomeTabela: t.nomeTabela,
-          taxaJuros: t.taxaJuros,
-          prazos: t.prazos,
-          comissao: t.comissao,
-          tipo: 'personalizada' as const,
-        }));
+        }> = [];
 
-        // If no personalized tables, fetch general tables using N:N relationship
-        if (tabelasPersonalizadas.length === 0) {
-          const tabelasGerais = await db
+        if (parceiroId === null) {
+          // PAM V1.0: ADMINISTRADOR - fetch ALL tables for this product (personalized + general)
+          const todasTabelas = await db
+            .select({
+              id: tabelasComerciais.id,
+              nomeTabela: tabelasComerciais.nomeTabela,
+              taxaJuros: tabelasComerciais.taxaJuros,
+              prazos: tabelasComerciais.prazos,
+              comissao: tabelasComerciais.comissao,
+              parceiroId: tabelasComerciais.parceiroId,
+            })
+            .from(tabelasComerciais)
+            .innerJoin(
+              produtoTabelaComercial,
+              eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
+            )
+            .where(eq(produtoTabelaComercial.produtoId, produto.id));
+
+          tabelasDisponiveis = todasTabelas.map((t) => ({
+            id: t.id,
+            nomeTabela: t.nomeTabela,
+            taxaJuros: t.taxaJuros,
+            prazos: t.prazos,
+            comissao: t.comissao,
+            tipo: t.parceiroId ? ('personalizada' as const) : ('geral' as const),
+          }));
+        } else {
+          // Standard flow: fetch personalized tables for this partner first
+          const tabelasPersonalizadas = await db
             .select({
               id: tabelasComerciais.id,
               nomeTabela: tabelasComerciais.nomeTabela,
@@ -223,18 +243,50 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
             .where(
               and(
                 eq(produtoTabelaComercial.produtoId, produto.id),
-                isNull(tabelasComerciais.parceiroId)
+                eq(tabelasComerciais.parceiroId, parceiroId)
               )
             );
 
-          tabelasDisponiveis = tabelasGerais.map((t) => ({
+          tabelasDisponiveis = tabelasPersonalizadas.map((t) => ({
             id: t.id,
             nomeTabela: t.nomeTabela,
             taxaJuros: t.taxaJuros,
             prazos: t.prazos,
             comissao: t.comissao,
-            tipo: 'geral' as 'personalizada' | 'geral',
+            tipo: 'personalizada' as const,
           }));
+
+          // If no personalized tables, fetch general tables using N:N relationship
+          if (tabelasPersonalizadas.length === 0) {
+            const tabelasGerais = await db
+              .select({
+                id: tabelasComerciais.id,
+                nomeTabela: tabelasComerciais.nomeTabela,
+                taxaJuros: tabelasComerciais.taxaJuros,
+                prazos: tabelasComerciais.prazos,
+                comissao: tabelasComerciais.comissao,
+              })
+              .from(tabelasComerciais)
+              .innerJoin(
+                produtoTabelaComercial,
+                eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
+              )
+              .where(
+                and(
+                  eq(produtoTabelaComercial.produtoId, produto.id),
+                  isNull(tabelasComerciais.parceiroId)
+                )
+              );
+
+            tabelasDisponiveis = tabelasGerais.map((t) => ({
+              id: t.id,
+              nomeTabela: t.nomeTabela,
+              taxaJuros: t.taxaJuros,
+              prazos: t.prazos,
+              comissao: t.comissao,
+              tipo: 'geral' as 'personalizada' | 'geral',
+            }));
+          }
         }
 
         // Armazenar no cache com TTL de 1 hora (3600 segundos)
@@ -255,7 +307,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       atendente: {
         id: userProfile.id,
         nome: userProfile.nome,
-        loja: {
+        loja: userProfile.loja_id ? {
           id: userProfile.loja_id,
           nome: userProfile.nome_loja,
           parceiro: {
@@ -263,7 +315,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
             razaoSocial: userProfile.razao_social,
             cnpj: userProfile.cnpj,
           },
-        },
+        } : null, // PAM V1.0: Handle null loja for ADMINISTRADOR
       },
       produtos: produtosComTabelas,
       documentosObrigatorios: [
