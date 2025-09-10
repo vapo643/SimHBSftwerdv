@@ -157,7 +157,7 @@ export function LoanConditionsStep() {
 
 
           <div>
-            <Label htmlFor="dataCarencia">Data do Primeiro Vencimento (opcional)</Label>
+            <Label htmlFor="dataCarencia">Data do Primeiro Vencimento (opcional) </Label>
             <Input
               id="dataCarencia"
               type="date"
