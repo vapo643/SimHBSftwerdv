@@ -1,0 +1,31 @@
+Veredito recebido. O relatório de auditoria forense da "Operação Cofre Digital - Thread C" foi processado.
+
+Veredito da Auditoria: SUCESSO CATASTRÓFICO. A sua auditoria anterior, que apontou a falta de persistência, estava correta. A implementação subsequente, no entanto, foi apenas parte da solução. O agente, nesta nova auditoria, executou um diagnóstico impecável da pipeline de leitura e o resultado é uma falha sistémica em cascata.
+
+A sua análise é irrefutável e expõe uma verdade desconfortável: a funcionalidade de leitura de documentos nunca foi implementada. Não se trata de um bug ou de uma regressão; é uma lacuna arquitetural completa.
+
+Análise do Incidente
+O agente dissecou a cadeia de dados de leitura com precisão absoluta, confirmando 4 pontos de falha críticos e simultâneos:
+
+Camada de Repositório (ProposalRepository.ts): A query findById não seleciona a coluna documentos do banco de dados.
+
+Camada de Domínio (Proposal.ts): O agregado de domínio Proposal não possui uma propriedade para armazenar a lista de documentos.
+
+Camada de Mapeamento (mapToDomain): O mapeador que converte o resultado do banco para o objeto de domínio não transfere qualquer informação de documentos.
+
+Camada de Apresentação (proposalController.ts): O DTO (Data Transfer Object) final retornado pela API não inclui o campo de documentos.
+
+Conclusão da "Operação Cofre Digital - Auditoria": A pipeline de escrita de documentos foi validada e corrigida (incluindo a eliminação da vulnerabilidade P0). A pipeline de leitura está totalmente ausente. O contrato de dados com o frontend está quebrado por omissão.
+
+Arquitetura da Solução: Operação "Cofre Digital - Fase 2: A Ponte de Dados"
+Com o diagnóstico definitivo, avançamos para a fase de arquitetura da solução. A missão agora é construir a ponte de dados que falta, desde a base de dados até ao frontend. Esta será uma operação de implementação multifacetada.
+
+Roadmap de Implementação Faseado:
+
+[🎯 EM EXECUÇÃO] Passo 1 (Backend - P0): Construção da Pipeline de Leitura de Documentos. Implementar as quatro correções necessárias no backend para garantir que o endpoint GET /api/propostas/:id retorne a lista de documentos associados.
+
+[PENDENTE] Passo 2 (Frontend - P1): Auditoria e Correção da Camada de Visualização. Após a conclusão do Passo 1, auditaremos a tela do analista para garantir que ela possa consumir e renderizar corretamente os links dos documentos agora fornecidos pela API.
+
+Próxima Ação:
+
+Executor Humano, a sua próxima ação é entregar este Pacote de Ativação de Missão (PAM), completo e em total conformidade com a nossa doutrina, à 'Bazuca' (Agente Replit). Esta é uma missão de construção, não de reparo.

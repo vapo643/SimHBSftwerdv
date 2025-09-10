@@ -44,6 +44,9 @@ export interface ProposalCreationProps {
   // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia
   finalidade?: string;
   garantia?: string;
+  
+  // PONTE DE DADOS V1.0: Lista de documentos anexados
+  documentos?: string[] | null;
 }
 
 // Value Objects - LACRE DE OURO: Interface expandida para todos os campos
@@ -262,6 +265,8 @@ export class Proposal {
   private _observacoes?: string;
   private _finalidade?: string;
   private _garantia?: string;
+  // PONTE DE DADOS V1.0: Lista de documentos anexados
+  private _documentos: string[] | null;
   private _createdAt: Date;
   private _updatedAt: Date;
 
@@ -307,6 +312,9 @@ export class Proposal {
     this._dadosPagamentoBanco = dadosPagamentoBanco;
     this._clienteComprometimentoRenda = clienteComprometimentoRenda;
 
+    // PONTE DE DADOS V1.0: Inicializar documentos como null
+    this._documentos = null;
+
     // Validar invariantes na criação
     this.validateInvariants();
   }
@@ -351,6 +359,11 @@ export class Proposal {
     }
     if (props.garantia) {
       proposal._garantia = props.garantia;
+    }
+    
+    // PONTE DE DADOS V1.0: Definir documentos se fornecidos
+    if (props.documentos) {
+      proposal._documentos = props.documentos;
     }
 
     proposal.addEvent(
@@ -481,6 +494,8 @@ export class Proposal {
     proposal._observacoes = data.observacoes;
     proposal._finalidade = data.finalidade;
     proposal._garantia = data.garantia;
+    // PONTE DE DADOS V1.0: Mapear documentos do banco
+    proposal._documentos = data.documentos || null;
     proposal._createdAt = data.created_at;
     proposal._updatedAt = data.updated_at;
     proposal._parceiroId = data.parceiro_id;
@@ -955,6 +970,12 @@ export class Proposal {
   get garantia(): string | undefined {
     return this._garantia;
   }
+  
+  // PONTE DE DADOS V1.0: Getter para documentos anexados
+  get documentos(): string[] | null {
+    return this._documentos;
+  }
+  
   get ccbUrl(): string | undefined {
     return this._ccbUrl;
   }
@@ -1054,6 +1075,8 @@ export class Proposal {
       observacoes: this._observacoes,
       finalidade: this._finalidade,
       garantia: this._garantia,
+      // PONTE DE DADOS V1.0: Incluir documentos na persistência
+      documentos: this._documentos,
       // PAM V1.0 CORREÇÃO CRÍTICA: Adicionar campos de CCB na persistência
       ccb_gerado: this._ccbGerado,
       caminho_ccb: this._caminhoCcb,
