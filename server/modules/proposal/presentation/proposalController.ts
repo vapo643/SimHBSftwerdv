@@ -959,10 +959,10 @@ export class ProposalController {
       }
     }
 
-    // Para outros status, retornar erro por enquanto
+    // Para outros status não reconhecidos
     return res.status(400).json({
       success: false,
-      error: 'Status transition not yet implemented in DDD architecture',
+      error: `Status '${status}' não suportado. Status válidos: aprovado, rejeitado, pendente, aguardando_analise`,
     });
   }
 }
