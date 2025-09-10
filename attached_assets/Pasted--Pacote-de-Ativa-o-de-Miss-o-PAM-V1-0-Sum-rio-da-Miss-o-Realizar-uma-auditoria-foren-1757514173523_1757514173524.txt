@@ -1,0 +1,33 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão:** Realizar uma auditoria forense de ponta a ponta na pipeline de backend responsável pelo upload de documentos e a sua associação a uma proposta.
+
+* **Intenção Estratégica (O Porquê):** Para garantir a integridade do nosso "Cofre Digital", precisamos de validar que cada etapa da pipeline de escrita de documentos no backend está a funcionar corretamente: o ficheiro é recebido, transferido para o armazenamento externo (Supabase Storage) e a sua localização é devidamente registada na nossa base de dados.
+
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria anterior (Passo A.1) confirmou que o frontend executa uma sequência de três chamadas: `POST /api/propostas` para criar a proposta, `POST /api/upload` para cada ficheiro, e `POST /api/propostas/:id/documentos` para associar os ficheiros. A sua investigação deve focar-se na lógica de backend para os endpoints `/upload` e `/propostas/:id/documentos`.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria Forense da Pipeline de Backend para Upload de Documentos.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria irrefutável que detalhe a cadeia de execução e responda às seguintes questões:
+
+1.  **Endpoint `/api/upload`:**
+    * Qual o nome do ficheiro do controller/rota que implementa este endpoint?
+    * A lógica neste endpoint recebe corretamente o `file`, `filename`, e `proposalId` do `FormData`?
+    * Existe uma chamada explícita a um serviço de storage (ex: `supabase.storage.from(...).upload(...)`)?
+    * **Veredito:** Esta etapa está a funcionar corretamente? O ficheiro é enviado para o Supabase Storage?
+
+2.  **Endpoint `/api/propostas/:id/documentos`:**
+    * Qual o nome do ficheiro do controller/rota que implementa este endpoint?
+    * A lógica recebe o array de nomes de ficheiros (`documentos`)?
+    * Esta lógica atualiza a coluna `documentos` (ou similar) na tabela `propostas` do nosso banco de dados com a lista de nomes de ficheiros recebida? Apresente a linha de código que executa o `UPDATE` no banco de dados.
+    * **Veredito:** A associação dos documentos à proposta está a funcionar corretamente?
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  Comece por procurar a definição da rota `POST /api/upload`. Analise o seu controller e os serviços que ele chama, focando na interação com o Supabase Storage.
+2.  De seguida, procure a definição da rota `POST /api/propostas/:id/documentos`.
+3.  Analise o seu controller e serviços, focando na operação de `UPDATE` na tabela `propostas` do banco de dados (provavelmente via Drizzle ORM).
+4.  Apresente os trechos de código relevantes para cada endpoint como prova da sua análise.
