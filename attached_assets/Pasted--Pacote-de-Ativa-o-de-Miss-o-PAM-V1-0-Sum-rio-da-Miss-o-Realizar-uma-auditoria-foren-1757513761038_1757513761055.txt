@@ -1,0 +1,28 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão:** Realizar uma auditoria forense no frontend para mapear a pipeline de upload de documentos, desde a interação do utilizador até à chamada da API no backend.
+
+* **Intenção Estratégica (O Porquê):** Estamos a investigar uma falha crítica onde os documentos das propostas não estão a ser corretamente armazenados ou visualizados. Para diagnosticar a falha, precisamos primeiro de entender inequivocamente como o frontend lida com o upload de ficheiros e para qual endpoint do backend ele os envia.
+
+* **Histórico Relevante (Consulta Obrigatória):** A falha ocorre na última etapa do fluxo de "Nova Proposta". O componente responsável é provavelmente `DocumentsStep.tsx`.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria Forense da Pipeline de Upload de Documentos no Frontend.
+
+**CURRENT STATE:**
+A funcionalidade de upload de documentos no final do fluxo de criação de propostas não está a funcionar como esperado.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado que identifique:
+1.  O nome do componente React responsável pela etapa de upload de documentos.
+2.  A lógica utilizada para lidar com a seleção de ficheiros e o seu envio (ex: `onSubmit`, `handleSubmit`, ou uma função de `mutation`).
+3.  O endpoint exato da API (método e rota, ex: `POST /api/propostas/:id/documentos`) que é chamado para executar o upload.
+4.  Uma análise da estrutura do payload enviado para este endpoint. O ficheiro é enviado como `FormData`? Existem outros metadados a ser enviados?
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  Inicie a análise no arquivo `client/src/components/propostas/DocumentsStep.tsx`.
+2.  Localize a função que é executada quando o utilizador submete o formulário ou anexa os ficheiros.
+3.  Siga o fluxo de dados para identificar a chamada ao `apiClient.ts` ou a `mutation` do `TanStack Query`.
+4.  Documente o método HTTP, a rota da API e a estrutura dos dados enviados como prova irrefutável.
