@@ -272,6 +272,8 @@ export class ProposalRepository implements IProposalRepository {
         valor_total_financiado: propostas.valorTotalFinanciado,
         finalidade: propostas.finalidade,
         garantia: propostas.garantia,
+        // PONTE DE DADOS V1.0: Incluir documentos na query
+        documentos: propostas.documentos,
         produto_id: propostas.produtoId,
         produto_nome: produtos.nomeProduto,
         tabela_comercial_nome: tabelasComerciais.nomeTabela,
@@ -450,6 +452,8 @@ export class ProposalRepository implements IProposalRepository {
         valor_total_financiado: propostas.valorTotalFinanciado,
         finalidade: propostas.finalidade,
         garantia: propostas.garantia,
+        // PONTE DE DADOS V1.0: Incluir documentos na query
+        documentos: propostas.documentos,
         produto_id: propostas.produtoId,
         produto_nome: produtos.nomeProduto,
         tabela_comercial_nome: tabelasComerciais.nomeTabela,
@@ -1022,6 +1026,8 @@ export class ProposalRepository implements IProposalRepository {
         : parseFloat(row.valor),
       finalidade: row.finalidade,
       garantia: row.garantia,
+      // PONTE DE DADOS V1.0: Mapear documentos do banco para domínio
+      documentos: row.documentos,
       dados_pagamento: row.dadosPagamentoMetodo
         ? {
             metodo: row.dadosPagamentoMetodo || row.metodoPagamento,
