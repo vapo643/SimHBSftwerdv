@@ -71,7 +71,7 @@ export class DocumentsService {
           console.log(`[DOCUMENTS_SERVICE] Generating signed URL for: ${filePath}`);
 
           // Generate signed URL
-          const signedUrl = await this.documentsRepository.generateSignedUrl(filePath, 3600);
+          const signedUrl = await this.documentsRepository.generateSignedUrl(filePath, 604800); // 7 dias em segundos
 
           documents.push({
             name: doc.nomeArquivo,

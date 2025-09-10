@@ -1,0 +1,65 @@
+Roadmap de Implementação Faseado
+Nível da Missão: Nível 2: Complexa
+
+Ferramenta Recomendada: Extended Thinking
+
+[PENDENTE] Passo 1: Corrigir a Lógica de Negócio (Tempo de Expiração da URL)
+
+Ficheiro a ser Modificado: server/services/documentsService.ts
+
+Linha: 74 (aproximadamente)
+
+Ação: Ajustar o parâmetro expiresIn na chamada da função generateSignedUrl para refletir a regra de negócio de 7 dias.
+
+Código Anterior (Incorreto):
+
+TypeScript
+
+const signedUrl = await this.documentsRepository.generateSignedUrl(filePath, 3600);
+Código Novo (Correto):
+
+TypeScript
+
+const signedUrl = await this.documentsRepository.generateSignedUrl(filePath, 604800); // 7 dias em segundos
+Justificativa: Alinha a implementação técnica com o requisito de negócio explícito definido na Fase de Alinhamento.
+
+[PENDENTE] Passo 2: Reativar a Rota da API e suas Dependências
+
+Ficheiro a ser Modificado: server/routes.ts
+
+Linha: 1505 (aproximadamente)
+
+Ação 1 (Importação): Garantir que o controlador getPropostaDocuments está a ser importado no topo do ficheiro. Adicionar a linha abaixo se estiver ausente:
+
+TypeScript
+
+import { getPropostaDocuments } from './routes/documents';
+Ação 2 (Reativação): Descomentar a linha que regista a rota no servidor da aplicação.
+
+Código Anterior (Incorreto):
+
+TypeScript
+
+// app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
+Código Novo (Correto):
+
+TypeScript
+
+app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
+Justificativa: Esta ação reconecta o frontend ao backend, tornando a funcionalidade de busca de documentos novamente acessível pela aplicação.
+
+[PENDENTE] Passo 3: Refinar a Interface do Utilizador (Remover Botão "Baixar")
+
+Ficheiro a ser Modificado: client/src/components/DocumentViewer.tsx (hipótese mais provável)
+
+Ação: Realizar uma busca no ficheiro para localizar o componente ou elemento HTML que renderiza o botão "Baixar" e removê-lo, mantendo apenas o botão "Visualizar".
+
+Justificativa: Cumpre um requisito explícito do "Blueprint de Negócio", simplificando a interface para o analista.
+
+[PENDENTE] Passo 4: Validação Funcional Completa
+
+Executor: Humano (QA)
+
+Ação: Executar o fluxo completo do analista, validando que a lista de documentos aparece, que cada documento pode ser visualizado ao clicar no botão, e que o botão "Baixar" não está mais presente.
+
+Justificativa: Confirmação final de que todos os objetivos da missão foram alcançados e a "Definição de Feito" foi cumprida.

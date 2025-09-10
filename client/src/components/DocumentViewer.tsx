@@ -282,14 +282,6 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
                   <div className="mt-4 flex justify-end space-x-2">
                     <Button
                       variant="outline"
-                      onClick={() => handleDownload(doc.url, doc.name)}
-                      disabled={doc.url === '#loading' || doc.url === '#error'}
-                    >
-                      <Download className="mr-1 h-4 w-4" />
-                      Baixar
-                    </Button>
-                    <Button
-                      variant="outline"
                       onClick={() => window.open(doc.url, '_blank')}
                       disabled={doc.url === '#loading' || doc.url === '#error'}
                     >
@@ -300,14 +292,6 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
                 </DialogContent>
               </Dialog>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDownload(doc.url, doc.name)}
-                disabled={doc.url === '#loading' || doc.url === '#error'}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         ))}

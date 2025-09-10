@@ -74,6 +74,7 @@ import { passwordSchema, validatePassword } from './lib/password-validator';
 import { timingNormalizerMiddleware } from './middleware/timing-normalizer';
 import timingSecurityRoutes from './routes/timing-security';
 import documentosRoutes from './routes/documentos';
+import { getPropostaDocuments } from './routes/documents';
 import featureFlagService from './services/featureFlagService';
 import { performanceMonitor } from './middleware/performance-monitor';
 import { performance } from 'perf_hooks';
@@ -1502,7 +1503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Document routes for proposals - TEMPORARILY DISABLED FOR RECOVERY
-  // app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
+  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
   // app.post(
   //   "/api/propostas/:id/documents",
   //   jwtAuthMiddleware as any,
