@@ -81,35 +81,48 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
   req.correlationId = correlationId;
   req.startTime = Date.now();
 
-  // Log inicial da requisição
-  logger.info('📥 Request received', {
-    correlationId,
-    method: req.method,
-    url: req.url,
-    path: req.path,
-    query: req.query,
-    ip: req.ip || req.connection.remoteAddress,
-    userAgent: req.get('user-agent'),
-    referrer: req.get('referrer'),
-  });
+  // Filtrar logs desnecessários em desenvolvimento (arquivos estáticos)
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isStaticFile = req.url.match(/\.(js|jsx|ts|tsx|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot)$/);
+  const isViteHMR = req.url.includes('/@vite/') || req.url.includes('/@fs/');
+  const isSourceMap = req.url.includes('.map');
+  const isComponentFile = req.url.includes('/src/components/') || req.url.includes('/src/pages/') || req.url.includes('/src/lib/') || req.url.includes('/src/hooks/') || req.url.includes('/src/utils/');
+  
+  const shouldSkipLogging = isDevelopment && (isStaticFile || isViteHMR || isSourceMap || isComponentFile);
+
+  // Log inicial da requisição (apenas para requests importantes)
+  if (!shouldSkipLogging) {
+    logger.info('📥 Request received', {
+      correlationId,
+      method: req.method,
+      url: req.url,
+      path: req.path,
+      query: req.query,
+      ip: req.ip || req.connection.remoteAddress,
+      userAgent: req.get('user-agent'),
+      referrer: req.get('referrer'),
+    });
+  }
 
   // Interceptar o response para log final
   const originalSend = res.send;
   res.send = function (data) {
     const duration = Date.now() - (req.startTime || Date.now());
 
-    // Log do response
-    logger.info('📤 Request completed', {
-      correlationId,
-      method: req.method,
-      url: req.url,
-      statusCode: res.statusCode,
-      duration,
-      responseSize: Buffer.byteLength(JSON.stringify(data)),
-    });
+    // Log do response (apenas para requests importantes)
+    if (!shouldSkipLogging) {
+      logger.info('📤 Request completed', {
+        correlationId,
+        method: req.method,
+        url: req.url,
+        statusCode: res.statusCode,
+        duration,
+        responseSize: Buffer.byteLength(JSON.stringify(data)),
+      });
+    }
 
-    // Alertar para requisições lentas
-    if (duration > 1000) {
+    // Alertar para requisições lentas (sempre monitorar, independente do filtro)
+    if (duration > 1000 && !shouldSkipLogging) {
       logger.warn('⚠️ Slow request detected', {
         correlationId,
         url: req.url,
@@ -118,8 +131,8 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
       });
     }
 
-    // Alertar para erros
-    if (res.statusCode >= 400) {
+    // Alertar para erros (sempre monitorar erros, independente do filtro)
+    if (res.statusCode >= 400 && !shouldSkipLogging) {
       logger.error('❌ Request error', {
         correlationId,
         method: req.method,
