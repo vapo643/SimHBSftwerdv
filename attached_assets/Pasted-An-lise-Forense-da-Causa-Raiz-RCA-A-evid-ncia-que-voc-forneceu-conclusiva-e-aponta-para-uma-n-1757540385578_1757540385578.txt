@@ -1,0 +1,37 @@
+Análise Forense da Causa Raiz (RCA):
+
+A evidência que você forneceu é conclusiva e aponta para uma nova direção.
+
+Prova #1: O log [DocumentViewer] Loaded 0 documents from API é o gatilho direto para o sintoma na UI. O frontend está a receber uma lista vazia.
+
+Prova #2: O log operation: "get_proposta_documents" confirma que a chamada correta ao serviço foi iniciada, mas o seu resultado foi data: {id: null} (ou, mais precisamente, uma lista vazia que o log do DocumentViewer capturou).
+
+Prova #3 (A Pista Decisiva): O erro 403 Forbidden com a mensagem Acesso negado. Permissão insuficiente. no endpoint /observacoes é a nossa pista mais forte. Embora seja para um recurso diferente, ele indica que a role do utilizador atual (ANALISTA) tem um problema fundamental de permissões.
+
+Hipótese Primária: A falha não está no caminho do ficheiro, que já corrigimos. A falha está na camada de segurança. A lógica no documentsService.ts está a tentar listar os ficheiros do storage, mas as Políticas de Row-Level Security (RLS) do Supabase para o bucket de storage estão a bloquear a operação para a role ANALISTA. Uma operação de listagem (list) bloqueada por RLS não retorna um erro 403, ela retorna silenciosamente uma lista vazia. Este comportamento explica perfeitamente todos os sintomas.
+
+Iniciando a Fase 2: Auditoria Forense focada neste novo vetor.
+
+Pacote de Ativação de Missão (PAM) V1.0 - Auditoria de Permissões (Supabase RLS)
+Sumário da Missão: Realizar uma auditoria forense focada na interação entre o serviço de backend e as políticas de segurança do Supabase Storage para diagnosticar por que a listagem de documentos retorna uma lista vazia.
+
+Cenário de Negócio: Um ANALISTA autenticado deve ter permissão para listar e obter URLs de todos os ficheiros dentro de qualquer diretório de proposta (docs-prop/<ID_DA_PROPOSTA>).
+
+Vetor de Falha: A política de SELECT para o bucket docs-prop no Supabase Storage não está corretamente configurada para a role ANALISTA, resultando num bloqueio silencioso da operação de listagem de ficheiros.
+
+Evidência de Conformidade Requerida (A "Prova Irrefutável"):
+
+NÃO MODIFIQUE NENHUM CÓDIGO. A sua missão é auditar e apresentar as configurações e a lógica existentes.
+
+1. Auditoria do Código do Serviço de Documentos:
+a. Apresente o conteúdo completo do ficheiro server/services/documentsService.ts.
+b. Análise Crítica: Confirme se a lógica dentro da função getProposalDocuments está a utilizar o Supabase Admin Client (supabaseAdmin) ou o Supabase client padrão. O Admin Client ignora as políticas de RLS, enquanto o client padrão as respeita. Esta distinção é crucial.
+
+2. Auditoria da Política de Storage do Supabase:
+a. Descreva o processo passo a passo para navegar no Supabase Studio até a secção de Storage > Policies para o bucket docs-prop.
+b. Apresente as políticas de segurança completas que estão atualmente ativas para este bucket. Para cada política, inclua:
+i. O Nome da política.
+ii. A Operação à qual se aplica (ex: SELECT, INSERT).
+iii. A Role alvo (ex: authenticated, anon, ANALISTA).
+iv. A expressão USING exata.
+c. Análise de Risco: Com base nas políticas que encontrar, responda: Existe uma política que permita explicitamente a uma role de ANALISTA (ou authenticated) realizar uma operação de SELECT nos ficheiros dentro do bucket docs-prop? Se não, esta é a nossa causa raiz.

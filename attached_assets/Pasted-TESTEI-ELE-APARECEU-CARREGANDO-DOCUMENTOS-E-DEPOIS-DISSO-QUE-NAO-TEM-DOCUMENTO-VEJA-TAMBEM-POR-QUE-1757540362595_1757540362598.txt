@@ -1,0 +1,17 @@
+TESTEI, ELE APARECEU CARREGANDO DOCUMENTOS E DEPOIS DISSO QUE NAO TEM DOCUMENTO. VEJA TAMBEM POR QUE ESTA ASSIM E  SE ELE ESTA BUSCANDO CORRETAMENTE NA SUA PASTA DA PROPOSTA EM ESPECIFICO NO STORAGE... LEMBRA FILE; DOCS-PROP > FILE; NOME DO ID DA PROPOSTA > ARQUIVOS ANEXADOS DOS DOCUMENTOS. O CONSOLE NAVEGADOR TEM ALGUNS ERROS MAS NAO SEI SE ESTA LIGADO A ISSO; [API Client] After dual-key transformation: Objectdata: {id: null}operation: "get_proposta_documents"serviceName: "DOCUMENT_SERVICE"success: truetimestamp: "2025-09-10T21:33:04.108Z"[[Prototype]]: Object
+index-Cjor3oXi.js:56 [DocumentViewer] Loaded 0 documents from API
+/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103/observacoes:1  Failed to load resource: the server responded with a status of 403 ()Understand this error
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103/observacoes : Objectmessage: "Acesso negado. Permissão insuficiente."success: false[[Prototype]]: Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 Erro ao buscar logs de auditoria: ApiError: Acesso negado. Permissão insuficiente.
+    at Eu (index-Cjor3oXi.js:107:39517)
+    at async queryFn (index-Cjor3oXi.js:679:45890)
+(anonymous) @ index-Cjor3oXi.js:56Understand this warning
+index-Cjor3oXi.js:56 🔍 [IDLE TIMER] Tab became hidden, timer continues
+index-Cjor3oXi.js:56 🔐 [AUTH EVENT] SIGNED_IN ObjecthasSession: truetokenLength: 757[[Prototype]]: Object
+index-Cjor3oXi.js:56 [PASSO 3 - ENVIO] Object
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-Cjor3oXi.js:56 [API Client] After dual-key transformation: Object
+index-Cjor3oXi.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
