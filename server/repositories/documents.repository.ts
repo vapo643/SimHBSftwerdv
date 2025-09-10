@@ -36,6 +36,19 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
   }
 
   /**
+   * List files in storage for a proposal (DIAGNÓSTICO)
+   */
+  async listProposalFilesInStorage(propostaId: string): Promise<string[]> {
+    try {
+      const folderPath = `docs-prop/${propostaId}`;
+      return await this.storageProvider.listFiles(folderPath, this.BUCKET_NAME);
+    } catch (error) {
+      console.error('[DOCUMENTS_REPO] Error listing files in storage:', error);
+      return [];
+    }
+  }
+
+  /**
    * Get proposal by ID
    */
   async getProposalById(propostaId: string): Promise<any | null> {

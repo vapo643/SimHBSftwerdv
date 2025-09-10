@@ -1,0 +1,61 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Injeção de Diagnóstico no Backend
+Sumário da Missão: Injetar logs de diagnóstico detalhados no serviço de backend (documentsService.ts e/ou seu repositório) para capturar o propostaId recebido, o caminho exato que está a ser consultado no storage, e o resultado bruto (sucesso ou erro) da operação de listagem de ficheiros do Supabase.
+
+Intenção Estratégica: Obter visibilidade total da execução da lógica de backend para identificar o ponto exato da falha silenciosa.
+
+IMPLEMENTAR:
+Adicionar logs de diagnóstico detalhados na função responsável por listar os documentos do storage.
+
+FICHEIRO ALVO PROVÁVEL:
+server/services/documentsService.ts ou o ficheiro do repositório que ele chama (ex: documentsRepository.ts).
+
+AÇÃO REQUERIDA:
+Localize a função que executa a chamada supabase.storage.from(...).list(...) para os documentos da proposta e injete o seguinte bloco de diagnóstico. Adapte os nomes das variáveis conforme necessário.
+
+Exemplo de Código a Ser Injetado (Lógica Conceitual):
+
+TypeScript
+
+// Dentro da função que lista os ficheiros, antes da chamada ao Supabase
+console.log('--- DIAGNÓSTICO DE SERVIÇO BACKEND ---');
+console.log(`[SERVICE LOG] ID da Proposta recebido: ${propostaId}`);
+
+const bucketName = 'docs-prop';
+const folderPath = `${propostaId}`; // Assumindo que o caminho é apenas o ID
+console.log(`[SERVICE LOG] A consultar Supabase Storage: Bucket='${bucketName}', Caminho='${folderPath}'`);
+
+try {
+  // A chamada ao Supabase para listar os ficheiros
+  const { data: fileList, error } = await supabase.storage
+    .from(bucketName)
+    .list(folderPath);
+
+  if (error) {
+    console.error('[SERVICE LOG] ERRO EXPLÍCITO retornado pelo Supabase Storage:', error);
+  }
+
+  console.log('[SERVICE LOG] Resultado bruto da operação .list():', fileList);
+  console.log(`[SERVICE LOG] Número de ficheiros encontrados: ${fileList?.length || 0}`);
+  console.log('--- FIM DO DIAGNÓSTICO DE SERVIÇO ---');
+
+  // ... resto da função ...
+} catch (e) {
+  console.error('[SERVICE LOG] ERRO CATASTRÓFICO (try/catch) na listagem de ficheiros:', e);
+  console.log('--- FIM DO DIAGNÓSTICO DE SERVIÇO ---');
+  // ... resto da função ...
+}
+Instruções para o Executor Humano:
+
+Envie o PAM acima para o Agente Replit.
+
+Após a confirmação de que o código de diagnóstico foi inserido no backend:
+
+Execute o fluxo de análise de proposta na aplicação novamente.
+
+O erro na UI ("Nenhum documento anexado") irá acontecer.
+
+Verifique a Consola do Replit (logs do servidor/backend).
+
+Copie o bloco de texto completo do log que começa com --- DIAGNÓSTICO DE SERVIÇO BACKEND --- e cole-o aqui.
+
+Estes logs do servidor nos darão a resposta definitiva. Aguardo os dados.

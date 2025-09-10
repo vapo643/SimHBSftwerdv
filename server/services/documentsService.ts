@@ -52,7 +52,34 @@ export class DocumentsService {
       }
 
       // Get other documents
+      console.log('--- DIAGNÓSTICO DE SERVIÇO BACKEND ---');
+      console.log(`[SERVICE LOG] ID da Proposta recebido: ${propostaId}`);
+
+      const bucketName = 'documents';
+      const folderPath = `docs-prop/${propostaId}`;
+      console.log(`[SERVICE LOG] A consultar Supabase Storage: Bucket='${bucketName}', Caminho='${folderPath}'`);
+
+      // PRIMEIRO: Verificar registros na base de dados
       const propostaDocuments = await this.documentsRepository.getProposalDocuments(propostaId);
+      console.log(`[SERVICE LOG] Documentos encontrados na BASE DE DADOS: ${propostaDocuments.length}`);
+
+      // SEGUNDO: Listar arquivos reais no storage (DIAGNÓSTICO CRÍTICO)
+      try {
+        console.log('[SERVICE LOG] === INICIANDO LISTAGEM DE ARQUIVOS NO STORAGE ===');
+        const fileList = await this.documentsRepository.listProposalFilesInStorage(propostaId);
+        
+        console.log('[SERVICE LOG] Resultado bruto da operação .listFiles():', fileList);
+        console.log(`[SERVICE LOG] Número de ficheiros encontrados no STORAGE: ${fileList?.length || 0}`);
+        
+        if (fileList && fileList.length > 0) {
+          console.log('[SERVICE LOG] Arquivos encontrados no storage:', fileList);
+        } else {
+          console.log('[SERVICE LOG] ⚠️ NENHUM ARQUIVO ENCONTRADO NO STORAGE!');
+        }
+      } catch (storageError) {
+        console.error('[SERVICE LOG] ERRO EXPLÍCITO retornado pelo Supabase Storage:', storageError);
+      }
+      console.log('--- FIM DO DIAGNÓSTICO DE SERVIÇO ---');
 
       for (const doc of propostaDocuments) {
         try {
