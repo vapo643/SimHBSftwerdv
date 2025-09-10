@@ -1,0 +1,66 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Correção Arquitetural: Fase 2 (Backend Path)
+Sumário da Missão: Executar a Fase 2 da correção arquitetural, padronizando o prefixo do caminho de armazenamento de documentos no backend para alinhar as lógicas de upload e de visualização.
+
+Intenção Estratégica (O Porquê): Corrigir a inconsistência arquitetural crítica para garantir que a lógica de upload e a de visualização de documentos utilizem a mesma estrutura de diretórios (docs-prop/), conforme a regra de negócio. Isto elimina um bug latente e garante a integridade do sistema de ficheiros da aplicação.
+
+Histórico Relevante (Consulta Obrigatória): A Fase 1 corrigiu o envio do proposalId correto do frontend. Agora, esta missão aborda a falha secundária identificada na auditoria: o backend (server/routes.ts) está a salvar os uploads num caminho com o prefixo incorreto (proposta-), enquanto o serviço de visualização (server/services/documentsService.ts) espera encontrá-los no caminho com o prefixo correto (docs-prop/).
+
+Modelo Mental (Como se Encaixa): Esta alteração unifica a "Fonte Única da Verdade" para os caminhos de armazenamento de documentos. Ao fazer esta correção, garantimos que qualquer ficheiro carregado com sucesso pelo endpoint de upload será imediatamente localizável e servível pela funcionalidade de visualização.
+
+Riscos Antecipados e Contramedidas: MÉDIO. A alteração de uma lógica de I/O de ficheiros no servidor é uma operação crítica. Um erro pode fazer com que novos documentos sejam salvos num local inacessível ou causar falhas no endpoint de upload. A contramedida é a adesão estrita ao protocolo 7-CHECK para validar a sintaxe e a funcionalidade básica do endpoint após a alteração.
+
+IMPLEMENTAR:
+Padronizar o caminho de armazenamento de documentos no backend para usar o prefixo docs-prop/.
+
+CURRENT STATE:
+
+Ficheiro: server/routes.ts
+
+Linha: 3476 (aproximadamente)
+
+Código com Falha:
+
+TypeScript
+
+const filePath = `proposta-${proposalId}/${fileName}`;
+Evidência Bruta: Este código utiliza um prefixo de caminho (proposta-) que é inconsistente com a lógica de recuperação de documentos (docs-prop/), o que tornaria os documentos recém-carregados inacessíveis, mesmo com o proposalId correto.
+
+EXPECTED (Estado Final de Sucesso):
+
+Ficheiro: server/routes.ts
+
+Código Corrigido:
+
+TypeScript
+
+const filePath = `docs-prop/${proposalId}/${fileName}`;
+Comportamento Resultante: A função de upload agora salvará os ficheiros no diretório correto (docs-prop/<ID_DA_PROPOSTA>/...), alinhando-se perfeitamente com a lógica de visualização e cumprindo a regra de negócio estabelecida.
+
+CONSTRAINTS (Roadmap de Implementação):
+Esta missão corresponde exclusivamente ao Passo 2 do roadmap. A sua única responsabilidade é alterar o prefixo do caminho de armazenamento. NÃO modifique a lógica de validação do proposalId (Passo 3) nesta etapa.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: 95%
+
+RISCOS IDENTIFICADOS: MÉDIO. A alteração de um caminho de I/O de ficheiros é uma operação crítica. Um erro pode resultar em falha total do endpoint de upload.
+
+DECISÕES TÉCNICAS ASSUMIDAS: "A padronização para o prefixo docs-prop/ é a decisão correta, pois alinha o código com a regra de negócio explícita e com a lógica já existente no documentsService.ts."
+
+VALIDAÇÃO PENDENTE: "A validação funcional completa do fluxo de ponta a ponta ocorrerá no Passo 4 do roadmap."
+
+PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:
+
+Mapeie o ficheiro e a função exata afetada no server/routes.ts.
+
+Garanta que a alteração se limita à string do prefixo do caminho. Não altere nenhuma outra lógica.
+
+Execute get_latest_lsp_diagnostics após a modificação e corrija TODOS os erros ou avisos introduzidos.
+
+Declare o seu Nível de Confiança (0-100%) na implementação.
+
+Categorize quaisquer Riscos Descobertos durante a implementação (BAIXO/MÉDIO/ALTO/CRÍTICO).
+
+Realize um teste funcional mínimo: confirme que a aplicação reinicia sem erros. A validação completa do upload será feita no passo 4, mas garanta que o servidor não quebra com a sua alteração.
+
+Documente quaisquer Decisões Técnicas ou observações inesperadas feitas durante a implementação.

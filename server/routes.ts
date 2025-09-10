@@ -3473,7 +3473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { v4: uuidv4 } = await import('uuid');
         const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
         const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
-        const filePath = `proposta-${proposalId}/${fileName}`;
+        const filePath = `docs-prop/${proposalId}/${fileName}`;
 
         console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
 
