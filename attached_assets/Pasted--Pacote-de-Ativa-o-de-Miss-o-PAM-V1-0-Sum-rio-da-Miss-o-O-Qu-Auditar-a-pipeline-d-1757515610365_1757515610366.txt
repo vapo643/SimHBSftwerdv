@@ -1,0 +1,35 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Auditar a pipeline de leitura de dados de propostas no backend para validar irrefutavelmente se os metadados dos documentos anexados estão a ser incluídos na resposta da API para a tela de análise.
+* **Intenção Estratégica (O Porquê):** O fluxo de análise está quebrado porque o analista não consegue visualizar os documentos enviados. A nossa investigação anterior validou o fluxo de escrita; agora precisamos de validar o fluxo de leitura. Esta auditoria irá confirmar se o backend está a cumprir o seu contrato de dados com o frontend.
+* **Histórico Relevante (Consulta Obrigatória):** A pipeline de upload de documentos foi validada e uma vulnerabilidade de segurança crítica foi removida. O código para ler uma proposta completa, incluindo o seu histórico de comunicação, reside na função `findById` do `ProposalRepository`. A sua missão é verificar se esta mesma função também carrega os dados dos documentos.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria Forense da Pipeline de Leitura de Metadados de Documentos.
+
+**CURRENT STATE:**
+O analista não consegue ver os links para os documentos de uma proposta. Suspeitamos que o endpoint `GET /api/propostas/:id` não está a retornar a lista de documentos associados.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria claro que responda às seguintes questões:
+1.  A função `findById` no arquivo `server/modules/proposal/infrastructure/ProposalRepository.ts` seleciona a coluna `documentos` (ou similar) da tabela `propostas`?
+2.  O objeto de domínio `Proposal` (`server/modules/proposal/domain/Proposal.ts`) possui uma propriedade para armazenar a lista de documentos?
+3.  O método `mapToDomain` no `ProposalRepository` mapeia corretamente os dados da coluna `documentos` para o objeto de domínio?
+4.  O DTO (Data Transfer Object) retornado pelo `proposalController` inclui este campo de documentos na sua resposta final?
+5.  **Veredito Explícito:** O backend está a enviar os dados dos documentos? Se não, aponte o local exato da falha na cadeia de dados.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  Inicie a análise no `server/modules/proposal/infrastructure/ProposalRepository.ts`, na função `findById`. Verifique a cláusula `select`.
+2.  Analise o `server/modules/proposal/domain/Proposal.ts` para confirmar a existência de um campo para documentos.
+3.  Volte ao `ProposalRepository` e analise o método `mapToDomain` para verificar o mapeamento.
+4.  Finalmente, analise o `server/modules/proposal/presentation/proposalController.ts`, no método que lida com `GET /api/propostas/:id`, e verifique o objeto DTO que é retornado como JSON.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95% (A confiança é na minha capacidade de auditar, não no código existente).
+* **RISCOS IDENTIFICADOS:** **MÉDIO** - Se a falha estiver no domínio ou no mapeador, a correção pode ter efeitos colaterais em outras partes do sistema que consomem o objeto `Proposal`. A análise deve ser cuidadosa.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que a coluna que armazena os documentos na tabela `propostas` é um array de strings (nomes dos ficheiros), conforme a auditoria do fluxo de escrita.
+* **VALIDAÇÃO PENDENTE:** O Orquestrador deve cruzar o resultado desta auditoria com a auditoria anterior do fluxo de escrita para garantir consistência.
+---
