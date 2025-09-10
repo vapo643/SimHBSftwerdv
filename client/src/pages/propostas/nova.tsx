@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'wouter';
 import DashboardLayout from '@/components/DashboardLayout';
 import {
   ProposalProvider,
@@ -34,6 +35,7 @@ function ProposalForm() {
   const { setContext, setStep, setLoading } = useProposalActions();
   const { isStepValid } = useStepValidation();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   // Apply proposal effects (auto-simulation, validation, etc.)
   useProposalEffects();
@@ -249,6 +251,9 @@ function ProposalForm() {
         setContext(state.context);
       }
       setStep(0);
+      
+      // Redirecionar automaticamente para o dashboard
+      setLocation('/dashboard');
     },
     onError: (error) => {
       toast({
