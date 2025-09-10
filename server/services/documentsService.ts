@@ -65,7 +65,7 @@ export class DocumentsService {
           } else {
             const urlParts = doc.url.split('/');
             const fileName = urlParts[urlParts.length - 1];
-            filePath = `proposta-${propostaId}/${fileName}`;
+            filePath = `docs-prop/${propostaId}/${fileName}`;
           }
 
           console.log(`[DOCUMENTS_SERVICE] Generating signed URL for: ${filePath}`);
@@ -134,7 +134,7 @@ export class DocumentsService {
       // Generate unique file name
       const timestamp = Date.now();
       const fileName = `${timestamp}-${file.originalname}`;
-      const filePath = `proposta-${propostaId}/${fileName}`;
+      const filePath = `docs-prop/${propostaId}/${fileName}`;
 
       // Upload to storage (usando abstração IStorageProvider)
       const uploadResult = await this.documentsRepository.uploadToStorage(
