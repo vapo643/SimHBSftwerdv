@@ -1579,68 +1579,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload route for proposal documents during creation
-  app.post(
-    '/api/upload',
-    jwtAuthMiddleware,
-    upload.single('file'),
-    async (req: AuthenticatedRequest, res) => {
-      try {
-        const file = req.file;
-        const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
-
-        if (!file) {
-          return res.status(400).json({ message: 'Arquivo é obrigatório' });
-        }
-
-        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const supabase = createServerSupabaseAdminClient();
-
-        // Generate unique filename with UUID
-        const { v4: uuidv4 } = await import('uuid');
-        const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
-        const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
-        const filePath = `proposta-${proposalId}/${fileName}`;
-
-        console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
-
-        // Upload to PRIVATE Supabase Storage bucket
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('documents')
-          .upload(filePath, file.buffer, {
-            contentType: file.mimetype,
-            upsert: false,
-          });
-
-        if (uploadError) {
-          console.error('[ERROR] Erro no upload:', uploadError);
-          return res.status(400).json({
-            message: `Erro no upload: ${uploadError.message}`,
-          });
-        }
-
-        // For private bucket, we need to generate a signed URL for viewing
-        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-          .from('documents')
-          .createSignedUrl(filePath, 3600); // 1 hour expiry
-
-        console.log(`[DEBUG] Upload bem-sucedido. Arquivo salvo em: ${filePath}`);
-
-        res.json({
-          success: true,
-          fileName: fileName,
-          filePath: filePath,
-          url: signedUrlData?.signedUrl || '', // Temporary signed URL
-          originalName: file.originalname,
-          size: file.size,
-          type: file.mimetype,
-        });
-      } catch (error) {
-        console.error('[ERROR] Erro no upload de documento:', error);
-        res.status(500).json({ message: 'Erro interno no upload' });
-      }
-    }
-  );
 
   // Import do controller de produtos
   const {
