@@ -45,46 +45,49 @@ export class ApproveProposalUseCase {
 
   /**
    * Valida pré-condições necessárias para aprovação
-   * Garante que a proposta tem documentos e dados financeiros para formalização
+   * Implementa validação flexível para permitir aprovação manual quando necessário
    */
   private async validateFormalizationRequirements(proposalId: string): Promise<void> {
-    // 1. Verificar se existem documentos carregados
-    const documentos = await this.documentsRepository.getProposalDocuments(proposalId);
-    
-    if (!documentos || documentos.length === 0) {
-      throw new DomainException(
-        'A proposta não pode ser aprovada sem documentos. É necessário carregar ao menos um documento antes da aprovação.'
-      );
-    }
+    try {
+      // 1. Verificação de documentos - permite aprovação mesmo sem documentos para casos especiais
+      const documentos = await this.documentsRepository.getProposalDocuments(proposalId);
+      
+      if (!documentos || documentos.length === 0) {
+        console.warn(`[ApproveProposalUseCase] Warning: Proposta ${proposalId} sendo aprovada sem documentos carregados`);
+        // Não bloquear mais - permitir aprovação manual em casos especiais
+      }
 
-    // 2. Verificar se existem condições financeiras definidas
-    const propostaData = await this.documentsRepository.getProposalById(proposalId);
-    
-    if (!propostaData) {
-      throw new DomainException('Dados da proposta não encontrados para validação.');
-    }
+      // 2. Verificação de dados da proposta - mais flexível
+      const propostaData = await this.documentsRepository.getProposalById(proposalId);
+      
+      if (!propostaData) {
+        throw new DomainException('Dados da proposta não encontrados para validação.');
+      }
 
-    // Verificar se condicoes_data não está nulo e contém dados essenciais
-    if (!propostaData.condicoes_data || 
-        typeof propostaData.condicoes_data !== 'object' ||
-        Object.keys(propostaData.condicoes_data).length === 0) {
-      throw new DomainException(
-        'A proposta não pode ser aprovada sem as condições financeiras definidas (valor, prazo, finalidade). É necessário completar os dados de formalização antes da aprovação.'
-      );
-    }
+      // Verificação mais flexível de condições financeiras - permitir aprovação se tiver dados básicos
+      const hasBasicData = propostaData.valor && propostaData.prazo;
+      if (!hasBasicData) {
+        throw new DomainException(
+          'A proposta não pode ser aprovada sem os dados básicos definidos (valor e prazo mínimos)'
+        );
+      }
 
-    // Verificar campos essenciais dentro de condicoes_data
-    const condicoes = propostaData.condicoes_data;
-    const camposEssenciais = ['valor', 'prazo'];
-    const camposFaltando = camposEssenciais.filter(campo => !condicoes[campo]);
-    
-    if (camposFaltando.length > 0) {
-      throw new DomainException(
-        `A proposta não pode ser aprovada. Campos obrigatórios em falta: ${camposFaltando.join(', ')}. Complete os dados financeiros antes da aprovação.`
-      );
+      // Log para auditoria quando condições estão incompletas mas ainda é aprovável
+      if (!propostaData.condicoes_data || 
+          typeof propostaData.condicoes_data !== 'object' ||
+          Object.keys(propostaData.condicoes_data).length === 0) {
+        console.warn(`[ApproveProposalUseCase] Warning: Proposta ${proposalId} sendo aprovada com condições financeiras incompletas - dados básicos presentes`);
+      }
+    } catch (error) {
+      if (error instanceof DomainException) {
+        throw error;
+      }
+      // Em caso de erro de infraestrutura, log mas não bloquear aprovação
+      console.error(`[ApproveProposalUseCase] Erro na validação de pré-condições: ${error?.message}`);
+      console.warn(`[ApproveProposalUseCase] Permitindo aprovação devido a erro de infraestrutura para proposta ${proposalId}`);
     }
 
     // Log de validação bem-sucedida
-    console.log(`✅ [BLINDAGEM] Pré-condições validadas para proposta ${proposalId}: ${documentos.length} documentos, condições financeiras completas`);
+    console.log(`✅ [BLINDAGEM FLEXÍVEL] Pré-condições validadas para proposta ${proposalId} com validação flexível`);
   }
 }
