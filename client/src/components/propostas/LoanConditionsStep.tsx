@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DollarSign, Package, Calculator, AlertCircle } from 'lucide-react';
 import CurrencyInput from '@/components/ui/CurrencyInput';
@@ -156,19 +155,6 @@ export function LoanConditionsStep() {
             {errors.prazo && <p className="mt-1 text-sm text-destructive">{errors.prazo}</p>}
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="incluirTac"
-              checked={loanData.incluirTac}
-              onCheckedChange={(checked) => updateLoanConditions({ incluirTac: !!checked })}
-            />
-            <Label
-              htmlFor="incluirTac"
-              className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Incluir Taxa de Abertura de Crédito (TAC)
-            </Label>
-          </div>
 
           <div>
             <Label htmlFor="dataCarencia">Data de Carência (opcional)</Label>
