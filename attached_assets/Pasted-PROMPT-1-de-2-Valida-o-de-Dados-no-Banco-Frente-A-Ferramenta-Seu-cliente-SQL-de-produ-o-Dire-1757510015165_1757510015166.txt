@@ -1,0 +1,41 @@
+PROMPT 1 de 2: Validação de Dados no Banco (Frente A)
+Ferramenta: Seu cliente SQL de produção.
+
+Diretriz: Execute a seguinte query SQL no seu banco de dados de produção. O objetivo é listar todas as comunicações registradas para a proposta específica mencionada. Apresente os resultados brutos.
+
+SQL
+
+-- Query de Validação de Histórico de Comunicação
+SELECT
+  id,
+  proposta_id,
+  user_id,
+  user_name,
+  observacao,
+  tipo_contato,
+  created_at
+FROM
+  observacoes_cobranca
+WHERE
+  proposta_id = '29e80705-89bb-43a5-bbc8-960b3139939c'
+ORDER BY
+  created_at DESC;
+PROMPT 2 de 2: Auditoria Forense do Código Backend (Frente B)
+Ferramenta: 'Sniper' (Assistente Replit)
+
+Markdown
+
+### Pacote de Ativação de Missão (PAM) V1.0 - Padrão PACN V1.0
+
+* **Sumário da Missão:** Realizar uma auditoria forense de alta prioridade na camada de persistência de dados para validar, de forma irrefutável, que a lógica de negócio para buscar o "Histórico de Comunicação" (`observacoes_cobranca`) está corretamente implementada e não sofreu regressão.
+
+* **Cenário de Negócio (O "Caso de Teste"):** Uma correção anterior implementou um `LEFT JOIN` na função `findById` do `ProposalRepository.ts` para agregar o histórico de comunicação a uma proposta. No entanto, o sintoma de histórico vazio ressurgiu em produção. Precisamos verificar se essa lógica crucial ainda existe e funciona.
+
+* **Vetor de Ataque / Ponto de Falha (O "Risco"):** O risco crítico é que a correção do `LEFT JOIN` tenha sido revertida por um deploy subsequente ou que a lógica de agregação dos resultados da query esteja falha, resultando em um array de observações vazio mesmo quando os dados existem no banco.
+
+* **Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+    1.  Localize a função `findById(id: string)` no arquivo `server/modules/proposal/infrastructure/ProposalRepository.ts`.
+    2.  Apresente o trecho de código completo da query Drizzle ORM dentro desta função.
+    3.  **Confirme explicitamente a presença ou ausência da cláusula `.leftJoin(observacoesCobranca, eq(propostas.id, observacoesCobranca.propostaId))`.**
+    4.  Apresente o bloco de código responsável por **agregar** os resultados da query (provavelmente um `.reduce()` ou `.filter()` + `.map()`) em um único objeto de proposta com um array de observações.
+    5.  Declare o veredito final: a falha de regressão está nesta camada de código ou não?
