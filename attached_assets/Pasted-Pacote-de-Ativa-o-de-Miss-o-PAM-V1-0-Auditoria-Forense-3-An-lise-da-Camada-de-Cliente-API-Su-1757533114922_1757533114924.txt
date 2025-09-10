@@ -1,0 +1,29 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Auditoria Forense #3 (Análise da Camada de Cliente API)
+Sumário da Missão: Realizar uma auditoria forense de alta precisão no código do cliente da API para determinar a estrutura exata do objeto propostaResponse após todas as transformações (especificamente a "dual-key transformation") e identificar a sintaxe correta para extrair o ID da proposta.
+
+Hipótese / Ponto de Falha: A função apiRequest ou uma função utilitária associada está a modificar a estrutura da resposta JSON crua da API. A nossa correção anterior (.data.id) falha porque opera sobre uma suposição incorreta da estrutura final do objeto.
+
+Evidência de Conformidade Requerida (A "Prova Irrefutável"):
+
+NÃO MODIFIQUE NENHUM CÓDIGO. A sua missão é, novamente, apenas LER, ANALISAR e APRESENTAR.
+
+1. Mapeamento da Camada de Abstração da API:
+a. Localize e apresente o código-fonte completo da função apiRequest (provavelmente localizada num ficheiro como apiClient.js ou utils/api.js).
+b. Analise o corpo da função. Explique, passo a passo, como ela processa a resposta de uma requisição fetch ou axios antes de retorná-la. Preste atenção especial a qualquer lógica que se refira a "dual-key transformation" ou que manipule o objeto response.data.
+
+2. Diagnóstico Definitivo em nova.tsx:
+a. Retorne ao ficheiro client/src/pages/propostas/nova.tsx.
+b. Com base na sua análise da função apiRequest, forneça agora a linha de código exata e correta para extrair o ID da proposta do objeto propostaResponse.
+c. Para validar a sua conclusão, apresente um trecho de código sugerido (não aplicado) mostrando onde você inseriria um console.log para provar a sua teoria. O log deve ser o mais informativo possível:
+```typescript
+// Imediatamente após a chamada de API
+const propostaResponse = await apiRequest('/api/propostas', { /* ... */ });
+
+// Log para expor a estrutura final e real do objeto
+console.log('DEBUG ESTRUTURA FINAL: O objeto propostaResponse é:', JSON.stringify(propostaResponse, null, 2));
+
+// A sua linha de código corrigida para extrair o ID
+const propostaId = [SUA LÓGICA CORRETA AQUI]; 
+console.log('DEBUG ID EXTRAÍDO:', propostaId);
+```
+Esta é a nossa investigação final. A resposta a este prompt deve nos dar a correção definitiva. Aguardo o relatório do Agente.

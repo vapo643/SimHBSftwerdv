@@ -184,7 +184,7 @@ function ProposalForm() {
         body: proposalData,
       });
 
-      const propostaId = (propostaResponse as any).data.id;
+      const propostaId = (propostaResponse as any).id;
       console.log(`[DEBUG] Proposta criada com ID: ${propostaId}`);
 
       // 2. SEGUNDO: Upload dos documentos com ID real da proposta
