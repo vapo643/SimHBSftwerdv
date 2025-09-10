@@ -1,0 +1,77 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Correção Arquitetural: Fase 1 (Frontend)
+Sumário da Missão: Executar a Fase 1 de um plano de correção arquitetural. A missão é erradicar a causa raiz do bug proposta-undefined, corrigindo um erro de acesso a dados no componente de frontend responsável pela criação de propostas.
+
+Intenção Estratégica (O Porquê): O objetivo é restaurar a integridade do fluxo de dados entre o cliente e o servidor. Ao corrigir a extração do ID da proposta no frontend, garantimos que os documentos enviados pelos utilizadores sejam corretamente associados às suas respetivas propostas, prevenindo a criação de dados órfãos e inacessíveis e restaurando uma funcionalidade crítica do negócio.
+
+Histórico Relevante (Consulta Obrigatória):
+Uma auditoria forense em duas fases revelou uma cadeia de falhas:
+
+Diagnóstico do Frontend (Causa Primária): No ficheiro client/src/pages/propostas/nova.tsx, a variável propostaId está a ser definida como undefined. A investigação concluiu que não se trata de uma condição de corrida, mas sim de um erro estrutural. O código tenta aceder (propostaResponse as any).id, mas a estrutura real do objeto de resposta da API é { success: true, data: { id: '...' } }.
+
+Diagnóstico do Backend (Sintoma e Risco Latente): No ficheiro server/routes.ts, o backend recebe o proposalId como undefined e reage de forma incorreta, utilizando uma lógica de fallback frágil (req.body.filename?.split('-')[0]) que resulta na criação de um caminho de armazenamento corrompido: proposta-undefined/. Adicionalmente, foi detetada uma inconsistência arquitetural crítica: o backend salva ficheiros com o prefixo proposta-, mas a lógica de visualização procura pelo prefixo docs-prop/.
+
+Modelo Mental (Como se Encaixa): Esta missão é o primeiro passo cirúrgico para quebrar a cadeia de falhas. Vamos estancar o problema na sua origem. Ao fornecer ao backend um proposalId válido e consistente, preparamos o terreno para as correções subsequentes de padronização de caminhos e robustecimento da API que ocorrerão nas próximas fases do roadmap.
+
+Riscos Antecipados e Contramedidas: O risco técnico desta alteração é BAIXO. A modificação é localizada e a lógica foi validada pela auditoria. A principal contramedida é a adesão estrita ao PROTOCOLO 7-CHECK, que irá validar a sintaxe e a ausência de efeitos colaterais antes da conclusão.
+
+IMPLEMENTAR:
+Corrigir a lógica de extração do ID da proposta no componente de frontend para refletir a estrutura correta do objeto de resposta da API.
+
+CONTEXT:
+Um atendente cria uma nova proposta e, no mesmo fluxo, anexa ficheiros de suporte. O sistema deve associar esses ficheiros à proposta recém-criada. Atualmente, devido a um erro na leitura da resposta da API, o ID da proposta é perdido (undefined), fazendo com que todos os ficheiros sejam salvos num diretório incorreto e genérico (proposta-undefined), tornando-os inacessíveis.
+
+CURRENT STATE:
+
+Ficheiro: client/src/pages/propostas/nova.tsx
+
+Linha: 187 (aproximadamente)
+
+Lógica com Falha:
+
+TypeScript
+
+const propostaResponse = await apiRequest('/api/propostas', { /* ... */ });
+// A linha abaixo falha porque `propostaResponse` é `{ data: { id: '...' } }`, 
+// não tendo uma propriedade `.id` no nível superior.
+const propostaId = (propostaResponse as any).id; 
+EXPECTED (Estado Final de Sucesso):
+
+Ficheiro: client/src/pages/propostas/nova.tsx
+
+Lógica Corrigida: O código deve ser alterado para navegar corretamente na estrutura do objeto de resposta e extrair o ID de propostaResponse.data.id.
+
+TypeScript
+
+const propostaResponse = await apiRequest('/api/propostas', { /* ... */ });
+// A linha corrigida acede corretamente ao objeto `data` aninhado.
+const propostaId = (propostaResponse as any).data.id;
+Comportamento Resultante: A variável propostaId será populada com um valor de string válido (ex: "prop-abc-123"). Consequentemente, a chamada formData.append('proposalId', propostaId) enviará o ID correto para o backend, resolvendo o problema na sua origem.
+
+CONSTRAINTS (Roadmap de Implementação):
+Esta missão corresponde exclusivamente ao Passo 1 de um roadmap de 4 passos. A sua única responsabilidade é executar a correção no frontend. NÃO prossiga para as correções de backend (Passos 2 e 3). Elas serão tratadas em missões subsequentes.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: 99%
+
+RISCOS IDENTIFICADOS: BAIXO. Risco limitado a erro de digitação durante a modificação.
+
+DECISÕES TÉCNICAS ASSUMIDAS: "A arquitetura da resposta da API, como { data: { id: '...' } }, é considerada a fonte da verdade e não será alterada nesta fase."
+
+VALIDAÇÃO PENDENTE: "A validação funcional completa do fluxo de ponta a ponta ocorrerá no Passo 4 do roadmap."
+
+PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:
+
+Mapeie o ficheiro e a função exata afetada: submitProposal dentro de client/src/pages/propostas/nova.tsx.
+
+Garanta que as importações e tipos permaneçam corretos. A alteração é apenas numa linha de atribuição de variável.
+
+Execute get_latest_lsp_diagnostics após a modificação e corrija TODOS os erros ou avisos introduzidos. A execução deve terminar com zero diagnósticos.
+
+Declare o seu Nível de Confiança (0-100%) na implementação.
+
+Categorize quaisquer Riscos Descobertos durante a implementação (BAIXO/MÉDIO/ALTO/CRÍTICO).
+
+Realize um teste funcional mínimo: confirme que a aplicação compila com sucesso e que a página /propostas/nova carrega sem erros de runtime no browser.
+
+Documente quaisquer Decisões Técnicas ou observações inesperadas feitas durante a implementação para auditoria futura.
