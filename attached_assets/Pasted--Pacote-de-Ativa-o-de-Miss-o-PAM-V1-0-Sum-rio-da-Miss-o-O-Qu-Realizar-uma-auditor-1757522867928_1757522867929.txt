@@ -1,0 +1,35 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense de alta prioridade no `proposalController` para identificar a causa raiz de uma falha de validação de schema `ZodError` que está a causar um erro 500 em produção.
+* **Intenção Estratégica (O Porquê):** O fluxo de aprovação de propostas, uma função de negócio crítica, está completamente paralisado. A falha de validação Zod é a nossa pista mais forte. Identificar o campo inconsistente no DTO (Data Transfer Object) é o passo mais rápido para diagnosticar e erradicar esta falha de alta prioridade.
+* **Histórico Relevante (Consulta Obrigatória):** O log de produção reportou inequivocamente: `[SAFE-ERROR] [ProposalController.getById] Output validation failed { errorType: 'ZodError' }`. Isto significa que os dados que chegam ao `getById` do `ProposalRepository` não correspondem ao schema definido em `proposalOutput.schema.ts`.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria Forense de Validação de Schema Zod no Controller de Propostas.
+
+**CURRENT STATE:**
+Uma chamada ao método `getById` no `proposalController` está a falhar devido a uma incompatibilidade entre os dados recebidos da camada de serviço/repositório e o schema de validação de saída.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria claro e preciso que identifique:
+1.  O arquivo `server/schemas/proposalOutput.schema.ts`, apresentando a estrutura do schema Zod.
+2.  O arquivo `server/modules/proposal/presentation/proposalController.ts`, apresentando o método `getById` (ou equivalente).
+3.  **Análise de Divergência:** Uma comparação lado a lado entre a estrutura de dados retornada pelo `ProposalRepository.findById` (que você já auditou) e o schema Zod.
+4.  **Veredito Explícito:** Uma declaração que aponte o(s) campo(s) exato(s) que estão a causar a falha de validação. O campo está em falta no retorno do repositório? O tipo está incorreto (ex: `string` vs. `number`)? O campo pode ser `null` quando o schema não o permite?
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  Abra e analise `server/schemas/proposalOutput.schema.ts` para entender o "contrato de dados" esperado.
+2.  Abra e analise `server/modules/proposal/presentation/proposalController.ts` para ver como o schema é utilizado no método `getById`.
+3.  Abra e analise `server/modules/proposal/infrastructure/ProposalRepository.ts`, focando na estrutura do objeto retornado pela query na função `findById`.
+4.  Cruze as informações dos três arquivos para encontrar a discrepância.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 100% (A confiança é na minha capacidade de auditar).
+* **RISCOS IDENTIFICADOS:** **BAIXO**. Esta é uma missão de reconhecimento. Nenhum código será alterado.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que o erro de Zod é a causa raiz primária do erro 500 reportado, e que a sua resolução irá estabilizar o fluxo de aprovação.
+* **VALIDAÇÃO PENDENTE:** O Orquestrador irá usar o seu diagnóstico para arquitetar a missão de correção.
+---
