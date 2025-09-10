@@ -43,7 +43,8 @@ router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req: 
     const { role } = req.user!;
 
     // Verificar permissões (isto poderia estar em um middleware)
-    if (role !== 'ADMINISTRADOR' && role !== 'COBRANCA' && role !== 'SUPERVISOR_COBRANCA') {
+    // PAM V1.0: ANALISTA precisa ver observações para análise de propostas
+    if (role !== 'ADMINISTRADOR' && role !== 'COBRANCA' && role !== 'SUPERVISOR_COBRANCA' && role !== 'ANALISTA') {
       return res.status(403).json({
         success: false,
         message: 'Acesso negado. Permissão insuficiente.',

@@ -63,9 +63,6 @@ export function LoanConditionsStep() {
                 {context.produtos.map((produto) => (
                   <SelectItem key={produto.id} value={produto.id.toString()}>
                     {produto.nome}
-                    {produto.tacTipo === 'fixo'
-                      ? ` (TAC: R$ ${produto.tacValor})`
-                      : ` (TAC: ${produto.tacValor}%)`}
                   </SelectItem>
                 ))}
               </SelectContent>

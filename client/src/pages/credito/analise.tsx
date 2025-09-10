@@ -432,9 +432,8 @@ const AnaliseManualPage: React.FC = () => {
             <DocumentViewer
               propostaId={propostaId!}
               documents={
-                propostaMapeada.documentos?.map((doc: any) => ({
-                  ...doc,
-                  name: doc.nome || doc.name || 'Documento',
+                propostaMapeada.documentos?.map((fileName: string) => ({
+                  name: fileName,
                 })) || []
               }
               ccbDocumentoUrl={undefined}
