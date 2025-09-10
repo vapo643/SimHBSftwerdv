@@ -1,0 +1,31 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão:** Auditar a cadeia de execução de "pendenciar proposta", a partir do `proposalController`, para validar se a lógica de negócio está a invocar corretamente o repositório para persistir o registo de comunicação (`observacao`) no banco de dados.
+
+* **Intenção Estratégica (O Porquê):** O sistema recebe a comunicação do analista, mas não a guarda. Precisamos encontrar o elo quebrado na cadeia de comando entre o recebimento da requisição e a operação de `INSERT` no banco de dados para restaurar a funcionalidade de auditoria de propostas.
+
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria anterior (Passo 1) confirmou que a rota `PUT /api/propostas/:id/status` aciona o método `pendenciar()` no `ProposalController`, e que os dados da observação (`motivo_pendencia`) estão disponíveis nesse ponto. A sua investigação começa a partir deste método.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria Forense da Pipeline de Persistência de Observações.
+
+**CURRENT STATE:**
+A comunicação do analista (motivo da pendência) não está a ser guardada na tabela `observacoes_cobranca`. Sabemos que os dados chegam ao `proposalController.ts`.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria irrefutável que responda à seguinte questão: **A lógica dentro do `PendenciarPropostaUseCase.ts` (ou o serviço equivalente chamado pelo controller) efetivamente comanda a criação de um novo registo na tabela `observacoes_cobranca`?**
+
+O relatório deve conter:
+1.  O nome do arquivo e da classe do *Use Case* chamado pelo método `pendenciar()` no `proposalController.ts`.
+2.  O trecho de código dentro do método `execute()` deste *Use Case* que é responsável por lidar com a observação.
+3.  A prova definitiva: a linha de código exata que invoca o método de salvamento (ex: `this.observacoesRepository.save(...)` ou `unitOfWork.observacoes.create(...)`).
+4.  **Veredito Explícito:** Uma declaração clara que confirme se a chamada para salvar a observação **existe e está correta**, ou se ela está **ausente ou incorreta**.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  Comece no arquivo `server/modules/proposal/presentation/proposalController.ts` e localize o método `pendenciar()`.
+2.  Identifique o *Use Case* que é instanciado e cujo método `.execute()` é chamado.
+3.  Navegue para o arquivo desse *Use Case*.
+4.  Dentro do método `execute()`, analise a lógica passo a passo. O seu foco é encontrar a chamada que deveria persistir a nova observação.
+5.  Se a chamada de persistência estiver ausente, declare-o como a causa raiz da falha.
