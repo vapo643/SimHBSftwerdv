@@ -46,32 +46,30 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-// NOVA FUNÇÃO para operações Admin com graceful handling:
-export function createServerSupabaseAdminClient() {
-  const isProd = process.env.NODE_ENV === 'production';
-  const serviceKey = isProd 
-    ? (process.env.PROD_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)
-    : (process.env.DEV_SUPABASE_SERVICE_ROLE_KEY || process.env.DEV_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
-  const url = isProd
-    ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL)
-    : (process.env.DEV_SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL);
+// FUNÇÃO HARDENED para operações Admin - Foco exclusivo em produção:
+export const createServerSupabaseAdminClient = () => {
+  // Carrega exclusivamente as variáveis de ambiente de PRODUÇÃO.
+  const url = process.env.PROD_SUPABASE_URL;
+  const serviceKey = process.env.PROD_SUPABASE_SERVICE_KEY;
 
+  // Validação explícita com mensagem de erro informativa.
   if (!serviceKey || !url) {
-    console.warn('⚠️ Supabase admin credentials not configured. Admin operations will be limited.');
-    if (isProd) {
-      console.warn('ℹ️  Configure PROD_SUPABASE_SERVICE_KEY and PROD_SUPABASE_URL for admin operations');
-    }
-    // Return a mock client that will fail gracefully
-    return null as any;
+    console.error('--- ERRO CRÍTICO DE CONFIGURAÇÃO ---');
+    console.error('As variáveis de ambiente de produção (PROD_SUPABASE_URL, PROD_SUPABASE_SERVICE_KEY) não estão configuradas ou não estão acessíveis.');
+    console.error('As operações de Admin do Supabase serão desativadas.');
+    console.error('--- FIM DO ERRO ---');
+    return null as any; 
   }
 
+  // Retorna o cliente Admin configurado com as credenciais de PRODUÇÃO.
   return createClient(url, serviceKey, {
     auth: {
-      autoRefreshToken: false,
       persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
     },
   });
-}
+};
 
 // FUNÇÃO ANTI-FRÁGIL para operações com RLS (autenticadas):
 export function createServerSupabaseClient(accessToken?: string) {

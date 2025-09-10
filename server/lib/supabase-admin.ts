@@ -1,28 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Create Supabase admin client for server-side operations with graceful handling
+// Create Supabase admin client - HARDENED para produção
 function getSupabaseAdminCredentials() {
-  const isProd = process.env.NODE_ENV === 'production';
-  
-  const supabaseUrl = isProd
-    ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '')
-    : (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '');
-    
-  const supabaseServiceKey = isProd
-    ? (process.env.PROD_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '')
-    : (process.env.SUPABASE_SERVICE_ROLE_KEY || '');
+  // Carrega exclusivamente as variáveis de ambiente de PRODUÇÃO.
+  const supabaseUrl = process.env.PROD_SUPABASE_URL;
+  const supabaseServiceKey = process.env.PROD_SUPABASE_SERVICE_KEY;
 
   return { supabaseUrl, supabaseServiceKey };
 }
 
 const { supabaseUrl, supabaseServiceKey } = getSupabaseAdminCredentials();
 
-// Graceful handling for missing Supabase admin credentials
+// Validação explícita com mensagem de erro informativa.
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('⚠️ Supabase admin environment variables not configured. Admin operations will be limited.');
-  if (process.env.NODE_ENV === 'production') {
-    console.warn('ℹ️  Configure PROD_SUPABASE_URL and PROD_SUPABASE_SERVICE_ROLE_KEY in deployment secrets');
-  }
+  console.error('--- ERRO CRÍTICO DE CONFIGURAÇÃO ADMIN CLIENT ---');
+  console.error('As variáveis de ambiente de produção (PROD_SUPABASE_URL, PROD_SUPABASE_SERVICE_KEY) não estão configuradas.');
+  console.error('O cliente Admin do Supabase será desativado.');
+  console.error('--- FIM DO ERRO ---');
 }
 
 export const supabaseAdmin = (supabaseUrl && supabaseServiceKey)
