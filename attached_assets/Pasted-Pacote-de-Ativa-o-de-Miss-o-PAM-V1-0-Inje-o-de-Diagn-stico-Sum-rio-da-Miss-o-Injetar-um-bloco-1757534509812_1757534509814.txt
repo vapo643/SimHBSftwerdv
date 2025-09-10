@@ -1,0 +1,43 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Injeção de Diagnóstico
+Sumário da Missão: Injetar um bloco de código de diagnóstico de alta visibilidade no frontend para capturar e exibir a estrutura e o conteúdo exatos do objeto propostaResponse no console do navegador, no momento da execução.
+
+Intenção Estratégica: Obter a prova irrefutável e visual da estrutura de dados real com a qual estamos a lidar, eliminando toda a ambiguidade e permitindo a formulação de uma correção definitiva baseada em factos, não em inferências.
+
+Histórico Relevante: Tentativas anteriores de corrigir a extração do ID da proposta (.data.id, .proposalId) falharam, resultando num erro 400 Bad Request. A confiança na análise estática do código é agora nula. A única fonte de verdade restante são os dados em tempo de execução.
+
+IMPLEMENTAR:
+Adicionar um bloco de console.log detalhado imediatamente após a chamada da API de criação de proposta para inspecionar a sua resposta.
+
+FICHEIRO ALVO:
+client/src/pages/propostas/nova.tsx
+
+CÓDIGO DE REFERÊNCIA (ESTADO ATUAL):
+
+TypeScript
+
+// Localize este bloco de código
+const propostaResponse = await apiRequest('/api/propostas', {
+  method: 'POST',
+  body: proposalData,
+});
+
+const propostaId = (propostaResponse as any).proposalId;
+AÇÃO REQUERIDA (MODIFICAÇÃO):
+Altere o bloco de código acima para o seguinte. A sua única missão é adicionar o bloco de console.log. NÃO TENTE corrigir a linha proposalId novamente. O objetivo é APENAS diagnosticar.
+
+TypeScript
+
+const propostaResponse = await apiRequest('/api/propostas', {
+  method: 'POST',
+  body: proposalData,
+});
+
+// --- INÍCIO DO BLOCO DE DIAGNÓSTICO OBRIGATÓRIO ---
+console.log('--- DIAGNÓSTICO DE ALERTA VERMELHO ---');
+console.log('TIPO DO OBJETO propostaResponse:', typeof propostaResponse);
+console.log('CONTEÚDO BRUTO DO propostaResponse:', JSON.stringify(propostaResponse, null, 2));
+console.log('CHAVES DISPONÍVEIS NO OBJETO:', Object.keys(propostaResponse));
+console.log('--- FIM DO DIAGNÓSTICO ---');
+// --- FIM DO BLOCO DE DIAGNÓSTICO OBRIGATÓRIO ---
+
+const propostaId = (propostaResponse as any).proposalId;
