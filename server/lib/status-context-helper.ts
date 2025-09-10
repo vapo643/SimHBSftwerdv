@@ -9,7 +9,7 @@
  */
 
 import { db } from './supabase';
-import { propostas, statusContextuais, propostaLogs } from '@shared/schema';
+import { propostas, statusContextuais, propostaLogs, observacoesCobranca } from '@shared/schema';
 import { eq, and, sql } from 'drizzle-orm';
 
 export type StatusContexto = 'pagamentos' | 'cobrancas' | 'formalizacao' | 'geral';
@@ -126,7 +126,21 @@ export async function updateStatusWithContext(
         });
       }
 
-      // 5. Registrar no log de auditoria
+      // 5. Registrar observação na tabela observacoes_cobranca (PAM V1.0 - CORREÇÃO CRÍTICA)
+      if (observacoes && typeof observacoes === 'string' && observacoes.trim() !== '') {
+        console.log(`[DUPLA-ESCRITA] 💬 Persistindo observação na tabela 'observacoes_cobranca' para a proposta ${propostaId}`);
+        await tx.insert(observacoesCobranca).values({
+          propostaId: propostaId,
+          userId: userId || 'e647afc0-03fa-482d-8293-d824dcab0399', // Fallback para userId sistemico
+          userName: 'Sistema', // Fallback para Sistema (poderia buscar do perfil do usuário)
+          observacao: observacoes,
+          tipoContato: 'INTERNO', // Define um tipo padrão para estas observações
+          createdAt: new Date(),
+        });
+        console.log(`[DUPLA-ESCRITA] ✅ Observação salva em observacoes_cobranca`);
+      }
+
+      // 6. Registrar no log de auditoria
       console.log(`[DUPLA-ESCRITA] 📜 Registrando auditoria...`);
       await tx.insert(propostaLogs).values({
         propostaId,
