@@ -15,6 +15,7 @@ import {
   tabelasComerciais,
   lojas,
   parceiros,
+  observacoesCobranca,
 } from '@shared/schema';
 import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { IProposalRepository, ProposalSearchCriteria } from '../domain/IProposalRepository';
@@ -241,7 +242,7 @@ export class ProposalRepository implements IProposalRepository {
   }
 
   async findById(id: string): Promise<Proposal | null> {
-    console.log('🔍 [findById] PAM V1.0 - Replicating findByCriteriaLightweight logic for ID:', id);
+    console.log('🔍 [findById] PAM V1.0 - Including observacoes with complete proposal data for ID:', id);
 
     // PAM V1.0 CORREÇÃO MANDATÓRIA: Query completa com TODOS os campos do cliente
     const result = await db
@@ -287,31 +288,60 @@ export class ProposalRepository implements IProposalRepository {
         data_assinatura: propostas.dataAssinatura,
         created_at: propostas.createdAt,
         updated_at: propostas.updatedAt,
+        // PAM V1.0 CORREÇÃO CRÍTICA: Campos das observações para histórico de comunicação
+        observacao_id: observacoesCobranca.id,
+        observacao_texto: observacoesCobranca.observacao,
+        observacao_user_id: observacoesCobranca.userId,
+        observacao_user_name: observacoesCobranca.userName,
+        observacao_tipo_contato: observacoesCobranca.tipoContato,
+        observacao_status_promessa: observacoesCobranca.statusPromessa,
+        observacao_data_promessa: observacoesCobranca.dataPromessaPagamento,
+        observacao_created_at: observacoesCobranca.createdAt,
       })
       .from(propostas)
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
       .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
-      .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id)) // CRUCIAL: JOIN com parceiros que estava faltando!
+      .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
+      // PAM V1.0 CORREÇÃO CRÍTICA: LEFT JOIN com observacoesCobranca para histórico de comunicação
+      .leftJoin(observacoesCobranca, eq(propostas.id, observacoesCobranca.propostaId))
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)))
-      .limit(1);
+      .orderBy(desc(observacoesCobranca.createdAt)); // Ordenar observações pela mais recente
 
     if (!result || result.length === 0) {
       console.log('🔍 [findById] No proposal found for ID:', id);
       return null;
     }
 
-    console.log('🔍 [findById] PAM V1.0 SUCCESS - Found complete data:', {
-      parceiro: result[0].parceiro_nome,
-      loja: result[0].loja_nome,
-      produto: result[0].produto_nome,
+    console.log('🔍 [findById] PAM V1.0 SUCCESS - Found proposal with observacoes:', {
+      proposalId: result[0].id,
+      totalRows: result.length,
+      hasObservacoes: !!result[0].observacao_id
     });
 
-    // CORREÇÃO CRÍTICA PAM V2.0: Retornar instância de domain, não DTO
-    // Outros métodos do repositório usam mapToDomain() - deve ser consistente
-    const mappedData = this.mapToDomain(result[0]);
+    // PAM V1.0 CORREÇÃO CRÍTICA: Agregar múltiplas linhas em um objeto único
+    // O LEFT JOIN pode retornar múltiplas linhas - uma para cada observação
+    const proposalData = result[0]; // Dados da proposta (iguais em todas as linhas)
+    
+    // Agregar observações em um array, filtrando valores null
+    const observacoes = result
+      .filter(row => row.observacao_id !== null)
+      .map(row => ({
+        id: row.observacao_id!,
+        observacao: row.observacao_texto!,
+        userId: row.observacao_user_id!,
+        userName: row.observacao_user_name!,
+        tipoContato: row.observacao_tipo_contato,
+        statusPromessa: row.observacao_status_promessa,
+        dataPromessaPagamento: row.observacao_data_promessa,
+        createdAt: row.observacao_created_at!,
+      }));
 
-    // CORREÇÃO: Retornar instância de domain com métodos disponíveis
+    console.log('🔍 [findById] Aggregated observacoes:', observacoes.length);
+
+    // CORREÇÃO CRÍTICA PAM V2.0: Retornar instância de domain com observações agregadas
+    const mappedData = this.mapToDomain(proposalData, observacoes);
+
     return mappedData;
   }
 
@@ -915,8 +945,10 @@ export class ProposalRepository implements IProposalRepository {
 
   /**
    * Mapeia dados do banco para o agregado Proposal
+   * @param row Dados da proposta do banco
+   * @param observacoes Array de observações de cobrança (opcional)
    */
-  private mapToDomain(row: any): Proposal {
+  private mapToDomain(row: any, observacoes?: any[]): Proposal {
     // ID já é string no banco
     const aggregateId = row.id;
 
@@ -1002,7 +1034,7 @@ export class ProposalRepository implements IProposalRepository {
           }
         : undefined,
       motivo_rejeicao: row.motivoRejeicao,
-      observacoes: row.observacoes,
+      observacoes: observacoes || row.observacoes, // PAM V1.0: Usar observações agregadas se fornecidas
       ccb_url: row.ccbDocumentoUrl,
       // PAM V1.0 CORREÇÃO CRÍTICA: Incluir campos de CCB para frontend
       ccb_gerado: row.ccb_gerado,
