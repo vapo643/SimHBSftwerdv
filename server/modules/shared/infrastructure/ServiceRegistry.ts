@@ -9,6 +9,9 @@ import { Container, TOKENS } from './Container';
 
 // Import repositories
 import { ProposalRepository } from '../../proposal/infrastructure/ProposalRepository';
+import { DocumentsRepository } from '../../../repositories/documents.repository';
+import { SupabaseStorageAdapter } from './SupabaseStorageAdapter';
+import { createServerSupabaseAdminClient } from '../../../lib/supabase';
 
 // Import use cases
 import { CreateProposalUseCase } from '../../proposal/application/CreateProposalUseCase';
@@ -33,6 +36,11 @@ export function configureContainer(): Container {
 
   const proposalRepository = new ProposalRepository();
   container.register(TOKENS.PROPOSAL_REPOSITORY, proposalRepository);
+
+  // PAM V1.0 - Registrar DocumentsRepository com StorageProvider injetado
+  const storageProvider = new SupabaseStorageAdapter(createServerSupabaseAdminClient());
+  const documentsRepository = new DocumentsRepository(storageProvider);
+  container.register(TOKENS.DOCUMENTS_REPOSITORY, documentsRepository);
 
   // ========================================================================
   // USE CASES (Factories with DI)

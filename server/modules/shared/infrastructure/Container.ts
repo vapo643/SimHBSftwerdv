@@ -79,6 +79,7 @@ export class Container {
 export const TOKENS = {
   // Repositories
   PROPOSAL_REPOSITORY: Symbol('ProposalRepository'),
+  DOCUMENTS_REPOSITORY: Symbol('DocumentsRepository'),
 
   // Use Cases
   CREATE_PROPOSAL_USE_CASE: Symbol('CreateProposalUseCase'),

@@ -1,0 +1,32 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense de causa raiz no `ApproveProposalUseCase` para descobrir por que uma variável crítica está `undefined`, a causar um `TypeError` e a bloquear o fluxo de aprovação de propostas em produção.
+* **Intenção Estratégica (O Porquê):** O coração do nosso fluxo de negócio — a capacidade de um analista aprovar uma proposta — está paralisado. A evidência do log (`TypeError: Cannot read properties of undefined (reading 'getProposalDocuments')`) aponta para uma falha lógica severa dentro do nosso domínio. A sua missão é dissecar este *use case* para encontrar a origem exata da corrupção de estado.
+* **Histórico Relevante (Consulta Obrigatória):** O erro ocorre no método `validateFormalizationRequirements` dentro do `ApproveProposalUseCase`. Isto implica que o objeto `proposal`, que deveria ser uma instância completa do nosso agregado de domínio, está a chegar a este ponto num estado inválido (`undefined` ou `null`).
+
+---
+
+**IMPLEMENTAR:**
+Auditoria Forense de Causa Raiz do `ApproveProposalUseCase`.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria irrefutável que responda às seguintes questões:
+
+1.  **Origem dos Dados:** Como o objeto `proposal` é obtido dentro do método `execute` do `ApproveProposalUseCase.ts`? Apresente a linha de código que o busca (ex: `this.proposalRepository.findById(...)`).
+2.  **Validação de Existência:** Existe uma verificação para garantir que a proposta foi encontrada (ou seja, não é `null`) antes de prosseguir com a lógica de negócio?
+3.  **Ponto da Falha:** Rastreie o objeto `proposal` desde a sua obtenção até à chamada do método `this.validateFormalizationRequirements(proposal)`.
+4.  **Veredito Explícito:** Qual é a causa raiz do `TypeError`? A proposta não está a ser encontrada no banco de dados? O objeto retornado pelo repositório não está a ser corretamente mapeado para o agregado de domínio, resultando na ausência do método `getProposalDocuments`? Aponte a falha exata.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  Abra o arquivo `server/modules/proposal/application/ApproveProposalUseCase.ts`.
+2.  Foque-se no método `execute`.
+3.  Analise a primeira parte do método, onde a proposta é carregada da persistência.
+4.  Analise a chamada para `validateFormalizationRequirements` e determine o estado do objeto `proposal` nesse exato momento.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 100% (A confiança é na minha capacidade de auditar).
+* **RISCOS IDENTIFICADOS:** **BAIXO**. Esta é uma missão de reconhecimento.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que o `TypeError` é a causa primária da falha e que o seu diagnóstico desbloqueará a solução para o erro 500.
+* **VALIDAÇÃO PENDENTE:** O Orquestrador irá usar o seu diagnóstico para arquitetar a missão de correção.
+---
