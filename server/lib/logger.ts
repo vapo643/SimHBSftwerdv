@@ -90,8 +90,8 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
   
   const shouldSkipLogging = isDevelopment && (isStaticFile || isViteHMR || isSourceMap || isComponentFile);
 
-  // Log inicial da requisição (apenas para requests importantes)
-  if (!shouldSkipLogging) {
+  // Log inicial da requisição (apenas em desenvolvimento e para requests importantes)
+  if (process.env.NODE_ENV !== 'production' && !shouldSkipLogging) {
     logger.info('📥 Request received', {
       correlationId,
       method: req.method,
@@ -109,8 +109,8 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
   res.send = function (data) {
     const duration = Date.now() - (req.startTime || Date.now());
 
-    // Log do response (apenas para requests importantes)
-    if (!shouldSkipLogging) {
+    // Log do response (apenas em desenvolvimento e para requests importantes)
+    if (process.env.NODE_ENV !== 'production' && !shouldSkipLogging) {
       logger.info('📤 Request completed', {
         correlationId,
         method: req.method,

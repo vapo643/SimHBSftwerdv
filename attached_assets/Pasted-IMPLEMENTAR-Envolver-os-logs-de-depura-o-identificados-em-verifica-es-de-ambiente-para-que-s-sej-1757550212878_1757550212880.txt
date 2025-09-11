@@ -1,0 +1,70 @@
+IMPLEMENTAR:
+Envolver os logs de depuração identificados em verificações de ambiente para que só sejam executados quando process.env.NODE_ENV não for 'production'.
+
+CURRENT STATE:
+
+Ficheiro 1: client/src/lib/apiClient.ts
+
+Lógica com Falha: O console.log('[PASSO 3 - ENVIO]', ...) é executado incondicionalmente em todas as requisições autenticadas.
+
+Ficheiro 2: server/lib/logger.ts
+
+Lógica com Falha: O logger.info('📥 Request received', ...) é executado incondicionalmente em todas as requisições recebidas pelo servidor.
+
+EXPECTED (Estado Final de Sucesso):
+
+Ficheiro 1: client/src/lib/apiClient.ts
+
+Código Corrigido: O bloco de log deve ser envolvido numa condição.
+
+TypeScript
+
+// Verifique o ambiente (usando o método apropriado para Vite no frontend)
+if (import.meta.env.DEV) {
+  console.log('[PASSO 3 - ENVIO]', {
+    url: fullUrl,
+    authorizationHeader: headers['Authorization'],
+    hasToken: !!token,
+    isFormData: body instanceof FormData,
+  });
+}
+Ficheiro 2: server/lib/logger.ts
+
+Código Corrigido: O log de informação deve ser envolvido numa condição similar.
+
+TypeScript
+
+// Dentro do middleware requestLoggingMiddleware
+if (process.env.NODE_ENV !== 'production') {
+  logger.info('📥 Request received', {
+    // ... (detalhes do log)
+  });
+}
+next();
+Comportamento: Ao executar a aplicação em produção (NODE_ENV='production'), estes logs de depuração não devem mais aparecer na consola do navegador ou do servidor. Em desenvolvimento, devem continuar a funcionar como antes.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: 100%
+
+RISCOS IDENTIFICADOS: BAIXO.
+
+DECISÕES TÉCNICAS ASSUMIDAS: "Utilizando as variáveis de ambiente padrão da indústria (import.meta.env.DEV para Vite no frontend, process.env.NODE_ENV para Node.js no backend) para a deteção de ambiente."
+
+VALIDAÇÃO PENDENTE: "Validação funcional completa pelo Arquiteto Chefe no Passo 5 do roadmap."
+
+PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:
+
+Mapeie e modifique os ficheiros client/src/lib/apiClient.ts e server/lib/logger.ts.
+
+Garanta que as condições de ambiente (if) envolvem corretamente os blocos de log.
+
+Execute get_latest_lsp_diagnostics e corrija TODOS os erros ou avisos introduzidos.
+
+Declare o seu Nível de Confiança.
+
+Categorize o Risco como BAIXO.
+
+Realize um teste funcional mínimo: confirme que a aplicação reinicia sem erros.
+
+Documente a decisão de condicionar os logs ao ambiente de desenvolvimento.
