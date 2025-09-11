@@ -762,6 +762,10 @@ export default function Formalizacao() {
       queryClient.invalidateQueries({
         queryKey: ['/api/propostas/formalizacao'],
       });
+      // 🎯 CORREÇÃO CRÍTICA: Invalidar cache dos boletos do Banco Inter
+      queryClient.invalidateQueries({
+        queryKey: ['/api/inter/collections', propostaId],
+      });
       // Refetch current proposal to get updated status
       refetch();
     },

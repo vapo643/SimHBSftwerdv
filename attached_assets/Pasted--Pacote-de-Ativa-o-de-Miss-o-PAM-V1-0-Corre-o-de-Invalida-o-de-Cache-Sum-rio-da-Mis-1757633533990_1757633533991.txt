@@ -1,0 +1,54 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Correção de Invalidação de Cache
+
+* **Sumário da Missão:** Refatorar o `onSuccess` da `mutation` `marcarComoConcluida` para incluir a invalidação da `queryKey` dos boletos do Banco Inter, resolvendo a falha de atualização de estado da UI.
+
+* **Intenção Estratégica:** Garantir que a interface do utilizador reflita de forma imediata e correta as alterações de estado no backend, proporcionando um feedback visual consistente e eliminando a "falha silenciosa" de UI.
+
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria forense provou que a causa raiz da UI "estática" é a ausência de uma chamada `invalidateQueries` para a `queryKey` `['/api/inter/collections', propostaId]` dentro do `onSuccess` da `mutation`.
+
+---
+
+**IMPLEMENTAR:**
+Adicionar a invalidação de cache para a query de boletos.
+
+**CURRENT STATE:**
+* **Ficheiro:** `client/src/pages/formalizacao.tsx`
+* **Lógica com Falha (Dentro do `onSuccess` da `marcarComoConcluida`):**
+    ```typescript
+    onSuccess: (data, variables) => {
+        const { propostaId } = variables;
+        toast({ /* ... */ });
+        
+        // Invalidações existentes (corretas, mas incompletas)
+        queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
+        queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId, 'formalizacao'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+        
+        // FALTA A INVALIDAÇÃO DA QUERY DE BOLETOS
+    },
+    ```
+
+**EXPECTED (Estado Final de Sucesso):**
+* **Ficheiro:** `client/src/pages/formalizacao.tsx`
+* **Código Corrigido:** Adicionar a linha de invalidação de cache para a `query` dos boletos.
+    ```typescript
+    onSuccess: (data, variables) => {
+        const { propostaId } = variables;
+        toast({ /* ... */ });
+        
+        // Invalidações existentes
+        queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
+        queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId, 'formalizacao'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+
+        // <-- LINHA DE CORREÇÃO OBRIGATÓRIA -->
+        queryClient.invalidateQueries({ queryKey: ['/api/inter/collections', propostaId] });
+        
+        // ...
+    },
+    ```
+* **Comportamento Resultante:** Após uma chamada bem-sucedida para "Marcar como Concluída", todas as fontes de dados relevantes para a página serão invalidadas, forçando o TanStack Query a buscar os dados mais recentes e a UI a renderizar corretamente o novo estado, incluindo a secção de boletos.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a refatoração e realize o protocolo 7-CHECK completo.
