@@ -68,7 +68,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
 
   /**
    * Create a document record
-   * PAM V1.0 - Fixed snake_case/camelCase mapping conflict
+   * PAM V1.0 - Substituição Forçada de Lógica - Arquiteturalmente correta
    */
   async createDocument(documentData: {
     proposta_id: string;
@@ -76,39 +76,36 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
     url: string;
     tipo: string;
     tamanho: number;
-  }): Promise<PropostaDocumento | null> {
+  }): Promise<PropostaDocumento> {
+    console.log('[DOCUMENTS_REPO] Tentando criar registo de documento com dados de entrada (snake_case):', documentData);
     try {
-      console.log('[DOCUMENTS_REPO] Creating document with data:', {
-        proposta_id: documentData.proposta_id,
-        nome_arquivo: documentData.nome_arquivo,
+      // Mapeamento explícito de snake_case (dados de entrada) para camelCase (propriedades do schema Drizzle)
+      const valuesToInsert = {
+        propostaId: documentData.proposta_id,
+        nomeArquivo: documentData.nome_arquivo,
         url: documentData.url,
         tipo: documentData.tipo,
         tamanho: documentData.tamanho,
-      });
+        createdAt: new Date(),
+      };
 
       const [document] = await db
         .insert(propostaDocumentos)
-        .values({
-          // CORREÇÃO: Mapeamento direto sem conversão de nomenclatura
-          propostaId: documentData.proposta_id,
-          nomeArquivo: documentData.nome_arquivo,
-          url: documentData.url,
-          tipo: documentData.tipo,
-          tamanho: documentData.tamanho,
-          createdAt: new Date(),
-        })
+        .values(valuesToInsert)
         .returning();
 
-      console.log('[DOCUMENTS_REPO] Document created successfully:', document);
+      if (!document) {
+        // Esta verificação é crucial caso o .returning() falhe ou retorne vazio
+        throw new Error('A operação de inserção na base de dados não retornou o documento criado.');
+      }
+      
+      console.log('[DOCUMENTS_REPO] Registo de documento criado com sucesso na base de dados:', document);
       return document;
+
     } catch (error) {
-      console.error('[DOCUMENTS_REPO] Error creating document:', error);
-      console.error('[DOCUMENTS_REPO] Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        inputData: documentData,
-      });
-      return null;
+      console.error('[DOCUMENTS_REPO] ERRO CRÍTICO ao criar registo do documento:', error);
+      // Re-lança o erro para que a camada de serviço superior possa capturá-lo e lidar com ele
+      throw new Error('Falha ao persistir metadados do documento na base de dados.');
     }
   }
 

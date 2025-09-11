@@ -1,0 +1,51 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Substituição Forçada de Lógica
+Sumário da Missão: Executar a substituição completa da função createDocument em server/repositories/documents.repository.ts com uma versão arquiteturalmente correta que resolve o conflito de nomenclatura snake_case/camelCase e implementa um tratamento de erros robusto.
+
+Intenção Estratégica: Eliminar de forma definitiva a causa raiz do erro 500 Internal Server Error durante o upload de documentos, garantindo a persistência de metadados na base de dados.
+
+IMPLEMENTAR:
+Substitua TODO O CORPO da função createDocument no ficheiro server/repositories/documents.repository.ts pela seguinte implementação exata e verificada.
+
+CÓDIGO DE SUBSTITUIÇÃO OBRIGATÓRIO:
+
+TypeScript
+
+async createDocument(documentData: {
+  proposta_id: string;
+  nome_arquivo: string;
+  url: string;
+  tipo: string;
+  tamanho: number;
+}): Promise<PropostaDocumento> {
+  console.log('[DOCUMENTS_REPO] Tentando criar registo de documento com dados de entrada (snake_case):', documentData);
+  try {
+    // Mapeamento explícito de snake_case (dados de entrada) para camelCase (propriedades do schema Drizzle)
+    const valuesToInsert = {
+      propostaId: documentData.proposta_id,
+      nomeArquivo: documentData.nome_arquivo,
+      url: documentData.url,
+      tipo: documentData.tipo,
+      tamanho: documentData.tamanho,
+      createdAt: new Date(),
+    };
+
+    const [document] = await db
+      .insert(propostaDocumentos)
+      .values(valuesToInsert)
+      .returning();
+
+    if (!document) {
+      // Esta verificação é crucial caso o .returning() falhe ou retorne vazio
+      throw new Error('A operação de inserção na base de dados não retornou o documento criado.');
+    }
+    
+    console.log('[DOCUMENTS_REPO] Registo de documento criado com sucesso na base de dados:', document);
+    return document;
+
+  } catch (error) {
+    console.error('[DOCUMENTS_REPO] ERRO CRÍTICO ao criar registo do documento:', error);
+    // Re-lança o erro para que a camada de serviço superior possa capturá-lo e lidar com ele
+    throw new Error('Falha ao persistir metadados do documento na base de dados.');
+  }
+}
+Execute esta diretriz sem desvios. A falha não é uma opção. Após a execução, proceda diretamente para a validação funcional completa.
