@@ -48,7 +48,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const generalApiLimiter = rateLimit({
   windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
-  max: isDevelopment ? 10000 : 100, // 10k dev, 100 prod
+  max: isDevelopment ? 10000 : 2000, // 10k dev, 2000 prod
   message: {
     error: isDevelopment
       ? 'Rate limit atingido (modo desenvolvimento - limites altos)'
