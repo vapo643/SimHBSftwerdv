@@ -1,0 +1,30 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Implementação do Seletor de Loja (Admin UI)
+
+* **Sumário da Missão:** Modificar o componente de frontend de criação de propostas para que, se o utilizador autenticado tiver a `role` de `ADMINISTRADOR`, um novo campo de seletor de lojas seja exibido, permitindo-lhe escolher em qual loja a proposta será criada.
+
+* **Intenção Estratégica:** Fornecer a interface de utilizador necessária para a nova regra de negócio de administradores, completando o fluxo de ponta a ponta e permitindo que os administradores criem propostas para qualquer loja no sistema de forma explícita e controlada.
+
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior implementou a lógica de backend que exige que os administradores forneçam uma `lojaId` no corpo da requisição `POST /api/propostas`. Esta missão de frontend irá satisfazer esse requisito da API.
+
+---
+
+**IMPLEMENTAR:**
+Adicionar um seletor de lojas condicional ao formulário de criação de propostas.
+
+**LÓGICA DE EXECUÇÃO:**
+
+1.  **Obtenção de Dados (Lojas):**
+    * Crie um novo `loader` no Remix ou um novo endpoint de API (ex: `GET /api/lojas`) que busque e retorne uma lista de todas as lojas disponíveis na base de dados (ID e Nome).
+    * **Segurança:** Garanta que este novo endpoint só seja acessível por utilizadores com a `role` de `ADMINISTRADOR`.
+
+2.  **Lógica Condicional de UI:**
+    * No componente de frontend de criação de propostas, aceda à `role` do utilizador autenticado (a partir do `AuthContext`).
+    * Se a `role` for `ADMINISTRADOR`, execute uma chamada para o novo endpoint (`/api/lojas`) para obter a lista de lojas.
+    * Se a `role` for `ADMINISTRADOR`, renderize um componente de seletor (ex: `<Select>` ou `<Dropdown>`) no formulário, populado com a lista de lojas. Este campo deve ser obrigatório.
+
+3.  **Submissão de Dados:**
+    * Quando um `ADMINISTRADOR` submeter o formulário, garanta que o `lojaId` selecionado no novo componente seja incluído no corpo (`body`) da requisição `POST /api/propostas`.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a implementação completa (backend e frontend) e realize o protocolo 7-CHECK, garantindo **ZERO** novos diagnósticos de LSP e a estabilidade da aplicação.
