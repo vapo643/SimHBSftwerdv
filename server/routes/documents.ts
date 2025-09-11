@@ -5,10 +5,8 @@
  */
 
 import { Request, Response } from 'express';
-// 1. IMPORTAÇÃO CORRIGIDA: Apontar para a instância correta do DocumentsService
+// 1. IMPORTAÇÃO UNIFICADA: Apontar apenas para a instância correta do DocumentsService
 import { documentsService } from '../services/documentsService';
-// Manter importação para upload (temporário conforme PAM)
-import { documentService } from '../services/genericService';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
 /**
@@ -50,28 +48,30 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
 
     if (!propostaId) {
       return res.status(400).json({
+        success: false,
         message: 'ID da proposta é obrigatório',
       });
     }
 
     if (!req.file) {
       return res.status(400).json({
+        success: false,
         message: 'Arquivo é obrigatório',
       });
     }
 
-    // Using genericService with proper operation mapping
-    const result = await documentService.executeOperation('upload_proposta_document', {
-      propostaId: parseInt(propostaId),
-      file: req.file,
-      ...req.body,
-    });
+    // 2. CHAMADA CORRIGIDA: Invocar o método uploadDocument do serviço correto
+    const result = await documentsService.uploadDocument(propostaId, req.file);
 
-    res.json(result);
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(500).json(result);
+    }
   } catch (error: any) {
     console.error('[DOCUMENTS_CONTROLLER] Error uploading document:', error);
-
     res.status(500).json({
+      success: false,
       message: error.message || 'Erro interno do servidor ao fazer upload do documento',
     });
   }
