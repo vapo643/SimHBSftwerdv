@@ -1,0 +1,21 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Auditoria do Fluxo de Avanço de Status
+Sumário da Missão: Realizar uma auditoria forense de ponta a ponta para mapear a funcionalidade (ou a sua ausência) do botão "Marcar como Concluída" na tela de Formalização. O objetivo é identificar os componentes de UI, os endpoints de API existentes e a lógica de negócio subjacente.
+
+Hipótese / Ponto de Falha: A hipótese principal é que existe um endpoint genérico para atualização de status (ex: PUT /api/propostas/:id/status), mas a lógica específica de orquestração (liberar botão de gerar boletos, esperar confirmação, atualizar para BOLETOS_EMITIDOS) não está implementada nem conectada ao botão do frontend, que provavelmente está desativado.
+
+Evidência de Conformidade Requerida (A "Prova Irrefutável"):
+
+NÃO MODIFIQUE NENHUM CÓDIGO. A sua única missão é LER, ANALISAR e APRESENTAR.
+
+1. Análise do Frontend (Componente de Exibição):
+a. Apresente o código-fonte completo do componente React que renderiza a página de "Formalização" (client/src/pages/formalizacao.tsx).
+b. Localize o botão "Marcar como Concluída" (ou similar) e apresente o seu código.
+c. Análise Crítica: O botão está desativado (disabled)? Qual é a lógica (ou falta dela) associada ao seu evento onClick? Ele já tenta chamar alguma API?
+
+2. Análise do Backend (Endpoint de Atualização):
+a. Investigue o ficheiro de rotas do servidor (server/routes.ts) e os controladores relevantes. Existe um endpoint para atualizar o status de uma proposta, como PUT ou POST para /api/propostas/:id/status?
+b. Se o endpoint existir, apresente o código do seu controlador.
+c. Análise Crítica: A lógica do controlador suporta a sequência de eventos descrita (atualizar status, interagir com o serviço do Banco Inter, etc.)? Ou é um endpoint genérico que apenas altera o valor do campo status na base de dados?
+
+3. Conclusão da Auditoria:
+a. Com base na sua análise, descreva o estado atual da funcionalidade. O que já existe e o que precisa de ser construído do zero para cumprir a regra de negócio?
