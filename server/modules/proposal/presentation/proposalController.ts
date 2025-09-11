@@ -125,7 +125,7 @@ export class ProposalController {
         incluirTac: req.body.incluirTac,
 
         // ===== ADMINISTRATIVO =====
-        lojaId: req.body.lojaId || (req as any).user?.lojaId || 1,
+        lojaId: req.body.lojaId || (req as any).user?.loja_id || 1,
         atendenteId: req.body.atendenteId || (req as any).user?.id,
         finalidade: req.body.finalidade,
         garantia: req.body.garantia,

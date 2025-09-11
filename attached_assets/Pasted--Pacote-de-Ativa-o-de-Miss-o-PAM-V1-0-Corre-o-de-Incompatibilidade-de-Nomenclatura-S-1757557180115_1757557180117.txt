@@ -1,0 +1,45 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Correção de Incompatibilidade de Nomenclatura
+
+* **Sumário da Missão:** Corrigir a incompatibilidade de nomenclatura no ficheiro `server/modules/proposal/presentation/proposalController.ts`, alinhando a leitura da propriedade `loja_id` com o formato `snake_case` que é fornecido pelo middleware JWT.
+
+* **Intenção Estratégica:** Restaurar a funcionalidade de criação de propostas, eliminando a causa raiz do erro `PostgresError: User does not belong to the specified store`. Esta correção garante que a identidade da loja do utilizador seja corretamente propagada do middleware para a base de dados, resolvendo a falha de integridade.
+
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria forense final provou que o `jwt-auth-middleware.ts` anexa a identidade da loja como `req.user.loja_id` (snake_case), mas o `proposalController.ts` tenta lê-la como `req.user.lojaId` (camelCase). Esta incompatibilidade aciona a lógica de fallback, atribuindo um ID de loja incorreto (`1`) e causando a falha de validação na base de dados.
+
+---
+
+**IMPLEMENTAR:**
+Refatorar a atribuição da variável `lojaId` no controlador de propostas para que leia a propriedade correta (`loja_id`) do objeto `req.user`.
+
+**CURRENT STATE:**
+* **Ficheiro:** `server/modules/proposal/presentation/proposalController.ts`
+* **Lógica com Falha (Linha 128 aprox.):**
+    ```typescript
+    lojaId: req.body.lojaId || (req as any).user?.lojaId || 1,
+    ```
+* **Evidência Bruta:** A expressão `(req as any).user?.lojaId` avalia para `undefined`, pois o nome correto da propriedade é `loja_id`.
+
+**EXPECTED (Estado Final de Sucesso):**
+* **Ficheiro:** `server/modules/proposal/presentation/proposalController.ts`
+* **Código Corrigido (Linha 128 aprox.):**
+    ```typescript
+    lojaId: req.body.lojaId || (req as any).user?.loja_id || 1,
+    ```
+* **Comportamento Resultante:** O controlador irá agora ler corretamente a `loja_id` do utilizador autenticado a partir do objeto `req.user`, passando o ID de loja correto para a camada de serviço e, subsequentemente, para a base de dados, resolvendo o erro `500 Internal Server Error`.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 100%
+* **RISCOS IDENTIFICADOS:** BAIXO. A auditoria foi conclusiva e a correção é uma alteração de uma única linha numa propriedade.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** "A correção será feita na camada de 'leitura' (controlador) para um impacto mínimo. A padronização da nomenclatura em toda a aplicação será tratada como dívida técnica."
+* **VALIDAÇÃO PENDENTE:** "Validação funcional completa pelo Arquiteto Chefe no Passo 3 do roadmap."
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapeie e modifique o ficheiro `server/modules/proposal/presentation/proposalController.ts`.
+2.  Garanta que a única alteração é a propriedade de `lojaId` para `loja_id`.
+3.  Execute `get_latest_lsp_diagnostics` e corrija **TODOS** os erros ou avisos introduzidos.
+4.  Declare o seu Nível de Confiança.
+5.  Categorize o Risco como BAIXO.
+6.  Realize um teste funcional mínimo: confirme que a aplicação reinicia sem erros.
+7.  Documente a decisão.
