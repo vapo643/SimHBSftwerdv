@@ -260,6 +260,89 @@ export class DocumentsService {
       };
     }
   }
+
+  /**
+   * Delete a document (from both storage and database)
+   * PAM V1.0 - Complete document deletion implementation
+   */
+  async deleteDocument(documentId: string): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      console.log(`[DOCUMENTS_SERVICE] Deleting document with ID: ${documentId}`);
+
+      // Convert string ID to number for repository call
+      const docId = parseInt(documentId);
+      if (isNaN(docId)) {
+        return {
+          success: false,
+          error: 'ID do documento inválido',
+        };
+      }
+
+      // Get document to retrieve file path before deletion
+      const document = await this.documentsRepository.getDocumentById(docId);
+      
+      if (!document) {
+        return {
+          success: false,
+          error: 'Documento não encontrado',
+        };
+      }
+
+      // Extract file path from URL for storage deletion
+      let filePath = '';
+      try {
+        const documentsIndex = document.url.indexOf('/documents/');
+        if (documentsIndex !== -1) {
+          filePath = document.url.substring(documentsIndex + '/documents/'.length);
+        } else {
+          // Fallback: construct path from document metadata
+          const timestamp = document.createdAt ? new Date(document.createdAt).getTime() : Date.now();
+          filePath = `docs-prop/${document.propostaId}/${timestamp}-${document.nomeArquivo}`;
+        }
+
+        console.log(`[DOCUMENTS_SERVICE] Extracted file path: ${filePath}`);
+      } catch (error) {
+        console.error('[DOCUMENTS_SERVICE] Error extracting file path:', error);
+        // Continue with database deletion even if storage path extraction fails
+      }
+
+      // Delete from storage first
+      let storageDeleted = false;
+      if (filePath) {
+        storageDeleted = await this.documentsRepository.deleteFromStorage(filePath);
+        if (!storageDeleted) {
+          console.warn(`[DOCUMENTS_SERVICE] Failed to delete file from storage: ${filePath}`);
+          // Continue with database deletion even if storage deletion fails
+        }
+      }
+
+      // Delete from database
+      const databaseDeleted = await this.documentsRepository.deleteDocument(docId);
+      
+      if (!databaseDeleted) {
+        return {
+          success: false,
+          error: 'Falha ao remover documento da base de dados',
+        };
+      }
+
+      console.log(`[DOCUMENTS_SERVICE] Document deleted successfully: ${documentId}`);
+      
+      return {
+        success: true,
+      };
+
+    } catch (error: any) {
+      console.error('[DOCUMENTS_SERVICE] Error deleting document:', error);
+      return {
+        success: false,
+        error: error.message || 'Erro interno do servidor ao deletar documento',
+      };
+    }
+  }
 }
 
 // Instância padrão com Supabase Storage Adapter
