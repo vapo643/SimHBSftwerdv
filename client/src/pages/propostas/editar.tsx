@@ -190,6 +190,35 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
     },
   });
 
+  // Mutation para deletar documento - PAM V1.0
+  const deleteMutation = useMutation({
+    mutationFn: async (documentId: string) => {
+      const response = await api.delete(`/api/propostas/${propostaId}/documents/${documentId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Documento removido com sucesso!',
+        description: 'O documento foi removido da proposta.',
+      });
+      // Invalidar a query para recarregar a lista de documentos
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/documents`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao remover documento',
+        description: error.message || 'Tente novamente em alguns instantes.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleDeleteDocument = (documentId: string) => {
+    if (window.confirm('Tem certeza que deseja remover este documento?')) {
+      deleteMutation.mutate(documentId);
+    }
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
@@ -254,10 +283,15 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
                     variant="destructive"
                     size="sm"
                     className="text-xs"
-                    disabled
+                    onClick={() => handleDeleteDocument(doc.id)}
+                    disabled={deleteMutation.isPending}
                     data-testid="button-remove-document"
                   >
-                    Remover
+                    {deleteMutation.isPending ? (
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                    ) : (
+                      'Remover'
+                    )}
                   </Button>
                 </div>
               </div>
