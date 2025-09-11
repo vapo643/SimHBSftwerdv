@@ -101,6 +101,7 @@ export class DocumentsService {
           const signedUrl = await this.documentsRepository.generateSignedUrl(filePath, 604800); // 7 dias em segundos
 
           documents.push({
+            id: doc.id, // CRITICAL: Include database ID for deletion - PAM V1.0 fix
             name: doc.nomeArquivo,
             url: signedUrl || doc.url, // Fallback to original URL
             type: doc.tipo || 'application/octet-stream',
@@ -115,6 +116,7 @@ export class DocumentsService {
           );
           // Fallback to original URL
           documents.push({
+            id: doc.id, // CRITICAL: Include database ID for deletion - PAM V1.0 fix
             name: doc.nomeArquivo,
             url: doc.url,
             type: doc.tipo || 'application/octet-stream',
@@ -262,32 +264,50 @@ export class DocumentsService {
   }
 
   /**
-   * Delete a document (from both storage and database)
-   * PAM V1.0 - Complete document deletion implementation
+   * Delete a document with proper ownership validation
+   * PAM V1.0 - Complete document deletion with security validation
    */
-  async deleteDocument(documentId: string): Promise<{
+  async deleteDocumentWithValidation(propostaId: string, documentId: string): Promise<{
     success: boolean;
     error?: string;
   }> {
     try {
-      console.log(`[DOCUMENTS_SERVICE] Deleting document with ID: ${documentId}`);
+      console.log(`[DOCUMENTS_SERVICE] Deleting document ${documentId} from proposal ${propostaId}`);
 
       // Convert string ID to number for repository call
-      const docId = parseInt(documentId);
-      if (isNaN(docId)) {
+      const docId = parseInt(documentId, 10);
+      if (isNaN(docId) || docId <= 0) {
         return {
           success: false,
           error: 'ID do documento inválido',
         };
       }
 
-      // Get document to retrieve file path before deletion
+      // Verify proposal exists first
+      const proposta = await this.documentsRepository.getProposalById(propostaId);
+      if (!proposta) {
+        return {
+          success: false,
+          error: 'Proposta não encontrada',
+        };
+      }
+
+      // Get document to retrieve file path and validate ownership
       const document = await this.documentsRepository.getDocumentById(docId);
       
       if (!document) {
         return {
           success: false,
           error: 'Documento não encontrado',
+        };
+      }
+
+      // Critical security check: Verify document belongs to the specified proposal
+      if (document.propostaId !== propostaId) {
+        console.warn(`[DOCUMENTS_SERVICE] SECURITY: Attempt to delete document ${docId} from wrong proposal. Document belongs to ${document.propostaId}, request for ${propostaId}`);
+        return {
+          success: false,
+          error: 'Documento não pertence à proposta especificada',
         };
       }
 
@@ -309,13 +329,17 @@ export class DocumentsService {
         // Continue with database deletion even if storage path extraction fails
       }
 
-      // Delete from storage first
-      let storageDeleted = false;
+      // Delete from storage first (best effort - treat failures as warnings)
       if (filePath) {
-        storageDeleted = await this.documentsRepository.deleteFromStorage(filePath);
-        if (!storageDeleted) {
-          console.warn(`[DOCUMENTS_SERVICE] Failed to delete file from storage: ${filePath}`);
-          // Continue with database deletion even if storage deletion fails
+        try {
+          const storageDeleted = await this.documentsRepository.deleteFromStorage(filePath);
+          if (!storageDeleted) {
+            console.warn(`[DOCUMENTS_SERVICE] Failed to delete file from storage: ${filePath}`);
+          } else {
+            console.log(`[DOCUMENTS_SERVICE] Successfully deleted file from storage: ${filePath}`);
+          }
+        } catch (storageError) {
+          console.warn(`[DOCUMENTS_SERVICE] Storage deletion error (continuing with DB deletion): ${storageError}`);
         }
       }
 
@@ -329,19 +353,50 @@ export class DocumentsService {
         };
       }
 
-      console.log(`[DOCUMENTS_SERVICE] Document deleted successfully: ${documentId}`);
+      console.log(`[DOCUMENTS_SERVICE] Document deleted successfully: ${documentId} from proposal ${propostaId}`);
       
       return {
         success: true,
       };
 
     } catch (error: any) {
-      console.error('[DOCUMENTS_SERVICE] Error deleting document:', error);
+      console.error('[DOCUMENTS_SERVICE] Error deleting document with validation:', error);
       return {
         success: false,
         error: error.message || 'Erro interno do servidor ao deletar documento',
       };
     }
+  }
+
+  /**
+   * Delete a document (legacy method - deprecated)
+   * @deprecated Use deleteDocumentWithValidation instead for proper security
+   */
+  async deleteDocument(documentId: string): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    console.warn(`[DOCUMENTS_SERVICE] DEPRECATED: deleteDocument called without proposal validation. Use deleteDocumentWithValidation instead.`);
+    
+    // For backward compatibility, but this should not be used
+    const docId = parseInt(documentId, 10);
+    if (isNaN(docId) || docId <= 0) {
+      return {
+        success: false,
+        error: 'ID do documento inválido',
+      };
+    }
+
+    const document = await this.documentsRepository.getDocumentById(docId);
+    if (!document) {
+      return {
+        success: false,
+        error: 'Documento não encontrado',
+      };
+    }
+
+    // Call the secure version with the document's proposal ID
+    return this.deleteDocumentWithValidation(document.propostaId, documentId);
   }
 }
 

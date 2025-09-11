@@ -279,20 +279,23 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
                     <Eye className="mr-1 h-3 w-3" />
                     Ver
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="text-xs"
-                    onClick={() => handleDeleteDocument(doc.id)}
-                    disabled={deleteMutation.isPending}
-                    data-testid="button-remove-document"
-                  >
-                    {deleteMutation.isPending ? (
-                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                    ) : (
-                      'Remover'
-                    )}
-                  </Button>
+                  {/* Only show remove button for user-uploaded documents with ID */}
+                  {doc.id && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => handleDeleteDocument(doc.id)}
+                      disabled={deleteMutation.isPending}
+                      data-testid="button-remove-document"
+                    >
+                      {deleteMutation.isPending ? (
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                      ) : (
+                        'Remover'
+                      )}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

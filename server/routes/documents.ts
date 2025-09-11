@@ -80,11 +80,18 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
 /**
  * DELETE /api/propostas/:propostaId/documents/:documentoId
  * Delete a document from a proposal
- * PAM V1.0 - Complete document deletion controller
+ * PAM V1.0 - Complete document deletion controller with proper validation
  */
 export const deletePropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { documentoId } = req.params;
+    const { propostaId, documentoId } = req.params;
+
+    if (!propostaId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID da proposta é obrigatório',
+      });
+    }
 
     if (!documentoId) {
       return res.status(400).json({
@@ -93,14 +100,24 @@ export const deletePropostaDocument = async (req: AuthenticatedRequest, res: Res
       });
     }
 
-    console.log(`[DOCUMENTS_CONTROLLER] Deleting document with ID: ${documentoId}`);
+    // Validate documentoId is a positive integer
+    const docId = parseInt(documentoId, 10);
+    if (isNaN(docId) || docId <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID do documento deve ser um número positivo',
+      });
+    }
 
-    const result = await documentsService.deleteDocument(documentoId);
+    console.log(`[DOCUMENTS_CONTROLLER] Deleting document ${documentoId} from proposal ${propostaId}`);
+
+    const result = await documentsService.deleteDocumentWithValidation(propostaId, documentoId);
 
     if (result.success) {
       res.json(result);
     } else {
-      const statusCode = result.error === 'Documento não encontrado' ? 404 : 500;
+      const statusCode = result.error === 'Documento não encontrado' || 
+                        result.error === 'Documento não pertence à proposta especificada' ? 404 : 500;
       res.status(statusCode).json(result);
     }
   } catch (error: any) {
