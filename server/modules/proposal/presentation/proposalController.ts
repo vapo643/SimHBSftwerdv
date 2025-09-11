@@ -1118,7 +1118,7 @@ export class ProposalController {
 
       return res.status(200).json({
         success: true,
-        message: 'Processo de geração de boletos iniciado com sucesso',
+        message: 'Processo de geração de boletos concluído com sucesso',
       });
     } catch (error: any) {
       SafeLogger.error('[marcarPropostaComoConcluida] Error in manual boleto generation', {
