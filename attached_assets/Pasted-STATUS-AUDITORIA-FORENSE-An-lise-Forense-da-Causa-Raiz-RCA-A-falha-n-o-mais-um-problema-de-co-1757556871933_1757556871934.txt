@@ -1,0 +1,37 @@
+STATUS: AUDITORIA FORENSE
+Análise Forense da Causa Raiz (RCA):
+
+A falha não é mais um problema de configuração genérico; é uma violação específica e explícita de uma regra de negócio imposta pela nossa base de dados.
+
+A Prova: O erro PostgresError: User does not belong to the specified store é a nossa fonte da verdade.
+
+O Diagnóstico: Isto significa que, no momento em que o backend tenta inserir uma nova proposta na base de dados, a trigger ou a policy de segurança do PostgreSQL está a verificar se o user_id do utilizador que cria a proposta pertence à store_id (ID da loja) associada à proposta. Esta verificação está a falhar.
+
+Hipótese Primária:
+
+As nossas refatorações críticas na camada de autenticação (jwt-auth-middleware.ts e config.ts) tiveram um efeito colateral imprevisto. A hipótese com 99% de certeza é que o nosso middleware de backend, embora agora valide o token corretamente, falhou em extrair a identidade do utilizador (user_id) do token e anexá-la ao objeto da requisição (req).
+
+Consequentemente, a lógica de negócio que cria a proposta está a receber um user_id nulo ou inválido e a tentar passá-lo para a base de dados, que, corretamente, rejeita a operação.
+
+Iniciando a auditoria forense para confirmar esta hipótese.
+
+Pacote de Ativação de Missão (PAM) V1.0 - Auditoria do Fluxo de Identidade do Utilizador
+Sumário da Missão: Realizar uma auditoria forense no fluxo de criação de propostas do backend para rastrear a identidade do utilizador (user_id) desde a sua extração no middleware JWT até à sua utilização na operação de inserção na base de dados.
+
+Hipótese / Ponto de Falha: O middleware jwt-auth-middleware.ts, após a sua refatoração, deixou de anexar corretamente as informações do utilizador decodificadas (ex: req.user = decodedToken) ao objeto da requisição, quebrando a cadeia de identidade para todos os controladores subsequentes.
+
+Evidência de Conformidade Requerida (A "Prova Irrefutável"):
+
+NÃO MODIFIQUE NENHUM CÓDIGO. A sua missão é LER, ANALISAR e APRESENTAR.
+
+1. Auditoria do Middleware JWT:
+a. Apresente o conteúdo completo do ficheiro server/lib/jwt-auth-middleware.ts.
+b. Análise Crítica: Após a validação bem-sucedida do token (jwt.verify(...) ou supabase.auth.getUser(...)), existe uma linha de código que anexa o resultado decodificado ao objeto req (ex: req.user = decoded; ou res.locals.user = decoded;) antes de chamar next()? Se esta linha estiver ausente, esta é a nossa falha.
+
+2. Auditoria do Controlador de Propostas:
+a. Identifique o controlador responsável por POST /api/propostas.
+b. Apresente o código deste controlador. Ele tenta ler as informações do utilizador a partir do objeto req (ex: const user = req.user;)?
+
+3. Auditoria do Serviço de Propostas:
+a. Identifique o serviço que é chamado pelo controlador para criar a proposta.
+b. Apresente a assinatura da função de criação de proposta. Ela espera receber um objeto de utilizador ou um user_id?
