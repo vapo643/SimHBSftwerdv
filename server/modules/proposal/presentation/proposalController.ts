@@ -54,6 +54,22 @@ export class ProposalController {
         isValid: !isNaN(parseFloat(req.body.valorSolicitado)),
       });
 
+      // LÓGICA DE VALIDAÇÃO DE TENANT (LOJA)
+      const userStoreId = (req as any).user?.loja_id;
+      const lojaId = req.body.lojaId || userStoreId;
+
+      // VALIDAÇÃO CRÍTICA: Se nenhuma loja for determinada, a operação deve falhar.
+      if (!lojaId) {
+        SafeLogger.error('[ProposalController.create] Falha na validação de tenant: lojaId está ausente no corpo da requisição e no perfil do utilizador.', {
+          userId: (req as any).user?.id,
+          userRole: (req as any).user?.role
+        });
+        return res.status(400).json({
+          success: false,
+          error: 'Operação inválida: O utilizador autenticado não pertence a uma loja e nenhuma loja foi especificada na requisição.',
+        });
+      }
+
       // LACRE DE OURO: Mapeamento COMPLETO de todos os campos enviados pelo frontend
       const dto = {
         // ===== DADOS BÁSICOS DO CLIENTE =====
@@ -125,7 +141,7 @@ export class ProposalController {
         incluirTac: req.body.incluirTac,
 
         // ===== ADMINISTRATIVO =====
-        lojaId: req.body.lojaId || (req as any).user?.loja_id || 1,
+        lojaId: lojaId, // Utiliza a variável lojaId que foi validada
         atendenteId: req.body.atendenteId || (req as any).user?.id,
         finalidade: req.body.finalidade,
         garantia: req.body.garantia,

@@ -1,0 +1,111 @@
+ao tentar criar um a proposta da um erro! console navegador; [FRONTEND] Resposta da nova API: ObjectcetAnual: 207.18comissao: {percentual: 15.5, valor: 826.84}cronogramaPagamento: (6) [{…}, {…}, {…}, {…}, {…}, {…}]custoTotalOperacao: 1241.5699999999997iof: {diario: 78.74, adicional: 20.27, total: 99.01}parametrosUtilizados: {parceiroId: null, produtoId: 2, taxaJurosMensal: 2.85, tacValor: 10, tacTipo: 'percentual'}prazoMeses: 6tac: 533.44taxaJurosAnual: 40.10432831284445taxaJurosMensal: 2.85valorEmprestimo: 5334.43valorParcela: 1096valorTotalAPagar: 6576valorTotalFinanciado: 5966.880000000001[[Prototype]]: Object
+
+index-Cjor3oXi.js:56 [HARDENING LOG] Etapa 1: Iniciando submissão da proposta.
+
+index-Cjor3oXi.js:56 [HARDENING LOG] Etapa 2: Enviando requisição para criar proposta...
+
+index-Cjor3oXi.js:56 [PASSO 3 - ENVIO] ObjectauthorizationHeader: "Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIyYzNmZWVkMy02YjQ1LTRhNDctODAzMS05NmNkYWIwOWZiZTkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU3NTk5NjgyLCJpYXQiOjE3NTc1OTYwODIsImVtYWlsIjoicmFtb24uYmFyYm9zYUBlZWxsZXZlcHJvbW90b3JhLmNvbS5iciIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFETUlOSVNUUkFET1IifSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbF92ZXJpZmllZCI6dHJ1ZX0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTc1NDI1MTl9XSwic2Vzc2lvbl9pZCI6IjMyYjA1MDZiLWVkYzItNDhkNy05NzMxLTUzMWI2ZjNiZWIwNCIsImlzX2Fub255bW91cyI6ZmFsc2V9.ijafWJy2c4wBqqFNH135fwMXQgnjNkJRwmS8rhqgU5c"hasToken: trueisFormData: falseurl: "https://sistemasimpix.com.br/api/propostas"[[Prototype]]: Object
+
+/api/propostas:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+
+index-Cjor3oXi.js:56 [HARDENING LOG] ERRO FATAL: Falha catastrófica durante o processo de submissão. ApiError: <!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="utf-8">
+
+<title>Error</title>
+
+</head>
+
+<body>
+
+<pre>Internal Server Error</pre>
+
+</body>
+
+</html>
+
+
+
+    at Eu (index-Cjor3oXi.js:107:39517)
+
+    at async Xe (index-Cjor3oXi.js:107:40835)
+
+    at async Object.mutationFn (index-Cjor3oXi.js:679:24357)
+
+(anonymous) @ index-Cjor3oXi.js:56Understand this error
+
+index-Cjor3oXi.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : {flags: {…}, context: {…}} >> LOGS DEPLOY; 2025-09-11 10:23:15.51
+
+04d64d59
+
+User
+
+PostgresError: User does not belong to the specified store
+
+2025-09-11 10:23:15.51
+
+04d64d59
+
+User
+
+at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+
+2025-09-11 10:23:15.51
+
+04d64d59
+
+User
+
+at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+
+2025-09-11 10:23:15.51
+
+04d64d59
+
+User
+
+at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+
+2025-09-11 10:23:15.51
+
+04d64d59
+
+User
+
+at TLSSocket.emit (node:events:524:28)
+
+2025-09-11 10:23:15.51
+
+04d64d59
+
+User
+
+at addChunk (node:internal/streams/readable:561:12)
+
+2025-09-11 10:23:15.51
+
+04d64d59
+
+User
+
+at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+
+2025-09-11 10:23:15.51
+
+04d64d59
+
+User
+
+at Readable.push (node:internal/streams/readable:392:5)
+
+2025-09-11 10:23:15.51
+
+04d64d59
+
+User
+
+at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23)

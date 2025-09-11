@@ -1,0 +1,68 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Implementação de Validação de Tenant
+
+* **Sumário da Missão:** Refatorar o controlador de criação de propostas (`create`) para remover a lógica de fallback insegura de `lojaId` e introduzir uma validação explícita que garanta que o utilizador autenticado tenha uma loja associada ou que uma loja seja fornecida na requisição.
+
+* **Intenção Estratégica:** Fortalecer a integridade de dados da aplicação, garantindo que cada proposta esteja sempre associada a uma loja válida. A aplicação deve falhar de forma explícita e informativa em vez de mascarar problemas de dados com valores de fallback perigosos.
+
+* **Histórico Relevante (Consulta Obrigatória):** A análise do código-fonte e dos erros de base de dados (`PostgresError: User does not belong to the specified store`) provou que a lógica de fallback `|| 1` na determinação da `lojaId` é a causa raiz da falha de criação de propostas.
+
+---
+
+**IMPLEMENTAR:**
+Refatorar a lógica de determinação e validação da `lojaId` no método `create` do ficheiro `server/modules/proposal/presentation/proposalController.ts`.
+
+**CURRENT STATE:**
+* **Ficheiro:** `server/modules/proposal/presentation/proposalController.ts`
+* **Lógica com Falha (Insegura):**
+    ```typescript
+    // ...
+    // ===== ADMINISTRATIVO =====
+    lojaId: req.body.lojaId || (req as any).user?.loja_id || 1,
+    // ...
+    ```
+
+**EXPECTED (Estado Final de Sucesso):**
+* **Ficheiro:** `server/modules/proposal/presentation/proposalController.ts`
+* **Código Corrigido:** O método `create` deve ser refatorado para usar a seguinte lógica de validação. Substitua a linha `lojaId:` existente pela lógica abaixo e garanta que o DTO utilize a variável `lojaId` validada.
+
+    ```typescript
+    // No início do método 'create', após a resolução do 'useCase'
+    try {
+      // ...
+
+      // LÓGICA DE VALIDAÇÃO DE TENANT (LOJA)
+      const userStoreId = (req as any).user?.loja_id;
+      const lojaId = req.body.lojaId || userStoreId;
+
+      // VALIDAÇÃO CRÍTICA: Se nenhuma loja for determinada, a operação deve falhar.
+      if (!lojaId) {
+        SafeLogger.error('[ProposalController.create] Falha na validação de tenant: lojaId está ausente no corpo da requisição e no perfil do utilizador.', {
+          userId: (req as any).user?.id,
+          userRole: (req as any).user?.role
+        });
+        return res.status(400).json({
+          success: false,
+          error: 'Operação inválida: O utilizador autenticado não pertence a uma loja e nenhuma loja foi especificada na requisição.',
+        });
+      }
+
+      // LACRE DE OURO: Mapeamento COMPLETO de todos os campos enviados pelo frontend
+      const dto = {
+        // ... (todos os outros campos do DTO) ...
+
+        // ===== ADMINISTRATIVO =====
+        lojaId: lojaId, // Utiliza a variável lojaId que foi validada
+        atendenteId: req.body.atendenteId || (req as any).user?.id,
+        // ... (resto dos campos administrativos) ...
+      };
+      
+      // ... (resto do método create) ...
+
+    } catch (error: any) {
+      next(error);
+    }
+    ```
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a refatoração e realize o protocolo 7-CHECK completo, garantindo **ZERO** novos diagnósticos de LSP e a estabilidade da aplicação.
