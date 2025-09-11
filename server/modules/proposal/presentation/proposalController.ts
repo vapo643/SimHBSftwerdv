@@ -54,20 +54,77 @@ export class ProposalController {
         isValid: !isNaN(parseFloat(req.body.valorSolicitado)),
       });
 
-      // LÓGICA DE VALIDAÇÃO DE TENANT (LOJA)
-      const userStoreId = (req as any).user?.loja_id;
-      const lojaId = req.body.lojaId || userStoreId;
-
-      // VALIDAÇÃO CRÍTICA: Se nenhuma loja for determinada, a operação deve falhar.
-      if (!lojaId) {
-        SafeLogger.error('[ProposalController.create] Falha na validação de tenant: lojaId está ausente no corpo da requisição e no perfil do utilizador.', {
-          userId: (req as any).user?.id,
-          userRole: (req as any).user?.role
-        });
-        return res.status(400).json({
+      // GUARD DE AUTENTICAÇÃO: Verificar se usuário está autenticado
+      if (!(req as any).user) {
+        SafeLogger.error('[ProposalController.create] Tentativa de acesso não autenticado detectada.');
+        return res.status(401).json({
           success: false,
-          error: 'Operação inválida: O utilizador autenticado não pertence a uma loja e nenhuma loja foi especificada na requisição.',
+          error: 'Usuário não autenticado.',
         });
+      }
+
+      // LÓGICA DE VALIDAÇÃO DE TENANT (LOJA) COM REGRA ESPECÍFICA PARA ADMIN + SEGURANÇA
+      const userRole = (req as any).user.role;
+      const userStoreId = (req as any).user.loja_id;
+      let lojaId: number; // Será determinada pela lógica abaixo
+
+      // VALIDAÇÃO CRÍTICA REVISADA COM REGRA PARA ADMIN E PROTEÇÃO DE TENANT
+      if (userRole === 'ADMINISTRADOR') {
+        // Se for Admin, a loja DEVE vir obrigatoriamente no corpo da requisição
+        if (!req.body.lojaId) {
+          SafeLogger.error('[ProposalController.create] Falha na validação de tenant: Administrador não especificou uma lojaId na requisição.', {
+            userId: (req as any).user?.id
+          });
+          return res.status(400).json({
+            success: false,
+            error: 'Operação inválida: Administradores devem especificar uma loja para criar propostas.',
+          });
+        }
+        
+        // Validar e normalizar lojaId do admin
+        const adminLojaId = parseInt(req.body.lojaId);
+        if (isNaN(adminLojaId) || adminLojaId <= 0) {
+          SafeLogger.error('[ProposalController.create] Falha na validação: lojaId inválido fornecido pelo administrador.', {
+            userId: (req as any).user?.id,
+            providedLojaId: req.body.lojaId
+          });
+          return res.status(400).json({
+            success: false,
+            error: 'Operação inválida: ID da loja deve ser um número positivo.',
+          });
+        }
+        lojaId = adminLojaId;
+      } else {
+        // PROTEÇÃO DE TENANT: Para utilizadores não-admin, IGNORAR req.body.lojaId para evitar spoofing
+        // Normalizar tipos para comparação robusta (evitar falsos positivos string vs number)
+        const attemptedLojaId = req.body.lojaId ? parseInt(req.body.lojaId) : null;
+        const normalizedUserStoreId = userStoreId ? parseInt(userStoreId) : null;
+        
+        // Detectar tentativa de override e registrar evento de segurança
+        if (attemptedLojaId && attemptedLojaId !== normalizedUserStoreId) {
+          SafeLogger.error('[SECURITY ALERT] Tentativa de tenant spoofing detectada: utilizador não-admin tentou especificar lojaId diferente do perfil.', {
+            userId: (req as any).user.id,
+            userRole: userRole,
+            userStoreId: normalizedUserStoreId,
+            attemptedLojaId: attemptedLojaId
+          });
+          return res.status(403).json({
+            success: false,
+            error: 'Operação não autorizada: Utilizadores não podem criar propostas para outras lojas.',
+          });
+        }
+        
+        // Para utilizadores padrão, usar APENAS a loja do perfil
+        if (!normalizedUserStoreId) {
+          SafeLogger.error('[ProposalController.create] Falha na validação de tenant: Utilizador não pertence a uma loja.', {
+            userId: (req as any).user.id
+          });
+          return res.status(400).json({
+            success: false,
+            error: 'Operação inválida: O utilizador autenticado não pertence a uma loja.',
+          });
+        }
+        lojaId = normalizedUserStoreId;
       }
 
       // LACRE DE OURO: Mapeamento COMPLETO de todos os campos enviados pelo frontend

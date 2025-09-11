@@ -1,0 +1,71 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Implementação de Regra de Negócio (Admin/Loja)
+
+* **Sumário da Missão:** Refatorar o controlador de criação de propostas (`create`) para impor uma nova regra de negócio: se o utilizador autenticado tiver a `role` de `ADMINISTRADOR`, a `lojaId` deve ser obrigatoriamente fornecida no corpo da requisição (`req.body`).
+
+* **Intenção Estratégica:** Aumentar a segurança e a integridade dos dados, garantindo que mesmo os administradores sejam explícitos sobre o "tenant" (loja) ao qual uma nova proposta pertence. A aplicação deve rejeitar ativamente tentativas de criar propostas "órfãs" por parte de administradores.
+
+* **Histórico Relevante (Consulta Obrigatória):** A implementação anterior introduziu uma validação de "tenant" que funciona corretamente para utilizadores padrão. Esta missão expande essa validação para adicionar um caso especial e mais rigoroso para a `role` de `ADMINISTRADOR`.
+
+---
+
+**IMPLEMENTAR:**
+Alterar a lógica de validação de "tenant" no método `create` do ficheiro `server/modules/proposal/presentation/proposalController.ts` para impor a nova regra para administradores.
+
+**CURRENT STATE:**
+* **Ficheiro:** `server/modules/proposal/presentation/proposalController.ts`
+* **Lógica Atual:**
+    ```typescript
+    const userStoreId = (req as any).user?.loja_id;
+    const lojaId = req.body.lojaId || userStoreId;
+
+    if (!lojaId) {
+      // ... retorna erro 400
+    }
+    ```
+
+**EXPECTED (Estado Final de Sucesso):**
+* **Ficheiro:** `server/modules/proposal/presentation/proposalController.ts`
+* **Código Corrigido:** O método `create` deve ser refatorado para usar a seguinte lógica de validação, que diferencia o comportamento com base na `role` do utilizador.
+
+    ```typescript
+    // No método 'create', substitua a lógica de validação de tenant existente por esta:
+    
+    const userRole = (req as any).user?.role;
+    const userStoreId = (req as any).user?.loja_id;
+    let lojaId; // Será determinada pela lógica abaixo
+
+    // VALIDAÇÃO CRÍTICA REVISADA COM REGRA PARA ADMIN
+    if (userRole === 'ADMINISTRADOR') {
+        // Se for Admin, a loja DEVE vir obrigatoriamente no corpo da requisição
+        if (!req.body.lojaId) {
+            SafeLogger.error('[ProposalController.create] Falha na validação de tenant: Administrador não especificou uma lojaId na requisição.', { userId: (req as any).user?.id });
+            return res.status(400).json({
+                success: false,
+                error: 'Operação inválida: Administradores devem especificar uma loja para criar propostas.',
+            });
+        }
+        lojaId = req.body.lojaId;
+    } else {
+        // Para outros utilizadores, a loja vem do perfil (ou de um override no body, se aplicável)
+        lojaId = req.body.lojaId || userStoreId;
+        if (!lojaId) {
+            SafeLogger.error('[ProposalController.create] Falha na validação de tenant: Utilizador não pertence a uma loja.', { userId: (req as any).user?.id });
+            return res.status(400).json({
+                success: false,
+                error: 'Operação inválida: O utilizador autenticado não pertence a uma loja.',
+            });
+        }
+    }
+    
+    // O resto do código continua, utilizando a variável 'lojaId' que foi validada acima.
+    // Exemplo no DTO:
+    const dto = {
+        // ...
+        lojaId: lojaId,
+        // ...
+    };
+    ```
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a refatoração e realize o protocolo 7-CHECK completo, garantindo **ZERO** novos diagnósticos de LSP e a estabilidade da aplicação.
