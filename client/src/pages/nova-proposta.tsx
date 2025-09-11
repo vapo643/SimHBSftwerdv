@@ -127,6 +127,20 @@ export default function NovaProposta() {
   
   // Authentication and user role
   const { user } = useAuth();
+  
+  // --- INÍCIO DO BLOCO DE DIAGNÓSTICO OBRIGATÓRIO ---
+  console.log('--- DIAGNÓSTICO DE ROLE DE UTILIZADOR ---');
+  console.log('TIPO DO OBJETO user:', typeof user);
+  console.log('CONTEÚDO BRUTO DO user:', JSON.stringify(user, null, 2));
+  if (user) {
+    console.log('CHAVES DISPONÍVEIS NO OBJETO user:', Object.keys(user));
+    console.log('VALOR de user.role:', user.role);
+  } else {
+    console.log('Objeto user é nulo ou indefinido na renderização.');
+  }
+  console.log('--- FIM DO DIAGNÓSTICO ---');
+  // --- FIM DO BLOCO DE DIAGNÓSTICO OBRIGATÓRIO ---
+  
   const isAdmin = user?.role === 'ADMINISTRADOR';
   
   // Fetch stores for admin users
