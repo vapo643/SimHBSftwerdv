@@ -1,0 +1,47 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Refinamento de UI (Analista)**
+
+* **Sumário da Missão:** Refatorar o componente de frontend da página `/credito/analise` para remover campos financeiros específicos da visualização do analista.
+
+* **Intenção Estratégica:** Simplificar a interface do analista, focando a sua atenção nos dados mais relevantes para a tomada de decisão e ocultando informações financeiras sensíveis, conforme a regra de negócio definida.
+
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria forense identificou a localização exata dos campos a serem removidos no ficheiro `client/src/pages/credito/analise.tsx`. Com a correção do Passo 1, a fonte de dados está agora correta, permitindo-nos executar esta modificação de UI com segurança.
+
+---
+
+**IMPLEMENTAR:**
+Remover os blocos de código JSX que renderizam os campos "Taxa de Juros", "TAC" e "IOF".
+
+**FICHEIRO ALVO:**
+`client/src/pages/credito/analise.tsx`
+
+**AÇÃO REQUERIDA:**
+No ficheiro alvo, localize e remova completamente os seguintes blocos de código JSX:
+
+1.  **Bloco "Taxa de Juros" (Linhas 370-376 aprox.):**
+    ```jsx
+    <strong>Taxa de Juros:</strong>{' '}
+    {(() => {
+      const taxa = safeRender(propostaMapeada.condicoes.taxaJuros);
+      return taxa !== 'N/A' && !isNaN(Number(taxa))
+        ? `${Number(taxa).toFixed(2)}%`
+        : taxa;
+    })()}
+    ```
+
+2.  **Bloco "TAC" (Linhas 378-384 aprox.):**
+    ```jsx
+    <strong>TAC:</strong> {safeRender(propostaMapeada.condicoes.valorTac)}
+    {safeRender(propostaMapeada.condicoes.tacTipo) === 'percentual' &&
+    safeRender(propostaMapeada.condicoes.valorTac) !== 'N/A'
+      ? '%'
+      : ''}
+    ```
+
+3.  **Bloco "IOF" (Linha 386 aprox.):**
+    ```jsx
+    <strong>IOF:</strong> {safeRender(propostaMapeada.condicoes.valorIof)}
+    ```
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a remoção dos blocos de código e realize o protocolo 7-CHECK completo, garantindo **ZERO** novos diagnósticos de LSP e que a aplicação reinicia e renderiza a página de análise sem erros.

@@ -367,25 +367,6 @@ const AnaliseManualPage: React.FC = () => {
                 <strong>Garantia:</strong> {safeRender(propostaMapeada.condicoes.garantia)}
               </p>
               <p>
-                <strong>Taxa de Juros:</strong>{' '}
-                {(() => {
-                  const taxa = safeRender(propostaMapeada.condicoes.taxaJuros);
-                  return taxa !== 'N/A' && !isNaN(Number(taxa))
-                    ? `${Number(taxa).toFixed(2)}%`
-                    : taxa;
-                })()}
-              </p>
-              <p>
-                <strong>TAC:</strong> {safeRender(propostaMapeada.condicoes.valorTac)}
-                {safeRender(propostaMapeada.condicoes.tacTipo) === 'percentual' &&
-                safeRender(propostaMapeada.condicoes.valorTac) !== 'N/A'
-                  ? '%'
-                  : ''}
-              </p>
-              <p>
-                <strong>IOF:</strong> {safeRender(propostaMapeada.condicoes.valorIof)}
-              </p>
-              <p>
                 <strong>Valor Total Financiado:</strong>{' '}
                 {safeRender(propostaMapeada.condicoes.valorTotalFinanciado)}
               </p>
