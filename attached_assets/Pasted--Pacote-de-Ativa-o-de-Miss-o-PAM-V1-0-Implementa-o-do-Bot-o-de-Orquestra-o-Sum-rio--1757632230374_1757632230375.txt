@@ -1,0 +1,34 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Implementação do Botão de Orquestração
+
+* **Sumário da Missão:** Implementar a funcionalidade de frontend para o botão "Marcar como Concluída" na página de `Formalização`, incluindo a sua renderização condicional e a conexão com o novo endpoint de orquestração do backend.
+
+* **Intenção Estratégica:** Completar o fluxo de negócio de avanço manual de status, fornecendo aos utilizadores autorizados uma interface clara para acionar a geração de boletos e progredir a proposta na `timeline` de formalização.
+
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior implementou com sucesso o endpoint `PUT /api/propostas/:id/marcar-concluida`, que está agora pronto para ser consumido pelo frontend.
+
+---
+
+**IMPLEMENTAR:**
+Adicionar e conectar a lógica para o botão "Marcar como Concluída" no frontend.
+
+**LÓGICA DE EXECUÇÃO (FRONTEND):**
+
+1.  **Componente Alvo:**
+    * `client/src/pages/formalizacao.tsx`.
+
+2.  **Lógica de Renderização Condicional:**
+    * Dentro do componente, aceda à `role` do utilizador a partir do `AuthContext`.
+    * Para cada proposta na lista, renderize um novo botão "Marcar como Concluída" (ou similar).
+    * Este botão só deve estar visível e ativo se **ambas** as seguintes condições forem verdadeiras:
+        * A `role` do utilizador é `ATENDENTE`, `ADMINISTRADOR` ou `GERENTE`.
+        * O `status` da proposta atual é um dos seguintes: `AGUARDANDO_ASSINATURA`, `ASSINATURA_PENDENTE`, ou `ASSINATURA_CONCLUIDA`.
+
+3.  **Lógica de Ação (`onClick`):**
+    * Crie uma nova `mutation` (usando `useMutation` do TanStack Query) que será acionada pelo clique no botão.
+    * A `mutation` deve fazer uma chamada `PUT` para o novo endpoint: `/api/propostas/{proposta.id}/marcar-concluida`.
+    * No `onSuccess` da `mutation`, invalide as queries relevantes (ex: `queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] })`) para que a lista de propostas na UI seja atualizada automaticamente com o novo status (`BOLETOS_EMITIDOS`).
+    * Implemente feedback visual para o utilizador (ex: desativar o botão durante a chamada e exibir `toasts` de sucesso ou erro).
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a implementação completa do frontend e realize o protocolo 7-CHECK, garantindo **ZERO** novos diagnósticos de LSP e a estabilidade da aplicação.

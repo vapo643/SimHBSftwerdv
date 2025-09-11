@@ -738,6 +738,42 @@ export default function Formalizacao() {
     },
   });
 
+  // 🎯 PAM V1.0: Nova mutation para orquestração manual de boletos
+  const marcarComoConcluida = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest(`/api/propostas/${propostaId}/marcar-concluida`, {
+        method: 'PUT',
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Sucesso',
+        description: 'Processo de geração de boletos iniciado com sucesso',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/propostas', propostaId],
+      });
+      // Invalidate the specific detail query key
+      queryClient.invalidateQueries({
+        queryKey: ['/api/propostas', propostaId, 'formalizacao'],
+      });
+      // Also invalidate the formalization list
+      queryClient.invalidateQueries({
+        queryKey: ['/api/propostas/formalizacao'],
+      });
+      // Refetch current proposal to get updated status
+      refetch();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro',
+        description: error?.message || 'Erro ao marcar proposta como concluída',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const formatCurrency = (value: string | number) => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     return new Intl.NumberFormat('pt-BR', {
@@ -904,7 +940,7 @@ export default function Formalizacao() {
           table: 'propostas',
           filter: `id=eq.${propostaId}`, // Filtrar apenas esta proposta
         },
-        (payload) => {
+        (payload: any) => {
           console.log('📡 [REALTIME] Evento recebido:', payload);
 
           if (payload.eventType === 'UPDATE') {
@@ -941,7 +977,7 @@ export default function Formalizacao() {
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         if (status === 'SUBSCRIBED') {
           console.log('✅ [REALTIME] Conectado ao canal de atualizações');
         } else if (status === 'CHANNEL_ERROR') {
@@ -3092,6 +3128,27 @@ export default function Formalizacao() {
                     {updateFormalizacao.isPending ? 'Atualizando...' : 'Atualizar Status'}
                   </Button>
                 </form>
+
+                {/* 🎯 PAM V1.0: Botão "Marcar como Concluída" - Orquestração Manual */}
+                {/* Renderização condicional baseada em role e status */}
+                {(user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR' || user?.role === 'GERENTE') &&
+                  (proposta.status === 'AGUARDANDO_ASSINATURA' || 
+                   proposta.status === 'ASSINATURA_PENDENTE' || 
+                   proposta.status === 'ASSINATURA_CONCLUIDA') && (
+                  <div className="mt-4 border-t border-gray-600 pt-4">
+                    <Button
+                      onClick={() => marcarComoConcluida.mutate()}
+                      className="w-full bg-orange-600 hover:bg-orange-700"
+                      disabled={marcarComoConcluida.isPending}
+                      data-testid="button-marcar-concluida"
+                    >
+                      {marcarComoConcluida.isPending ? 'Processando...' : 'Marcar como Concluída'}
+                    </Button>
+                    <p className="mt-2 text-xs text-gray-400 text-center">
+                      Inicia o processo de geração automática de boletos
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
