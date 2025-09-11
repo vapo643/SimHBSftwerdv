@@ -1,0 +1,277 @@
+front da tela de deploy voltou porem permanece quebrado. o menu todo sumiu, todas as propostas sumiram e todos os dados. o console naveagdor nao tem nenhum erro; 🚀 [AUTH INIT] Inicializando contexto de autenticação
+
+content-script.js:22 Document already loaded, running initialization immediately
+
+content-script.js:4 Attempting to initialize AdUnit
+
+content-script.js:6 AdUnit initialized successfully
+
+index-Dj7h0Ie9.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+
+index-Dj7h0Ie9.js:56 [API Client] After dual-key transformation: Object
+
+index-Dj7h0Ie9.js:56 🔍 [AUTH INITIAL] Sessão inicial obtida Object
+
+index-Dj7h0Ie9.js:56 🎯 [AUTH INITIAL] Chamando fetchUserProfile para sessão inicial
+
+index-Dj7h0Ie9.js:56 🔒 [AUTH LOCK] fetchUserProfile já está em execução, ignorando chamada duplicada
+
+index-Dj7h0Ie9.js:56 🔐 [AUTH EVENT] INITIAL_SESSION Object
+
+index-Dj7h0Ie9.js:56 🔐 [AUTH EVENT] SIGNED_IN Object
+
+index-Dj7h0Ie9.js:56 🎯 [AUTH EVENT] Chamando fetchUserProfile para evento SIGNED_IN
+
+index-Dj7h0Ie9.js:56 🔒 [AUTH LOCK] fetchUserProfile já está em execução, ignorando chamada duplicada
+
+index-Dj7h0Ie9.js:56 [PASSO 1 - LOGIN] ObjectaccessToken: "eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIyYzNmZWVkMy02YjQ1LTRhNDctODAzMS05NmNkYWIwOWZiZTkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU3NTU1NDI5LCJpYXQiOjE3NTc1NTE4MjksImVtYWlsIjoicmFtb24uYmFyYm9zYUBlZWxsZXZlcHJvbW90b3JhLmNvbS5iciIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFETUlOSVNUUkFET1IifSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbF92ZXJpZmllZCI6dHJ1ZX0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTc1NTE4Mjl9XSwic2Vzc2lvbl9pZCI6ImMxNmYzNGI4LWVmZDgtNDgyMy04OWVkLWE3M2ViNTE3NDA1NSIsImlzX2Fub255bW91cyI6ZmFsc2V9.3cyKXMBvVanLcO90BVF71U5qdu8Q4VyUDTfj3ax5MCA"expiresAt: 1757555429tokenLength: 783[[Prototype]]: Object
+
+index-Dj7h0Ie9.js:56 DEBUG - First 3 proposals values: Array(0)length: 0[[Prototype]]: Array(0)
+
+index-Dj7h0Ie9.js:56 🔐 [TOKEN MANAGER] Fresh token obtained, length: 783                                   mas ja os logs do deploy tem algun s(ignora os do redis); 2025-09-10 21:50:11.97
+
+7ac23d80
+
+User
+
+' "status": 400\n' +
+
+2025-09-10 21:50:11.97
+
+7ac23d80
+
+User
+
+'}'
+
+2025-09-10 21:50:11.97
+
+7ac23d80
+
+User
+
+}
+
+2025-09-10 21:50:11.97
+
+7ac23d80
+
+User
+
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+
+2025-09-10 21:50:11.97
+
+7ac23d80
+
+User
+
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.59.230.231 | endpoint=/api/origination/context
+
+2025-09-10 21:50:16.21
+
+7ac23d80
+
+User
+
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+
+2025-09-10 21:50:16.21
+
+7ac23d80
+
+User
+
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+[JWT DEBUG] Falha na validação. Erro completo: {
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+message: 'Auth session missing!',
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+mode: 'SUPABASE',
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+fullError: '{\n' +
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+' "__isAuthError": true,\n' +
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+' "name": "AuthSessionMissingError",\n' +
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+' "status": 400\n' +
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+'}'
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+}
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+
+2025-09-10 21:50:16.72
+
+7ac23d80
+
+User
+
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.59.230.231 | endpoint=/api/origination/context
+
+2025-09-10 21:50:17.05
+
+7ac23d80
+
+User
+
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+
+2025-09-10 21:50:17.05
+
+7ac23d80
+
+User
+
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+[JWT DEBUG] Falha na validação. Erro completo: {
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+message: 'Auth session missing!',
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+mode: 'SUPABASE',
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+fullError: '{\n' +
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+' "__isAuthError": true,\n' +
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+' "name": "AuthSessionMissingError",\n' +
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+' "status": 400\n' +
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+'}'
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+}
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+
+2025-09-10 21:50:17.54
+
+7ac23d80
+
+User
+
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.59.230.231 | endpoint=/api/origination/context
