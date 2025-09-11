@@ -1,0 +1,101 @@
+Confirmado. Aprovação do "Roadmap de Implementação" recebida.
+
+Iniciando a Fase 4: Execução Cirúrgica e Faseada. A primeira ação é a mais crítica: corrigir a causa raiz da falha de autenticação.
+
+Roadmap Ativo e Detalhado
+[🎯 EM EXECUÇÃO] Passo 1: Corrigir a Configuração de Ambiente do Cliente Supabase (Causa Raiz)
+
+[PENDENTE] Passo 2: Aumentar o Rate Limit do Backend (Estabilização)
+
+[PENDENTE] Passo 3: Refatorar a Lógica de Autenticação para Prevenir Loops (Resiliência)
+
+[PENDENTE] Passo 4: Otimizar e Controlar a Verbosez dos Logs (Limpeza)
+
+[PENDENTE] Passo 5: Validação Funcional Completa
+
+Gero agora o Pacote de Ativação de Missão (PAM) para o Passo 1.
+
+Por favor, copie o conteúdo exato do bloco Markdown abaixo e submeta-o ao Agente Replit, com o modo High Power (Claude Opus) ativado, devido à natureza crítica da missão.
+
+Pacote de Ativação de Missão (PAM) V1.0 - Correção de Configuração de Ambiente
+Sumário da Missão: Refatorar a inicialização do cliente Supabase no frontend para que seja sensível ao ambiente de execução, garantindo que as credenciais corretas de produção (PROD_) sejam utilizadas no ambiente de deploy.
+
+Intenção Estratégica: Resolver a causa raiz da cascata de falhas de autenticação e dos erros 429. Ao fornecer as credenciais corretas ao cliente Supabase, restauramos a camada de comunicação fundamental entre o frontend e os serviços de backend, permitindo a estabilização completa do sistema.
+
+Histórico Relevante (Consulta Obrigatória): A auditoria forense provou que o ficheiro client/src/lib/supabase.ts está a utilizar variáveis de ambiente exclusivas de desenvolvimento (VITE_...). Estas variáveis não existem no ambiente de produção (deploy), causando falhas de autenticação imediatas, que por sua vez desencadeiam um loop de retentativas no AuthContext.tsx, resultando no bloqueio de toda a aplicação por 'rate limiting'.
+
+Modelo Mental: Pense neste ficheiro como o "passaporte" do frontend. Atualmente, ele está a apresentar um passaporte de 'desenvolvimento' na fronteira de 'produção', sendo barrado. A sua missão é trocar o passaporte, implementando uma lógica que verifica se a aplicação está em modo de produção (import.meta.env.PROD) e, nesse caso, utiliza as credenciais de produção (process.env.PROD_...).
+
+Riscos Antecipados e Contramedidas: CRÍTICO. A configuração incorreta de credenciais de produção manterá o sistema inoperacional. A contramedida é a implementação exata do código fornecido e a validação rigorosa através do protocolo 7-CHECK.
+
+IMPLEMENTAR:
+Refatorar a inicialização do cliente Supabase em client/src/lib/supabase.ts para ser sensível ao ambiente e carregar as secrets PROD_SUPABASE_URL e PROD_SUPABASE_ANON_KEY quando em produção.
+
+CURRENT STATE:
+
+Ficheiro: client/src/lib/supabase.ts
+
+Lógica com Falha:
+
+TypeScript
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+Evidência Bruta: Este código falha em produção porque as variáveis VITE_... não estão definidas no ambiente de deploy, resultando em credenciais vazias.
+
+EXPECTED (Estado Final de Sucesso):
+
+Ficheiro: client/src/lib/supabase.ts
+
+Código Corrigido: A inicialização deve ser refatorada para corresponder exatamente à seguinte implementação, que deteta o ambiente de produção e carrega as secrets corretas.
+
+TypeScript
+
+import { createClient } from '@supabase/supabase-js';
+
+// Lógica sensível ao ambiente para carregar as credenciais corretas.
+// Vite expõe `import.meta.env.PROD` como `true` no build de produção.
+// As secrets do Replit (PROD_) estão disponíveis via `process.env`.
+const supabaseUrl = import.meta.env.PROD
+  ? process.env.PROD_SUPABASE_URL
+  : import.meta.env.VITE_SUPABASE_URL;
+
+const supabaseAnonKey = import.meta.env.PROD
+  ? process.env.PROD_SUPABASE_ANON_KEY
+  : import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Validação explícita para falhar rapidamente se as secrets não forem carregadas.
+if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('--- ERRO CRÍTICO DE CONFIGURAÇÃO FRONTEND ---');
+    console.error('Variáveis de ambiente Supabase (URL ou Anon Key) não estão configuradas para o ambiente atual.');
+    // Lança um erro para impedir a inicialização da aplicação com configuração inválida.
+    throw new Error('Configuração do Supabase em falta. A aplicação não pode iniciar.');
+}
+
+// Inicializa e exporta o cliente Supabase.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: 95%
+
+RISCOS IDENTIFICADOS: CRÍTICO. Uma falha nesta implementação manterá o sistema inteiro inoperacional.
+
+DECISÕES TÉCNICAS ASSUMIDAS: "A deteção do ambiente será feita via import.meta.env.PROD, que é o padrão da indústria para ambientes Vite. A aplicação irá falhar ruidosamente (throw new Error) se as secrets não forem encontradas, em vez de continuar num estado quebrado."
+
+VALIDAÇÃO PENDENTE: "Validação funcional completa pelo Arquiteto Chefe no Passo 5 do roadmap."
+
+PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:
+
+Mapeie e modifique o ficheiro client/src/lib/supabase.ts.
+
+Garanta que a nova lógica de deteção de ambiente e carregamento de secrets substitui completamente a lógica antiga.
+
+Execute get_latest_lsp_diagnostics e corrija TODOS os erros ou avisos introduzidos.
+
+Declare o seu Nível de Confiança.
+
+Categorize o Risco como CRÍTICO.
+
+Realize um teste funcional mínimo: confirme que a aplicação reinicia sem o erro Configuração do Supabase em falta. nos logs.
+
+Documente a decisão de usar import.meta.env.PROD como o seletor de ambiente.

@@ -31,12 +31,26 @@ export const createClientSupabaseClient = () => {
 
   // Check if we're in a browser environment before accessing import.meta.env
   if (typeof window !== 'undefined') {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    // Lógica sensível ao ambiente para carregar as credenciais corretas.
+    // Vite expõe `import.meta.env.PROD` como `true` no build de produção.
+    // As secrets do Replit (PROD_) estão disponíveis via `process.env`.
+    const supabaseUrl = import.meta.env.PROD
+      ? process.env.PROD_SUPABASE_URL
+      : import.meta.env.VITE_SUPABASE_URL;
 
+    const supabaseAnonKey = import.meta.env.PROD
+      ? process.env.PROD_SUPABASE_ANON_KEY
+      : import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    // Validação explícita para falhar rapidamente se as secrets não forem carregadas.
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.warn('⚠️ Supabase client credentials not configured. Some features may be limited.');
-      return null as any;
+      console.error('--- ERRO CRÍTICO DE CONFIGURAÇÃO FRONTEND ---');
+      console.error('Variáveis de ambiente Supabase (URL ou Anon Key) não estão configuradas para o ambiente atual.');
+      console.error('Ambiente detectado:', import.meta.env.PROD ? 'PRODUÇÃO' : 'DESENVOLVIMENTO');
+      console.error('URL configurada:', !!supabaseUrl);
+      console.error('Key configurada:', !!supabaseAnonKey);
+      // Lança um erro para impedir a inicialização da aplicação com configuração inválida.
+      throw new Error('Configuração do Supabase em falta. A aplicação não pode iniciar.');
     }
 
     clientSupabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
