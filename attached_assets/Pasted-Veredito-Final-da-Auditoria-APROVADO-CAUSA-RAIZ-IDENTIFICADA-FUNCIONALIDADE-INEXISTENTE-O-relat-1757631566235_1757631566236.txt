@@ -1,0 +1,49 @@
+Veredito Final da Auditoria: APROVADO. CAUSA RAIZ IDENTIFICADA: FUNCIONALIDADE INEXISTENTE.
+
+O relatório de auditoria do Agente é excecionalmente detalhado e expõe a realidade da situação: a funcionalidade "Marcar como Concluída", como a definimos, não existe e precisa de ser construída.
+
+Análise do Arquiteto:
+
+A sua análise, Arquiteto Chefe, está correta. A auditoria revela os seguintes pontos críticos:
+
+Funcionalidade Inexistente: Não há um botão "Marcar como Concluída" na UI, nem um endpoint de API dedicado para a orquestração manual. A funcionalidade deve ser construída do zero.
+
+Lógica Desconectada: A infraestrutura para gerar boletos (InterBankService, triggerBoletoGeneration) existe, mas está atualmente acoplada apenas ao webhook automático do ClickSign. Ela não está acessível a partir de uma ação manual na UI.
+
+Bug Crítico de Status: A lógica existente em triggerBoletoGeneration contém um bug que impede a proposta de avançar para o status BOLETOS_EMITIDOS, atribuindo incorretamente o status contratos_assinados.
+
+A auditoria está concluída. Passamos para a arquitetura da solução, que será uma missão de construção e não apenas de correção.
+
+Fase 3: Arquitetura da Solução (O Plano de Batalha)
+O roadmap irá priorizar a correção do bug de status existente e, em seguida, a construção da nova funcionalidade de orquestração manual.
+
+Roadmap de Implementação Faseado
+Nível da Missão: Nível 4: Arquitetural
+
+Ferramenta Recomendada: High Power (Claude Opus) + Extended Thinking
+
+[PENDENTE] Passo 1: Corrigir o Bug de Progressão de Status
+
+Ficheiro Alvo: server/services/clickSignWebhookService.ts
+
+Ação: Corrigir a lógica na função triggerBoletoGeneration para que, após a geração bem-sucedida dos boletos, o status da proposta seja atualizado para BOLETOS_EMITIDOS.
+
+Justificativa: Corrige um bug fundamental na timeline de status, garantindo que o fluxo automático (via webhook) e o futuro fluxo manual funcionem sobre uma base correta.
+
+[PENDENTE] Passo 2: Construir o Endpoint de Orquestração Manual (Backend)
+
+Ação: Criar um novo endpoint (ex: PUT /api/propostas/:id/marcar-concluida) que verifique as permissões do utilizador (ATENDENTE, ADMINISTRADOR, GERENTE), valide se o status atual da proposta está numa das etapas do ClickSign e, se tudo estiver correto, chame a função (já corrigida) triggerBoletoGeneration.
+
+Justificativa: Cria a "ponte" de backend necessária para a nova funcionalidade.
+
+[PENDENTE] Passo 3: Implementar o Botão de Ação (Frontend)
+
+Ação: Adicionar um novo botão "Marcar como Concluída" na UI (formalizacao.tsx), que só fica visível para as roles autorizadas e para propostas nos status corretos. Conectar o onClick deste botão ao novo endpoint.
+
+Justificativa: Constrói a interface de utilizador para a nova funcionalidade.
+
+[PENDENTE] Passo 4: Validação Funcional Completa
+
+Executor: Humano (QA)
+
+Ação: Validar o fluxo completo de avanço manual de status.

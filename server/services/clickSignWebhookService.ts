@@ -727,11 +727,16 @@ class ClickSignWebhookService {
 
       // Log final result
       if (successfulBoletos.length > 0) {
+        // 🎯 PAM V1.0 FIX: Atualizar status da proposta para BOLETOS_EMITIDOS
+        await storage.updateProposta(proposta.id, {
+          status: 'BOLETOS_EMITIDOS',
+        });
+
         await storage.createPropostaLog({
           propostaId: proposta.id,
           autorId: 'clicksign-webhook',
           statusAnterior: proposta.status,
-          statusNovo: 'contratos_assinados',
+          statusNovo: 'BOLETOS_EMITIDOS',
           observacao: `${successfulBoletos.length} boletos gerados automaticamente após assinatura CCB (parcelas: ${successfulBoletos.join(', ')})`,
         });
       }
@@ -741,7 +746,7 @@ class ClickSignWebhookService {
           propostaId: proposta.id,
           autorId: 'clicksign-webhook',
           statusAnterior: proposta.status,
-          statusNovo: 'contratos_assinados',
+          statusNovo: successfulBoletos.length > 0 ? 'BOLETOS_EMITIDOS' : 'contratos_assinados',
           observacao: `Erro ao gerar ${failedBoletos.length} boletos (parcelas: ${failedBoletos.join(', ')})`,
         });
       }
