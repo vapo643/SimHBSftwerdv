@@ -345,8 +345,18 @@ export class ProposalRepository implements IProposalRepository {
 
     console.log('🔍 [findById] Aggregated observacoes:', observacoes.length);
 
-    // CORREÇÃO CRÍTICA PAM V2.0: Retornar instância de domain com observações agregadas
-    const mappedData = this.mapToDomain(proposalData, observacoes);
+    // CORREÇÃO CRÍTICA PAM V1.0: Usar mapeador correto para incluir dados relacionados
+    // Estruturar dados para mapToDomainWithJoinedData que espera formato específico
+    const structuredData = {
+      proposta: proposalData,
+      produto: { nomeProduto: proposalData.produto_nome },
+      tabelaComercial: { 
+        nomeTabela: proposalData.tabela_comercial_nome,
+        taxaJuros: proposalData.taxa_juros 
+      },
+      loja: { nomeLoja: proposalData.loja_nome }
+    };
+    const mappedData = this.mapToDomainWithJoinedData(structuredData);
 
     return mappedData;
   }
