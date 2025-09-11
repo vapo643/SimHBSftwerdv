@@ -2970,13 +2970,6 @@ export default function Formalizacao() {
                     </p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-400">Taxa de Juros</Label>
-                    <p className="flex items-center gap-1 font-medium text-white">
-                      <Percent className="h-4 w-4" />
-                      {'N/A'}% a.m.
-                    </p>
-                  </div>
-                  <div>
                     <Label className="text-sm font-medium text-gray-400">Prazo</Label>
                     <p className="font-medium text-white">
                       {proposta.prazo || 0} meses
