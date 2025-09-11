@@ -33,13 +33,13 @@ export const createClientSupabaseClient = () => {
   if (typeof window !== 'undefined') {
     // Lógica sensível ao ambiente para carregar as credenciais corretas.
     // Vite expõe `import.meta.env.PROD` como `true` no build de produção.
-    // As secrets do Replit (PROD_) estão disponíveis via `process.env`.
+    // As secrets do Replit (PROD_) estão disponíveis via `import.meta.env.VITE_`.
     const supabaseUrl = import.meta.env.PROD
-      ? process.env.PROD_SUPABASE_URL
+      ? import.meta.env.VITE_PROD_SUPABASE_URL
       : import.meta.env.VITE_SUPABASE_URL;
 
     const supabaseAnonKey = import.meta.env.PROD
-      ? process.env.PROD_SUPABASE_ANON_KEY
+      ? import.meta.env.VITE_PROD_SUPABASE_ANON_KEY
       : import.meta.env.VITE_SUPABASE_ANON_KEY;
 
     // Validação explícita para falhar rapidamente se as secrets não forem carregadas.
