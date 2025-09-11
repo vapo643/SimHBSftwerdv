@@ -1,0 +1,78 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Refatoração de Roteamento de Serviço
+
+* **Sumário da Missão:** Refatorar o controlador `getPropostaDocuments` no ficheiro `server/routes/documents.ts` para que ele importe e utilize o `documentsService` correto, corrigindo a desconexão arquitetural que impede a listagem de documentos.
+
+* **Intenção Estratégica:** Restaurar o fluxo de dados correto entre o ponto de entrada da API e a lógica de negócio de documentos. Esta ação irá "ativar" o código de listagem de ficheiros do Supabase Storage que atualmente é código morto (dead code).
+
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria forense provou que o controlador `getPropostaDocuments` está a importar e a chamar um `genericService` incorreto. Ele deve, em vez disso, importar e chamar a instância de `DocumentsService` do ficheiro `server/services/documentsService.ts`, que contém a lógica de negócio correta.
+
+---
+
+**IMPLEMENTAR:**
+"Religar" o controlador `getPropostaDocuments` para que ele utilize o `documentsService` correto.
+
+**CURRENT STATE:**
+* **Ficheiro:** `server/routes/documents.ts`
+* **Lógica com Falha:**
+    ```typescript
+    // Importação incorreta
+    import { documentService } from '../services/genericService';
+    
+    // ...
+    
+    export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Response) => {
+      // ...
+      // Chamada incorreta ao serviço genérico
+      const result = await documentService.executeOperation('get_proposta_documents', {
+        id: parseInt(propostaId),
+      });
+      // ...
+    };
+    ```
+
+**EXPECTED (Estado Final de Sucesso):**
+* **Ficheiro:** `server/routes/documents.ts`
+* **Código Corrigido:** O ficheiro deve ser refatorado para corresponder à seguinte lógica:
+    ```typescript
+    import { Request, Response } from 'express';
+    // 1. IMPORTAÇÃO CORRIGIDA: Apontar para a instância correta do DocumentsService
+    import { documentsService } from '../services/documentsService';
+    import { AuthenticatedRequest } from '../../shared/types/express';
+
+    /**
+     * GET /api/propostas/:id/documents
+     * Get all documents for a proposal
+     */
+    export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const { id: propostaId } = req.params;
+
+        if (!propostaId) {
+          return res.status(400).json({
+            message: 'ID da proposta é obrigatório',
+          });
+        }
+
+        // 2. CHAMADA CORRIGIDA: Invocar o método getProposalDocuments do serviço correto
+        const result = await documentsService.getProposalDocuments(propostaId);
+
+        res.json({ success: true, ...result });
+      } catch (error: any) {
+        console.error('[DOCUMENTS_CONTROLLER] Error fetching proposal documents:', error);
+
+        const statusCode = error.message === 'Proposta não encontrada' ? 404 : 500;
+        res.status(statusCode).json({
+          success: false,
+          message: error.message || 'Erro interno do servidor ao buscar documentos',
+        });
+      }
+    };
+    
+    // Manter a função uploadPropostaDocument inalterada por agora
+    // ...
+    ```
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a refatoração e realize o protocolo 7-CHECK completo, garantindo **ZERO** novos diagnósticos de LSP e a estabilidade da aplicação após a mudança.

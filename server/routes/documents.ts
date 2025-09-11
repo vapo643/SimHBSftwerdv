@@ -5,6 +5,9 @@
  */
 
 import { Request, Response } from 'express';
+// 1. IMPORTAÇÃO CORRIGIDA: Apontar para a instância correta do DocumentsService
+import { documentsService } from '../services/documentsService';
+// Manter importação para upload (temporário conforme PAM)
 import { documentService } from '../services/genericService';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
@@ -22,17 +25,16 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
       });
     }
 
-    // Using genericService with proper operation mapping
-    const result = await documentService.executeOperation('get_proposta_documents', {
-      id: parseInt(propostaId),
-    });
+    // 2. CHAMADA CORRIGIDA: Invocar o método getProposalDocuments do serviço correto
+    const result = await documentsService.getProposalDocuments(propostaId);
 
-    res.json(result);
+    res.json({ success: true, ...result });
   } catch (error: any) {
     console.error('[DOCUMENTS_CONTROLLER] Error fetching proposal documents:', error);
 
     const statusCode = error.message === 'Proposta não encontrada' ? 404 : 500;
     res.status(statusCode).json({
+      success: false,
       message: error.message || 'Erro interno do servidor ao buscar documentos',
     });
   }
