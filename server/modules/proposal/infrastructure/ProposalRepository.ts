@@ -57,10 +57,10 @@ export class ProposalRepository implements IProposalRepository {
           : data.cliente_data.cep,
         // Garantir que renda_mensal seja número
         renda_mensal: typeof data.cliente_data.renda_mensal === 'object' && data.cliente_data.renda_mensal?.cents
-          ? data.cliente_data.renda_mensal.cents / 100
+          ? data.cliente_data.renda_mensal.cents
           : data.cliente_data.renda_mensal,
         rendaMensal: typeof data.cliente_data.rendaMensal === 'object' && data.cliente_data.rendaMensal?.cents
-          ? data.cliente_data.rendaMensal.cents / 100
+          ? data.cliente_data.rendaMensal.cents
           : data.cliente_data.rendaMensal,
       };
       
@@ -143,10 +143,10 @@ export class ProposalRepository implements IProposalRepository {
           : data.cliente_data.cep,
         // Garantir que renda_mensal seja número
         renda_mensal: typeof data.cliente_data.renda_mensal === 'object' && data.cliente_data.renda_mensal?.cents
-          ? data.cliente_data.renda_mensal.cents / 100
+          ? data.cliente_data.renda_mensal.cents
           : data.cliente_data.renda_mensal,
         rendaMensal: typeof data.cliente_data.rendaMensal === 'object' && data.cliente_data.rendaMensal?.cents
-          ? data.cliente_data.rendaMensal.cents / 100
+          ? data.cliente_data.rendaMensal.cents
           : data.cliente_data.rendaMensal,
       };
 
