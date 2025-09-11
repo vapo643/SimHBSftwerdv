@@ -68,6 +68,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
 
   /**
    * Create a document record
+   * PAM V1.0 - Fixed snake_case/camelCase mapping conflict
    */
   async createDocument(documentData: {
     proposta_id: string;
@@ -77,9 +78,18 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
     tamanho: number;
   }): Promise<PropostaDocumento | null> {
     try {
+      console.log('[DOCUMENTS_REPO] Creating document with data:', {
+        proposta_id: documentData.proposta_id,
+        nome_arquivo: documentData.nome_arquivo,
+        url: documentData.url,
+        tipo: documentData.tipo,
+        tamanho: documentData.tamanho,
+      });
+
       const [document] = await db
         .insert(propostaDocumentos)
         .values({
+          // CORREÇÃO: Mapeamento direto sem conversão de nomenclatura
           propostaId: documentData.proposta_id,
           nomeArquivo: documentData.nome_arquivo,
           url: documentData.url,
@@ -89,9 +99,15 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         })
         .returning();
 
+      console.log('[DOCUMENTS_REPO] Document created successfully:', document);
       return document;
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error creating document:', error);
+      console.error('[DOCUMENTS_REPO] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        inputData: documentData,
+      });
       return null;
     }
   }
