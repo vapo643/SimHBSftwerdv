@@ -76,3 +76,38 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
     });
   }
 };
+
+/**
+ * DELETE /api/propostas/:propostaId/documents/:documentoId
+ * Delete a document from a proposal
+ * PAM V1.0 - Complete document deletion controller
+ */
+export const deletePropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { documentoId } = req.params;
+
+    if (!documentoId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID do documento é obrigatório',
+      });
+    }
+
+    console.log(`[DOCUMENTS_CONTROLLER] Deleting document with ID: ${documentoId}`);
+
+    const result = await documentsService.deleteDocument(documentoId);
+
+    if (result.success) {
+      res.json(result);
+    } else {
+      const statusCode = result.error === 'Documento não encontrado' ? 404 : 500;
+      res.status(statusCode).json(result);
+    }
+  } catch (error: any) {
+    console.error('[DOCUMENTS_CONTROLLER] Error deleting document:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erro interno do servidor ao deletar documento',
+    });
+  }
+};
