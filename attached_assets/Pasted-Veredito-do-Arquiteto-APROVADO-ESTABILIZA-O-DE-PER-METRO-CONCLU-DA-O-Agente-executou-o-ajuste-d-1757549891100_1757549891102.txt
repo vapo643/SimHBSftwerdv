@@ -1,0 +1,80 @@
+Veredito do Arquiteto: APROVADO. ESTABILIZAÇÃO DE PERÍMETRO CONCLUÍDA.
+
+O Agente executou o ajuste do rate limit de produção com sucesso. Esta ação não corrige o loop de retentativas do frontend, mas, como planeado, dá-nos a margem de segurança operacional necessária para diagnosticar e corrigir a falha de lógica sem o risco de uma nova negação de serviço.
+
+O Passo 2 da missão de estabilização foi um sucesso.
+
+Roadmap Ativo e Detalhado
+[✅ CONCLUÍDO] Passo 1: Corrigir a Configuração de Ambiente do Cliente Supabase (Causa Raiz)
+
+[✅ CONCLUÍDO] Passo 2: Aumentar o Rate Limit do Backend (Estabilização)
+
+[🎯 EM EXECUÇÃO] Passo 3: Refatorar a Lógica de Autenticação para Prevenir Loops (Resiliência)
+
+[PENDENTE] Passo 4: Otimizar e Controlar a Verbosez dos Logs (Limpeza)
+
+[PENDENTE] Passo 5: Validação Funcional Completa
+
+Agora que o perímetro está seguro, atacamos a causa da "tempestade de requisições": a lógica de retentativa no AuthContext.tsx. O Passo 3 é uma missão de resiliência. Vamos refatorar o frontend para que ele lide com falhas de autenticação de forma inteligente e controlada, em vez de entrar num loop.
+
+Gero agora o Pacote de Ativação de Missão (PAM) para o Passo 3.
+
+Por favor, copie o conteúdo exato do bloco Markdown abaixo e submeta-o ao Agente Replit.
+
+Pacote de Ativação de Missão (PAM) V1.0 - Refatoração de Resiliência do AuthContext
+Sumário da Missão: Refatorar a lógica de autenticação no ficheiro client/src/contexts/AuthContext.tsx para prevenir loops de retentativas em caso de falha na obtenção da sessão ou do perfil do utilizador.
+
+Intenção Estratégica: Tornar o frontend resiliente a falhas de autenticação, eliminando o comportamento que causa a "tempestade de requisições" e o erro 429. A aplicação deve lidar com uma sessão inválida de forma graciosa, interrompendo o fluxo em vez de sobrecarregar o backend.
+
+Histórico Relevante (Consulta Obrigatória): A auditoria forense identificou que um useEffect no AuthContext.tsx chama a função fetchUserProfile (que aciona a API /api/debug/me) na inicialização. Quando a autenticação falha, esta lógica entra num loop de retentativas que causa uma negação de serviço.
+
+Modelo Mental: O AuthContext deve agir como um controlador de tráfego aéreo inteligente. Se um avião (tentativa de autenticação) reporta uma falha, ele não deve enviar o mesmo avião para a mesma rota de colisão repetidamente. Ele deve aterrar o avião em segurança (parar o processo) e reportar o erro.
+
+Riscos Antecipados e Contramedidas: ALTO. Refatorar a lógica central de autenticação é uma operação de alto risco. Um erro pode impedir que todos os utilizadores façam login. A contramedida é a implementação cuidadosa de um controlo de estado e a validação rigorosa via 7-CHECK.
+
+IMPLEMENTAR:
+Introduzir um mecanismo de controlo de estado (isLoading, error) no AuthContext.tsx para garantir que fetchUserProfile seja chamado apenas uma vez por tentativa de autenticação e não entre em loop em caso de falha.
+
+CURRENT STATE:
+
+Ficheiro: client/src/contexts/AuthContext.tsx
+
+Lógica com Falha: A lógica atual no useEffect e fetchUserProfile não possui um mecanismo de bloqueio (lock) ou controlo de estado. Quando fetchUserProfile falha, o onAuthStateChange ou outra lógica reativa pode acionar uma nova tentativa imediatamente, criando um loop.
+
+EXPECTED (Estado Final de Sucesso):
+
+Ficheiro: client/src/contexts/AuthContext.tsx
+
+Comportamento Corrigido: A lógica de fetchUserProfile e o useEffect que a chama devem ser refatorados para seguir estes princípios:
+
+Prevenção de Chamadas Múltiplas: Deve ser introduzido um estado de loading (ex: const [isLoading, setIsLoading] = useState(true);). A função fetchUserProfile só deve ser executada se isLoading for false. Ela deve definir isLoading para true no início da sua execução e para false no final (tanto em caso de sucesso como de erro).
+
+Gestão Graciosa de Falhas: A lógica deve lidar com uma sessão null ou uma falha na chamada à API de forma controlada. Em vez de tentar novamente em loop, ela deve definir um estado de erro e parar o fluxo de autenticação.
+
+Resultado Final: Mesmo que a API /api/debug/me retorne um erro, o AuthContext deve tentar a autenticação um número controlado de vezes (idealmente, apenas uma vez por mudança de estado de autenticação) e depois parar, deixando a aplicação num estado de "não autenticado" estável.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: 90%
+
+RISCOS IDENTIFICADOS: ALTO. A refatoração da lógica de autenticação pode introduzir bugs que impeçam o login de utilizadores legítimos.
+
+DECISÕES TÉCNICAS ASSUMIDAS: "A implementação de um state machine simples (idle, loading, error) é a abordagem padrão da indústria para tornar hooks React resilientes e prevenir loops de re-renderização e de chamadas de API."
+
+VALIDAÇÃO PENDENTE: "Validação funcional completa pelo Arquiteto Chefe no Passo 5 do roadmap."
+
+PROTOCOLO OBRIGATÁRIO 7-CHECK EXPANDIDO:
+
+Mapeie e modifique o ficheiro client/src/contexts/AuthContext.tsx.
+
+Garanta que a nova lógica com controlo de estado (isLoading, error) é implementada de forma robusta.
+
+Execute get_latest_lsp_diagnostics e corrija TODOS os erros ou avisos introduzidos.
+
+Declare o seu Nível de Confiança.
+
+Categorize o Risco como ALTO.
+
+Realize um teste funcional mínimo: confirme que a aplicação reinicia e que a página de login ainda é acessível.
+
+Documente a nova lógica de state machine implementada no AuthContext.
