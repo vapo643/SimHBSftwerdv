@@ -74,7 +74,7 @@ import { passwordSchema, validatePassword } from './lib/password-validator';
 import { timingNormalizerMiddleware } from './middleware/timing-normalizer';
 import timingSecurityRoutes from './routes/timing-security';
 import documentosRoutes from './routes/documentos';
-import { getPropostaDocuments, uploadPropostaDocument } from './routes/documents';
+import { getPropostaDocuments, uploadPropostaDocument, deletePropostaDocument } from './routes/documents';
 import featureFlagService from './services/featureFlagService';
 import { performanceMonitor } from './middleware/performance-monitor';
 import { performance } from 'perf_hooks';
@@ -1509,6 +1509,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     jwtAuthMiddleware as any,
     upload.single("file"),
     uploadPropostaDocument
+  );
+
+  // DELETE /api/propostas/:propostaId/documents/:documentoId - PAM V1.0
+  app.delete(
+    "/api/propostas/:propostaId/documents/:documentoId",
+    jwtAuthMiddleware as any,
+    deletePropostaDocument
   );
 
   // Rota para alternar status entre ativa/suspensa - TEMPORARILY DISABLED
