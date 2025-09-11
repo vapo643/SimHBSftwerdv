@@ -3,7 +3,8 @@ import { useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/queryClient';
 import { api } from '@/lib/apiClient';
 import { useToast } from '@/hooks/use-toast';
@@ -97,9 +98,24 @@ const documentosSchema = z.object({
   documentos: z.array(z.string()).optional(),
 });
 
-const fullSchema = clienteSchema.merge(emprestimoSchema).merge(documentosSchema);
+// Schema adicional para seleção de loja (admins apenas)
+const adminLojaSchema = z.object({
+  lojaId: z.string().optional().transform((val) => val ? Number(val) : undefined),
+});
 
-type PropostaForm = z.infer<typeof fullSchema>;
+const baseSchema = clienteSchema.merge(emprestimoSchema).merge(documentosSchema).merge(adminLojaSchema);
+
+// Dynamic schema - makes lojaId required for admins
+const createDynamicSchema = (isAdmin: boolean) => {
+  if (isAdmin) {
+    return baseSchema.extend({
+      lojaId: z.coerce.number().int().positive({ message: 'Selecione uma loja' }),
+    });
+  }
+  return baseSchema;
+};
+
+type PropostaForm = z.infer<typeof baseSchema>;
 
 export default function NovaProposta() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -108,6 +124,19 @@ export default function NovaProposta() {
   const { isStepValid } = useStepValidation();
   const queryClient = useQueryClient();
   const [isSearchingCpf, setIsSearchingCpf] = useState(false);
+  
+  // Authentication and user role
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMINISTRADOR';
+  
+  // Fetch stores for admin users
+  const { data: lojas, isLoading: lojasLoading } = useQuery({
+    queryKey: ['/api/admin/lojas'],
+    enabled: isAdmin, // Only fetch if user is admin
+  });
+  
+  // Dynamic schema based on user role
+  const fullSchema = createDynamicSchema(isAdmin);
 
   const {
     register,
@@ -258,7 +287,10 @@ export default function NovaProposta() {
       // Map frontend data to backend schema format - STRICT MAPPING
       const backendData = {
         // Required fields from createPropostaValidationSchema
-        lojaId: Number(JSON.parse(localStorage.getItem('user_context') || '{}').lojaId) || 1,
+        // ADMIN RULE: Admins must select a store, regular users use their own store
+        lojaId: isAdmin 
+          ? data.lojaId // Already validated by dynamic schema
+          : user?.loja_id || (() => { throw new Error('Usuário não possui loja associada'); })(),
         clienteNome: data.clienteNome?.trim() || '',
         clienteCpf: data.clienteCpf?.replace(/\D/g, '') || '', // Clean CPF
         clienteEmail: data.clienteEmail?.trim() || '',
@@ -440,6 +472,20 @@ export default function NovaProposta() {
   };
 
   const nextStep = () => {
+    // Prevent navigation if admin hasn't selected a store (Step 1 only)
+    if (currentStep === 1 && isAdmin && !watch('lojaId')) {
+      setError('lojaId', {
+        type: 'required',
+        message: 'Administradores devem selecionar uma loja',
+      });
+      toast({
+        title: 'Seleção obrigatória',
+        description: 'Por favor, selecione uma loja antes de prosseguir para o próximo passo.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
@@ -452,6 +498,20 @@ export default function NovaProposta() {
   };
 
   const onSubmit = (data: PropostaForm) => {
+    // Pre-submit validation for admins: ensure store is selected
+    if (isAdmin && !data.lojaId) {
+      setError('lojaId', {
+        type: 'required',
+        message: 'Administradores devem selecionar uma loja',
+      });
+      toast({
+        title: 'Validação obrigatória',
+        description: 'Por favor, selecione uma loja antes de continuar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     createProposta.mutate(data);
   };
 
@@ -508,6 +568,43 @@ export default function NovaProposta() {
               {currentStep === 1 && (
                 <div className="space-y-6">
                   <h3 className="mb-4 text-lg font-semibold text-gray-900">Dados do Cliente</h3>
+
+                  {/* Store Selector for Administrators */}
+                  {isAdmin && (
+                    <div className="border border-blue-200 bg-blue-50 p-4 rounded-lg mb-6">
+                      <Label htmlFor="lojaId">Selecionar Loja *</Label>
+                      <Select
+                        value={watch('lojaId')?.toString() || ''}
+                        onValueChange={(value) => setValue('lojaId', Number(value))}
+                        disabled={lojasLoading}
+                      >
+                        <SelectTrigger
+                          id="lojaId"
+                          className={
+                            errors.lojaId
+                              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                              : ''
+                          }
+                          data-testid="select-loja"
+                        >
+                          <SelectValue placeholder={lojasLoading ? 'Carregando lojas...' : 'Escolha uma loja'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {lojas?.map((loja: any) => (
+                            <SelectItem key={loja.id} value={loja.id.toString()}>
+                              {loja.nome} ({loja.codigo || loja.id})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.lojaId && (
+                        <p className="text-sm text-red-600 mt-1">{errors.lojaId.message}</p>
+                      )}
+                      <p className="text-xs text-blue-600 mt-1">
+                        Como administrador, você deve selecionar em qual loja esta proposta será criada.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
