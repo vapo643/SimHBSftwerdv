@@ -225,8 +225,12 @@ function FormalizacaoList() {
       aprovado: 'bg-green-500',
       documentos_enviados: 'bg-blue-500',
       CCB_GERADA: 'bg-purple-500',
+      AGUARDANDO_ASSINATURA: 'bg-yellow-500',
+      ASSINATURA_PENDENTE: 'bg-amber-500',
       ASSINATURA_CONCLUIDA: 'bg-indigo-500',
       BOLETOS_EMITIDOS: 'bg-orange-500',
+      PAGAMENTO_PENDENTE: 'bg-blue-600',
+      PAGAMENTO_PARCIAL: 'bg-yellow-600',
       PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
     return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
@@ -237,8 +241,12 @@ function FormalizacaoList() {
       aprovado: 'Aprovado',
       documentos_enviados: 'Documentos Enviados',
       CCB_GERADA: 'CCB Gerada',
+      AGUARDANDO_ASSINATURA: 'Aguardando Assinatura',
+      ASSINATURA_PENDENTE: 'Assinatura Pendente',
       ASSINATURA_CONCLUIDA: 'Assinatura Concluída',
       BOLETOS_EMITIDOS: 'Boletos Emitidos',
+      PAGAMENTO_PENDENTE: 'Pagamento Pendente',
+      PAGAMENTO_PARCIAL: 'Pagamento Parcial',
       PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
     return statusTexts[status as keyof typeof statusTexts] || status;
@@ -313,10 +321,10 @@ function FormalizacaoList() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {[
             { status: 'aprovado', label: 'Aprovado', color: 'bg-green-400' },
-            { status: 'documentos_enviados', label: 'Docs Enviados', color: 'bg-blue-500' },
-            { status: 'CCB_GERADA', label: 'Contratos Prep.', color: 'bg-purple-500' },
-            { status: 'ASSINATURA_CONCLUIDA', label: 'Assinados', color: 'bg-indigo-500' },
-            { status: 'BOLETOS_EMITIDOS', label: 'Pronto Pag.', color: 'bg-orange-500' },
+            { status: 'documentos_enviados', label: 'Documentos Enviados', color: 'bg-blue-500' },
+            { status: 'CCB_GERADA', label: 'CCB Gerada', color: 'bg-purple-500' },
+            { status: 'ASSINATURA_CONCLUIDA', label: 'Assinatura Concluída', color: 'bg-indigo-500' },
+            { status: 'BOLETOS_EMITIDOS', label: 'Boletos Emitidos', color: 'bg-orange-500' },
           ].map((item) => {
             const count = formalizacaoPropostas.filter((p) => p.status === item.status).length;
             return (
@@ -658,10 +666,15 @@ export default function Formalizacao() {
     resolver: zodResolver(updateFormalizacaoSchema),
     defaultValues: {
       status: proposta?.status as
+        | 'aprovado'
         | 'documentos_enviados'
         | 'CCB_GERADA'
+        | 'AGUARDANDO_ASSINATURA'
+        | 'ASSINATURA_PENDENTE'
         | 'ASSINATURA_CONCLUIDA'
         | 'BOLETOS_EMITIDOS'
+        | 'PAGAMENTO_PENDENTE'
+        | 'PAGAMENTO_PARCIAL'
         | 'PAGAMENTO_CONFIRMADO'
         | undefined,
       documentosAdicionais: proposta?.documentosAdicionais || [],
@@ -670,6 +683,30 @@ export default function Formalizacao() {
       observacoesFormalização: proposta?.observacoesFormalização || '',
     },
   });
+
+  // Ensure form resets when proposta loads asynchronously to guarantee preselection
+  useEffect(() => {
+    if (proposta) {
+      form.reset({
+        status: proposta.status as
+          | 'aprovado'
+          | 'documentos_enviados'
+          | 'CCB_GERADA'
+          | 'AGUARDANDO_ASSINATURA'
+          | 'ASSINATURA_PENDENTE'
+          | 'ASSINATURA_CONCLUIDA'
+          | 'BOLETOS_EMITIDOS'
+          | 'PAGAMENTO_PENDENTE'
+          | 'PAGAMENTO_PARCIAL'
+          | 'PAGAMENTO_CONFIRMADO'
+          | undefined,
+        documentosAdicionais: proposta.documentosAdicionais || [],
+        contratoGerado: proposta.contratoGerado || false,
+        contratoAssinado: proposta.contratoAssinado || false,
+        observacoesFormalização: proposta.observacoesFormalização || '',
+      });
+    }
+  }, [proposta, form]);
 
   const updateFormalizacao = useMutation({
     mutationFn: async (data: UpdateFormalizacaoForm) => {
@@ -940,8 +977,12 @@ export default function Formalizacao() {
       aprovado: 'bg-green-500',
       documentos_enviados: 'bg-blue-500',
       CCB_GERADA: 'bg-purple-500',
+      AGUARDANDO_ASSINATURA: 'bg-yellow-500',
+      ASSINATURA_PENDENTE: 'bg-amber-500',
       ASSINATURA_CONCLUIDA: 'bg-indigo-500',
       BOLETOS_EMITIDOS: 'bg-orange-500',
+      PAGAMENTO_PENDENTE: 'bg-blue-600',
+      PAGAMENTO_PARCIAL: 'bg-yellow-600',
       PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
     return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
@@ -952,8 +993,12 @@ export default function Formalizacao() {
       aprovado: 'Aprovado',
       documentos_enviados: 'Documentos Enviados',
       CCB_GERADA: 'CCB Gerada',
+      AGUARDANDO_ASSINATURA: 'Aguardando Assinatura',
+      ASSINATURA_PENDENTE: 'Assinatura Pendente',
       ASSINATURA_CONCLUIDA: 'Assinatura Concluída',
       BOLETOS_EMITIDOS: 'Boletos Emitidos',
+      PAGAMENTO_PENDENTE: 'Pagamento Pendente',
+      PAGAMENTO_PARCIAL: 'Pagamento Parcial',
       PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
     return statusTexts[status as keyof typeof statusTexts] || status;
@@ -3019,10 +3064,14 @@ export default function Formalizacao() {
                     >
                       <option value="aprovado">Aprovado</option>
                       <option value="documentos_enviados">Documentos Enviados</option>
-                      <option value="CCB_GERADA">Contratos Preparados</option>
-                      <option value="ASSINATURA_CONCLUIDA">Contratos Assinados</option>
-                      <option value="BOLETOS_EMITIDOS">Pronto para Pagamento</option>
-                      <option value="PAGAMENTO_CONFIRMADO">Pago</option>
+                      <option value="CCB_GERADA">CCB Gerada</option>
+                      <option value="AGUARDANDO_ASSINATURA">Aguardando Assinatura</option>
+                      <option value="ASSINATURA_PENDENTE">Assinatura Pendente</option>
+                      <option value="ASSINATURA_CONCLUIDA">Assinatura Concluída</option>
+                      <option value="BOLETOS_EMITIDOS">Boletos Emitidos</option>
+                      <option value="PAGAMENTO_PENDENTE">Pagamento Pendente</option>
+                      <option value="PAGAMENTO_PARCIAL">Pagamento Parcial</option>
+                      <option value="PAGAMENTO_CONFIRMADO">Pagamento Confirmado</option>
                     </select>
                   </div>
 
