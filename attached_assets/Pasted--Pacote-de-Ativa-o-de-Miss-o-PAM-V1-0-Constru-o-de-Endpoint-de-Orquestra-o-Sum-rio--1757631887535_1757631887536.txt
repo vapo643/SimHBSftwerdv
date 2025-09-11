@@ -1,0 +1,33 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Construção de Endpoint de Orquestração
+
+* **Sumário da Missão:** Construir um novo endpoint de backend (`PUT /api/propostas/:id/marcar-concluida`) que permita a um utilizador autorizado acionar manualmente o processo de geração de boletos.
+
+* **Intenção Estratégica:** Criar a infraestrutura de API necessária para a funcionalidade de "Marcar como Concluída", permitindo que a interface do utilizador tenha um ponto de entrada seguro e específico para iniciar o fluxo de negócio de formalização.
+
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior corrigiu a função `triggerBoletoGeneration` em `clickSignWebhookService.ts`. Esta missão irá criar um novo controlador e uma nova rota que invocam esta mesma função.
+
+---
+
+**IMPLEMENTAR:**
+Criar a rota, o controlador e a lógica de serviço para o novo endpoint de orquestração manual.
+
+**LÓGICA DE EXECUÇÃO (BACKEND):**
+
+1.  **Serviço (`clickSignWebhookService.ts`):**
+    * Exponha a função `triggerBoletoGeneration` para que possa ser chamada por outros serviços/controladores, se necessário.
+
+2.  **Controlador (Novo Ficheiro ou `proposalController.ts`):**
+    * Crie um novo controlador `marcarPropostaComoConcluida`.
+    * Esta função deve extrair o `id` da proposta dos parâmetros da rota (`req.params`).
+    * **Validação de Permissões:** Verifique se a `role` do utilizador (`req.user.role`) é uma das permitidas: `ATENDENTE`, `ADMINISTRADOR`, ou `GERENTE`. Se não for, retorne um erro `403 Forbidden`.
+    * **Validação de Status:** Busque a proposta na base de dados. Verifique se o seu status atual é um dos status relacionados ao ClickSign (`AGUARDANDO_ASSINATURA`, `ASSINATURA_PENDENTE`, `ASSINATURA_CONCLUIDA`). Se não for, retorne um erro `400 Bad Request` com uma mensagem informativa.
+    * **Ação:** Se todas as validações passarem, chame a função `triggerBoletoGeneration(propostaId)`.
+    * **Resposta:** Retorne uma resposta de sucesso (`200 OK`) com uma mensagem a indicar que o processo foi iniciado.
+
+3.  **Rota (`routes.ts`):**
+    * Crie uma nova rota `PUT /api/propostas/:id/marcar-concluida`.
+    * Conecte esta rota ao novo controlador `marcarPropostaComoConcluida`, garantindo que o `jwtAuthMiddleware` seja aplicado.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a implementação completa do backend e realize o protocolo 7-CHECK, garantindo **ZERO** novos diagnósticos de LSP e a estabilidade da aplicação.

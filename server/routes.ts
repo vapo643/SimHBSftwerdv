@@ -1215,6 +1215,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // 🎯 PAM V1.0: PUT /api/propostas/:id/marcar-concluida - Orquestração manual de boletos
+  app.put(
+    '/api/propostas/:id/marcar-concluida',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res, next) => {
+      try {
+        const { ProposalController } = await import(
+          './modules/proposal/presentation/proposalController'
+        );
+        const proposalController = new ProposalController();
+        return proposalController.marcarPropostaComoConcluida(req, res, next);
+      } catch (error) {
+        console.error('PUT /api/propostas/:id/marcar-concluida error:', error);
+        next(error);
+      }
+    }
+  );
+
   // MOVED TO server/routes/propostas/core.ts - POST /api/propostas
 
   // Busca uma proposta individual pelo ID (Rota DDD Canônica)

@@ -22,6 +22,7 @@ import type { ResubmitPendingProposalUseCase } from '../application/ResubmitPend
 import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { ProposalOutputSchema } from '../../../schemas/proposalOutput.schema';
 import { SafeLogger } from '../../shared/infrastructure/SanitizedLogger';
+import { clickSignWebhookService } from '../../../services/clickSignWebhookService';
 
 export class ProposalController {
   private container: Container;
@@ -1037,5 +1038,95 @@ export class ProposalController {
       success: false,
       error: `Status '${status}' não suportado. Status válidos: aprovado, rejeitado, pendente, aguardando_analise`,
     });
+  }
+
+  /**
+   * 🎯 PAM V1.0: Marcar proposta como concluída (orquestração manual de boletos)
+   */
+  async marcarPropostaComoConcluida(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const { id } = req.params;
+      const user = (req as any).user;
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: 'Usuário não autenticado',
+        });
+      }
+
+      // Validação de Permissões: ATENDENTE, ADMINISTRADOR, GERENTE
+      const allowedRoles = ['ATENDENTE', 'ADMINISTRADOR', 'GERENTE'];
+      if (!allowedRoles.includes(user.role)) {
+        SafeLogger.error('[marcarPropostaComoConcluida] Unauthorized role attempt', {
+          userId: user.id,
+          userRole: user.role,
+          proposalId: id,
+        });
+        return res.status(403).json({
+          success: false,
+          error: 'Acesso negado. Apenas atendentes, administradores e gerentes podem marcar propostas como concluídas.',
+        });
+      }
+
+      // Buscar proposta na base de dados
+      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(
+        TOKENS.GET_PROPOSAL_BY_ID_USE_CASE
+      );
+      const proposta = await getByIdUseCase.execute(id);
+
+      if (!proposta) {
+        return res.status(404).json({
+          success: false,
+          error: 'Proposta não encontrada',
+        });
+      }
+
+      // Validação de Status: ClickSign related statuses
+      const validStatuses = [
+        'AGUARDANDO_ASSINATURA',
+        'ASSINATURA_PENDENTE', 
+        'ASSINATURA_CONCLUIDA',
+        'contratos_assinados'
+      ];
+      
+      if (!validStatuses.includes(proposta.status)) {
+        SafeLogger.warn('[marcarPropostaComoConcluida] Invalid status for completion', {
+          proposalId: id,
+          currentStatus: proposta.status,
+          validStatuses,
+        });
+        return res.status(400).json({
+          success: false,
+          error: `Proposta não pode ser marcada como concluída no status atual: ${proposta.status}. Status válidos: ${validStatuses.join(', ')}`,
+        });
+      }
+
+      SafeLogger.info('[marcarPropostaComoConcluida] Initiating manual boleto generation', {
+        proposalId: id,
+        userId: user.id,
+        currentStatus: proposta.status,
+      });
+
+      // Chamar orquestração de boletos
+      await clickSignWebhookService.triggerBoletoGeneration(proposta);
+
+      SafeLogger.info('[marcarPropostaComoConcluida] Manual boleto generation completed', {
+        proposalId: id,
+        userId: user.id,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Processo de geração de boletos iniciado com sucesso',
+      });
+    } catch (error: any) {
+      SafeLogger.error('[marcarPropostaComoConcluida] Error in manual boleto generation', {
+        proposalId: req.params.id,
+        userId: (req as any).user?.id,
+        error: error.message,
+      });
+      next(error);
+    }
   }
 }

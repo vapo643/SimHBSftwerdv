@@ -566,8 +566,9 @@ class ClickSignWebhookService {
 
   /**
    * Trigger boleto generation after signature
+   * 🎯 PAM V1.0: Exposed as public method for manual orchestration
    */
-  private async triggerBoletoGeneration(proposta: any) {
+  public async triggerBoletoGeneration(proposta: any) {
     try {
       console.log(`[CLICKSIGN → INTER] Triggering boleto generation for proposal: ${proposta.id}`);
 
