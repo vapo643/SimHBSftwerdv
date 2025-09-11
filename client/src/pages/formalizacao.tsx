@@ -50,6 +50,11 @@ import { CCBViewer } from '@/components/CCBViewer';
 interface Proposta {
   id: string;
   status: string;
+  // Direct fields from backend (NEW - corrected data contract)
+  valor?: number;
+  valorAprovado?: number;
+  prazo?: number;
+  taxaJuros?: number;
   cliente_data: {
     nome: string;
     cpf: string;
@@ -372,10 +377,7 @@ function FormalizacaoList() {
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Valor Aprovado</p>
                       <p className="font-bold text-green-400">
-                        {formatCurrency(
-                          parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id)
-                            ?.valor || 0
-                        )}
+                        {formatCurrency(proposta.valorAprovado || proposta.valor || 0)}
                       </p>
                     </div>
 
@@ -1577,7 +1579,7 @@ export default function Formalizacao() {
 
                                           const requestData = {
                                             proposalId: proposta.id,
-                                            valorTotal: proposta.condicoes_data?.valor || 0,
+                                            valorTotal: proposta.valorAprovado || proposta.valor || 0,
                                             dataVencimento: dataVencimento
                                               .toISOString()
                                               .split('T')[0],
@@ -2964,7 +2966,7 @@ export default function Formalizacao() {
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Valor Aprovado</Label>
                     <p className="text-2xl font-bold text-green-400">
-                      {formatCurrency(proposta.condicoes_data?.valor || 0)}
+                      {formatCurrency(proposta.valorAprovado || proposta.valor || 0)}
                     </p>
                   </div>
                   <div>
@@ -2977,7 +2979,7 @@ export default function Formalizacao() {
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Prazo</Label>
                     <p className="font-medium text-white">
-                      {proposta.condicoes_data?.prazo || 0} meses
+                      {proposta.prazo || 0} meses
                     </p>
                   </div>
                   <div>
