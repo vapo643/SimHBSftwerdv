@@ -3,8 +3,6 @@ import { Request, Response, NextFunction } from 'express';
 import { securityLogger, SecurityEventType, getClientIP } from './security-logger';
 // REFATORADO: Redis client via Redis Manager centralizado
 import { getRedisClient } from './redis-manager';
-// REFATORADO: JWT Secret via configuração centralizada
-import { config } from './config';
 // Importação direta da interface personalizada
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -477,7 +475,7 @@ export async function jwtAuthMiddleware(
       try {
         console.log('[JWT DEBUG] Using local JWT validation');
         const jwt = await import('jsonwebtoken');
-        const JWT_SECRET = config.security.jwtSecret;
+        const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
 
         const decoded = jwt.default.verify(token, JWT_SECRET) as any;
         console.log('[JWT DEBUG] JWT decoded successfully:', {

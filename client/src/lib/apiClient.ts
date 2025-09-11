@@ -391,15 +391,13 @@ export async function apiClient<T = any>(
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Log de diagnóstico para rastrear o header de Authorization (apenas em desenvolvimento)
-    if (import.meta.env.DEV) {
-      console.log('[PASSO 3 - ENVIO]', {
-        url: fullUrl,
-        authorizationHeader: headers['Authorization'],
-        hasToken: !!token,
-        isFormData: body instanceof FormData,
-      });
-    }
+    // Log de diagnóstico para rastrear o header de Authorization
+    console.log('[PASSO 3 - ENVIO]', {
+      url: fullUrl,
+      authorizationHeader: headers['Authorization'],
+      hasToken: !!token,
+      isFormData: body instanceof FormData,
+    });
   }
 
   // Prepare request configuration
