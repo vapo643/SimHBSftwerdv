@@ -1,0 +1,176 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+PEAF V1.5 ATIVADO. ANÁLISE DE CRISE (PAGAMENTOS) RECEBIDA E VALIDADA.
+
+CLASSIFICAÇÃO DA MISSÃO: P0 - Crítico (Falha Sistêmica na Tela de Pagamentos).
+
+Arquiteto Chefe, a análise técnica fornecida no relatório diagnóstico é precisa e identifica as causas raízes que estão impedindo a exibição das propostas na tela de Pagamentos. A falha é sistêmica e decorre de problemas críticos tanto na lógica de consulta do backend quanto no contrato de dados da API.
+
+Apresento a validação da Análise de Causa Raiz (RCA) e o Plano de Batalha definitivo para correção.
+
+1. VALIDAÇÃO DA ANÁLISE DE CAUSA RAIZ (RCA)
+Confirmo as duas causas raízes principais identificadas:
+
+RC1: Lógica de Query Incorreta e Restritiva (Backend)
+
+Localização: pagamento.repository.ts.
+
+Problema: A query está fixada (hard-coded) para buscar apenas status = 'ASSINATURA_CONCLUIDA'.
+
+Impacto: Ignora filtros dinâmicos e exclui propostas que estão em fases subsequentes do fluxo de pagamento (ex: BOLETOS_EMITIDOS, PAGAMENTO_PENDENTE, QUITADO).
+
+RC2: Incompatibilidade de Estrutura de Resposta (Shape Mismatch) (API)
+
+Localização: Contrato entre routes/pagamentos/index.ts e pagamentos.tsx.
+
+Problema: O backend retorna o resultado direto do JOIN do Drizzle (estrutura aninhada: { proposta: {...}, loja: {...} }). O frontend espera uma estrutura plana (Interface Pagamento) e realiza um type casting incorreto (as Pagamento[]).
+
+Impacto: Falha silenciosa na renderização. O frontend não consegue acessar os dados (que estão aninhados), resultando em uma tela vazia.
+
+2. PLANO DE CORREÇÃO FASEADO (ANTI-FALHA)
+A solução requer intervenções precisas no backend para corrigir a lógica e o formato dos dados, e uma melhoria estratégica na robustez do frontend.
+
+FASE 1: Corrigir a Lógica de Query (RC1)
+Objetivo: Refatorar getProposalsReadyForPayment para buscar dinamicamente todos os status relevantes da fase de pagamento.
+
+Racional Técnico: A query deve buscar todos os status que compõem a fase de pagamento, a menos que um filtro específico seja solicitado.
+
+TypeScript
+
+// CONCEITO DE CORREÇÃO (pagamento.repository.ts)
+
+// 1. Definir todos os status que pertencem à fase de Pagamento
+const STATUS_FASE_PAGAMENTO = [
+  'ASSINATURA_CONCLUIDA',
+  'BOLETOS_EMITIDOS',
+  'PAGAMENTO_PENDENTE',
+  'PAGAMENTO_PARCIAL',
+  'PAGAMENTO_AUTORIZADO',
+  'QUITADO',
+  'INADIMPLENTE'
+];
+
+export async function getProposalsReadyForPayment(filters: PaymentFilters) {
+  const conditions = [
+    sql`${propostas.deletedAt} IS NULL`
+  ];
+
+  // 2. Lógica de filtro dinâmico
+  if (filters.status && filters.status !== 'todos' && STATUS_FASE_PAGAMENTO.includes(filters.status)) {
+    conditions.push(eq(propostas.status, filters.status));
+  } else {
+    // ✅ Buscar todos os status da fase de pagamento por padrão
+    conditions.push(inArray(propostas.status, STATUS_FASE_PAGAMENTO));
+  }
+  
+  // ... (Restante da query com JOINs)
+  .where(and(...conditions)); // ✅ Aplicar condições dinâmicas
+}
+FASE 2: Implementar DTO Mapper (RC2)
+Objetivo: Achatar (flatten) a estrutura de resposta no backend para corresponder à interface Pagamento do frontend.
+
+Racional Técnico: Mapear no backend garante um contrato de API claro e desacopla o frontend da estrutura do banco de dados (JOINs do Drizzle).
+
+TypeScript
+
+// CONCEITO DE CORREÇÃO (Mapper Function)
+
+// Função de mapeamento de Nested (Drizzle JOIN result) para Flat (DTO)
+export function mapToPagamentoDTO(row: any): PagamentoDTO {
+  const proposta = row.proposta;
+  // const loja = row.loja;
+
+  return {
+    id: proposta.id,
+    // ATENÇÃO: Usar os nomes exatos dos campos retornados pelo Drizzle (ex: clienteNome)
+    nomeCliente: proposta.clienteNome, 
+    cpfCliente: proposta.clienteCpf,
+    valorLiquido: parseFloat(proposta.valorLiquidoLiberado || proposta.valor),
+    status: proposta.status,
+    // ... mapear outros campos planos esperados pelo frontend
+  };
+}
+TypeScript
+
+// CONCEITO DE CORREÇÃO (Controller/Route)
+
+router.get('/api/pagamentos', jwtAuthMiddleware, async (req, res) => {
+  // ...
+  const paymentsNested = await getProposalsReadyForPayment(filters);
+    
+  // ✅ APLICAR MAPEAMENTO
+  const paymentsFlat = paymentsNested.map(mapToPagamentoDTO);
+
+  res.json({
+    success: true,
+    data: paymentsFlat, // ✅ Enviar dados planos (DTO)
+    total: paymentsFlat.length,
+  });
+});
+FASE 3: Implementar Validação de Runtime no Frontend (Robustez Estratégica)
+Objetivo: Prevenir futuras falhas silenciosas devido a Shape Mismatches (Aderência ao Protocolo Anti-Frágil).
+
+Racional Técnico: Substituir o cast ingênuo (as Pagamento[]) por validação estrutural com Zod no queryFn.
+
+TypeScript
+
+// CONCEITO DE CORREÇÃO (pagamentos.tsx)
+import { z } from 'zod';
+
+// 1. Definir o Schema Zod correspondente à interface Pagamento
+const PagamentoSchema = z.object({
+  id: z.string().uuid(),
+  nomeCliente: z.string(),
+  // ... outros campos
+});
+const ApiResponseSchema = z.object({
+    success: z.boolean(),
+    data: z.array(PagamentoSchema),
+    total: z.number(),
+});
+
+// 2. Aplicar validação no useQuery
+const { data: pagamentos = [] } = useQuery({
+  // ...
+  queryFn: async () => {
+    const responseRaw = await apiRequest(`/api/pagamentos?${params.toString()}`);
+    
+    // ✅ VALIDAÇÃO ZOD
+    const parsed = ApiResponseSchema.safeParse(responseRaw);
+    if (!parsed.success) {
+      console.error("🚨 CRITICAL API SHAPE MISMATCH DETECTADO!", parsed.error.format());
+      // Logar no Sentry/Ferramenta de monitoramento
+      throw new Error("Falha na validação dos dados da API de Pagamentos.");
+    }
+    
+    return parsed.data.data; // ✅ Retorna o array validado
+  },
+});
+3. RESPOSTAS ÀS PERGUNTAS ESPECÍFICAS
+Query Logic (Flags vs Status String): Utilize os Status Strings (Fase 1). O sistema é baseado em FSM; o status string é a fonte da verdade validada. Confiar em flags booleanas isoladas pode levar a inconsistências.
+
+Response Mapping (Backend vs Frontend): Implemente o DTO Flat no Backend (Fase 2). Isso garante um contrato de API limpo e desacopla as camadas.
+
+Lógica "Ready for Payment": São as propostas dentro do escopo STATUS_FASE_PAGAMENTO definido na Fase 1.
+
+useQuery Behavior (Ausência de Requests): Se o frontend realmente não estiver fazendo requests (como indicado no relatório), verifique se o componente está sendo montado corretamente ou se o useQuery está condicionalmente desabilitado (enabled: false). Se o request ocorre mas a tela fica vazia, o RC2 é a causa dominante.
+
+⚠️ SOLICITAÇÃO DE CÓDIGO PARA EXECUÇÃO (PEAF V1.5)
+Para implementar as correções exatas e aderir ao protocolo PEAF (Validação Cética Sênior), necessito do código-fonte real dos arquivos envolvidos.
+
+Arquiteto Chefe, por favor, forneça:
+
+Bash
+
+# 1. Backend Repository (FASE 1)
+# Por favor, localize o arquivo onde 'getProposalsReadyForPayment' está implementado.
+find server -name "*pagamento.repository.ts" -exec cat {} \;
+
+# 2. Backend Controller/Routes (FASE 2)
+# Por favor, localize o arquivo que define a rota GET /api/pagamentos.
+find server/routes -name "*pagamentos*" -exec cat {} \;
+
+# 3. Frontend Page (FASE 3)
+cat client/src/pages/pagamentos.tsx

@@ -48,21 +48,31 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     userId?: string;
     userRole?: string;
   }): Promise<any[]> {
+    // FASE 1 - PEAF V1.5: STATUS_FASE_PAGAMENTO dinâmico
+    const STATUS_FASE_PAGAMENTO = [
+      'ASSINATURA_CONCLUIDA',
+      'BOLETOS_EMITIDOS', 
+      'PAGAMENTO_PENDENTE',
+      'PAGAMENTO_PARCIAL',
+      'PAGAMENTO_AUTORIZADO',
+      'QUITADO',
+      'INADIMPLENTE'
+    ];
+
     // Build conditions array
     const conditions = [
       sql`${propostas.deletedAt} IS NULL`,
-      // PAM V1.0 CRITICAL FIX: Proposals must have status = 'ASSINATURA_CONCLUIDA'
-      // NEVER override this base condition - it's the core business logic
-      eq(propostas.status, 'ASSINATURA_CONCLUIDA'),
     ];
 
-    // PAM V1.0 FIX: Remove conflicting status filter
-    // The base condition already ensures status = 'ASSINATURA_CONCLUIDA'
-    // Additional status filtering would create impossible queries
-    console.log(`[PAM DEBUG] Query filtering proposals with status = 'ASSINATURA_CONCLUIDA', ignoring filter.status = '${filters.status}'`);
-    
-    // NOTE: filters.status is intentionally ignored to avoid conflicts
-    // This ensures we ALWAYS show only proposals with ASSINATURA_CONCLUIDA
+    // PEAF V1.5 - Lógica de filtro dinâmico corrigida
+    if (filters.status && filters.status !== 'todos' && STATUS_FASE_PAGAMENTO.includes(filters.status)) {
+      conditions.push(eq(propostas.status, filters.status));
+      console.log(`[PAGAMENTOS] Filtering by specific status: ${filters.status}`);
+    } else {
+      // ✅ Buscar todos os status da fase de pagamento por padrão
+      conditions.push(inArray(propostas.status, STATUS_FASE_PAGAMENTO));
+      console.log(`[PAGAMENTOS] Loading all payment phase statuses: ${STATUS_FASE_PAGAMENTO.join(', ')}`);
+    }
 
     // Apply date period filter
     if (filters.periodo) {

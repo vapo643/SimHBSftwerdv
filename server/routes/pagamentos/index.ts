@@ -11,6 +11,94 @@ import { pagamentoService } from '../../services/pagamentoService.js';
 import { z } from 'zod';
 import multer from 'multer';
 
+// FASE 2 - PEAF V1.5: DTO Mapper para correção de Shape Mismatch (RC2)
+interface PagamentoDTO {
+  id: string;
+  propostaId: string;
+  numeroContrato: string;
+  nomeCliente: string;
+  cpfCliente: string;
+  valorFinanciado: number;
+  valorLiquido: number;
+  valorIOF: number;
+  valorTAC: number;
+  contaBancaria: {
+    banco: string;
+    agencia: string;
+    conta: string;
+    tipoConta: string;
+    titular: string;
+  };
+  status: string;
+  dataRequisicao: string;
+  dataAprovacao?: string;
+  dataPagamento?: string;
+  requisitadoPor: {
+    id: string;
+    nome: string;
+    papel: string;
+  };
+  aprovadoPor?: {
+    id: string;
+    nome: string;
+    papel: string;
+  };
+  motivoRejeicao?: string;
+  observacoes?: string;
+  comprovante?: string;
+  formaPagamento: 'ted' | 'pix' | 'doc';
+  loja: string;
+  produto: string;
+}
+
+// PEAF V1.5 - Função de mapeamento de Nested (Drizzle JOIN result) para Flat (DTO)
+function mapToPagamentoDTO(row: any): PagamentoDTO {
+  const proposta = row.proposta;
+  const loja = row.loja;
+  const produto = row.produto;
+  const boleto = row.boleto;
+
+  return {
+    id: proposta.id,
+    propostaId: proposta.id,
+    numeroContrato: proposta.numeroContrato || proposta.numeroProposta || `PROP-${proposta.id.slice(0, 8)}`,
+    // ATENÇÃO: Usar os nomes exatos dos campos retornados pelo Drizzle
+    nomeCliente: proposta.clienteNome || 'N/A',
+    cpfCliente: proposta.clienteCpf || 'N/A',
+    valorFinanciado: parseFloat(proposta.valorTotalFinanciado || proposta.valor || '0'),
+    valorLiquido: parseFloat(proposta.valorLiquidoLiberado || proposta.valorTotalFinanciado || '0'),
+    valorIOF: parseFloat(proposta.valorIof || '0'),
+    valorTAC: parseFloat(proposta.valorTac || '0'),
+    contaBancaria: {
+      banco: proposta.dadosPagamentoBanco || 'N/A',
+      agencia: proposta.dadosPagamentoAgencia || 'N/A',
+      conta: proposta.dadosPagamentoConta || 'N/A',
+      tipoConta: proposta.dadosPagamentoTipo || 'corrente',
+      titular: proposta.dadosPagamentoNomeTitular || proposta.clienteNome || 'N/A',
+    },
+    status: proposta.status || 'UNKNOWN',
+    dataRequisicao: proposta.createdAt?.toISOString() || new Date().toISOString(),
+    dataAprovacao: proposta.dataAprovacao?.toISOString(),
+    dataPagamento: proposta.dataPagamento?.toISOString(),
+    requisitadoPor: {
+      id: proposta.userId || 'system',
+      nome: proposta.solicitadoPorNome || 'Sistema',
+      papel: 'OPERADOR',
+    },
+    aprovadoPor: proposta.aprovadoPorNome ? {
+      id: proposta.analistaId || 'system',
+      nome: proposta.aprovadoPorNome,
+      papel: 'ANALISTA',
+    } : undefined,
+    motivoRejeicao: proposta.motivoPendencia,
+    observacoes: proposta.observacoes,
+    comprovante: proposta.urlComprovantePagemento,
+    formaPagamento: (proposta.formaPagamento?.toLowerCase() || 'pix') as 'ted' | 'pix' | 'doc',
+    loja: loja?.nome || 'N/A',
+    produto: produto?.nome || 'N/A',
+  };
+}
+
 // Multer configuration for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -35,7 +123,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
-    const payments = await pagamentoService.getPayments({
+    const paymentsNested = await pagamentoService.getPayments({
       status: status as string,
       periodo: periodo as string,
       incluir_pagos: incluir_pagos === 'true',
@@ -43,10 +131,15 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       userRole: userRole || undefined,
     });
 
+    // ✅ FASE 2 - PEAF V1.5: APLICAR MAPEAMENTO DTO
+    const paymentsFlat = paymentsNested.map(mapToPagamentoDTO);
+
+    console.log(`[PAGAMENTOS] Mapped ${paymentsFlat.length} proposals to DTO format`);
+
     res.json({
       success: true,
-      data: payments,
-      total: payments.length,
+      data: paymentsFlat, // ✅ Enviar dados planos (DTO)
+      total: paymentsFlat.length,
     });
   } catch (error: any) {
     console.error('[PAGAMENTOS] Error getting payments:', error);
