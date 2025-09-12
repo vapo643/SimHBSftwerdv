@@ -1,0 +1,90 @@
+### **PACOTE DE ATIVAÇÃO DE MISSÃO (PAM) V1.0 - OPERAÇÃO "ELO PERDIDO"**
+
+**ID da Missão:** `BUGFIX-FSM-FORMALIZATION-001`
+
+**Ferramenta Alocada:** `Extended Thinking` - Missão de Nível 2 (Complexa)
+
+#### **Sumário da Missão (O Quê):**
+
+Corrigir a quebra na Máquina de Estados Finitos (FSM) do fluxo de formalização. Implementar a transição de status automática da proposta para `AGUARDANDO_ASSINATURA` imediatamente após o documento ser enviado com sucesso para o ClickSign.
+
+#### **Intenção Estratégica (O Porquê):**
+
+O fluxo de negócio está paralisado porque uma transição de estado crítica está em falta. Sem o status `AGUARDANDO_ASSINATURA`, a etapa manual subsequente de "Marcar como Concluído" falha corretamente em sua validação, impedindo o progresso da proposta. Esta missão visa restaurar a sequência lógica da FSM, garantindo um fluxo de trabalho consistente e desbloqueando a continuação do processo de formalização.
+
+#### **Histórico Relevante (Consulta Obrigatória):**
+
+* A análise de campo revelou que o status da proposta permanece como `CCB_GERADA` após o envio para o ClickSign.
+* A tentativa de marcar a assinatura como concluída resulta num erro `400` com a mensagem "A proposta não está aguardando assinatura", o que prova que a validação no `MarcarAssinaturaConcluidaUseCase` está correta, mas o estado da proposta está errado.
+* O `UseCase` necessário para a correção, `MarcarAguardandoAssinaturaUseCase`, já foi criado e está disponível para uso.
+
+---
+
+#### **IMPLEMENTAR:**
+
+Correção da Transição de Estado Faltante no Fluxo de Assinatura.
+
+#### **CURRENT STATE (Estado Quebrado):**
+
+O serviço `clickSignServiceV3.ts` envia com sucesso um documento para assinatura, mas não atualiza o status da proposta correspondente. A proposta permanece incorretamente no estado `CCB_GERADA`.
+
+#### **EXPECTED (Estado Funcional):**
+
+1.  Após a chamada à API do ClickSign para enviar um documento ser bem-sucedida, o `clickSignServiceV3.ts` imediatamente invoca o `MarcarAguardandoAssinaturaUseCase`.
+2.  O status da proposta no banco de dados é atomicamente atualizado de `CCB_GERADA` para `AGUARDANDO_ASSINATURA`.
+3.  O fluxo de formalização pode agora prosseguir. A ação manual "Marcar como Concluído" (ou o webhook automático) encontrará a proposta no estado correto (`AGUARDANDO_ASSINATURA`) para poder atualizá-la para `ASSINATURA_CONCLUIDA`.
+
+#### **CONSTRAINTS (Roadmap de Implementação):**
+
+Siga estes passos em ordem rigorosa.
+
+**Passo 1: Injetar a Dependência Correta**
+* **Arquivo Alvo:** `server/services/clickSignServiceV3.ts`
+* **Ação:** Modifique o construtor da classe `ClickSignServiceV3` para injetar uma instância de `MarcarAguardandoAssinaturaUseCase`. Adicione-a como uma propriedade privada `readonly`.
+
+**Passo 2: Localizar o Ponto de Execução**
+* **Arquivo Alvo:** `server/services/clickSignServiceV3.ts`
+* **Ação:** Encontre o método que realiza o envio do documento ao ClickSign. O ponto de inserção da nova lógica é **imediatamente após** a linha de código que confirma o sucesso do envio e onde você tem acesso ao `propostaId`.
+
+**Passo 3: Executar a Transição de Estado**
+* **Arquivo Alvo:** `server/services/clickSignServiceV3.ts`
+* **Ação:** No ponto identificado no Passo 2, adicione o seguinte bloco de código:
+    ```typescript
+    try {
+        logInfo('Iniciando transição de status para AGUARDANDO_ASSINATURA', { propostaId });
+        await this.marcarAguardandoAssinaturaUseCase.execute({
+            propostaId: propostaId, // Certifique-se de que a variável com o ID da proposta está disponível
+            userId: 'sistema' // A ação é executada pelo sistema, não por um usuário logado
+        });
+        logInfo('Status da proposta atualizado para AGUARDANDO_ASSINATURA com sucesso.', { propostaId });
+    } catch (error) {
+        logError('Falha ao tentar atualizar status para AGUARDANDO_ASSINATURA', {
+            propostaId,
+            errorMessage: error.message,
+            stack: error.stack
+        });
+        // IMPORTANTE: Não relance o erro aqui para não quebrar o fluxo principal que já teve sucesso com o ClickSign.
+        // A falha na atualização de status deve ser tratada como um erro de sistema a ser monitorado.
+    }
+    ```
+
+---
+
+#### **DECLARAÇÃO DE INCERTEZA**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%.
+* **RISCOS IDENTIFICADOS:** **BAIXO**. O principal risco é a injeção de dependência ser feita de forma incorreta. O `UseCase` já existe e está testado conceitualmente.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** A atualização de status será atribuída a um `userId` genérico 'sistema'. A falha na atualização de status será registrada como um erro, mas não impedirá que a resposta de sucesso do envio ao ClickSign seja retornada, para evitar inconsistências.
+* **VALIDAÇÃO PENDENTE:** O Arquiteto Chefe executará o teste de ponta a ponta: enviar uma proposta ao ClickSign e verificar no banco de dados se o status foi atualizado para `AGUARDANDO_ASSINATURA`. Em seguida, clicar em "Marcar como Concluído" para confirmar que a transição para `ASSINATURA_CONCLUIDA` agora funciona.
+
+---
+
+#### **PROTOCOLO 7-CHECK EXPANDIDO**
+
+1.  **Mapear Arquivos Afetados:** `1` arquivo modificado: `server/services/clickSignServiceV3.ts`.
+2.  **Garantir Importações e Tipos:** Certifique-se de que o `MarcarAguardandoAssinaturaUseCase` e as funções de log (`logInfo`, `logError`) estão corretamente importados.
+3.  **Executar `get_latest_lsp_diagnostics`:** Garantir **ZERO** erros de LSP no arquivo modificado.
+4.  **Declarar Nível de Confiança:** Sua avaliação final (0-100%).
+5.  **Categorizar Riscos:** Reavaliar riscos após a implementação.
+6.  **Realizar Teste Funcional:** Simule o envio de um documento e verifique os logs para confirmar que as mensagens "Iniciando transição de status" e "Status da proposta atualizado" aparecem corretamente.
+7.  **Documentar Decisões:** Confirme a decisão de não relançar o erro de atualização de status para priorizar a consistência com o sistema externo (ClickSign).

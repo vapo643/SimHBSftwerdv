@@ -8,6 +8,8 @@
 
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { clickSignSecurityService } from './clickSignSecurityService.js';
+import { MarcarAguardandoAssinaturaUseCase } from '../modules/proposal/application/MarcarAguardandoAssinaturaUseCase.js';
+import { logInfo, logError } from '../lib/logger.js';
 // Removido import do cpf-cnpj-validator
 
 interface ClickSignV3Config {
@@ -76,8 +78,9 @@ class ClickSignServiceV3 {
   private config: ClickSignV3Config;
   private rateLimitRemaining: number = 300;
   private rateLimitReset: Date = new Date();
+  private readonly marcarAguardandoAssinaturaUseCase?: MarcarAguardandoAssinaturaUseCase;
 
-  constructor() {
+  constructor(marcarAguardandoAssinaturaUseCase?: MarcarAguardandoAssinaturaUseCase) {
     // ALWAYS use production ClickSign API for valid legal signatures
     // ClickSign uses API v1 with query parameter authentication
     this.config = {
@@ -652,6 +655,27 @@ class ClickSignServiceV3 {
       console.log(`[CLICKSIGN V1] ✅ CCB sent for signature successfully`);
       console.log(`[CLICKSIGN V1] Sign URL generated:`, signUrl);
 
+      // 🎯 ELO PERDIDO: Executar transição de status CCB_GERADA → AGUARDANDO_ASSINATURA
+      if (this.marcarAguardandoAssinaturaUseCase) {
+        try {
+          logInfo('Iniciando transição de status para AGUARDANDO_ASSINATURA', { proposalId });
+          await this.marcarAguardandoAssinaturaUseCase.execute({
+            propostaId: proposalId,
+            userId: 'sistema'
+          });
+          logInfo('Status da proposta atualizado para AGUARDANDO_ASSINATURA com sucesso.', { proposalId });
+        } catch (error) {
+          logError('Falha ao tentar atualizar status para AGUARDANDO_ASSINATURA', {
+            proposalId,
+            errorMessage: (error as Error).message,
+            stack: (error as Error).stack
+          });
+          // IMPORTANTE: Não relança o erro para não quebrar o fluxo principal que já teve sucesso com o ClickSign.
+        }
+      } else {
+        console.warn('[CLICKSIGN V1] ⚠️ MarcarAguardandoAssinaturaUseCase não disponível - status não será atualizado');
+      }
+
       return {
         documentKey: document.key,
         signerId: signer.key,
@@ -680,5 +704,10 @@ class ClickSignServiceV3 {
   }
 }
 
-// Export singleton instance
+// Factory function to create ClickSign service with dependencies
+export function createClickSignServiceV3(marcarAguardandoAssinaturaUseCase?: MarcarAguardandoAssinaturaUseCase): ClickSignServiceV3 {
+  return new ClickSignServiceV3(marcarAguardandoAssinaturaUseCase);
+}
+
+// Export singleton instance (backwards compatibility - without status transition)
 export const clickSignServiceV3 = new ClickSignServiceV3();
