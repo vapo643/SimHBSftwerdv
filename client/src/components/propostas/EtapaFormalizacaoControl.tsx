@@ -44,7 +44,7 @@ export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> =
       });
 
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId, 'formalizacao'] });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
 
       if (onUpdate) {
