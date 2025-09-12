@@ -1,0 +1,55 @@
+Passo 1: [BACKEND - LÓGICA] Restauração da Máquina de Estados e Refatoração para UseCases.
+
+Objetivo: Corrigir a lógica de negócio no backend e restaurar a conformidade com a arquitetura DDD.
+
+Ações:
+
+Criar MarcarAguardandoAssinaturaUseCase.ts:
+
+Receberá propostaId e userId.
+
+Validará se o status atual da proposta é CCB_GERADA.
+
+Fará a transição do status para AGUARDANDO_ASSINATURA usando o statusFsmService.
+
+Registrará a transição no histórico da proposta.
+
+Criar MarcarAssinaturaConcluidaUseCase.ts:
+
+Receberá propostaId e userId.
+
+Validará se o status atual é AGUARDANDO_ASSINATURA.
+
+Fará a transição do status para ASSINATURA_CONCLUIDA.
+
+Registrará a transição no histórico.
+
+Refatorar o Endpoint: Modificar a rota PATCH /api/propostas/:id/etapa-formalizacao para invocar o MarcarAssinaturaConcluidaUseCase.ts em vez de conter lógica inline.
+
+Passo 2: [BACKEND - AUTOMAÇÃO] Integração do Webhook do ClickSign.
+
+Objetivo: Implementar a atualização automática de status conforme a regra de negócio.
+
+Ações:
+
+Modificar o serviço clickSignWebhookService.ts.
+
+Dentro do manipulador de eventos (document.signed, document.finished), invocar o novo MarcarAssinaturaConcluidaUseCase.ts para automatizar o avanço da timeline.
+
+Passo 3: [FRONTEND - REVALIDAÇÃO] Correção Cirúrgica da Invalidação de Cache.
+
+Objetivo: Garantir que a UI reflita o estado real do backend após a mutação.
+
+Ações:
+
+No componente EtapaFormalizacaoControl.tsx, dentro do onSuccess do useMutation, adicionar a invalidação da queryKey que busca a proposta individual. A chave correta é provavelmente ['proposta', propostaId] ou similar.
+
+Passo 4: [TRANSVERSAL] Blindagem e Observabilidade.
+
+Objetivo: Aumentar a resiliência e a capacidade de diagnóstico do fluxo.
+
+Ações:
+
+Injetar logging estruturado (Winston/Sentry) dentro dos novos UseCases para registrar o início, sucesso e falha das transições de status.
+
+Garantir que a UI exiba uma mensagem de erro específica ao usuário caso a mutação no backend falhe, utilizando o callback onError do useMutation.

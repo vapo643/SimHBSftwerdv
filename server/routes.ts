@@ -2970,12 +2970,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         } else if (etapa === 'assinatura_eletronica') {
-          updateData.assinaturaEletronicaConcluida = concluida;
+          // PAM V1.0 - REFATORAÇÃO CRÍTICA: Usar UseCase para lógica de negócio
+          if (concluida) {
+            // Importar UseCase e dependências
+            const { MarcarAssinaturaConcluidaUseCase } = await import('./modules/proposal/application/MarcarAssinaturaConcluidaUseCase');
+            const { DomainException } = await import('./modules/shared/domain/DomainException');
+            const { Container } = await import('./modules/shared/infrastructure/Container');
+            
+            try {
+              // Instanciar UseCase via IoC Container
+              const container = Container.getInstance();
+              const unitOfWork = container.get('UnitOfWork');
+              const marcarAssinaturaUseCase = new MarcarAssinaturaConcluidaUseCase(unitOfWork);
 
-          // TODO: Integrate with ClickSign when marked as complete
-          if (concluida && !proposta.assinaturaEletronicaConcluida) {
-            console.log(`[${getBrasiliaTimestamp()}] Enviando para ClickSign - proposta ${id}`);
+              // Executar transição de status via UseCase
+              await marcarAssinaturaUseCase.execute({
+                propostaId: id,
+                userId: req.user?.id || 'sistema'
+              });
+
+              console.log(`[${getBrasiliaTimestamp()}] ✅ UseCase executado com sucesso - Assinatura marcada como concluída`);
+
+            } catch (error) {
+              if (error instanceof DomainException) {
+                console.error(`[${getBrasiliaTimestamp()}] ❌ Erro de domínio:`, error.message);
+                return res.status(400).json({
+                  message: `Erro ao marcar assinatura como concluída: ${error.message}`,
+                  error: 'DOMAIN_ERROR'
+                });
+              } else {
+                console.error(`[${getBrasiliaTimestamp()}] ❌ Erro interno:`, error);
+                return res.status(500).json({
+                  message: 'Erro interno ao marcar assinatura como concluída',
+                  error: 'INTERNAL_ERROR'
+                });
+              }
+            }
           }
+          
+          // Manter compatibilidade com campos boolean para outras etapas
+          updateData.assinaturaEletronicaConcluida = concluida;
         } else if (etapa === 'biometria') {
           updateData.biometriaConcluida = concluida;
 
