@@ -222,7 +222,8 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .set({
         status,
         updatedAt: getBrasiliaDate(),
-        userId: userId,
+        // userId removed - preserve original userId to avoid trigger validation error
+        // The userId parameter is kept for backward compatibility and logging but not used
       })
       .where(eq(propostas.id, proposalId))
       .returning();
