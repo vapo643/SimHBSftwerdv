@@ -22,6 +22,7 @@ import { MarcarAssinaturaConcluidaUseCase } from '../modules/proposal/applicatio
 import { DomainException } from '../modules/shared/domain/DomainException.js';
 import { UnitOfWork } from '../lib/unit-of-work.js';
 import { logInfo, logError } from '../lib/logger.js';
+import { SecureLogger, sanitizeWebhookPayload } from '../modules/shared/infrastructure/SanitizedLogger';
 
 interface WebhookEvent {
   event: string;

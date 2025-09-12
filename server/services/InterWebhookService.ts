@@ -9,6 +9,7 @@
 import { UnitOfWork } from '../modules/shared/infrastructure/UnitOfWork';
 import { MarkBoletoAsPaidUseCase } from '../modules/boleto/application/MarkBoletoAsPaidUseCase';
 import { securityRepository } from '../repositories/security.repository';
+import { SecureLogger, sanitizeWebhookPayload } from '../modules/shared/infrastructure/SanitizedLogger';
 
 export interface InterWebhookPayload {
   event?: string;
@@ -42,14 +43,14 @@ export class InterWebhookService {
     metadata?: any
   ): Promise<any> {
     try {
-      console.log(`[INTER WEBHOOK] Processing ${operation}`, {
+      SecureLogger.webhook(`Processing ${operation}`, {
         eventType: payload.event,
         boletoId: payload.boletoId,
         nossoNumero: payload.nossoNumero,
         status: payload.status,
-      });
+      }, 'inter');
 
-      // Log início do processamento
+      // Log início do processamento (COM SANITIZAÇÃO)
       await securityRepository.logSecurityEvent({
         eventType: 'WEBHOOK_PROCESSING_START',
         severity: 'LOW',
@@ -58,8 +59,8 @@ export class InterWebhookService {
           service: 'inter',
           operation,
           eventType: payload.event,
-          webhookPayload: payload,
-          metadata,
+          webhookPayload: sanitizeWebhookPayload(payload),
+          metadata: metadata ? sanitizeWebhookPayload(metadata) : null,
         },
       });
 

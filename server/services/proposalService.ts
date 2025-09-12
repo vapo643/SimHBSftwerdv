@@ -5,6 +5,7 @@
  */
 
 import { GenericService } from './genericService.js';
+import { SecureLogger } from '../modules/shared/infrastructure/SanitizedLogger';
 
 export class ProposalService extends GenericService {
   constructor() {
@@ -16,11 +17,11 @@ export class ProposalService extends GenericService {
    */
   async processProposal(operation: string, data: any): Promise<any> {
     try {
-      console.log(`[PROPOSAL_SERVICE] Processing ${operation}`, data);
+      SecureLogger.info(`[PROPOSAL_SERVICE] Processing ${operation}`, { operation, hasData: !!data });
 
       return await this.executeOperation(operation, data);
     } catch (error: any) {
-      console.error(`[PROPOSAL_SERVICE] Operation ${operation} failed:`, error);
+      SecureLogger.error(`[PROPOSAL_SERVICE] Operation ${operation} failed`, error);
       throw error;
     }
   }

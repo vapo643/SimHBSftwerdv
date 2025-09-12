@@ -9,6 +9,8 @@ import { transitionTo, InvalidTransitionError } from './statusFsmService.js';
 import { z } from 'zod';
 // PAM V3.5 - Import paymentsQueue for idempotent processing
 import { getPaymentsQueue } from '../lib/queues.js';
+// SECURITY V2.0 - Import secure logger
+import { SecureLogger } from '../modules/shared/infrastructure/SanitizedLogger';
 
 // Validation schema
 const pagamentoSchema = z.object({
@@ -47,7 +49,7 @@ export class PagamentoService {
     // Get payment statistics for debugging
     const stats = await pagamentoRepository.getPaymentStatistics();
 
-    console.log('[PAGAMENTOS DEBUG] Statistics:', stats);
+    SecureLogger.debug('Payment statistics retrieved', stats);
 
     // Get proposals with filters
     const proposals = await pagamentoRepository.getProposalsReadyForPayment({
