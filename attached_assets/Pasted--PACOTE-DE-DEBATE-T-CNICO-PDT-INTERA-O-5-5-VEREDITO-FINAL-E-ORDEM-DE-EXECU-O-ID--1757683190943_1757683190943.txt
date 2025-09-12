@@ -1,0 +1,40 @@
+### **PACOTE DE DEBATE TÉCNICO (PDT) - INTERAÇÃO 5/5 (VEREDITO FINAL E ORDEM DE EXECUÇÃO)**
+
+**ID da Missão:** `RCA-500-DATAMAP-001-DEBATE`
+
+**ARQUITETO 1 (Code Custodian):**
+
+"Agente, consenso alcançado. O debate técnico está encerrado. O seu desempenho em identificar os riscos, avaliar as estratégias e convergir para uma solução pragmática e robusta foi exemplar.
+
+**Recapitulação da Crise e do Nosso Processo:**
+
+1.  **A Falha Original:** O sistema retornava um erro 500 ao clicar em "Marcar como Concluído", bloqueando o fluxo de negócio mais crítico. Os logs de campo que recebemos foram inequívocos:
+    > [UoW] Work failed, rolling back transaction: txn_1757680710360_3o7357lkb **TypeError: Cannot read properties of undefined (reading 'cep')**
+    > at _Proposal.fromDatabase (...)
+    > at TransactionalProposalRepository.findById (...)
+
+2.  **Diagnóstico Inicial (Interação 1):** Nós identificamos que a causa raiz era uma incompatibilidade estrutural. O `TransactionalProposalRepository` retornava dados 'flat' do banco, enquanto a entidade `Proposal.fromDatabase` esperava um objeto aninhado `cliente_data`, causando a `TypeError`.
+
+3.  **Debate de Estratégias (Interação 2):** Confrontamos a solução arquiteturalmente pura (`ProposalMapper`) com a realidade da crise e concordamos que uma abordagem de contenção imediata era taticamente superior.
+
+4.  **Refinamento da Tática (Interação 3):** Refinamos a contenção, substituindo a ideia de 'fallbacks duplos' pela estratégia superior de um **"Bloco de Normalização de Dados"** isolado no topo do método `fromDatabase`.
+
+5.  **Consolidação do Plano (Interação 4):** Você validou o plano, identificou um risco residual de `null` values e propôs a mitigação correta, selando o nosso consenso.
+
+**Veredito Final:**
+
+A estratégia híbrida de duas fases está **formalmente aprovada**. A falha recorrente será erradicada.
+
+**Sua Tarefa (Interação 5/5) - O Plano Irrefutável:**
+
+Com base em todo o nosso debate, sua tarefa final é gerar o **"Plano de Ação Irrefutável"**. Este não é um prompt de debate, mas sim o **Pacote de Ativação de Missão (PAM)** completo e pronto para execução, que irá guiar a implementação da **Fase 1 (Contenção Imediata)**.
+
+O PAM deve ser detalhado, preciso e seguir o nosso padrão rigoroso. Ele deve conter:
+
+1.  **Sumário da Missão e Intenção Estratégica:** Claros e concisos.
+2.  **CURRENT STATE e EXPECTED:** Descrições inequívocas.
+3.  **CONSTRAINTS (Roadmap de Implementação):** A implementação detalhada e exata do **"Bloco de Normalização"** dentro do método `Proposal.fromDatabase`, incluindo a mitigação de risco para campos nulos que você identificou na interação 4. Liste todos os 35 campos `cliente_*` que devem ser mapeados.
+4.  **DECLARAÇÃO DE INCERTEZA:** Preenchida com os riscos e validações que discutimos.
+5.  **PROTOCOLO 7-CHECK EXPANDIDO:** Completo e pronto para ser seguido durante a execução.
+
+**"Vamos acabar com isso de uma vez por todas."** Gere o PAM que irá garantir isso."
