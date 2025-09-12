@@ -10,6 +10,7 @@ import { supabaseAdmin } from '../lib/supabase-admin.js';
 import {
   interCollections,
   propostas,
+  parcelas,
   historicoObservacoesCobranca,
   statusContextuais,
   type InterCollection,
@@ -207,6 +208,19 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     const result = await db.select().from(propostas).where(eq(propostas.id, proposalId)).limit(1);
 
     return result[0];
+  }
+
+  /**
+   * Get parcelas (installments) for a proposal
+   */
+  async getParcelas(proposalId: string): Promise<any[]> {
+    const result = await db
+      .select()
+      .from(parcelas)
+      .where(eq(parcelas.propostaId, proposalId))
+      .orderBy(asc(parcelas.numeroParcela));
+
+    return result;
   }
 
   /**

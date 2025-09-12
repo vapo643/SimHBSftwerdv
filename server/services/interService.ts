@@ -12,11 +12,10 @@ import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { z } from 'zod';
 import type { InterCollection, Proposta } from '@shared/schema';
 
-// Validation schemas
+// Validation schemas - UPDATED FOR MULTIPLE BOLETOS
 const createCollectionSchema = z.object({
   proposalId: z.string(),
-  valorTotal: z.number().min(2.5).max(99999999.99),
-  dataVencimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  // clienteData is now optional - will be extracted from proposal
   clienteData: z.object({
     nome: z.string().min(1),
     cpf: z.string().min(11),
@@ -29,7 +28,7 @@ const createCollectionSchema = z.object({
     cidade: z.string().min(1),
     uf: z.string().length(2),
     cep: z.string().min(8),
-  }),
+  }).optional(),
 });
 
 export class InterService {
@@ -41,9 +40,9 @@ export class InterService {
   }
 
   /**
-   * Create a new collection (boleto/PIX)
+   * Create boletos for loan proposal - FIXED: Generate multiple boletos based on installments
    */
-  async createCollection(data: any, userId?: string): Promise<InterCollection> {
+  async createCollection(data: any, userId?: string): Promise<InterCollection[]> {
     // Validate input
     const validated = createCollectionSchema.parse(data);
 
@@ -53,62 +52,108 @@ export class InterService {
       throw new Error('Proposta não encontrada');
     }
 
-    // Check for existing collection
+    console.log(`[INTER] Creating boletos for proposal: ${validated.proposalId}`);
+    console.log(`[INTER] Client: ${proposal.clienteNome} - CPF: ${proposal.clienteCpf}`);
+    console.log(`[INTER] Loan amount: ${proposal.valor} - Installments: ${proposal.prazo}`);
+
+    // Check for existing collections
     const existingCollection = await interRepository.findByProposalId(validated.proposalId);
     if (existingCollection) {
-      throw new Error('Já existe uma cobrança para esta proposta');
+      throw new Error('Já existem boletos para esta proposta');
     }
 
-    // Create collection in Inter Bank using correct method
-    const interResult = await interBankService.criarCobrancaParaProposta({
-      id: validated.proposalId,
-      valorTotal: validated.valorTotal,
-      dataVencimento: validated.dataVencimento,
-      clienteData: {
-        nome: validated.clienteData.nome,
-        cpf: validated.clienteData.cpf,
-        email: validated.clienteData.email,
-        telefone: validated.clienteData.telefone,
-        endereco: validated.clienteData.endereco,
-        numero: validated.clienteData.numero,
-        complemento: validated.clienteData.complemento,
-        bairro: validated.clienteData.bairro,
-        cidade: validated.clienteData.cidade,
-        uf: validated.clienteData.uf,
-        cep: validated.clienteData.cep,
-      },
-    });
+    // Get installments from database
+    const parcelas = await interRepository.getParcelas(validated.proposalId);
+    if (!parcelas || parcelas.length === 0) {
+      throw new Error('Parcelas não encontradas para esta proposta');
+    }
 
-    // Fetch complete collection details since criarCobrancaParaProposta only returns codigoSolicitacao
-    const detailedResult = await (interBankService as any).recuperarCobranca(interResult.codigoSolicitacao);
+    console.log(`[INTER] Found ${parcelas.length} installments for proposal`);
 
-    // Save collection to database with complete data
-    const collection = await interRepository.createCollection({
-      propostaId: validated.proposalId,
-      codigoSolicitacao: interResult.codigoSolicitacao,
-      seuNumero: detailedResult.cobranca?.seuNumero || `PROP-${validated.proposalId}`,
-      valorNominal: String(validated.valorTotal),
-      dataVencimento: validated.dataVencimento,
-      situacao: detailedResult.cobranca?.situacao || 'EM_PROCESSAMENTO',
-      linhaDigitavel: detailedResult.linhaDigitavel || detailedResult.boleto?.linhaDigitavel,
-      pixCopiaECola: detailedResult.pixCopiaECola || detailedResult.pix?.pixCopiaECola,
-      dataEmissao: getBrasiliaTimestamp(),
-      // Store additional data in metadata field if needed
-    });
+    // Extract client data from proposal (use real data, not manual input)
+    const clienteData = {
+      nome: proposal.clienteNome,
+      cpf: proposal.clienteCpf.replace(/\D/g, ''),
+      email: proposal.clienteEmail || 'cliente@example.com',
+      telefone: proposal.clienteTelefone?.replace(/\D/g, '') || '27998538565',
+      endereco: proposal.clienteLogradouro || proposal.clienteEndereco || 'Endereço não informado',
+      numero: proposal.clienteNumero || '100',
+      complemento: proposal.clienteComplemento || '',
+      bairro: proposal.clienteBairro || 'Centro',
+      cidade: proposal.clienteCidade || 'Serra',
+      uf: proposal.clienteUf || 'ES',
+      cep: proposal.clienteCep?.replace(/\D/g, '') || '29165460',
+    };
+
+    const createdCollections: InterCollection[] = [];
+    let successCount = 0;
+    let failCount = 0;
+
+    // Create one boleto per installment (REAL DATA)
+    for (const parcela of parcelas) {
+      try {
+        console.log(`\n[INTER] Creating boleto for installment ${parcela.numeroParcela}/${parcelas.length}`);
+        console.log(`[INTER] Amount: R$ ${parcela.valorParcela} - Due: ${parcela.dataVencimento}`);
+
+        // Create boleto in Inter Bank API
+        const interResult = await interBankService.criarCobrancaParaProposta({
+          id: validated.proposalId,
+          valorTotal: Number(parcela.valorParcela),
+          dataVencimento: parcela.dataVencimento,
+          clienteData: clienteData,
+        });
+
+        // Fetch detailed collection info
+        const detailedResult = await (interBankService as any).recuperarCobranca(interResult.codigoSolicitacao);
+
+        // Save collection to database
+        const collection = await interRepository.createCollection({
+          propostaId: validated.proposalId,
+          codigoSolicitacao: interResult.codigoSolicitacao,
+          seuNumero: `${validated.proposalId}-${String(parcela.numeroParcela).padStart(3, '0')}`,
+          valorNominal: String(parcela.valorParcela),
+          dataVencimento: parcela.dataVencimento,
+          situacao: detailedResult.cobranca?.situacao || 'EM_PROCESSAMENTO',
+          linhaDigitavel: detailedResult.linhaDigitavel || detailedResult.boleto?.linhaDigitavel,
+          pixCopiaECola: detailedResult.pixCopiaECola || detailedResult.pix?.pixCopiaECola,
+          dataEmissao: getBrasiliaTimestamp(),
+          numeroParcela: parcela.numeroParcela,
+          totalParcelas: parcelas.length,
+        });
+
+        createdCollections.push(collection);
+        successCount++;
+        console.log(`✅ [INTER] Boleto ${parcela.numeroParcela} created successfully`);
+
+      } catch (error) {
+        failCount++;
+        console.error(`❌ [INTER] Failed to create boleto for installment ${parcela.numeroParcela}:`, error);
+        // Continue with next installment
+      }
+    }
+
+    if (createdCollections.length === 0) {
+      throw new Error('Nenhum boleto foi criado com sucesso');
+    }
 
     // Update proposal status
-    await interRepository.updateProposalStatus(validated.proposalId, 'COBRANÇA_GERADA', userId);
+    await interRepository.updateProposalStatus(validated.proposalId, 'BOLETOS_EMITIDOS', userId);
 
     // Create observation history
     await interRepository.createObservationHistory({
       propostaId: validated.proposalId,
-      mensagem: `Cobrança gerada com sucesso. Código: ${interResult.codigoSolicitacao}`,
+      mensagem: `${successCount} boletos gerados com sucesso. ${failCount} falharam. Cliente: ${clienteData.nome}`,
       criadoPor: 'Sistema',
-      tipoAcao: 'COBRANÇA_GERADA',
-      dadosAcao: { codigoSolicitacao: interResult.codigoSolicitacao, usuarioId: userId },
+      tipoAcao: 'BOLETOS_GERADOS',
+      dadosAcao: { 
+        boletosGerados: successCount, 
+        boletos: createdCollections.map(c => c.codigoSolicitacao),
+        usuarioId: userId 
+      },
     });
 
-    return collection;
+    console.log(`\n✅ [INTER] Successfully created ${successCount} boletos for ${clienteData.nome}`);
+    return createdCollections;
   }
 
   /**
