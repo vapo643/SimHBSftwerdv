@@ -1,0 +1,63 @@
+# DOSSIÊ DE CONTEXTO TÉCNICO COMPLETO: PROJETO SIMPIX
+
+## 1. Visão Geral e Propósito de Negócio
+- **Problema Central:** Qual problema de negócio o Simpix se propõe a resolver?
+- **Público-Alvo:** Quem são os principais usuários do sistema (personas)?
+- **Valor Agregado:** Qual o principal valor que o software entrega para seus usuários e para a instituição financeira?
+
+## 2. Arquitetura de Software
+- **Padrão Arquitetural:** Descreva em detalhes a implementação do padrão "Monolito Modular".
+- **Decomposição por Domínio (DDD):** Liste e descreva cada domínio de negócio identificado no sistema (ex: Crédito, Pagamentos, Segurança).
+- **Módulos Principais:** Dentro de cada domínio, identifique os principais módulos e suas responsabilidades.
+- **Diagrama de Contexto (C4 Model - Nível 1):** Gere um diagrama MermaidJS mostrando o sistema Simpix, seus usuários e as interações com sistemas externos (Supabase, Banco Inter, ClickSign).
+
+## 3. Fluxos de Negócio Principais (End-to-End)
+- **Fluxo 1: Criação e Aprovação de Proposta de Crédito:**
+  - Descreva passo a passo, desde a entrada de dados no frontend até a aprovação final.
+  - Detalhe quais componentes de UI, endpoints de API, serviços de backend e tabelas do banco de dados estão envolvidos em cada etapa.
+  - Gere um Diagrama de Sequência em MermaidJS para este fluxo.
+- **Fluxo 2: Geração e Pagamento de CCB:**
+  - Descreva o processo completo, incluindo a geração do PDF, integração com a ClickSign e o workflow de pagamentos via Banco Inter.
+  - Detalhe os componentes, APIs, serviços e tabelas envolvidos.
+  - Gere um Diagrama de Sequência em MermaidJS para este fluxo.
+- **Fluxos Secundários:** Liste e descreva brevemente outros fluxos importantes (ex: cadastro de usuário, gestão de tabelas comerciais).
+
+## 4. Análise do Frontend
+- **Stack Tecnológica:** Detalhe o uso de React 18, Vite, TypeScript, Tailwind CSS e shadcn/ui.
+- **Gerenciamento de Estado:** Explique a estratégia de uso do TanStack Query e `useReducer`.
+- **Estrutura de Componentes:** Descreva a hierarquia geral dos componentes e a organização dos diretórios em `client/src/`.
+- **Formulários e Validação:** Detalhe a implementação do React Hook Form com Zod.
+- **Roteamento:** Explique como o Wouter é utilizado para gerenciar as rotas da aplicação.
+
+## 5. Análise do Backend
+- **Stack Tecnológica:** Detalhe o uso de Express.js, TypeScript e BullMQ/Redis.
+- **Estrutura da API:** Descreva a organização das rotas, middlewares e controllers.
+- **Camada de Serviço:** Identifique os principais serviços e a lógica de negócio que eles encapsulam.
+- **Processamento Assíncrono:** Explique como as filas (Job Queues) são utilizadas, especialmente no fluxo de pagamentos.
+
+## 6. Camada de Persistência (Banco de Dados)
+- **ORM e Schema:** Descreva como o Drizzle ORM é usado e analise o schema principal em `shared/schema.ts`.
+- **Diagrama de Entidade e Relacionamento (ERD):** Gere um diagrama MermaidJS mostrando as principais tabelas e seus relacionamentos.
+- **Segurança (RLS):** Liste todas as políticas de Row Level Security implementadas e explique o que cada uma protege.
+
+## 7. Infraestrutura, CI/CD e Operações
+- **Ambientes:** Descreva a estratégia de ambientes (Desenvolvimento, Staging, Produção) e o uso do Supabase.
+- **Pipeline de CI/CD:** Analise os arquivos em `.github/workflows/` e descreva as etapas de Integração Contínua, Implantação em Staging e Scans de Segurança.
+- **Observabilidade:** Explique as estratégias de logging (Winston), error tracking (Sentry) e health checks.
+
+## 8. Doutrina de Segurança "Banking-Grade"
+- Para cada um dos seguintes itens, localize a implementação no código e explique como funciona:
+  - Autenticação e Autorização (JWTs, RBAC)
+  - Rate Limiting (Two-Tier)
+  - Proteção contra Timing Attacks
+  - Geração de UUIDs Criptograficamente Seguros
+  - Anti-Fragile RBAC
+  - Input Sanitization
+
+## 9. Compêndio de Decisões Arquiteturais (ADRs)
+- Analise todos os arquivos na pasta `architecture/07-decisions/`.
+- Para cada ADR, resuma: O Contexto do Problema, a Decisão Tomada e as Consequências.
+
+## 10. Dependências e Hierarquia do Projeto
+- **Análise de Dependências:** Liste as principais dependências do `package.json` (produção e desenvolvimento) e descreva o propósito de cada uma no projeto.
+- **Mapa de Dependências de Módulos:** Gere um diagrama de dependências em MermaidJS mostrando como os principais módulos do backend se interconectam.
