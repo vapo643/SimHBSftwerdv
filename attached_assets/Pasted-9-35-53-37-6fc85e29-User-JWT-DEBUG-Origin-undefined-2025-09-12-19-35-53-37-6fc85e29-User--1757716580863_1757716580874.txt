@@ -1,0 +1,112 @@
+9:35:53.37
+6fc85e29
+User
+[JWT DEBUG] Origin: undefined
+2025-09-12 19:35:53.37
+6fc85e29
+User
+[JWT DEBUG] Referer: https://sistemasimpix.com.br/financeiro/pagamentos
+2025-09-12 19:35:53.37
+6fc85e29
+User
+[JWT DEBUG] Header Auth presente: true
+2025-09-12 19:35:53.37
+6fc85e29
+User
+[JWT DEBUG] Header começa com Bearer: true
+2025-09-12 19:35:53.93
+6fc85e29
+User
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+2025-09-12 19:35:53.93
+6fc85e29
+User
+[JWT DEBUG] Auto-detected token type: supabase
+2025-09-12 19:35:53.93
+6fc85e29
+User
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-12 19:35:54.21
+6fc85e29
+User
+{"correlationId":"ec9340a1-8bef-4362-8f9d-eaf60ff9f964","duration":844,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":314,"service":"simpix-api","statusCode":200,"timestamp":"2025-09-12 22:35:54","url":"/api/debug/me","version":"1.0.0"}
+2025-09-12 19:35:54.29
+6fc85e29
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-12 19:35:54.29
+6fc85e29
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-12 19:35:54.29
+6fc85e29
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-12 19:35:54.29
+6fc85e29
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-12 19:35:54.47
+6fc85e29
+User
+{"correlationId":"154748d6-a12e-489f-a6dd-3a7328084b47","environment":"production","ip":"34.58.89.73","level":"info","message":"📥 Request received","method":"GET","path":"/api/pagamentos","query":{},"referrer":"https://sistemasimpix.com.br/financeiro/pagamentos","service":"simpix-api","timestamp":"2025-09-12 22:35:54","url":"/api/pagamentos?","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-12 19:35:54.47
+6fc85e29
+User
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+2025-09-12 19:35:54.47
+6fc85e29
+User
+[JWT DEBUG] Rota acessada: /
+2025-09-12 19:35:54.47
+6fc85e29
+User
+[JWT DEBUG] Método: GET
+2025-09-12 19:35:54.47
+6fc85e29
+User
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+2025-09-12 19:35:54.47
+6fc85e29
+User
+[JWT DEBUG] Origin: undefined
+2025-09-12 19:35:54.47
+6fc85e29
+User
+[JWT DEBUG] Referer: https://sistemasimpix.com.br/financeiro/pagamentos
+2025-09-12 19:35:54.47
+6fc85e29
+User
+[JWT DEBUG] Header Auth presente: true
+2025-09-12 19:35:54.47
+6fc85e29
+User
+[JWT DEBUG] Header começa com Bearer: true
+2025-09-12 19:35:55.04
+6fc85e29
+User
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+2025-09-12 19:35:55.04
+6fc85e29
+User
+[JWT DEBUG] Auto-detected token type: supabase
+2025-09-12 19:35:55.04
+6fc85e29
+User
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-12 19:35:55.33
+6fc85e29
+User
+Query: select count(*) from "propostas" where "propostas"."deleted_at" IS NULL
+2025-09-12 19:35:55.47
+6fc85e29
+User
+Query: select count(*) from "propostas" where ("propostas"."status" = $1 and "propostas"."deleted_at" IS NULL) -- params: ["aprovado"]
+2025-09-12 19:35:55.77
+6fc85e29
+User
+Query: select count(*) from "propostas" where ("propostas"."status" = $1 and "propostas"."deleted_at" IS NULL) -- params: ["ASSINATURA_CONCLUIDA"]
+2025-09-12 19:35:56.06
+6fc85e29
+User
+Query: select count(DISTINCT "proposta_id") from "inter_collections" where "inter_collections"."proposta_id" IS NOT NULL

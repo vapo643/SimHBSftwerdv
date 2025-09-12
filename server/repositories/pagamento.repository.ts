@@ -52,13 +52,17 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     const conditions = [
       sql`${propostas.deletedAt} IS NULL`,
       // PAM V1.0 CRITICAL FIX: Proposals must have status = 'ASSINATURA_CONCLUIDA'
+      // NEVER override this base condition - it's the core business logic
       eq(propostas.status, 'ASSINATURA_CONCLUIDA'),
     ];
 
-    // Apply status filter
-    if (filters.status && filters.status !== 'todos') {
-      conditions.push(eq(propostas.status, filters.status));
-    }
+    // PAM V1.0 FIX: Remove conflicting status filter
+    // The base condition already ensures status = 'ASSINATURA_CONCLUIDA'
+    // Additional status filtering would create impossible queries
+    console.log(`[PAM DEBUG] Query filtering proposals with status = 'ASSINATURA_CONCLUIDA', ignoring filter.status = '${filters.status}'`);
+    
+    // NOTE: filters.status is intentionally ignored to avoid conflicts
+    // This ensures we ALWAYS show only proposals with ASSINATURA_CONCLUIDA
 
     // Apply date period filter
     if (filters.periodo) {
