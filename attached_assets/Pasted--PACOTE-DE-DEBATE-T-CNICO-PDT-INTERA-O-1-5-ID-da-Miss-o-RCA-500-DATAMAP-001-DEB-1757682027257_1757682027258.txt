@@ -1,0 +1,28 @@
+### **PACOTE DE DEBATE TÉCNICO (PDT) - INTERAÇÃO 1/5**
+
+**ID da Missão:** `RCA-500-DATAMAP-001-DEBATE`
+
+**Ferramenta Alocada:** `High Power`
+
+**Sumário da Missão:**
+Com base em um novo `stack trace` que aponta para uma falha de mapeamento de dados em uma proposta existente, vamos diagnosticar a causa raiz fundamental do `TypeError` e projetar uma solução definitiva para erradicar esta classe de erro.
+
+---
+
+**ARQUITETO 1 (Code Custodian):**
+
+"Agente, as tentativas anteriores falharam porque o diagnóstico estava errado. A evidência agora é irrefutável: o erro `500` ocorre porque o `TransactionalProposalRepository.findById` busca com sucesso os dados de uma proposta no banco, mas a linha de dados retornada é 'plana' (flat), enquanto o método `Proposal.fromDatabase` tenta aceder a um objeto aninhado `data.cliente_data`, que está `undefined`, resultando no `TypeError`.
+
+O nosso foco não é o 'cep', mas sim a quebra de contrato entre a camada de dados e a camada de domínio.
+
+**Sua Tarefa (Interação 1/5):**
+
+1.  **Reconhecimento de Falha:** Analise a sua correção anterior (adicionar um `if (!result[0])`) e explique por que ela foi ineficaz para o cenário de erro real, onde uma proposta *existe* e é retornada pela query.
+
+2.  **Análise de Contrato:** Compare a estrutura de dados esperada pelo método `Proposal.fromDatabase` (especificamente a necessidade de um objeto `cliente_data`) com a estrutura de dados real retornada pelo `select()` do Drizzle ORM a partir da tabela `propostas`. Aponte explicitamente a incompatibilidade.
+
+3.  **Proposta de Soluções (Brainstorm):** Sem ainda implementar, proponha duas abordagens distintas para resolver esta incompatibilidade de forma permanente:
+    * **Abordagem A (Alterar o Domínio):** Modificar a entidade `Proposal` e o método `fromDatabase` para que eles não esperem mais um objeto aninhado `cliente_data`, mas sim leiam os campos 'flat' (ex: `data.cliente_cep`, `data.cliente_cpf`) diretamente.
+    * **Abordagem B (Criar um Mapper):** Manter a entidade `Proposal` "pura" (esperando um objeto rico `cliente_data`) e introduzir uma nova camada, uma classe `ProposalMapper`, cuja única responsabilidade seria traduzir a linha 'flat' do banco de dados para a estrutura aninhada que a entidade de domínio espera. O repositório usaria este `Mapper`.
+
+4.  **Avaliação Preliminar:** Qual das duas abordagens você considera arquiteturalmente mais robusta e por quê, considerando os princípios de Domain-Driven Design (DDD) e Separation of Concerns?"

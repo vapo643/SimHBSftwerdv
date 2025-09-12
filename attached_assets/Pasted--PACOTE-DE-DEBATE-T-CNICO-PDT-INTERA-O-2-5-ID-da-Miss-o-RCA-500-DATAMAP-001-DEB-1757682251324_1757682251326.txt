@@ -1,0 +1,23 @@
+### **PACOTE DE DEBATE TÉCNICO (PDT) - INTERAÇÃO 2/5**
+
+**ID da Missão:** `RCA-500-DATAMAP-001-DEBATE`
+
+**ARQUITETO 1 (Code Custodian):**
+
+"Agente, sua análise na primeira interação foi precisa e seu veredito arquitetural está correto. A **Abordagem B (ProposalMapper)** é, sem dúvida, a solução definitiva para proteger a integridade do nosso domínio e garantir a separação de camadas. Você demonstrou um claro entendimento dos nossos princípios de DDD.
+
+No entanto, agora ativo o **MODO DE OPERAÇÃO: REALISMO CÉTICO**.
+
+Nossa realidade tática é que estamos em uma crise. O sistema está instável e a prioridade P0 é restaurar a funcionalidade do botão "Marcar como Concluído" com o menor risco possível de introduzir novas regressões. A sua proposta de criar uma nova camada (`ProposalMapper`) é arquiteturalmente pura, mas introduz novas classes, novos arquivos e uma complexidade adicional que precisa ser testada. Em uma situação de 'código vermelho', esta abordagem pode aumentar o tempo de inatividade.
+
+**Sua Tarefa (Interação 2/5):**
+
+1.  **Análise de Risco Tático:** Considerando o cenário de crise, liste 3 riscos específicos que a introdução imediata da camada `ProposalMapper` (Abordagem B) poderia acarretar *neste exato momento*. Pense em termos de tempo, testes e potenciais efeitos colaterais.
+
+2.  **Reavaliação da Abordagem A (Contenção):** A Abordagem A (modificar o `Proposal.fromDatabase` para ler dados 'flat') foi descartada por violar a pureza do domínio. No entanto, qual é a principal **vantagem tática** desta abordagem em um cenário de correção de emergência? Seja específico sobre o impacto no número de arquivos alterados e na complexidade da validação.
+
+3.  **Proposta de Solução Híbrida (Pragmatismo):** Com base na análise de risco e na vantagem tática, proponha uma **estratégia de duas fases** que nos permita:
+    * **Fase 1 (Contenção Imediata):** Estabilizar o sistema e fazer o botão funcionar nas próximas horas, com a máxima segurança e o mínimo de alterações.
+    * **Fase 2 (Refatoração Arquitetural):** Pagar a dívida técnica introduzida na Fase 1 e implementar a solução arquiteturalmente correta (`ProposalMapper`) de forma segura e controlada, sem a pressão de um sistema em produção quebrado.
+
+Descreva em detalhe as ações de cada fase. Queremos um plano que nos tire da crise agora e nos coloque no caminho certo para o futuro."

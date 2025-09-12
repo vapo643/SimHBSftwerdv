@@ -1,0 +1,46 @@
+### **PACOTE DE DEBATE TÉCNICO (PDT) - INTERAÇÃO 3/5**
+
+**ID da Missão:** `RCA-500-DATAMAP-001-DEBATE`
+
+**ARQUITETO 1 (Code Custodian):**
+
+"Agente, sua proposta de solução híbrida é excelente. Você equilibrou perfeitamente a urgência tática com a estratégia de longo prazo. A abordagem de 'Contenção Imediata' seguida por 'Refatoração Arquitetural' está aprovada como o nosso plano de batalha.
+
+Agora, vamos refinar a **Fase 1 (Contenção)**.
+
+Sua sugestão de usar um fallback duplo (ex: `data.cliente_nome || data.cliente_data?.nome`) é inteligente, mas ainda espalha a lógica de contenção por todo o método `fromDatabase`. Isso aumenta a chance de esquecermos um campo e mantém o código em um estado híbrido confuso.
+
+Proponho uma abordagem de contenção ainda mais limpa e segura: um **Bloco de Normalização de Dados** no início do método.
+
+A ideia é: em vez de adicionar fallbacks em cada linha, nós normalizamos o objeto `data` uma única vez, no topo do método, para garantir que ele **sempre** tenha a estrutura aninhada `cliente_data` que o resto da função espera.
+
+**Exemplo Conceitual do Bloco de Normalização:**
+
+```typescript
+static fromDatabase(data: any): Proposal {
+    // INÍCIO DO BLOCO DE NORMALIZAÇÃO
+    if (data.cliente_data === undefined && data.cliente_cpf !== undefined) {
+        data.cliente_data = {
+            cpf: data.cliente_cpf,
+            nome: data.cliente_nome,
+            email: data.cliente_email,
+            cep: data.cliente_cep,
+            // ... mapear TODOS os outros campos 'cliente_*' para aqui
+        };
+    }
+    // FIM DO BLOCO DE NORMALIZAÇÃO
+
+    // O resto do código permanece INALTERADO, pois agora ele pode confiar
+    // que data.cliente_data sempre existirá se os dados do cliente existirem.
+    const cepValue = typeof data.cliente_data.cep === 'object' ...
+    // ...
+}
+Esta abordagem isola a "correção de emergência" em um único bloco de código, tornando-a explícita e fácil de remover na Fase 2, e não exige nenhuma outra alteração no resto do método.
+
+Sua Tarefa (Interação 3/5):
+
+Análise Comparativa: Avalie a minha proposta do "Bloco de Normalização" contra a sua proposta de "Fallback Duplo". Quais são as vantagens, em termos de manutenibilidade e risco, de isolar a lógica de mapeamento no topo da função?
+
+Refinamento do Plano de Contenção: Adote a estratégia do "Bloco de Normalização" e re-escreva em detalhe a Ação Tática para a Fase 1 (Contenção Imediata). O seu plano deve listar exatamente quais campos cliente_* da linha 'flat' do banco de dados precisam ser mapeados para dentro do novo objeto cliente_data construído.
+
+Confirmação do Débito Técnico: Confirme que você entende que este "Bloco de Normalização" é uma dívida técnica deliberada. Qual seria o primeiro passo da Fase 2 (Refatoração Arquitetural) em relação a este bloco de código?"
