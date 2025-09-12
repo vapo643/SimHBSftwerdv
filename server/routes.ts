@@ -2989,7 +2989,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Importar UseCase e dependências
             const { MarcarAssinaturaConcluidaUseCase } = await import('./modules/proposal/application/MarcarAssinaturaConcluidaUseCase');
             const { DomainException } = await import('./modules/shared/domain/DomainException');
-            const { UnitOfWork } = await import('./lib/unit-of-work');
+            const { UnitOfWork } = await import('./modules/shared/infrastructure/UnitOfWork');
             
             try {
               // Instanciar UseCase via UnitOfWork
