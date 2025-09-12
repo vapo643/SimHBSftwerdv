@@ -79,16 +79,19 @@ export class InterService {
       },
     });
 
-    // Save collection to database
+    // Fetch complete collection details since criarCobrancaParaProposta only returns codigoSolicitacao
+    const detailedResult = await (interBankService as any).recuperarCobranca(interResult.codigoSolicitacao);
+
+    // Save collection to database with complete data
     const collection = await interRepository.createCollection({
       propostaId: validated.proposalId,
       codigoSolicitacao: interResult.codigoSolicitacao,
-      seuNumero: interResult.seuNumero,
+      seuNumero: detailedResult.cobranca?.seuNumero || `PROP-${validated.proposalId}`,
       valorNominal: String(validated.valorTotal),
       dataVencimento: validated.dataVencimento,
-      situacao: interResult.situacao,
-      linhaDigitavel: interResult.linhaDigitavel,
-      pixCopiaECola: interResult.pix?.pixCopiaECola,
+      situacao: detailedResult.cobranca?.situacao || 'EM_PROCESSAMENTO',
+      linhaDigitavel: detailedResult.linhaDigitavel || detailedResult.boleto?.linhaDigitavel,
+      pixCopiaECola: detailedResult.pixCopiaECola || detailedResult.pix?.pixCopiaECola,
       dataEmissao: getBrasiliaTimestamp(),
       // Store additional data in metadata field if needed
     });
