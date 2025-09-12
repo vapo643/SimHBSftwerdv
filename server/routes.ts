@@ -57,6 +57,7 @@ import propostasCarneCheckRoutes from './routes/propostas-carne-check';
 import propostasStorageStatusRoutes from './routes/propostas-storage-status';
 import propostasCorrigirSincronizacaoRoutes from './routes/propostas-corrigir-sincronizacao';
 import propostasSincronizarBoletosRoutes from './routes/propostas-sincronizar-boletos';
+import propostasPatchRoutes from './routes/propostas-patch';
 import jobStatusRoutes from './routes/job-status';
 import testQueueRoutes from './routes/test-queue';
 import testRetryRoutes from './routes/test-retry';
@@ -3722,6 +3723,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       next(error);
     }
   });
+
+  // 🚀 Register GERENCIAR STATUS route (BEFORE legacy routes)
+  app.use('/api/propostas', propostasPatchRoutes);
 
   // Register legacy Propostas Carnê routes (AFTER DDD routes)
   app.use('/api/propostas', propostasCarneRoutes);
