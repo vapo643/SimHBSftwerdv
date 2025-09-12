@@ -362,20 +362,22 @@ export class TransactionalProposalRepository implements IProposalRepository {
     const result = await this.tx
       .select({ status: propostas.status })
       .from(propostas)
-      .where(eq(propostas.id, id))
+      .where(and(eq(propostas.id, id), isNull(propostas.deletedAt))) // 🛡️ INVARIANTE: Filtrar soft-delete
       .limit(1);
     
     return result.length > 0 ? result[0].status as ProposalStatus : null;
   }
 
   async updateStatus(id: string, newStatus: ProposalStatus, userId: string): Promise<void> {
+    // ⚠️ MÉTODO RESTRITO: Apenas para FSM interno - não emite eventos de domínio
+    // Para atualizações completas, use save() que dispara eventos
     await this.tx
       .update(propostas)
       .set({ 
         status: newStatus,
         updatedAt: new Date()
       })
-      .where(eq(propostas.id, id));
+      .where(and(eq(propostas.id, id), isNull(propostas.deletedAt))); // 🛡️ INVARIANTE: Filtrar soft-delete
   }
 
   async findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]> {

@@ -1,8 +1,12 @@
 /**
  * Use Case: Marcar Assinatura como Concluída
  * 
- * PAM V1.0 - OPERAÇÃO RESTAURAÇÃO DO NÚCLEO
+ * PAM V1.0 - OPERAÇÃO RESTAURAÇÃO DO NÚCLEO (REFATORADO PARA PERFORMANCE)
  * Orquestra a transição de status AGUARDANDO_ASSINATURA → ASSINATURA_CONCLUIDA
+ * 
+ * 🚀 OTIMIZAÇÃO CRÍTICA:
+ * - ANTES: findById() reconstituía objeto completo (CPF, Email, CEP, etc.) - DESNECESSÁRIO
+ * - AGORA: getProposalStatus() busca apenas status - ULTRA EFICIENTE
  * 
  * Responsabilidades:
  * - Validar se proposta está no status correto (AGUARDANDO_ASSINATURA)
@@ -31,10 +35,11 @@ export class MarcarAssinaturaConcluidaUseCase {
         useCase: 'MarcarAssinaturaConcluidaUseCase'
       });
 
-      // 1. Buscar proposta atual
-      const proposal = await this.unitOfWork.proposals.findById(dto.propostaId);
+      // 🚀 REFATORAÇÃO CRÍTICA: Usar método eficiente sem reconstituir objeto
+      // 1. Verificar se proposta existe e buscar apenas status (OPERAÇÃO LEAN)
+      const currentStatus = await this.unitOfWork.proposals.getProposalStatus(dto.propostaId);
 
-      if (!proposal) {
+      if (currentStatus === null) { // 🛡️ VERIFICAÇÃO EXPLÍCITA: Mais segura que !currentStatus
         const errorMessage = `Proposta ${dto.propostaId} não encontrada`;
         logError('[MARCAR ASSINATURA CONCLUIDA USE CASE] Proposta não encontrada', new Error(errorMessage), {
           propostaId: dto.propostaId,
@@ -42,19 +47,19 @@ export class MarcarAssinaturaConcluidaUseCase {
         });
         throw new DomainException(errorMessage);
       }
-
-      const currentStatus = proposal.status;
       logInfo('[MARCAR ASSINATURA CONCLUIDA USE CASE] Status atual validado', {
         propostaId: dto.propostaId,
         currentStatus: currentStatus
       });
 
-      // 2. VALIDAÇÃO: Verificar se status atual é AGUARDANDO_ASSINATURA
-      if (currentStatus !== 'AGUARDANDO_ASSINATURA') {
-        const errorMessage = `A proposta não está aguardando assinatura. Status atual: ${currentStatus}`;
+      // 2. VALIDAÇÃO: Verificar se status atual permite transição (normalização DB->domain)
+      // 🔄 CORREÇÃO CRÍTICA: DB armazena lowercase, FSM usa uppercase
+      const normalizedStatus = currentStatus.toUpperCase();
+      if (normalizedStatus !== 'AGUARDANDO_ASSINATURA') {
+        const errorMessage = `A proposta não está aguardando assinatura. Status atual: ${normalizedStatus}`;
         logError('[MARCAR ASSINATURA CONCLUIDA USE CASE] Status inválido para transição', new Error(errorMessage), {
           propostaId: dto.propostaId,
-          currentStatus: currentStatus,
+          currentStatus: normalizedStatus,
           expectedStatus: 'AGUARDANDO_ASSINATURA'
         });
         throw new DomainException(errorMessage);
