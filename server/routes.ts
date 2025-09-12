@@ -1506,7 +1506,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const id = parseInt(req.params.id);
+        // 🚨 BUG CRÍTICO CORRIGIDO: UUID deve ser string, não parseInt()
+        const id = req.params.id; // Manter como string para UUIDs
         const validatedData = updatePropostaSchema.parse(req.body);
         const proposta = await storage.updateProposta(id, validatedData);
         res.json(proposta);

@@ -1,0 +1,29 @@
+### **PACOTE DE ATIVAÇÃO DE MISSÃO (PAM) V1.0 - AUDITORIA FORENSE "ID PERDIDO"**
+
+**ID da Missão:** `RCA-FSM-MANUAL-UPDATE-001-AUDIT`
+
+**Ferramenta Alocada:** `Sniper`
+
+**Doutrina Ativa:** Protocolo de Auditoria de Cenário de Negócio (PACN) V1.0
+
+---
+
+#### **Sumário da Missão:**
+
+Realizar uma auditoria forense de rastreamento para identificar o ponto exato no código do backend onde o UUID da proposta está a ser incorretamente truncado pela função `parseInt()` antes de ser passado para o serviço da Máquina de Estados Finitos (FSM). **NÃO MODIFIQUE NENHUM CÓDIGO.**
+
+#### **Cenário de Negócio (O "Caso de Teste"):**
+
+Um usuário, na tela de formalização, utiliza a ferramenta "Gerenciar Status" para mudar manualmente o status de uma proposta. O frontend envia uma requisição `PUT` ou `PATCH` para a API no endpoint `/api/propostas/6206c1e3-686a-4084-b28f-d999ef0a0e9f`. O backend recebe a requisição, mas subsequentemente tenta procurar a proposta no banco de dados usando um ID truncado ("6206").
+
+#### **Vetor de Ataque / Ponto de Falha (O "Risco"):**
+
+O risco é uma **falha de tipo de dados**. A suspeita, com base nos logs, é que o código do controller que manipula esta rota está a usar `parseInt()` sobre o parâmetro `id` da URL, o que trunca o UUID.
+
+#### **Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+
+1.  **Ponto de Entrada (Backend):** Localize o arquivo de rotas e apresente o código do controller que manipula o endpoint de atualização de proposta que lida com a mudança manual de status (ex: `PUT /api/propostas/:id` ou `PATCH /api/propostas/:id`).
+
+2.  **Captura do Parâmetro:** Dentro do código do controller, apresente a linha exata onde o ID da proposta é extraído dos parâmetros da requisição.
+
+3.  **Análise Crítica do Ponto de Falha:** Verifique se a linha identificada no passo anterior contém uma chamada à função `parseInt()`. Declare explicitamente: "A chamada `parseInt()` FOI encontrada na linha X" ou "A chamada `parseInt()` NÃO foi encontrada". Se encontrada, esta é a causa raiz.
