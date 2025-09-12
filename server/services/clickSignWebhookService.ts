@@ -208,49 +208,93 @@ class ClickSignWebhookService {
 
   /**
    * Handle auto_close event - MOST IMPORTANT
+   * PAM V1.0 - OPERAÇÃO PONTE AUTOMATIZADA: Refatorado para usar UseCase
    */
   private async handleAutoClose(proposta: any, data: WebhookEvent['data']) {
-    console.log(`[CLICKSIGN WEBHOOK] 🎉 AUTO_CLOSE for proposal: ${proposta.id}`);
+    logInfo('[CLICKSIGN WEBHOOK] 🎉 AUTO_CLOSE event received', {
+      propostaId: proposta.id,
+      documentKey: data.document?.key,
+      service: 'clickSignWebhookService',
+      method: 'handleAutoClose'
+    });
 
     const now = getBrasiliaTimestamp();
 
-    // Update proposal with signature completion
-    const updateData = {
-      clicksignStatus: 'finished',
-      clicksignSignedAt: new Date(now),
-      assinaturaEletronicaConcluida: true,
-      biometriaConcluida: true, // ClickSign biometria acontece no mesmo processo
-      dataAssinatura: new Date(now),
-      status: 'ASSINATURA_CONCLUIDA' as const,
-    };
+    // PAM V1.0: Usar UseCase para transição de status ao invés de update direto
+    try {
+      await this.marcarAssinaturaConcluidaUseCase.execute({
+        propostaId: proposta.id,
+        userId: 'sistema' // Usuario sistema para ações automáticas de webhook
+      });
 
-    await storage.updateProposta(proposta.id, updateData);
-
-    // STATUS V2.0: Registrar transição de status
-    await logStatusTransition({
-      propostaId: proposta.id,
-      fromStatus: proposta.status || 'AGUARDANDO_ASSINATURA',
-      toStatus: 'ASSINATURA_CONCLUIDA',
-      triggeredBy: 'webhook',
-      webhookEventId: data.document?.key || data.list?.key,
-      metadata: {
-        service: 'clickSignWebhookService',
-        action: 'handleAutoClose',
-        eventType: 'auto_close',
+      logInfo('[CLICKSIGN WEBHOOK] ✅ UseCase executado com sucesso - Status atualizado para ASSINATURA_CONCLUIDA', {
+        propostaId: proposta.id,
         documentKey: data.document?.key,
-        timestamp: now,
-      },
-    });
+        triggeredBy: 'webhook_auto_close'
+      });
 
+      // Manter compatibilidade: Update campos ClickSign específicos
+      const clickSignUpdateData = {
+        clicksignStatus: 'finished',
+        clicksignSignedAt: new Date(now),
+        assinaturaEletronicaConcluida: true,
+        biometriaConcluida: true, // ClickSign biometria acontece no mesmo processo
+        dataAssinatura: new Date(now),
+      };
+
+      await storage.updateProposta(proposta.id, clickSignUpdateData);
+
+    } catch (error) {
+      if (error instanceof DomainException) {
+        // PAM V1.0: Tratamento idempotente - Se já processado, é sucesso para o webhook
+        logInfo('[CLICKSIGN WEBHOOK] ℹ️ Webhook recebido para proposta que já foi processada - Nenhuma ação necessária', {
+          propostaId: proposta.id,
+          domainError: error.message,
+          documentKey: data.document?.key,
+          reason: 'webhook_idempotent'
+        });
+
+        // Ainda assim, sync campos ClickSign se necessário
+        const clickSignUpdateData = {
+          clicksignStatus: 'finished',
+          clicksignSignedAt: new Date(now),
+          assinaturaEletronicaConcluida: true,
+          biometriaConcluida: true,
+          dataAssinatura: new Date(now),
+        };
+
+        await storage.updateProposta(proposta.id, clickSignUpdateData);
+
+      } else {
+        // Erro crítico - falha real no sistema
+        logError('[CLICKSIGN WEBHOOK] ❌ Erro crítico ao processar auto_close', error as Error, {
+          propostaId: proposta.id,
+          documentKey: data.document?.key,
+          method: 'handleAutoClose'
+        });
+
+        // Log para auditoria
+        await storage.createPropostaLog({
+          propostaId: proposta.id,
+          autorId: 'clicksign-webhook',
+          statusAnterior: proposta.status,
+          statusNovo: proposta.status,
+          observacao: `❌ ERRO CRÍTICO: Falha ao processar webhook auto_close. Erro: ${(error as Error).message}`,
+        });
+
+        // Re-throw para indicar falha ao endpoint de webhook
+        throw error;
+      }
+    }
+
+    // Log de sucesso específico para webhook
     await storage.createPropostaLog({
       propostaId: proposta.id,
       autorId: 'clicksign-webhook',
       statusAnterior: proposta.status,
       statusNovo: 'ASSINATURA_CONCLUIDA',
-      observacao: '✅ CCB assinado com sucesso + Biometria validada - Finalização automática',
+      observacao: '✅ CCB assinado com sucesso + Biometria validada - Finalização automática via webhook AUTO_CLOSE',
     });
-
-    console.log(`[CLICKSIGN V2.0] Status atualizado para ASSINATURA_CONCLUIDA`);
 
     // PAM V1.0: Processar documento assinado automaticamente
     try {
@@ -380,30 +424,96 @@ class ClickSignWebhookService {
 
   /**
    * Handle sign event
+   * PAM V1.0 - OPERAÇÃO PONTE AUTOMATIZADA: Refatorado para usar UseCase
    */
   private async handleSign(proposta: any, data: WebhookEvent['data']) {
-    console.log(`[CLICKSIGN WEBHOOK] ✍️ Document signed for proposal: ${proposta.id}`);
-
     const signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
-
-    // Update proposal to mark electronic signature as completed
-    await storage.updateProposta(proposta.id, {
-      assinaturaEletronicaConcluida: true,
-      clicksignStatus: 'signed',
-      clicksignDocumentKey: data.document?.key || null,
-    });
-
-    await storage.createPropostaLog({
+    
+    logInfo('[CLICKSIGN WEBHOOK] ✍️ SIGN event received', {
       propostaId: proposta.id,
-      autorId: 'clicksign-webhook',
-      statusAnterior: proposta.status,
-      statusNovo: proposta.status,
-      observacao: `✍️ Documento assinado${signerInfo} - Assinatura eletrônica concluída`,
+      documentKey: data.document?.key,
+      signerEmail: data.signer?.email,
+      service: 'clickSignWebhookService',
+      method: 'handleSign'
     });
 
-    console.log(
-      `[CLICKSIGN WEBHOOK] ✅ Updated proposal ${proposta.id} - assinatura_eletronica_concluida = true`
-    );
+    // PAM V1.0: Usar UseCase para transição de status ao invés de update direto
+    try {
+      await this.marcarAssinaturaConcluidaUseCase.execute({
+        propostaId: proposta.id,
+        userId: 'sistema' // Usuario sistema para ações automáticas de webhook
+      });
+
+      logInfo('[CLICKSIGN WEBHOOK] ✅ UseCase executado com sucesso - Status atualizado via evento SIGN', {
+        propostaId: proposta.id,
+        documentKey: data.document?.key,
+        signerEmail: data.signer?.email,
+        triggeredBy: 'webhook_sign'
+      });
+
+      // Manter compatibilidade: Update campos ClickSign específicos
+      await storage.updateProposta(proposta.id, {
+        assinaturaEletronicaConcluida: true,
+        clicksignStatus: 'signed',
+        clicksignDocumentKey: data.document?.key || null,
+      });
+
+      await storage.createPropostaLog({
+        propostaId: proposta.id,
+        autorId: 'clicksign-webhook',
+        statusAnterior: proposta.status,
+        statusNovo: 'ASSINATURA_CONCLUIDA',
+        observacao: `✍️ Documento assinado${signerInfo} - Status atualizado automaticamente para ASSINATURA_CONCLUIDA`,
+      });
+
+    } catch (error) {
+      if (error instanceof DomainException) {
+        // PAM V1.0: Tratamento idempotente - Se já processado, é sucesso para o webhook
+        logInfo('[CLICKSIGN WEBHOOK] ℹ️ Webhook SIGN recebido para proposta que já foi processada - Nenhuma ação necessária', {
+          propostaId: proposta.id,
+          domainError: error.message,
+          documentKey: data.document?.key,
+          signerEmail: data.signer?.email,
+          reason: 'webhook_idempotent_sign'
+        });
+
+        // Ainda assim, sync campos ClickSign se necessário
+        await storage.updateProposta(proposta.id, {
+          assinaturaEletronicaConcluida: true,
+          clicksignStatus: 'signed',
+          clicksignDocumentKey: data.document?.key || null,
+        });
+
+        await storage.createPropostaLog({
+          propostaId: proposta.id,
+          autorId: 'clicksign-webhook',
+          statusAnterior: proposta.status,
+          statusNovo: proposta.status,
+          observacao: `✍️ Documento assinado${signerInfo} - Status já processado anteriormente`,
+        });
+
+      } else {
+        // Erro crítico - falha real no sistema
+        logError('[CLICKSIGN WEBHOOK] ❌ Erro crítico ao processar evento SIGN', error as Error, {
+          propostaId: proposta.id,
+          documentKey: data.document?.key,
+          signerEmail: data.signer?.email,
+          method: 'handleSign'
+        });
+
+        // Log para auditoria
+        await storage.createPropostaLog({
+          propostaId: proposta.id,
+          autorId: 'clicksign-webhook',
+          statusAnterior: proposta.status,
+          statusNovo: proposta.status,
+          observacao: `❌ ERRO CRÍTICO: Falha ao processar webhook SIGN${signerInfo}. Erro: ${(error as Error).message}`,
+        });
+
+        // Re-throw para indicar falha ao endpoint de webhook
+        throw error;
+      }
+    }
 
     // PAM V1.0: Processar documento assinado automaticamente (evento de assinatura individual)
     try {
