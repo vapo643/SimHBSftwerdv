@@ -659,26 +659,52 @@ class ClickSignServiceV3 {
       console.log(`[CLICKSIGN V1] ✅ CCB sent for signature successfully`);
       console.log(`[CLICKSIGN V1] Sign URL generated:`, signUrl);
 
+      // 🎯 INSTRUMENTAÇÃO: Logging detalhado da transição de status
+      console.log(`[DEBUG-TRANSITION] === INICIANDO TRANSIÇÃO DE STATUS ===`);
+      console.log(`[DEBUG-TRANSITION] Proposta ID: ${proposalId}`);
+      console.log(`[DEBUG-TRANSITION] UseCase disponível: ${!!this.marcarAguardandoAssinaturaUseCase}`);
+      console.log(`[DEBUG-TRANSITION] Timestamp: ${new Date().toISOString()}`);
+
       // 🎯 ELO PERDIDO: Executar transição de status CCB_GERADA → AGUARDANDO_ASSINATURA
       if (this.marcarAguardandoAssinaturaUseCase) {
+        console.log(`[DEBUG-TRANSITION] Executando MarcarAguardandoAssinaturaUseCase...`);
         try {
           logInfo('Iniciando transição de status para AGUARDANDO_ASSINATURA', { proposalId });
+          console.log(`[DEBUG-TRANSITION] Chamando useCase.execute com params:`, {
+            propostaId: proposalId,
+            userId: 'sistema'
+          });
+          
           await this.marcarAguardandoAssinaturaUseCase.execute({
             propostaId: proposalId,
             userId: 'sistema'
           });
+          
+          console.log(`[DEBUG-TRANSITION] ✅ UseCase executado com SUCESSO!`);
           logInfo('Status da proposta atualizado para AGUARDANDO_ASSINATURA com sucesso.', { proposalId });
         } catch (error) {
+          console.error(`[DEBUG-TRANSITION] ❌ ERRO no UseCase:`, error);
+          console.error(`[DEBUG-TRANSITION] Tipo do erro:`, typeof error);
+          console.error(`[DEBUG-TRANSITION] Error message:`, (error as Error).message);
+          console.error(`[DEBUG-TRANSITION] Error stack:`, (error as Error).stack);
+          
           logError('Falha ao tentar atualizar status para AGUARDANDO_ASSINATURA', {
             proposalId,
             errorMessage: (error as Error).message,
             stack: (error as Error).stack
           });
+          
+          // 🚨 TEMPORÁRIO: EXPOR ERRO PARA DIAGNÓSTICO
+          console.error(`[DEBUG-TRANSITION] 🚨 ERRO EXPOSTO PARA DIAGNÓSTICO:`, error);
           // IMPORTANTE: Não relança o erro para não quebrar o fluxo principal que já teve sucesso com o ClickSign.
         }
       } else {
+        console.error(`[DEBUG-TRANSITION] ❌ USECASE NÃO DISPONÍVEL!`);
+        console.error(`[DEBUG-TRANSITION] this.marcarAguardandoAssinaturaUseCase is:`, this.marcarAguardandoAssinaturaUseCase);
         console.warn('[CLICKSIGN V1] ⚠️ MarcarAguardandoAssinaturaUseCase não disponível - status não será atualizado');
       }
+      
+      console.log(`[DEBUG-TRANSITION] === FIM DA TRANSIÇÃO DE STATUS ===`);
 
       return {
         documentKey: document.key,
