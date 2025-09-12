@@ -60,7 +60,7 @@ export class PagamentoService {
       userRole: filters.userRole,
     });
 
-    console.log(`[PAGAMENTOS DEBUG] Found ${proposals.length} proposals for payment`);
+    SecureLogger.debug(`Found proposals for payment`, { count: proposals.length });
 
     return proposals;
   }
@@ -110,9 +110,10 @@ export class PagamentoService {
     const existingCollection = await pagamentoRepository.checkExistingPayment(validated.propostaId);
 
     if (existingCollection) {
-      console.log(
-        `[PAYMENT IDEMPOTENCY] 🛡️ Payment already exists for proposal ${validated.propostaId}:`,
+      SecureLogger.info(
+        `Payment already exists for proposal (idempotency check)`,
         {
+          proposalId: validated.propostaId,
           codigoSolicitacao: existingCollection.codigoSolicitacao,
           seuNumero: existingCollection.seuNumero,
           situacao: existingCollection.situacao,
@@ -139,8 +140,9 @@ export class PagamentoService {
     // This ensures the same proposal always gets the same jobId
     const jobId = `payment-${validated.propostaId}`;
 
-    console.log(
-      `[PAYMENT IDEMPOTENCY] 🔑 Generated deterministic jobId: ${jobId} for proposal ${validated.propostaId}`
+    SecureLogger.info(
+      `Generated deterministic jobId for proposal`,
+      { jobId, proposalId: validated.propostaId }
     );
 
     try {
@@ -169,8 +171,9 @@ export class PagamentoService {
         }
       );
 
-      console.log(
-        `[PAYMENT IDEMPOTENCY] ✅ Job ${jobId} added to paymentsQueue (Job ID: ${job.id})`
+      SecureLogger.info(
+        `Job added to paymentsQueue`,
+        { jobId, queueJobId: job.id }
       );
 
       // Return job information instead of direct processing result
@@ -185,8 +188,9 @@ export class PagamentoService {
     } catch (error: any) {
       // If job addition fails, check if it's due to duplicate jobId (idempotency working)
       if (error.message?.includes('already exists') || error.message?.includes('duplicate')) {
-        console.log(
-          `[PAYMENT IDEMPOTENCY] 🛡️ Duplicate job prevented: ${jobId} already exists in queue`
+        SecureLogger.info(
+          `Duplicate job prevented - idempotency working`,
+          { jobId, message: 'Job already exists in queue' }
         );
 
         return {
@@ -199,7 +203,7 @@ export class PagamentoService {
         };
       }
 
-      console.error(`[PAYMENT IDEMPOTENCY] ❌ Failed to add job ${jobId}:`, error as Error);
+      SecureLogger.error(`Failed to add job to payment queue`, { jobId, error });
       throw new Error(`Erro ao enfileirar pagamento: ${(error as Error).message}`);
     }
   }
@@ -256,9 +260,9 @@ export class PagamentoService {
       });
     } catch (error) {
       if (error instanceof InvalidTransitionError) {
-        console.warn(
-          `[PAGAMENTO] Status transition warning for ${validated.propostaId}:`,
-          error.message
+        SecureLogger.warn(
+          `Status transition warning for proposal`,
+          { proposalId: validated.propostaId, warning: error.message }
         );
         // Continue with payment creation even if status transition fails
       } else {
@@ -333,7 +337,7 @@ export class PagamentoService {
         });
       } catch (error) {
         if (error instanceof InvalidTransitionError) {
-          console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);
+          SecureLogger.warn(`Status transition warning`, { proposalId, warning: error.message });
         } else {
           throw error;
         }
@@ -348,7 +352,7 @@ export class PagamentoService {
         });
       } catch (error) {
         if (error instanceof InvalidTransitionError) {
-          console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);
+          SecureLogger.warn(`Status transition warning`, { proposalId, warning: error.message });
         } else {
           throw error;
         }

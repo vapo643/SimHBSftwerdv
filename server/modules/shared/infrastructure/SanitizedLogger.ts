@@ -45,9 +45,9 @@ const PII_FIELDS = [
 ];
 
 /**
- * Advanced PII sanitization with smart field detection
+ * Deep sanitization that handles Error objects at any nesting level
  */
-export function redactPII(obj: any, depth: number = 0): any {
+function deepSanitizeError(obj: any, depth: number = 0): any {
   // Prevent infinite recursion
   if (depth > 10) {
     return '[DEEP_OBJECT]';
@@ -55,6 +55,30 @@ export function redactPII(obj: any, depth: number = 0): any {
 
   if (!obj) {
     return obj;
+  }
+
+  // Handle Error objects specially to control stack trace exposure
+  if (obj instanceof Error) {
+    const sanitizedError: any = {
+      name: obj.name,
+      message: sanitizeString(obj.message),
+    };
+    
+    // In production, completely redact stack traces
+    if (process.env.NODE_ENV === 'production') {
+      sanitizedError.stack = '[REDACTED_IN_PROD]';
+    } else {
+      sanitizedError.stack = obj.stack;
+    }
+    
+    // Include other enumerable properties, but sanitize them
+    for (const [key, value] of Object.entries(obj)) {
+      if (!['name', 'message', 'stack'].includes(key)) {
+        sanitizedError[key] = deepSanitizeError(value, depth + 1);
+      }
+    }
+    
+    return sanitizedError;
   }
 
   if (typeof obj === 'string') {
@@ -66,7 +90,7 @@ export function redactPII(obj: any, depth: number = 0): any {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => redactPII(item, depth + 1));
+    return obj.map(item => deepSanitizeError(item, depth + 1));
   }
 
   const sanitized: any = {};
@@ -81,13 +105,20 @@ export function redactPII(obj: any, depth: number = 0): any {
     if (isPIIField) {
       sanitized[key] = maskSensitiveValue(key, value);
     } else if (typeof value === 'object' && value !== null) {
-      sanitized[key] = redactPII(value, depth + 1);
+      sanitized[key] = deepSanitizeError(value, depth + 1);
     } else {
       sanitized[key] = value;
     }
   }
 
   return sanitized;
+}
+
+/**
+ * Advanced PII sanitization with smart field detection
+ */
+export function redactPII(obj: any, depth: number = 0): any {
+  return deepSanitizeError(obj, depth);
 }
 
 /**
@@ -197,16 +228,8 @@ export class SecureLogger {
     let sanitizedError = error;
     
     if (!skipSanitization && error) {
-      if (error instanceof Error) {
-        sanitizedError = {
-          message: error.message,
-          name: error.name,
-          stack: SecureLogger.isDevelopment ? error.stack : '[REDACTED_IN_PROD]',
-          ...redactPII(error)
-        };
-      } else {
-        sanitizedError = redactPII(error);
-      }
+      // Use deepSanitizeError (via redactPII) to handle Error objects at any depth
+      sanitizedError = redactPII(error);
     }
     
     logger.error(`🛡️ ${message}`, sanitizedError);
