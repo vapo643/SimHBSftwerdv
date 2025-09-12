@@ -1,0 +1,36 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Refatoração de Resiliência do AuthContext
+
+* **Sumário da Missão:** Refatorar a lógica de estado no `client/src/contexts/AuthContext.tsx` para prevenir o loop infinito de retentativas que ocorre quando a autenticação falha, eliminando a causa raiz da "espiral da morte de rate limiting".
+
+* **Intenção Estratégica:** Tornar o frontend resiliente a falhas de autenticação. A aplicação deve ser capaz de lidar com uma falha na obtenção da sessão ou do perfil do utilizador de forma graciosa, interrompendo o fluxo em vez de sobrecarregar o backend com retentativas.
+
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria forense provou que o `listener` `onAuthStateChange` está a acionar repetidamente a função `fetchUserProfile` em resposta a falhas de autenticação causadas pelo `rate limiting`, criando um ciclo vicioso.
+
+---
+
+**IMPLEMENTAR:**
+Introduzir um mecanismo de controlo de estado (um "lock" ou "state machine") no `AuthContext.tsx` para garantir que `fetchUserProfile` seja chamado apenas uma vez por tentativa de autenticação e não entre em loop em caso de falha.
+
+**LÓGICA DE EXECUÇÃO (FRONTEND):**
+
+1.  **Introduzir Estado de Carregamento:** Adicione um novo estado ao `AuthProvider` para rastrear se uma operação de autenticação já está em andamento.
+    ```typescript
+    const [isLoading, setIsLoading] = useState(true);
+    ```
+
+2.  **Implementar o "Lock":** No início da sua função `fetchUserProfile`, adicione uma verificação. Se `isLoading` já for `true`, a função deve retornar imediatamente para prevenir chamadas duplicadas.
+    ```typescript
+    const fetchUserProfile = useCallback(async (currentSession) => {
+        if (isLoading) return; // <-- LOCK DE PREVENÇÃO DE LOOP
+        setIsLoading(true);
+        // ... resto da lógica
+    }, [isLoading]); // Adicione 'isLoading' às dependências
+    ```
+
+3.  **Gerir o Estado:** Garanta que `setIsLoading(false)` seja chamado no final da função `fetchUserProfile`, tanto em casos de sucesso como de erro (dentro de um bloco `finally`), para libertar o "lock" e permitir futuras tentativas de login legítimas.
+
+4.  **Refatorar os Gatilhos:** Verifique os gatilhos (`useEffect` inicial e o `listener` `onAuthStateChange`) para garantir que eles respeitem o novo estado `isLoading`.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a refatoração e realize o protocolo 7-CHECK completo, garantindo **ZERO** novos diagnósticos de LSP e a estabilidade da aplicação.

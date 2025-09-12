@@ -5,6 +5,7 @@ import React, {
   useState,
   ReactNode,
   useCallback,
+  useRef,
 } from 'react';
 import { getSupabase } from '@/lib/supabase';
 import { api } from '@/lib/apiClient';
@@ -40,8 +41,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  // 🛡️ PAM V1.0: Ref-based mutex para lock atômico (previne race conditions)
+  const inFlight = useRef(false);
 
   // States para controle do idle timeout
   const [showIdleWarning, setShowIdleWarning] = useState(false);
@@ -88,6 +92,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   });
 
   const fetchUserProfile = useCallback(async (currentSession: Session | null) => {
+    // 🛡️ PAM V1.0: LOCK ATÔMICO DE PREVENÇÃO DE LOOP - Verificar se operação já está em andamento
+    if (inFlight.current) {
+      console.log('🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada');
+      return;
+    }
+    
+    console.log('🔐 [AUTH START] Iniciando fetchUserProfile');
+    inFlight.current = true;
+    setIsLoading(true);
+    
     try {
       if (currentSession?.user) {
         try {
@@ -121,9 +135,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setError(authError as Error);
       setUser(null);
     } finally {
+      console.log('🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock');
+      inFlight.current = false;
       setIsLoading(false);
     }
-  }, []);
+  }, []); // 🛡️ PAM V1.0: Dependências estáveis - ref não causa re-renderização
 
   // Conservative refetch strategy: maintain old data while fetching new
   const refetchUser = useCallback(async () => {
@@ -160,7 +176,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const supabase = getSupabase();
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+    supabase.auth.getSession().then(({ data: { session: initialSession } }: { data: { session: Session | null } }) => {
       setSession(initialSession);
       setAccessToken(initialSession?.access_token || null);
       fetchUserProfile(initialSession);
