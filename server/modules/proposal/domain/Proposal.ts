@@ -442,6 +442,65 @@ export class Proposal {
 
   // Factory method para reconstituir do banco
   static fromDatabase(data: any): Proposal {
+    // ==========================================
+    // 🚨 BLOCO DE NORMALIZAÇÃO - CONTENÇÃO FASE 1
+    // Converter dados FLAT do banco → estrutura ANINHADA esperada pelo domínio
+    // CUIDADO: Sistema CCB depende de tags - manter compatibilidade total
+    // ==========================================
+    if (data.cliente_data === undefined && data.cliente_cpf !== undefined) {
+        data.cliente_data = {
+            // Dados pessoais básicos (com validação defensiva)
+            nome: data.cliente_nome || '',
+            cpf: data.cliente_cpf || '',
+            email: data.cliente_email || null,
+            telefone: data.cliente_telefone || null,
+            data_nascimento: data.cliente_data_nascimento || null,
+            renda_mensal: data.cliente_renda || null,
+            
+            // Documentação
+            rg: data.cliente_rg || null,
+            orgao_emissor: data.cliente_orgao_emissor || null,
+            rg_uf: data.cliente_rg_uf || null,
+            rg_data_emissao: data.cliente_rg_data_emissao || null,
+            
+            // Dados pessoais complementares
+            estado_civil: data.cliente_estado_civil || null,
+            nacionalidade: data.cliente_nacionalidade || 'Brasileira',
+            local_nascimento: data.cliente_local_nascimento || null,
+            ocupacao: data.cliente_ocupacao || null,
+            
+            // Endereço completo - CRÍTICO PARA CCB
+            cep: data.cliente_cep || null,
+            endereco: data.cliente_endereco || null, // legado
+            logradouro: data.cliente_logradouro || null,
+            numero: data.cliente_numero || null,
+            complemento: data.cliente_complemento || null,
+            bairro: data.cliente_bairro || null,
+            cidade: data.cliente_cidade || null,
+            uf: data.cliente_uf || null,
+            
+            // Dados pessoa jurídica (quando aplicável)
+            razao_social: data.cliente_razao_social || null,
+            cnpj: data.cliente_cnpj || null,
+            
+            // Dados profissionais
+            empresa_nome: data.cliente_empresa_nome || null,
+            empresa_cnpj: data.cliente_empresa_cnpj || null,
+            cargo_funcao: data.cliente_cargo_funcao || null,
+            tempo_emprego: data.cliente_tempo_emprego || null,
+            renda_comprovada: data.cliente_renda_comprovada || false,
+            
+            // Dados financeiros e análise de crédito
+            dividas_existentes: data.cliente_dividas_existentes || null,
+            comprometimento_renda: data.cliente_comprometimento_renda || 30,
+            score_serasa: data.cliente_score_serasa || null,
+            restricoes_cpf: data.cliente_restricoes_cpf || false
+        };
+    }
+    // ==========================================
+    // FIM DO BLOCO DE NORMALIZAÇÃO
+    // ==========================================
+
     // VALUE OBJECT DEFENSIVE FIX: Lidar com dados que podem estar salvos incorretamente
     const cepValue = typeof data.cliente_data.cep === 'object' && data.cliente_data.cep?.value
       ? data.cliente_data.cep.value
