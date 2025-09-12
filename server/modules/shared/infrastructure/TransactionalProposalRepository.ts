@@ -128,7 +128,7 @@ export class TransactionalProposalRepository implements IProposalRepository {
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)))
       .limit(1);
 
-    if (result.length === 0) {
+    if (result.length === 0 || !result[0]) {
       return null;
     }
 
