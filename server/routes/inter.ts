@@ -52,7 +52,7 @@ router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
 });
 
 /**
- * Create a new collection (boleto/PIX)
+ * Create boletos for loan proposal - FIXED: Multiple boletos generation
  * POST /api/inter/collections
  */
 router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
@@ -64,26 +64,36 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
       });
     }
 
-    const collection = await interService.createCollection(req.body, req.user?.id);
+    console.log(`[INTER-ROUTE] Creating boletos for proposal: ${req.body.proposalId}`);
+    const collections = await interService.createCollection(req.body, req.user?.id);
 
     res.status(201).json({
       success: true,
-      collection,
-      message: 'Cobrança criada com sucesso',
+      collections,
+      totalBoletos: collections.length,
+      message: `${collections.length} boletos criados com sucesso`,
     });
   } catch (error: any) {
-    console.error('[INTER] Failed to create collection:', error);
+    console.error('[INTER] Failed to create boletos:', error);
 
     if (error.message === 'Proposta não encontrada') {
       return res.status(404).json({ error: error.message });
     }
 
-    if (error.message === 'Já existe uma cobrança para esta proposta') {
+    if (error.message === 'Já existem boletos para esta proposta') {
       return res.status(409).json({ error: error.message });
     }
 
+    if (error.message === 'Parcelas não encontradas para esta proposta') {
+      return res.status(400).json({ error: error.message });
+    }
+
+    if (error.message === 'Nenhum boleto foi criado com sucesso') {
+      return res.status(500).json({ error: error.message });
+    }
+
     res.status(500).json({
-      error: 'Erro ao criar cobrança',
+      error: 'Erro ao criar boletos',
       details: error.message,
     });
   }
