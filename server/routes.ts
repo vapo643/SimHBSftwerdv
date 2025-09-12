@@ -67,6 +67,7 @@ import {
   generateApprovalDate,
   getBrasiliaTimestamp,
 } from './lib/timezone';
+import { logInfo, logError } from './lib/logger';
 // Use mock queue in development to avoid Redis dependency
 import { queues, checkQueuesHealth } from './lib/mock-queue';
 import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
@@ -195,7 +196,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      console.error('Erro ao buscar feature flags:', error);
+      logError('Falha ao buscar feature flags', {
+        userId: req.user?.id,
+        error: error instanceof Error ? error.message : String(error),
+        endpoint: '/api/features'
+      });
       // Em caso de erro, retorna flags desabilitadas
       res.json({
         flags: {},
@@ -266,7 +271,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: 'API experimental - dados podem mudar',
         });
       } catch (error) {
-        console.error('Erro na API experimental:', error);
+        logError('Erro na API experimental', {
+          userId: req.user?.id,
+          error: error instanceof Error ? error.message : String(error),
+          endpoint: '/api/experimental'
+        });
         res.status(500).json({
           error: 'Internal server error',
           experimental: true,
@@ -435,7 +444,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             : '❌ Ainda há campos faltantes - necessário criar nova proposta de teste',
       });
     } catch (error) {
-      console.error('❌ [AUDIT] Erro na auditoria:', error);
+      logError('Falha na auditoria de dados da proposta', {
+        propostaId: id,
+        userId: req.user?.id,
+        error: error instanceof Error ? error.message : String(error),
+        tipoErro: 'AUDIT_ERROR'
+      });
       res.status(500).json({
         RELATORIO_FINAL: '[ERRO]',
         error: 'Falha na execução da auditoria',
@@ -2975,11 +2989,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Importar UseCase e dependências
             const { MarcarAssinaturaConcluidaUseCase } = await import('./modules/proposal/application/MarcarAssinaturaConcluidaUseCase');
             const { DomainException } = await import('./modules/shared/domain/DomainException');
-            const { createUnitOfWork } = await import('./lib/unit-of-work');
+            const { UnitOfWork } = await import('./lib/unit-of-work');
             
             try {
               // Instanciar UseCase via UnitOfWork
-              const unitOfWork = createUnitOfWork();
+              const unitOfWork = new UnitOfWork();
               const marcarAssinaturaUseCase = new MarcarAssinaturaConcluidaUseCase(unitOfWork);
 
               // Executar transição de status via UseCase
@@ -2988,17 +3002,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 userId: req.user?.id || 'sistema'
               });
 
-              console.log(`[${getBrasiliaTimestamp()}] ✅ UseCase executado com sucesso - Assinatura marcada como concluída`);
+              logInfo('UseCase executado com sucesso - Assinatura marcada como concluída', {
+                propostaId: id,
+                userId: req.user?.id || 'sistema',
+                operacao: 'MARCAR_ASSINATURA_CONCLUIDA'
+              });
 
             } catch (error) {
               if (error instanceof DomainException) {
-                console.error(`[${getBrasiliaTimestamp()}] ❌ Erro de domínio:`, error.message);
+                logError('Falha na transição de status manual - Erro de domínio', { 
+                  propostaId: id, 
+                  userId: req.user?.id, 
+                  error: error.message 
+                });
                 return res.status(400).json({
                   message: `Erro ao marcar assinatura como concluída: ${error.message}`,
                   error: 'DOMAIN_ERROR'
                 });
               } else {
-                console.error(`[${getBrasiliaTimestamp()}] ❌ Erro interno:`, error);
+                logError('Falha na transição de status manual - Erro interno', { 
+                  propostaId: id, 
+                  userId: req.user?.id, 
+                  error: error instanceof Error ? error.message : String(error) 
+                });
                 return res.status(500).json({
                   message: 'Erro interno ao marcar assinatura como concluída',
                   error: 'INTERNAL_ERROR'
@@ -3062,18 +3088,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 usuarioRole: req.user?.role || 'desconhecido',
               },
             });
-            console.log(
-              `[${getBrasiliaTimestamp()}] Transição de status validada e executada com sucesso`
-            );
+            logInfo('Transição de status para pronto_pagamento executada com sucesso', {
+              propostaId: id,
+              userId: req.user?.id || 'sistema',
+              novoStatus: 'pronto_pagamento',
+              contexto: 'formalizacao_completa'
+            });
           } catch (error) {
             if (error instanceof InvalidTransitionError) {
-              console.error(
-                `[${getBrasiliaTimestamp()}] Transição de status inválida: ${error.message}`
-              );
+              logError('Falha na transição de status para pronto_pagamento', {
+                propostaId: id,
+                userId: req.user?.id,
+                error: error.message,
+                tipoErro: 'INVALID_TRANSITION'
+              });
               // Não retornamos erro 409 aqui pois é uma operação interna após conclusão de etapas
               // O sistema deveria estar em um estado válido para esta transição
             } else {
-              console.error(`[${getBrasiliaTimestamp()}] Erro ao executar transição: ${error}`);
+              logError('Erro interno na transição de status para pronto_pagamento', {
+                propostaId: id,
+                userId: req.user?.id,
+                error: error instanceof Error ? error.message : String(error),
+                tipoErro: 'INTERNAL_TRANSITION_ERROR'
+              });
             }
           }
 
@@ -3087,7 +3124,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           proposta: updatedProposta,
         });
       } catch (error) {
-        console.error('Erro ao atualizar etapa de formalização:', error);
+        logError('Falha no endpoint de atualização de etapa de formalização', {
+          propostaId: req.params?.id,
+          userId: req.user?.id,
+          error: error instanceof Error ? error.message : String(error),
+          tipoErro: 'ENDPOINT_ERROR'
+        });
         res.status(500).json({
           message: 'Erro ao atualizar etapa de formalização',
         });
