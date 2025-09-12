@@ -152,20 +152,13 @@ export default function Pagamentos() {
       if (periodoFilter !== 'todos') params.append('periodo', periodoFilter);
       if (mostrarPagos) params.append('incluir_pagos', 'true');
 
-      console.log('[PAGAMENTOS] Buscando pagamentos com filtros:', {
-        statusFilter,
-        periodoFilter,
-        mostrarPagos,
-      });
 
       try {
         const response = await apiRequest(`/api/pagamentos?${params.toString()}`, {
           method: 'GET',
         });
-        console.log('[PAGAMENTOS] Resposta recebida:', response);
         return response as Pagamento[];
       } catch (err) {
-        console.error('[PAGAMENTOS] Erro ao buscar:', err);
         throw err;
       }
     },

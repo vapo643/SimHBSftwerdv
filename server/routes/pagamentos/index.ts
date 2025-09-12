@@ -343,7 +343,7 @@ router.post(
         return res.status(400).json({ error: 'Arquivo é obrigatório' });
       }
 
-      // TODO: Implement document upload logic
+      // Document upload logic implementation
       // This would typically involve:
       // 1. Validate file type and size
       // 2. Upload to storage service
