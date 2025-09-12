@@ -1,0 +1,47 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - CORREÇÃO E REFINAMENTO
+
+* **Sumário da Missão:** Refatorar a query da tela de pagamentos para alinhar com a regra de negócio (`status = 'ASSINATURA_CONCLUIDA'`) e erradicar todo o débito técnico identificado na auditoria forense.
+* **Intenção Estratégica:** Restaurar a funcionalidade crítica da tela de pagamentos, garantir a precisão dos dados exibidos ao departamento financeiro e elevar a qualidade e manutenibilidade do código para prevenir futuras regressões.
+* **Modelo Mental (Como se Encaixa):** A correção principal será no coração da lógica de busca de dados, no arquivo `server/repositories/pagamento.repository.ts`. Ao corrigir a query, garantimos que a fonte da verdade (o status da proposta) governe o fluxo de negócio. As correções subsequentes (LSP, limpeza de logs) são parte do nosso protocolo de não deixar "janelas quebradas" para trás.
+
+---
+
+**IMPLEMENTAR:**
+Plano de Refatoração Completo para a Tela de Pagamentos.
+
+**CURRENT STATE:**
+A query em `server/repositories/pagamento.repository.ts` utiliza uma lógica de filtro incorreta baseada em campos booleanos, desalinhada com a FSM. Existem 14 erros de LSP no mesmo arquivo e múltiplos `console.log`s em produção.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A query de busca de propostas para pagamento filtra **exclusivamente** pelo status `ASSINATURA_CONCLUIDA`.
+2.  Todos os 14 erros de diagnóstico do LSP no arquivo `server/repositories/pagamento.repository.ts` são resolvidos.
+3.  Todos os `console.log`s nos arquivos `client/src/pages/financeiro/pagamentos.tsx` e `server/routes/pagamentos/index.ts` são removidos.
+4.  O comentário `// TODO` em `server/routes/pagamentos/index.ts` é removido.
+5.  A aplicação está totalmente funcional, sem novas regressões.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**Passo 1: [P0 - CRÍTICO] Correção da Query Principal**
+1.  Abra o arquivo `server/repositories/pagamento.repository.ts`.
+2.  Localize a função `getProposalsReadyForPayment`.
+3.  Modifique a constante `conditions` para remover a lógica `or` e os campos booleanos.
+4.  A nova condição principal e **obrigatória** deve ser: `eq(propostas.status, 'ASSINATURA_CONCLUIDA')`.
+5.  Garanta que os filtros adicionais de status (se houver na UI) ainda possam ser aplicados em conjunto com esta condição base.
+
+**Passo 2: [P1 - ALTO] Erradicação dos Erros de LSP**
+1.  Ainda no arquivo `server/repositories/pagamento.repository.ts`, resolva todos os 14 diagnósticos de "Object is possibly 'null'".
+2.  Implemente verificações adequadas (ex: `if (!this.db) { throw new Error(...) }`) no início de cada método que utiliza `this.db` para garantir que a conexão com o banco de dados seja tratada de forma type-safe.
+
+**Passo 3: [P2 - MÉDIO] Limpeza de Débito Técnico**
+1.  Abra `client/src/pages/financeiro/pagamentos.tsx` e remova todas as instâncias de `console.log` e `console.error`.
+2.  Abra `server/routes/pagamentos/index.ts` e remova o comentário `// TODO: Implement document upload logic`.
+
+**Passo 4: [P3 - BAIXO] Validação Final**
+1.  Execute `get_latest_lsp_diagnostics` em todo o projeto para confirmar que nenhum novo erro foi introduzido. O resultado deve ser zero erros.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **VALIDAÇÃO PENDENTE:** O Executor Humano (Arquiteto Chefe) deve realizar um teste funcional completo do fluxo de pagamentos após a conclusão.
+---

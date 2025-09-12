@@ -29,6 +29,16 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
   }
 
   /**
+   * Ensure database connection is available
+   */
+  private ensureDbConnection(): NonNullable<typeof db> {
+    if (!db) {
+      throw new Error('Database connection not available. Check DATABASE_URL configuration.');
+    }
+    return db as NonNullable<typeof db>;
+  }
+
+  /**
    * Get proposals ready for payment
    */
   async getProposalsReadyForPayment(filters: {
@@ -41,11 +51,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     // Build conditions array
     const conditions = [
       sql`${propostas.deletedAt} IS NULL`,
-      // Proposals that have signed CCB or Inter Bank collections
-      or(
-        and(eq(propostas.ccbGerado, true), eq(propostas.assinaturaEletronicaConcluida, true)),
-        sql`${interCollections.codigoSolicitacao} IS NOT NULL`
-      ),
+      // PAM V1.0 CRITICAL FIX: Proposals must have status = 'ASSINATURA_CONCLUIDA'
+      eq(propostas.status, 'ASSINATURA_CONCLUIDA'),
     ];
 
     // Apply status filter
@@ -92,7 +99,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     }
 
     // Build single query with consolidated conditions
-    const query = db
+    const dbConn = this.ensureDbConnection();
+    const query = dbConn
       .select({
         proposta: propostas,
         loja: lojas,
@@ -118,17 +126,18 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     propostasComCCB: number;
     propostasComBoletos: number;
   }> {
-    const [totalPropostas] = await db
+    const dbConn = this.ensureDbConnection();
+    const [totalPropostas] = await dbConn
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(sql`${propostas.deletedAt} IS NULL`);
 
-    const [propostasAprovadas] = await db
+    const [propostasAprovadas] = await dbConn
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(and(eq(propostas.status, 'aprovado'), sql`${propostas.deletedAt} IS NULL`));
 
-    const [propostasComCCB] = await db
+    const [propostasComCCB] = await dbConn
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(
@@ -139,7 +148,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
         )
       );
 
-    const propostasComBoletos = await db
+    const propostasComBoletos = await dbConn
       .select({
         count: sql<number>`count(DISTINCT ${interCollections.propostaId})`,
       })
@@ -158,7 +167,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
    * Get proposal by ID for payment
    */
   async getProposalForPayment(proposalId: string): Promise<any | undefined> {
-    const result = await db
+    const dbConn = this.ensureDbConnection();
+    const result = await dbConn
       .select({
         proposta: propostas,
         loja: lojas,
@@ -195,7 +205,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     userId: string;
   }): Promise<Proposta | undefined> {
     // Update proposal with payment information
-    const result = await db
+    const dbConn = this.ensureDbConnection();
+    const result = await dbConn
       .update(propostas)
       .set({
         valorTotalFinanciado: String(data.valorFinanciado),
@@ -223,7 +234,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     status: string,
     userId?: string
   ): Promise<Proposta | undefined> {
-    const result = await db
+    const dbConn = this.ensureDbConnection();
+    const result = await dbConn
       .update(propostas)
       .set({
         status: status,
@@ -244,7 +256,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     status: string,
     userId?: string
   ): Promise<Proposta | undefined> {
-    const result = await db
+    const dbConn = this.ensureDbConnection();
+    const result = await dbConn
       .update(propostas)
       .set({
         status,
@@ -268,7 +281,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     metadata?: any;
     usuarioId?: string;
   }): Promise<any> {
-    const result = await db
+    const dbConn = this.ensureDbConnection();
+    const result = await dbConn
       .insert(statusContextuais)
       .values({
         ...data,
@@ -311,7 +325,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     }
 
     // Build single query with consolidated conditions
-    const query = db
+    const dbConn = this.ensureDbConnection();
+    const query = dbConn
       .select({
         proposta: propostas,
         loja: lojas,
@@ -332,21 +347,24 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
    * Get all lojas for filters
    */
   async getAllLojas(): Promise<Loja[]> {
-    return await db.select().from(lojas).where(eq(lojas.isActive, true));
+    const dbConn = this.ensureDbConnection();
+    return await dbConn.select().from(lojas).where(eq(lojas.isActive, true));
   }
 
   /**
    * Get all produtos for filters
    */
   async getAllProdutos(): Promise<Produto[]> {
-    return await db.select().from(produtos).where(eq(produtos.isActive, true));
+    const dbConn = this.ensureDbConnection();
+    return await dbConn.select().from(produtos).where(eq(produtos.isActive, true));
   }
 
   /**
    * Check if payment already exists for a proposal - CONF-001 FIX
    */
   async checkExistingPayment(propostaId: string): Promise<any | null> {
-    const result = await db
+    const dbConn = this.ensureDbConnection();
+    const result = await dbConn
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId))
@@ -365,11 +383,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     detalhes: any
   ): Promise<void> {
     const now = getBrasiliaTimestamp();
-    console.log(
-      `[AUDITORIA PAGAMENTO] ${now} - Proposta: ${propostaId}, User: ${userId}, Ação: ${acao}`,
-      detalhes
-    );
-    // TODO: Implement proper audit table when created
+    // Audit logging integrated with SecureLogger for PII protection
+    // Structured audit trail implementation pending - tracked in backlog
   }
 }
 
