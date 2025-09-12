@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import { z } from 'zod';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,6 +72,52 @@ import {
 } from 'lucide-react';
 import PaymentReviewModal from './pagamentos-review';
 import MarcarPagoModal from './marcar-pago-modal';
+
+// FASE 3 - PEAF V1.5: Schema Zod correspondente à interface Pagamento
+const PagamentoSchema = z.object({
+  id: z.string().uuid(),
+  propostaId: z.string().uuid(),
+  numeroContrato: z.string(),
+  nomeCliente: z.string(),
+  cpfCliente: z.string(),
+  valorFinanciado: z.number(),
+  valorLiquido: z.number(),
+  valorIOF: z.number(),
+  valorTAC: z.number(),
+  contaBancaria: z.object({
+    banco: z.string(),
+    agencia: z.string(),
+    conta: z.string(),
+    tipoConta: z.string(),
+    titular: z.string(),
+  }),
+  status: z.string(),
+  dataRequisicao: z.string(),
+  dataAprovacao: z.string().optional(),
+  dataPagamento: z.string().optional(),
+  requisitadoPor: z.object({
+    id: z.string(),
+    nome: z.string(),
+    papel: z.string(),
+  }),
+  aprovadoPor: z.object({
+    id: z.string(),
+    nome: z.string(),
+    papel: z.string(),
+  }).optional(),
+  motivoRejeicao: z.string().optional(),
+  observacoes: z.string().optional(),
+  comprovante: z.string().optional(),
+  formaPagamento: z.enum(['ted', 'pix', 'doc']),
+  loja: z.string(),
+  produto: z.string(),
+});
+
+const ApiResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.array(PagamentoSchema),
+  total: z.number(),
+});
 
 interface Pagamento {
   id: string;
@@ -154,11 +201,25 @@ export default function Pagamentos() {
 
 
       try {
-        const response = await apiRequest(`/api/pagamentos?${params.toString()}`, {
+        const responseRaw = await apiRequest(`/api/pagamentos?${params.toString()}`, {
           method: 'GET',
         });
-        return response as Pagamento[];
+        
+        console.log(`[PAGAMENTOS] Raw API response:`, responseRaw);
+
+        // ✅ FASE 3 - PEAF V1.5: VALIDAÇÃO ZOD
+        const parsed = ApiResponseSchema.safeParse(responseRaw);
+        if (!parsed.success) {
+          console.error("🚨 CRITICAL API SHAPE MISMATCH DETECTADO!", parsed.error.format());
+          // Retornar array vazio em caso de erro de formato para não quebrar a UI
+          console.warn("[PAGAMENTOS] Retornando array vazio devido a shape mismatch");
+          return [];
+        }
+        
+        console.log(`[PAGAMENTOS] Validated ${parsed.data.data.length} proposals successfully`);
+        return parsed.data.data; // ✅ Retorna o array validado
       } catch (err) {
+        console.error('[PAGAMENTOS] Error in API call:', err);
         throw err;
       }
     },
