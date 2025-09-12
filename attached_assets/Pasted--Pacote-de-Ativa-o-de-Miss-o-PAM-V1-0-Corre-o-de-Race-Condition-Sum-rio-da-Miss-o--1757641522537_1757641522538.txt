@@ -1,0 +1,55 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Correção de "Race Condition"
+
+* **Sumário da Missão:** Refatorar o controlador `marcarPropostaComoConcluida` para que a sua execução seja síncrona, aguardando a conclusão do processo de geração de boletos antes de retornar uma resposta de sucesso ao cliente.
+
+* **Intenção Estratégica:** Eliminar a "race condition" entre o frontend e o backend, garantindo que a invalidação de cache no frontend ocorra apenas após a conclusão de todas as operações de backend. Isto irá resolver a falha de atualização de estado da UI.
+
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria forense provou que o controlador está a retornar uma resposta de sucesso prematuramente, enquanto o processo de geração de boletos continua a ser executado de forma assíncrona em segundo plano, causando uma falha na sincronização de estado com o frontend.
+
+---
+
+**IMPLEMENTAR:**
+Modificar a lógica do controlador para que utilize `await` na chamada ao serviço de geração de boletos.
+
+**CURRENT STATE:**
+* **Ficheiro:** `server/modules/proposal/presentation/proposalController.ts` (ou similar)
+* **Lógica com Falha (Assíncrona):**
+    ```typescript
+    export const marcarPropostaComoConcluida = async (req, res, next) => {
+      try {
+        // ... validações ...
+        
+        // A chamada é feita, mas o controlador não espera pela sua conclusão
+        triggerBoletoGeneration(propostaId); 
+        
+        // A resposta é enviada imediatamente
+        res.json({ success: true, message: "Processo iniciado..." });
+      } catch (error) {
+        // ...
+      }
+    };
+    ```
+
+**EXPECTED (Estado Final de Sucesso):**
+* **Ficheiro:** `server/modules/proposal/presentation/proposalController.ts` (ou similar)
+* **Código Corrigido (Síncrono):**
+    ```typescript
+    export const marcarPropostaComoConcluida = async (req, res, next) => {
+      try {
+        // ... validações ...
+        
+        // 1. AWAIT OBRIGATÓRIO: O controlador agora espera pela conclusão do serviço
+        await clickSignWebhookService.triggerBoletoGeneration(propostaId); 
+        
+        // 2. A resposta só é enviada APÓS a conclusão do processo
+        res.json({ success: true, message: "Processo de geração de boletos concluído com sucesso" });
+      } catch (error) {
+        // ...
+      }
+    };
+    ```
+* **Comportamento Resultante:** O frontend ficará num estado de `loading` durante a chamada à API e só receberá a resposta de sucesso quando a geração de boletos e a atualização de status no backend estiverem 100% concluídas. A invalidação de cache subsequente irá, então, buscar os dados já corretos.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a refatoração e realize o protocolo 7-CHECK completo.
