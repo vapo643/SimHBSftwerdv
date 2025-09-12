@@ -81,6 +81,9 @@ class ClickSignServiceV3 {
   private readonly marcarAguardandoAssinaturaUseCase?: MarcarAguardandoAssinaturaUseCase;
 
   constructor(marcarAguardandoAssinaturaUseCase?: MarcarAguardandoAssinaturaUseCase) {
+    // 🎯 CRITICAL FIX: Assign dependency injection parameter to class field
+    this.marcarAguardandoAssinaturaUseCase = marcarAguardandoAssinaturaUseCase;
+    
     // ALWAYS use production ClickSign API for valid legal signatures
     // ClickSign uses API v1 with query parameter authentication
     this.config = {
@@ -99,6 +102,7 @@ class ClickSignServiceV3 {
     console.log(`[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)`);
     console.log(`[CLICKSIGN V1] API URL: ${this.config.apiUrl}`);
     console.log(`[CLICKSIGN V1] Token configured: ${this.config.apiToken.substring(0, 8)}***`);
+    console.log(`[CLICKSIGN V1] UseCase DI attached: ${!!this.marcarAguardandoAssinaturaUseCase}`);
   }
 
   /**

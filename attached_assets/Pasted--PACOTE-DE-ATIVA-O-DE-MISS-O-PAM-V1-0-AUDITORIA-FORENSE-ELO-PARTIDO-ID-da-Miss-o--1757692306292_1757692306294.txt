@@ -1,0 +1,34 @@
+### **PACOTE DE ATIVAÇÃO DE MISSÃO (PAM) V1.0 - AUDITORIA FORENSE "ELO PARTIDO"**
+
+**ID da Missão:** `RCA-FSM-CLICKSIGN-001-AUDIT`
+
+**Ferramenta Alocada:** `Sniper`
+
+**Doutrina Ativa:** Protocolo de Auditoria de Cenário de Negócio (PACN) V1.0
+
+---
+
+#### **Sumário da Missão:**
+
+Realizar uma auditoria forense de rastreamento de ponta a ponta para identificar por que a transição de status para `AGUARDANDO_ASSINATURA` não ocorre após o envio de um documento para o ClickSign. **NÃO MODIFIQUE NENHUM CÓDIGO.**
+
+#### **Cenário de Negócio (O "Caso de Teste"):**
+
+Um usuário, na tela de formalização de uma proposta com status `CCB_GERADA`, clica no botão "Enviar para ClickSign". A API responde com sucesso, mas o status da proposta não é atualizado para `AGUARANDO_ASSINATURA`.
+
+#### **Vetor de Ataque / Ponto de Falha (O "Risco"):**
+
+O risco é uma **quebra de continuidade lógica**. Suspeita-se que o método do serviço `clickSignServiceV3.ts` que é invocado pela rota da API não é o mesmo que foi modificado para incluir a chamada ao `MarcarAguardandoAssinaturaUseCase`, resultando em uma falha silenciosa de execução da lógica de negócio.
+
+#### **Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+
+1.  **Ponto de Partida (Frontend):** Localize o componente da UI que contém o botão "Enviar para ClickSign" na tela de formalização e apresente o trecho de código que revela qual **endpoint exato da API** é chamado pelo seu evento `onClick`.
+
+2.  **Ponto de Entrada (Backend):** Localize o arquivo de rotas (`server/routes.ts` ou similar) e apresente o código do controller que manipula o endpoint identificado no passo anterior.
+
+3.  **Cadeia de Invocação (Backend):** A partir do controller, rastreie a chamada até o serviço. Apresente o **nome exato do método** dentro de `clickSignServiceV3.ts` que é invocado por este controller.
+
+4.  **Análise do Ponto de Falha (Backend):**
+    * Navegue para o arquivo `server/services/clickSignServiceV3.ts`.
+    * Apresente o código-fonte completo do método identificado no passo 3.
+    * **Análise Crítica:** Verifique se este método contém a chamada para `this.marcarAguardandoAssinaturaUseCase.execute(...)`. Declare explicitamente: "A chamada ao UseCase EXISTE neste método" ou "A chamada ao UseCase NÃO EXISTE neste método".
