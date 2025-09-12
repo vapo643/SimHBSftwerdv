@@ -646,15 +646,7 @@ export default function Pagamentos() {
                           <ul className="mx-auto max-w-sm space-y-1 text-left text-sm text-muted-foreground">
                             <li className="flex items-center gap-2">
                               <CheckCircle className="h-4 w-4 text-green-600" />
-                              CCB assinada eletronicamente
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4 text-green-600" />
-                              Boletos de cobrança gerados no Inter
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4 text-green-600" />
-                              Status "Pronto para Pagamento"
+                              Status "Assinatura Concluída"
                             </li>
                           </ul>
                           <Button

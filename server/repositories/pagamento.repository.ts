@@ -95,7 +95,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
 
     // Exclude paid proposals unless specifically requested
     if (!filters.incluirPagos) {
-      conditions.push(or(sql`${propostas.status} IS NULL`, sql`${propostas.status} != 'pago'`));
+      conditions.push(sql`${propostas.status} != 'pago'`);
     }
 
     // Build single query with consolidated conditions
@@ -142,8 +142,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .from(propostas)
       .where(
         and(
-          eq(propostas.ccbGerado, true),
-          eq(propostas.assinaturaEletronicaConcluida, true),
+          eq(propostas.status, 'ASSINATURA_CONCLUIDA'),
           sql`${propostas.deletedAt} IS NULL`
         )
       );
