@@ -447,7 +447,7 @@ export class Proposal {
     // Converter dados FLAT do banco → estrutura ANINHADA esperada pelo domínio
     // CUIDADO: Sistema CCB depende de tags - manter compatibilidade total
     // ==========================================
-    if (data.cliente_data === undefined && data.cliente_cpf !== undefined) {
+    if (!data.cliente_data && data.cliente_cpf !== undefined) {
         data.cliente_data = {
             // Dados pessoais básicos (com validação defensiva)
             nome: data.cliente_nome || '',
@@ -502,13 +502,13 @@ export class Proposal {
     // ==========================================
 
     // VALUE OBJECT DEFENSIVE FIX: Lidar com dados que podem estar salvos incorretamente
-    const cepValue = typeof data.cliente_data.cep === 'object' && data.cliente_data.cep?.value
+    const cepValue = data.cliente_data && typeof data.cliente_data.cep === 'object' && data.cliente_data.cep?.value
       ? data.cliente_data.cep.value
-      : data.cliente_data.cep;
+      : data.cliente_data?.cep;
     
-    const rendaMensalValue = typeof data.cliente_data.renda_mensal === 'object' && data.cliente_data.renda_mensal?.cents
+    const rendaMensalValue = data.cliente_data && typeof data.cliente_data.renda_mensal === 'object' && data.cliente_data.renda_mensal?.cents
       ? data.cliente_data.renda_mensal.cents / 100
-      : data.cliente_data.renda_mensal;
+      : data.cliente_data?.renda_mensal;
     
     // Reconstituir Value Objects dos dados persistidos
     const clienteData: ClienteData = {
