@@ -443,11 +443,14 @@ export class Proposal {
   // Factory method para reconstituir do banco
   static fromDatabase(data: any): Proposal {
     // ==========================================
-    // 🚨 BLOCO DE NORMALIZAÇÃO - CONTENÇÃO FASE 1
+    // 🚨 BLOCO DE NORMALIZAÇÃO - CONTENÇÃO FASE 1 (CORRIGIDO)
     // Converter dados FLAT do banco → estrutura ANINHADA esperada pelo domínio
     // CUIDADO: Sistema CCB depende de tags - manter compatibilidade total
+    // CORREÇÃO: Executar normalização sempre que cliente_data estiver ausente
     // ==========================================
-    if (!data.cliente_data && data.cliente_cpf !== undefined) {
+    if (!data.cliente_data) {
+        console.log(`[DEBUG-PROPOSAL] Aplicando normalização para proposta ${data.id}`);
+        console.log(`[DEBUG-PROPOSAL] dados recebidos:`, Object.keys(data));
         data.cliente_data = {
             // Dados pessoais básicos (com validação defensiva)
             nome: data.cliente_nome || '',
@@ -509,6 +512,11 @@ export class Proposal {
     const rendaMensalValue = data.cliente_data && typeof data.cliente_data.renda_mensal === 'object' && data.cliente_data.renda_mensal?.cents
       ? data.cliente_data.renda_mensal.cents / 100
       : data.cliente_data?.renda_mensal;
+    
+    // 🚨 CORREÇÃO CRÍTICA: Verificação defensiva antes de acessar data.cliente_data
+    if (!data.cliente_data) {
+      throw new DomainException(`Dados do cliente não encontrados para proposta ${data.id}. Erro na consulta do banco de dados.`);
+    }
     
     // Reconstituir Value Objects dos dados persistidos
     const clienteData: ClienteData = {
