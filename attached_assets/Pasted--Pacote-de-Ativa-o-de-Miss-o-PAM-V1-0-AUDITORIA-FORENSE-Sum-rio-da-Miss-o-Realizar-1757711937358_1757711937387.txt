@@ -1,0 +1,51 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - AUDITORIA FORENSE
+
+* **Sumário da Missão:** Realizar uma auditoria forense completa no fluxo da "Tela de Pagamentos", mapeando todos os arquivos, lógicas de negócio e queries de banco de dados relevantes, tanto no frontend quanto no backend, para identificar a causa da regressão e quaisquer outros débitos técnicos.
+
+* **Intenção Estratégica:** A tela de pagamentos está quebrada e a regra de negócio para exibição de propostas mudou. Antes de qualquer modificação, precisamos de um mapa exato do estado atual do sistema para arquitetar uma correção cirúrgica, evitando a introdução de novos erros em um fluxo financeiro crítico.
+
+* **Modelo Mental (Como se Encaixa):** O usuário com a role `FINANCEIRO` acessa a rota `/financeiro/pagamentos`. O frontend (provavelmente `client/src/pages/financeiro/pagamentos.tsx`) faz uma chamada de API para o backend. O backend (provavelmente uma rota em `server/routes/pagamentos/index.ts`) busca no banco de dados as propostas que atendem a um critério de filtro específico e as retorna para a UI. A nossa hipótese é que a cláusula `WHERE` nesta query está incorreta ou desatualizada.
+
+---
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+Você deve executar as seguintes ações em sequência e apresentar os resultados em um único relatório. **NÃO modifique nenhum código.**
+
+**1. Mapeamento de Arquivos (Reconhecimento):**
+    * Identifique e liste o caminho completo de todos os arquivos relevantes para a funcionalidade da tela de pagamentos. A lista deve incluir, no mínimo:
+        * O componente principal da página React (`.tsx`).
+        * O arquivo de rotas do Express.js (`.ts`).
+        * O serviço de backend que contém a lógica de negócio (`.ts`).
+        * O repositório que executa a query no banco de dados (`.ts`).
+
+**2. Análise da Lógica de Backend (Extração de Evidência):**
+    * No arquivo de serviço/repositório identificado, localize e apresente a **função exata** que busca as propostas para pagamento.
+    * Apresente o **bloco de código completo da query Drizzle ORM**, com foco especial na cláusula `.where()`.
+
+**3. Análise da Lógica de Frontend (Inspeção de UI):**
+    * No arquivo da página React identificado, localize e apresente:
+        * A chamada da query `useQuery` (ou similar) que busca os dados do backend.
+        * O código que renderiza a tabela ou lista de propostas.
+        * A lógica de todos os botões de ação presentes na tela (ex: "Pagar", "Ver Detalhes", etc.).
+
+**4. Diagnóstico de Débito Técnico e Regressão:**
+    * Com base no código extraído, forneça uma análise preliminar sobre:
+        * **Causa Provável da Regressão:** Por que a funcionalidade pode ter quebrado? A lógica de filtro atual corresponde à regra antiga (`CCB assinada`, `Boleto gerado`, etc.)?
+        * **Pontos Obsoletos e Erros:** Existem `console.log`s esquecidos, variáveis não utilizadas, lógica comentada ou qualquer outro "code smell" que viole nossos padrões de qualidade? Liste-os.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA ANÁLISE:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição do risco na execução desta auditoria]
+* **VALIDAÇÃO PENDENTE:** A análise do Agente deve ser validada por mim (GEM 02) antes de qualquer plano de correção ser formulado.
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO (MODO AUDITORIA):**
+1.  Mapear ficheiros e funções exatas afetadas.
+2.  Garantir que a análise não deixou nenhuma importação ou dependência crítica de fora.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o estado atual do projeto está limpo antes de prosseguir.
+4.  **Declarar Nível de Confiança (0-100%)** na sua análise.
+5.  **Categorizar Riscos Descobertos** na base de código (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  (N/A para auditoria)
+7.  **Documentar Decisões Técnicas** assumidas durante a análise.
