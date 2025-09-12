@@ -12,6 +12,18 @@ import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { z } from 'zod';
 import type { InterCollection, Proposta } from '@shared/schema';
 
+// Utility functions to mask sensitive data in logs (SECURITY FIX)
+function maskCPF(cpf: string): string {
+  if (!cpf || cpf.length < 11) return '***.***.***-**';
+  const cleanCpf = cpf.replace(/\D/g, '');
+  return `***.***.***-${cleanCpf.slice(-2)}`;
+}
+
+function maskClientName(name: string): string {
+  if (!name || name.length < 2) return '*****';
+  return `${name.charAt(0)}${'*'.repeat(Math.max(1, name.length - 2))}${name.charAt(name.length - 1)}`;
+}
+
 // Validation schemas - UPDATED FOR MULTIPLE BOLETOS
 const createCollectionSchema = z.object({
   proposalId: z.string(),
@@ -53,7 +65,7 @@ export class InterService {
     }
 
     console.log(`[INTER] Creating boletos for proposal: ${validated.proposalId}`);
-    console.log(`[INTER] Client: ${proposal.clienteNome} - CPF: ${proposal.clienteCpf}`);
+    console.log(`[INTER] Client: ${maskClientName(proposal.clienteNome)} - CPF: ${maskCPF(proposal.clienteCpf)}`);
     console.log(`[INTER] Loan amount: ${proposal.valor} - Installments: ${proposal.prazo}`);
 
     // Check for existing collections
@@ -142,7 +154,7 @@ export class InterService {
     // Create observation history
     await interRepository.createObservationHistory({
       propostaId: validated.proposalId,
-      mensagem: `${successCount} boletos gerados com sucesso. ${failCount} falharam. Cliente: ${clienteData.nome}`,
+      mensagem: `${successCount} boletos gerados com sucesso. ${failCount} falharam. Cliente: ${maskClientName(clienteData.nome)}`,
       criadoPor: 'Sistema',
       tipoAcao: 'BOLETOS_GERADOS',
       dadosAcao: { 
@@ -152,7 +164,7 @@ export class InterService {
       },
     });
 
-    console.log(`\n✅ [INTER] Successfully created ${successCount} boletos for ${clienteData.nome}`);
+    console.log(`\n✅ [INTER] Successfully created ${successCount} boletos for proposal ${validated.proposalId}`);
     return createdCollections;
   }
 
