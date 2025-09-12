@@ -1,0 +1,100 @@
+2025-09-12 17:31:40.38
+127780f2
+User
+at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+2025-09-12 17:31:40.38
+127780f2
+User
+at TLSSocket.emit (node:events:524:28)
+2025-09-12 17:31:40.38
+127780f2
+User
+at addChunk (node:internal/streams/readable:561:12)
+2025-09-12 17:31:40.38
+127780f2
+User
+at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+2025-09-12 17:31:40.38
+127780f2
+User
+at Readable.push (node:internal/streams/readable:392:5)
+2025-09-12 17:31:40.38
+127780f2
+User
+at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+2025-09-12 17:31:40.38
+127780f2
+User
+severity_local: 'ERROR',
+2025-09-12 17:31:40.38
+127780f2
+User
+severity: 'ERROR',
+2025-09-12 17:31:40.38
+127780f2
+User
+code: 'P0001',
+2025-09-12 17:31:40.38
+127780f2
+User
+where: 'PL/pgSQL function validate_proposta_integrity() line 7 at RAISE',
+2025-09-12 17:31:40.38
+127780f2
+User
+file: 'pl_exec.c',
+2025-09-12 17:31:40.38
+127780f2
+User
+line: '3911',
+2025-09-12 17:31:40.38
+127780f2
+User
+routine: 'exec_stmt_raise'
+2025-09-12 17:31:40.38
+127780f2
+User
+}
+2025-09-12 17:31:40.38
+127780f2
+User
+{"correlationId":"ba4cb18e-ade4-4e53-a545-abfea4d5d930","duration":4345,"environment":"production","level":"info","message":"📤 Request completed","method":"POST","responseSize":101,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-12 20:31:40","url":"/collections","version":"1.0.0"}
+2025-09-12 17:31:40.38
+127780f2
+User
+{"correlationId":"ba4cb18e-ade4-4e53-a545-abfea4d5d930","duration":4345,"environment":"production","level":"warn","message":"⚠️ Slow request detected","service":"simpix-api","threshold":1000,"timestamp":"2025-09-12 20:31:40","url":"/collections","version":"1.0.0"}
+2025-09-12 17:31:40.38
+127780f2
+User
+{"correlationId":"ba4cb18e-ade4-4e53-a545-abfea4d5d930","duration":4345,"environment":"production","error":"{\"error\":\"Erro ao criar cobrança\",\"details\":\"User does not belong to the specified store\"}","level":"error","message":"❌ Request error","method":"POST","service":"simpix-api","statusCode":500,"timestamp":"2025-09-12 20:31:40","url":"/collections","version":"1.0.0"}
+2025-09-12 17:31:40.38
+127780f2
+User
+[PERFORMANCE] ⚠️ SLOW POST /api/inter/collections {
+2025-09-12 17:31:40.38
+127780f2
+User
+correlationId: 'perf-1757709096069-q7o80ppgs',
+2025-09-12 17:31:40.38
+127780f2
+User
+duration: 4314,
+2025-09-12 17:31:40.38
+127780f2
+User
+memoryDeltaMB: 1,
+2025-09-12 17:31:40.38
+127780f2
+User
+statusCode: 500,
+2025-09-12 17:31:40.38
+127780f2
+User
+isCritical: false,
+2025-09-12 17:31:40.38
+127780f2
+User
+threshold: 1000
+2025-09-12 17:31:40.38
+127780f2
+User
+}
