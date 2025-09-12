@@ -56,7 +56,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
   // Se as credenciais PROD_* existem, usar produção automaticamente
   const hasProdCredentials = !!
     (process.env.PROD_SUPABASE_URL && 
-     process.env.PROD_SUPABASE_SERVICE_KEY && 
+     process.env.PROD_SUPABASE_SERVICE_ROLE_KEY && 
      process.env.PROD_DATABASE_URL);
   
   const env = hasProdCredentials ? 'production' : (process.env.NODE_ENV || 'development');
@@ -173,7 +173,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       // Supabase
       supabaseUrl: process.env.PROD_SUPABASE_URL!,
       supabaseAnonKey: process.env.PROD_SUPABASE_ANON_KEY!,
-      supabaseServiceKey: process.env.PROD_SUPABASE_SERVICE_KEY!,
+      supabaseServiceKey: process.env.PROD_SUPABASE_SERVICE_ROLE_KEY!,
 
       // Security (production keys - MUST be strong)
       jwtSecret: process.env.PROD_JWT_SECRET!,

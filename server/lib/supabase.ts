@@ -50,12 +50,12 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
 export const createServerSupabaseAdminClient = () => {
   // Carrega exclusivamente as variáveis de ambiente de PRODUÇÃO.
   const url = process.env.PROD_SUPABASE_URL;
-  const serviceKey = process.env.PROD_SUPABASE_SERVICE_KEY;
+  const serviceKey = process.env.PROD_SUPABASE_SERVICE_ROLE_KEY;
 
   // Validação explícita com mensagem de erro informativa.
   if (!serviceKey || !url) {
     console.error('--- ERRO CRÍTICO DE CONFIGURAÇÃO ---');
-    console.error('As variáveis de ambiente de produção (PROD_SUPABASE_URL, PROD_SUPABASE_SERVICE_KEY) não estão configuradas ou não estão acessíveis.');
+    console.error('As variáveis de ambiente de produção (PROD_SUPABASE_URL, PROD_SUPABASE_SERVICE_ROLE_KEY) não estão configuradas ou não estão acessíveis.');
     console.error('As operações de Admin do Supabase serão desativadas.');
     console.error('--- FIM DO ERRO ---');
     return null as any; 
