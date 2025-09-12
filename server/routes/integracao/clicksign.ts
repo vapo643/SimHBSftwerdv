@@ -26,7 +26,7 @@ router.post('/enviar/:id', async (req: AuthenticatedRequest, res) => {
     const result = await fsmService.processStatusTransition(
       propostaId,
       'ASSINATURA_CONCLUIDA',
-      userId,
+      userId || 'system',
       {
         source: 'CLICKSIGN_SUBMISSION',
         timestamp: new Date().toISOString(),
