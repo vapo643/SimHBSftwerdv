@@ -1,0 +1,61 @@
+### **PACOTE DE ATIVAÇÃO DE MISSÃO (PAM) V1.0 - AUDITORIA FORENSE**
+
+**ID da Missão:** `BUGFIX-FORMALIZATION-TIMELINE-001-AUDIT`
+
+**Ferramenta Alocada:** `Sniper` (Assistente Replit)
+
+**Sumário da Missão (O Quê):**
+Realizar uma auditoria forense completa, de ponta a ponta (frontend-backend-database), no fluxo de "Formalização de Proposta", focando na transição de status da assinatura digital. O objetivo é mapear o fluxo de dados e a lógica de estado, identificando o ponto de falha que impede a atualização da timeline na UI. **Esta é uma missão de reconhecimento. NÃO MODIFIQUE NENHUM CÓDIGO.**
+
+**Intenção Estratégica (O Porquê):**
+O fluxo de formalização está travado, impedindo que as propostas avancem para a etapa de pagamento. Uma mensagem de "sucesso" é exibida na UI, mas o estado não é atualizado visualmente. Precisamos identificar a causa raiz exata—seja ela no frontend, na API, na lógica de negócio ou na camada de persistência—para projetar uma correção cirúrgica sem introduzir novas regressões.
+
+* * *
+
+#### **EVIDÊNCIA DE CONFORMIDADE REQUERIDA (A "PROVA IRREFUTÁVEL"):**
+
+Responda a cada um dos seguintes pontos de investigação de forma sequencial e detalhada. Apresente os trechos de código exatos para cada evidência solicitada.
+
+**Vetor 1: Análise da Ação Manual do Usuário (O Clique no Botão)**
+
+1.  **Ponto de Partida (Frontend):**
+    * Localize o arquivo que renderiza a página de acompanhamento da proposta (provavelmente `client/src/pages/formalizacao.tsx` ou similar).
+    * Dentro dele, identifique o componente da timeline (provavelmente `EtapaFormalizacaoControl.tsx`).
+    * Apresente o trecho de código do botão "Marcar como Concluído", incluindo o manipulador de evento `onClick`.
+
+2.  **Ação de Mutação (Frontend):**
+    * Rastreie a função chamada pelo `onClick`. Ela provavelmente utiliza um hook `useMutation` do TanStack Query.
+    * Apresente o código completo da declaração `useMutation`, mostrando a `mutationFn` utilizada, o endpoint da API que ela chama (ex: `PUT /api/propostas/:id/marcar-assinatura-concluida`), e o método HTTP.
+
+3.  **Ciclo de Revalidação de Dados (Frontend):**
+    * Inspecione o callback `onSuccess` dentro da `useMutation`.
+    * Apresente o trecho de código que mostra a chamada para `queryClient.invalidateQueries`.
+    * **Análise Crítica:** Apresente a `queryKey` exata que está sendo invalidada. Esta chave é o nosso principal suspeito.
+
+**Vetor 2: Análise da Lógica de Negócio (O Contrato da API e o Backend)**
+
+1.  **Contrato da API (Backend):**
+    * Localize a rota no backend que corresponde ao endpoint identificado no passo `1.2`.
+    * Apresente o código do controller que manipula esta rota.
+
+2.  **Execução do Caso de Uso (Backend):**
+    * Apresente o código completo do `UseCase` (ex: `MarcarAssinaturaConcluidaUseCase.ts`) que é invocado pelo controller.
+    * **Análise Crítica:** Verifique a lógica de transição de status. O UseCase tenta mudar o status de `CCB_GERADA` para `ASSINATURA_CONCLUIDA`? Ele deveria, na verdade, estar mudando para `AGUARDANDO_ASSINATURA` primeiro? Destaque a linha que executa a mudança de status.
+
+3.  **Persistência (Backend):**
+    * Apresente o método do `Repository` que o `UseCase` chama para salvar a atualização no banco de dados.
+
+**Vetor 3: Análise do Sistema Automatizado (Webhooks e Logs)**
+
+1.  **Receptor de Webhook (Backend):**
+    * Existe uma rota no backend designada para receber webhooks do ClickSign? (Procure por arquivos em `server/routes/webhooks/` ou similar).
+    * Se existir, apresente o código deste endpoint. Se não, declare "Nenhum endpoint de webhook do ClickSign foi encontrado".
+
+2.  **Observabilidade (Backend):**
+    * Analise o `UseCase` do passo `2.2`. Existe alguma chamada para o serviço de logging (Winston) ou Sentry para registrar o sucesso ou a falha da operação de mudança de status?
+    * Se sim, apresente a linha de código do log. Se não, declare "Nenhuma instrução de logging encontrada para esta operação".
+
+---
+
+**ESTADO FINAL DE SUCESSO DA AUDITORIA:**
+Você fornecerá um relatório em markdown contendo todos os trechos de código e análises solicitadas para cada um dos 8 pontos de investigação. Este relatório será a base para a nossa próxima fase: Arquitetura da Solução.
