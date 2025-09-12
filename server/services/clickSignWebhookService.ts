@@ -20,7 +20,7 @@ import { documentProcessingService, ProcessingSource } from './documentProcessin
 // PAM V1.0 - OPERAÇÃO PONTE AUTOMATIZADA: Import do UseCase
 import { MarcarAssinaturaConcluidaUseCase } from '../modules/proposal/application/MarcarAssinaturaConcluidaUseCase.js';
 import { DomainException } from '../modules/shared/domain/DomainException.js';
-import { createUnitOfWork } from '../lib/unit-of-work.js';
+import { UnitOfWork } from '../lib/unit-of-work.js';
 import { logInfo, logError } from '../lib/logger.js';
 
 interface WebhookEvent {
@@ -59,12 +59,17 @@ class ClickSignWebhookService {
   private processedEvents: Set<string> = new Set();
   private readonly marcarAssinaturaConcluidaUseCase: MarcarAssinaturaConcluidaUseCase;
 
-  constructor() {
+  constructor(marcarAssinaturaConcluidaUseCase?: MarcarAssinaturaConcluidaUseCase) {
     this.webhookSecret = process.env.CLICKSIGN_WEBHOOK_SECRET || '';
 
-    // PAM V1.0 - OPERAÇÃO PONTE AUTOMATIZADA: Injeção do UseCase
-    const unitOfWork = createUnitOfWork();
-    this.marcarAssinaturaConcluidaUseCase = new MarcarAssinaturaConcluidaUseCase(unitOfWork);
+    // PAM V1.0 - OPERAÇÃO PONTE AUTOMATIZADA: Injeção via construtor (DI correto)
+    if (marcarAssinaturaConcluidaUseCase) {
+      this.marcarAssinaturaConcluidaUseCase = marcarAssinaturaConcluidaUseCase;
+    } else {
+      // Fallback para compatibilidade - criar internamente se não injetado
+      const unitOfWork = new UnitOfWork();
+      this.marcarAssinaturaConcluidaUseCase = new MarcarAssinaturaConcluidaUseCase(unitOfWork);
+    }
 
     if (!this.webhookSecret) {
       console.warn(
@@ -74,12 +79,14 @@ class ClickSignWebhookService {
 
     logInfo('[CLICKSIGN WEBHOOK SERVICE] ✅ Inicializado com UseCase MarcarAssinaturaConcluidaUseCase', {
       webhookSecretConfigured: !!this.webhookSecret,
-      useCaseInjected: !!this.marcarAssinaturaConcluidaUseCase
+      useCaseInjected: !!this.marcarAssinaturaConcluidaUseCase,
+      injectionMethod: marcarAssinaturaConcluidaUseCase ? 'constructor' : 'internal_fallback'
     });
   }
 
   /**
-   * Validate webhook signature
+   * Validate webhook signature 
+   * PAM V1.0 - OPERAÇÃO PONTE AUTOMATIZADA: Corrigido bug de segurança HMAC
    */
   validateSignature(payload: string, signature: string, timestamp: string): boolean {
     if (!this.webhookSecret) {
@@ -87,38 +94,69 @@ class ClickSignWebhookService {
       return true; // Skip validation if no secret
     }
 
-    // Check timestamp age
-    const currentTime = Math.floor(Date.now() / 1000);
-    const webhookTime = parseInt(timestamp);
+    try {
+      // Parse and validate timestamp
+      const webhookTime = parseInt(timestamp, 10);
+      if (isNaN(webhookTime)) {
+        console.error('[CLICKSIGN WEBHOOK] Invalid timestamp format');
+        return false;
+      }
 
-    if (currentTime - webhookTime > this.maxTimestampAge) {
-      console.error('[CLICKSIGN WEBHOOK] Request timestamp too old');
+      // Check timestamp age
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (currentTime - webhookTime > this.maxTimestampAge) {
+        console.error('[CLICKSIGN WEBHOOK] Request timestamp too old');
+        return false;
+      }
+
+      // Normalize signature (remove common prefixes)
+      const cleanSignature = signature.replace(/^(sha256=|SHA256=)?/, '');
+
+      // Generate expected signature
+      const signedPayload = `${timestamp}.${payload}`;
+      const expectedSignature = crypto
+        .createHmac('sha256', this.webhookSecret)
+        .update(signedPayload)
+        .digest('hex');
+
+      // Validate hex format and length before comparison
+      if (!/^[a-fA-F0-9]+$/.test(cleanSignature) || cleanSignature.length !== expectedSignature.length) {
+        console.error('[CLICKSIGN WEBHOOK] Invalid signature format or length');
+        return false;
+      }
+
+      // Safe timing comparison with properly formatted buffers
+      const isValid = crypto.timingSafeEqual(
+        Buffer.from(cleanSignature, 'hex'),
+        Buffer.from(expectedSignature, 'hex')
+      );
+
+      if (!isValid) {
+        console.error('[CLICKSIGN WEBHOOK] Invalid signature');
+      }
+
+      return isValid;
+
+    } catch (error) {
+      console.error('[CLICKSIGN WEBHOOK] Signature validation error:', error);
       return false;
     }
-
-    // Validate HMAC signature
-    const signedPayload = `${timestamp}.${payload}`;
-    const expectedSignature = crypto
-      .createHmac('sha256', this.webhookSecret)
-      .update(signedPayload)
-      .digest('hex');
-
-    const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
-
-    if (!isValid) {
-      console.error('[CLICKSIGN WEBHOOK] Invalid signature');
-    }
-
-    return isValid;
   }
 
   /**
    * Check for duplicate events
+   * PAM V1.0 - OPERAÇÃO PONTE AUTOMATIZADA: Corrigido método quebrado
    */
   isDuplicateEvent(eventId: string): boolean {
-    const key = `${eventId}_${Date.now()}`;
+    if (!eventId) {
+      return false; // No event ID, can't check for duplicates
+    }
+
+    // Use only the event ID, not timestamp (which was making every event unique)
+    const key = eventId;
 
     if (this.processedEvents.has(key)) {
+      logInfo('[CLICKSIGN WEBHOOK] ⚠️ Duplicate event detected', { eventId });
       return true;
     }
 
@@ -128,6 +166,10 @@ class ClickSignWebhookService {
     if (this.processedEvents.size > 1000) {
       const entries = Array.from(this.processedEvents);
       this.processedEvents = new Set(entries.slice(-500));
+      logInfo('[CLICKSIGN WEBHOOK] 🧹 Cleaned old duplicate event cache', { 
+        removedEvents: this.processedEvents.size - 500,
+        currentCacheSize: this.processedEvents.size 
+      });
     }
 
     return false;
