@@ -11,6 +11,8 @@ import { getQueue } from '../lib/mock-queue.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { z } from 'zod';
 import type { InterCollection, Proposta } from '@shared/schema';
+// SECURITY V2.0 - Replace console.log with SecureLogger
+import { SecureLogger } from '../modules/shared/infrastructure/SanitizedLogger';
 
 // Utility functions to mask sensitive data in logs (SECURITY FIX)
 function maskCPF(cpf: string): string {
@@ -64,9 +66,14 @@ export class InterService {
       throw new Error('Proposta não encontrada');
     }
 
-    console.log(`[INTER] Creating boletos for proposal: ${validated.proposalId}`);
-    console.log(`[INTER] Client: ${maskClientName(proposal.clienteNome)} - CPF: ${maskCPF(proposal.clienteCpf)}`);
-    console.log(`[INTER] Loan amount: ${proposal.valor} - Installments: ${proposal.prazo}`);
+    SecureLogger.info(`Creating boletos for proposal: ${validated.proposalId}`, {
+      proposal: {
+        client: maskClientName(proposal.clienteNome),
+        cpf: maskCPF(proposal.clienteCpf),
+        amount: proposal.valor,
+        installments: proposal.prazo
+      }
+    });
 
     // Check for existing collections
     const existingCollection = await interRepository.findByProposalId(validated.proposalId);
@@ -80,7 +87,7 @@ export class InterService {
       throw new Error('Parcelas não encontradas para esta proposta');
     }
 
-    console.log(`[INTER] Found ${parcelas.length} installments for proposal`);
+    SecureLogger.info(`Found ${parcelas.length} installments for proposal`, { proposalId: validated.proposalId, totalInstallments: parcelas.length });
 
     // Extract client data from proposal (use real data, not manual input)
     const clienteData = {
@@ -104,8 +111,12 @@ export class InterService {
     // Create one boleto per installment (REAL DATA)
     for (const parcela of parcelas) {
       try {
-        console.log(`\n[INTER] Creating boleto for installment ${parcela.numeroParcela}/${parcelas.length}`);
-        console.log(`[INTER] Amount: R$ ${parcela.valorParcela} - Due: ${parcela.dataVencimento}`);
+        SecureLogger.debug(`Creating boleto for installment ${parcela.numeroParcela}/${parcelas.length}`, {
+          installment: parcela.numeroParcela,
+          total: parcelas.length,
+          amount: parcela.valorParcela,
+          dueDate: parcela.dataVencimento
+        });
 
         // Create boleto in Inter Bank API
         const interResult = await interBankService.criarCobrancaParaProposta({
@@ -135,11 +146,11 @@ export class InterService {
 
         createdCollections.push(collection);
         successCount++;
-        console.log(`✅ [INTER] Boleto ${parcela.numeroParcela} created successfully`);
+        SecureLogger.info(`Boleto ${parcela.numeroParcela} created successfully`);
 
       } catch (error) {
         failCount++;
-        console.error(`❌ [INTER] Failed to create boleto for installment ${parcela.numeroParcela}:`, error);
+        SecureLogger.error(`Failed to create boleto for installment ${parcela.numeroParcela}`, error);
         // Continue with next installment
       }
     }
@@ -164,7 +175,11 @@ export class InterService {
       },
     });
 
-    console.log(`\n✅ [INTER] Successfully created ${successCount} boletos for proposal ${validated.proposalId}`);
+    SecureLogger.info(`Successfully created ${successCount} boletos for proposal ${validated.proposalId}`, {
+      successCount,
+      failCount,
+      proposalId: validated.proposalId
+    });
     return createdCollections;
   }
 

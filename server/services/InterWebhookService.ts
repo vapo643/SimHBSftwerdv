@@ -69,7 +69,7 @@ export class InterWebhookService {
         case 'webhook_inter':
           return await this.processInterWebhookEvent(payload, metadata);
         default:
-          console.warn(`[INTER WEBHOOK] Unknown operation: ${operation}`);
+          SecureLogger.warn(`Unknown webhook operation: ${operation}`, { operation, eventType: payload.event });
           return {
             success: false,
             operation,
@@ -78,9 +78,9 @@ export class InterWebhookService {
           };
       }
     } catch (error: any) {
-      console.error(`[INTER WEBHOOK] Processing error:`, error);
+      SecureLogger.error(`Webhook processing error for operation ${operation}`, error);
 
-      // Log erro crítico
+      // Log erro crítico (COM SANITIZAÇÃO)
       await securityRepository.logSecurityEvent({
         eventType: 'WEBHOOK_PROCESSING_ERROR',
         severity: 'HIGH',
@@ -90,7 +90,7 @@ export class InterWebhookService {
           operation,
           error: error.message,
           errorStack: error.stack,
-          payload,
+          payload: sanitizeWebhookPayload(payload),
         },
       });
 
@@ -122,7 +122,7 @@ export class InterWebhookService {
         return await this.processBoletoOverdue(payload, metadata);
 
       default:
-        console.warn(`[INTER WEBHOOK] Unknown event type: ${eventType}`);
+        SecureLogger.warn(`Unknown webhook event type: ${eventType}`, { eventType, hasPayload: !!payload });
         return {
           success: true, // Return success to prevent retries for unknown events
           processed: false,
@@ -155,7 +155,7 @@ export class InterWebhookService {
       let finalBoletoId = boletoId;
       if (!finalBoletoId && nossoNumero) {
         // Implementar busca por nossoNumero usando repositório
-        console.log(`[INTER WEBHOOK] TODO: Implement findByNossoNumero for ${nossoNumero}`);
+        SecureLogger.info(`TODO: Implement findByNossoNumero`, { nossoNumero });
         // Por enquanto, usar o nossoNumero como fallback
         finalBoletoId = `boleto_${nossoNumero}`;
       }
@@ -173,7 +173,7 @@ export class InterWebhookService {
         webhookEventId: metadata?.webhookEventId || `webhook_${Date.now()}`,
       });
 
-      console.log(`[INTER WEBHOOK] ✅ Payment processed successfully for boleto ${finalBoletoId}`);
+      SecureLogger.info(`Payment processed successfully`, { boletoId: finalBoletoId });
 
       return {
         success: true,
@@ -185,7 +185,7 @@ export class InterWebhookService {
         timestamp: new Date().toISOString(),
       };
     } catch (error: any) {
-      console.error(`[INTER WEBHOOK] Payment processing error:`, error);
+      SecureLogger.error(`Payment processing error`, error);
 
       // Log erro específico de pagamento
       await securityRepository.logSecurityEvent({
@@ -209,7 +209,7 @@ export class InterWebhookService {
    * Processa cancelamento de boleto
    */
   private async processBoletoCancel(payload: InterWebhookPayload, metadata?: any): Promise<any> {
-    console.log(`[INTER WEBHOOK] Processing boleto cancellation`, payload);
+    SecureLogger.info(`Processing boleto cancellation`, { eventType: payload.event, boletoId: payload.boletoId });
 
     // TODO: Implementar MarkBoletoAsCancelledUseCase
     return {
@@ -225,7 +225,7 @@ export class InterWebhookService {
    * Processa vencimento de boleto
    */
   private async processBoletoOverdue(payload: InterWebhookPayload, metadata?: any): Promise<any> {
-    console.log(`[INTER WEBHOOK] Processing boleto overdue`, payload);
+    SecureLogger.info(`Processing boleto overdue`, { eventType: payload.event, boletoId: payload.boletoId });
 
     // TODO: Implementar MarkBoletoAsOverdueUseCase
     return {
@@ -251,7 +251,7 @@ export class InterWebhookService {
       const testUnitOfWork = new UnitOfWork();
       await testUnitOfWork.executeInTransaction(async () => {
         // Simple transaction test - no actual operations
-        console.log('[INTER WEBHOOK] Testing UnitOfWork connectivity');
+        SecureLogger.debug('Testing UnitOfWork connectivity');
       });
 
       return {
@@ -265,7 +265,7 @@ export class InterWebhookService {
         timestamp: new Date().toISOString(),
       };
     } catch (error: any) {
-      console.error('[INTER WEBHOOK] Connection test failed:', error);
+      SecureLogger.error('UnitOfWork connection test failed', error);
       return {
         success: false,
         serviceName: 'InterWebhookService',
