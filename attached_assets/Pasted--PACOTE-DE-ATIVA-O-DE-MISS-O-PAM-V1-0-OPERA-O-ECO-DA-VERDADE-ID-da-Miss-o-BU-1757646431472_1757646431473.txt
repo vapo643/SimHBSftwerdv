@@ -1,0 +1,79 @@
+### **PACOTE DE ATIVAÇÃO DE MISSÃO (PAM) V1.0 - OPERAÇÃO "ECO DA VERDADE"**
+
+**ID da Missão:** `BUGFIX-FORMALIZATION-TIMELINE-001-STEP3`
+
+**Ferramenta Alocada:** `Sniper` - Missão de Nível 1 (Simples)
+
+---
+
+#### **Sumário da Missão (O Quê):**
+
+Corrigir a falha de revalidação de cache no componente `EtapaFormalizacaoControl.tsx`, garantindo que a interface do usuário (UI) reflita imediatamente as mudanças de estado processadas com sucesso pelo backend.
+
+#### **Intenção Estratégica (O Porquê):**
+
+Atualmente, o backend processa a conclusão da etapa de assinatura corretamente, mas a UI não atualiza, permanecendo estática. Isso cria uma experiência de usuário quebrada e confusa, onde o sistema reporta sucesso, mas visualmente nada acontece. Esta missão visa sincronizar o estado visual do frontend com a verdade do backend, fechando o ciclo do feedback para o usuário e desbloqueando o avanço na timeline de formalização.
+
+#### **Histórico Relevante (Consulta Obrigatória):**
+
+* A auditoria forense (`...-AUDIT`) identificou com alta probabilidade que a `queryKey` específica usada para buscar os dados completos da proposta na página de formalização **NÃO está sendo invalidada** após a mutação.
+* As missões anteriores (`...-STEP1`, `...-STEP2`) garantiram que o backend agora funciona corretamente. A falha remanescente é puramente na camada de apresentação/cache do cliente.
+
+#### **Modelo Mental (Como se Encaixa):**
+
+Você está operando na camada de **Frontend**, especificamente na lógica de gerenciamento de estado do servidor com TanStack Query. A falha está no "eco" da operação: a mutação (`useMutation`) executa com sucesso, mas seu `onSuccess` callback não notifica (`invalidateQueries`) o hook de busca (`useQuery`) correto para que ele se atualize. Sua tarefa é consertar essa notificação.
+
+#### **Riscos Antecipados e Contramedidas:**
+
+1.  **Risco de Chave Incorreta (Baixo):** Invalidar a `queryKey` errada não corrigirá o bug e pode causar re-fetches desnecessários em outras partes da aplicação.
+    * **Contramedida Mandatória:** Antes de modificar o código, você **DEVE** inspecionar o componente pai (`client/src/pages/formalizacao.tsx`) para identificar a `queryKey` exata usada pelo `useQuery` que busca os dados da proposta. A chave provavelmente seguirá o padrão `['proposta', propostaId]`.
+
+* * *
+
+#### **IMPLEMENTAR:**
+
+Correção de Invalidação de Cache no Frontend.
+
+#### **CURRENT STATE:**
+
+O componente `client/src/components/propostas/EtapaFormalizacaoControl.tsx` executa uma mutação para atualizar uma etapa. No callback `onSuccess`, ele invalida `queryKey: ['/api/propostas/', propostaId]` e `queryKey: ['/api/propostas/formalizacao']`, mas falha em invalidar a chave principal que contém os dados detalhados da proposta, fazendo com que a UI não se atualize.
+
+#### **EXPECTED (Estado Final de Sucesso):**
+
+1.  Após um usuário clicar em "Marcar como Concluída" e a operação ter sucesso, a timeline de formalização na página `formalizacao.tsx` é atualizada imediatamente, refletindo o novo estado (ex: a etapa de assinatura aparece como concluída e a etapa de geração de boletos é habilitada).
+2.  A `queryKey` correta, que busca os dados da proposta na página principal, é adicionada à lista de invalidações no `onSuccess` da mutação.
+
+#### **CONSTRAINTS (Roadmap de Implementação):**
+
+Siga estes passos em ordem rigorosa.
+
+**Passo 3.1: Identificar a `queryKey` Correta**
+* Navegue até o arquivo `client/src/pages/formalizacao.tsx`.
+* Localize a chamada ao hook `useQuery` que busca os dados da proposta.
+* Copie a `queryKey` exata utilizada.
+
+**Passo 3.2: Corrigir a Invalidação**
+* Navegue até o arquivo `client/src/components/propostas/EtapaFormalizacaoControl.tsx`.
+* Localize o hook `useMutation` chamado `updateEtapa`.
+* Dentro do callback `onSuccess`, adicione uma nova linha: `queryClient.invalidateQueries({ queryKey: [COLE_A_CHAVE_CORRETA_AQUI] });`.
+
+* * *
+
+#### **DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** **BAIXO**. O único risco é a identificação incorreta da `queryKey`, que é mitigado pela contramedida mandatório no Passo 3.1.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumimos que a `queryKey` segue o padrão de nomenclatura já estabelecido no projeto e que uma única invalidação adicional será suficiente para resolver o problema visual.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deverá executar o fluxo completo de ponta a ponta: marcar a assinatura como concluída e verificar se a timeline avança visualmente e se o botão para gerar boletos do Banco Inter se torna ativo.
+
+* * *
+
+#### **PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+
+1.  Mapeie os **2 arquivos modificados**: `formalizacao.tsx` (apenas para leitura) e `EtapaFormalizacaoControl.tsx` (para escrita).
+2.  Garanta que a `queryKey` adicionada corresponde exatamente àquela usada na busca de dados.
+3.  Execute `get_latest_lsp_diagnostics` e corrija **TODOS** os erros.
+4.  Declare seu **Nível de Confiança (0-100%)** final.
+5.  Categorize quaisquer **Riscos Descobertos**.
+6.  Realize um teste funcional completo no frontend, validando a reatividade da UI após a ação.
+7.  Documente a `queryKey` que foi adicionada para o registro histórico da correção.
