@@ -22,10 +22,10 @@ interface RateLimitState {
 class RateLimitService {
   private states: Map<string, RateLimitState> = new Map();
   private defaultConfig: RateLimitConfig = {
-    maxRequestsPerSecond: 5, // Limite observado do Banco Inter
-    maxRetries: 3,
-    baseDelayMs: 1000,
-    maxDelayMs: 30000,
+    maxRequestsPerSecond: 20, // Limite aumentado 4X (era 5, agora 20)
+    maxRetries: 5, // Aumentado de 3 para 5 tentativas
+    baseDelayMs: 500, // Reduzido de 1s para 500ms
+    maxDelayMs: 15000, // Reduzido de 30s para 15s
   };
 
   /**

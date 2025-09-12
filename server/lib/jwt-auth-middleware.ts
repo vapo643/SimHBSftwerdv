@@ -24,13 +24,13 @@ export interface AuthenticatedRequest extends Request {
 const TOKEN_BLACKLIST_TTL = 60 * 60; // 1 hour in seconds
 // Configuração dinâmica por ambiente
 const isDevelopment = process.env.NODE_ENV === 'development';
-const MAX_AUTH_ATTEMPTS = isDevelopment ? 10000 : 50; // 10k dev, 50 prod
+const MAX_AUTH_ATTEMPTS = isDevelopment ? 50000 : 500; // 50k dev, 500 prod (AUMENTADO 10X)
 const AUTH_WINDOW_MS = isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000; // 1min dev, 15min prod
 const AUTH_ATTEMPTS_TTL = Math.ceil(AUTH_WINDOW_MS / 1000); // Convert to seconds
 
 // ===== 🛡️ CIRCUIT BREAKER CONFIGURATION =====
 // PAM V1.0: Circuit breaker para proteção contra avalanche de requisições
-const CIRCUIT_BREAKER_FAILURE_THRESHOLD = isDevelopment ? 20 : 10; // Falhas para acionar circuit breaker
+const CIRCUIT_BREAKER_FAILURE_THRESHOLD = isDevelopment ? 100 : 50; // Falhas para acionar circuit breaker (AUMENTADO 5X)
 const CIRCUIT_BREAKER_WINDOW_MS = 60 * 1000; // 60 segundos
 const CIRCUIT_BREAKER_COOLDOWN_MS = 120 * 1000; // 2 minutos de bloqueio
 const CIRCUIT_BREAKER_TTL = Math.ceil(CIRCUIT_BREAKER_COOLDOWN_MS / 1000); // Convert to seconds

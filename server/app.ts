@@ -92,10 +92,10 @@ export async function createApp() {
 
     const generalApiLimiter = rateLimit({
       windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
-      max: isDevelopment ? 10000 : 1000, // 10k dev, 1k prod (muito mais permissivo)
+      max: isDevelopment ? 50000 : 5000, // 50k dev, 5k prod (LIMITES AUMENTADOS 5X)
       message: {
         error: isDevelopment
-          ? 'Rate limit atingido (modo desenvolvimento - limites altos)'
+          ? 'Rate limit atingido (modo desenvolvimento - limites muito altos 50k/min)'
           : 'Muitas requisições da API. Tente novamente em 15 minutos.',
         retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
       },
