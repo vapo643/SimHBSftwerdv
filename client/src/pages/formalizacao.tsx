@@ -856,7 +856,7 @@ export default function Formalizacao() {
     }
   };
 
-  // Função para enviar CCB para ClickSign
+  // 🚀 FUNÇÃO CORRIGIDA: Enviar CCB para ClickSign com invalidação robusta de cache
   const sendToClickSign = async (propostaId: string) => {
     setLoadingClickSign(true);
     try {
@@ -874,9 +874,35 @@ export default function Formalizacao() {
           title: 'Sucesso',
           description: 'CCB enviada para ClickSign! Link de assinatura gerado.',
         });
+        
+        console.log('🚀 [FRONTEND-FIX] Iniciando invalidação de cache após ClickSign');
+        
+        // 🎯 SOLUÇÃO 1: Invalidar cache específica (mais robusta que refetch)
+        await queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+        
+        // 🎯 SOLUÇÃO 2: Forçar atualização imediata do estado local
+        queryClient.setQueryData(['/api/propostas', propostaId], (oldData: any) => {
+          if (oldData) {
+            console.log('🔄 [FRONTEND-FIX] Atualizando status local para AGUARDANDO_ASSINATURA');
+            return {
+              ...oldData,
+              status: 'AGUARDANDO_ASSINATURA'
+            };
+          }
+          return oldData;
+        });
+        
         // Atualizar dados ClickSign
         await checkClickSignStatus(propostaId);
-        refetch();
+        
+        // 🎯 SOLUÇÃO 3: Aguardar e refetch para evitar race conditions
+        setTimeout(() => {
+          console.log('⏰ [FRONTEND-FIX] Refetch tardio executado');
+          refetch();
+        }, 500);
+        
+        console.log('✅ [FRONTEND-FIX] Todas as invalidações executadas');
       }
     } catch (error: any) {
       console.error('Erro ao enviar para ClickSign:', error);
