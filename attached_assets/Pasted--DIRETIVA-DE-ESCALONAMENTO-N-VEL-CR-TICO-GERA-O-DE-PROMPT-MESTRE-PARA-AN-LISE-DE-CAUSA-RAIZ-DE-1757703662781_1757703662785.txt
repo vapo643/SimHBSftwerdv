@@ -1,0 +1,49 @@
+### DIRETIVA DE ESCALONAMENTO NÍVEL CRÍTICO: GERAÇÃO DE PROMPT MESTRE PARA ANÁLISE DE CAUSA RAIZ (DEEPTHINK)
+
+**CLASSIFICAÇÃO DA MISSÃO:** Nível 3: Crítica (High Power - Claude Opus)
+**PROTOCOLO ATIVO:** Padrão de Ativação de Missão (PAM) V1.0 - Anti-Falha
+
+---
+
+**### Pacote de Ativação de Missão (PAM) V1.0 - NÍVEL DE CRISE**
+
+* **Sumário da Missão (O Quê):** Realizar uma análise de causa raiz (RCA) definitiva na falha sistêmica de atualização de status da tela de Formalização e arquitetar um plano de implementação faseado, resiliente e à prova de falhas para corrigir o problema em todas as suas vertentes, garantindo a atomicidade das transações e a integridade da máquina de estados.
+
+* **Intenção Estratégica (O Porquê):** O fluxo de formalização é um gargalo operacional crítico que está paralisando o avanço do projeto. Múltiplas tentativas de correção falharam, consumindo mais de 10 horas de desenvolvimento e erodindo a confiança na estabilidade da base de código. A resolução deste problema é a **prioridade máxima** para restabelecer a velocidade de desenvolvimento e garantir a integridade do core business do sistema.
+
+* **Modelo Mental (Como se Encaixa):** O fluxo de atualização de status é o coração da lógica de negócio. Ele é orquestrado por uma **Máquina de Estados Finitos (FSM)**, implementada em `server/services/statusFsmService.ts`. Toda transição de estado deve ser uma operação **atômica**, gerenciada pelo nosso `UnitOfWork`, para prevenir inconsistências no banco de dados. Uma falha aqui significa que todo o fluxo da proposta de crédito está comprometido. O frontend (`EtapaFormalizacaoControl.tsx`) reage a essas mudanças de estado para habilitar/desabilitar funcionalidades subsequentes (como a integração com Banco Inter e ClickSign).
+
+* **Histórico de Falhas (Dossiê Completo):**
+    *COLE AQUI O CONTEÚDO COMPLETO DO "RELATORIO_FALHAS_FORMALIZACAO.md" QUE VOCÊ RECEBEU.*
+
+* **Vetores de Análise Obrigatórios (Pontos de Falha Conhecidos):**
+    A sua análise deve, obrigatoriamente, investigar e apresentar uma solução para as três frentes que falharam repetidamente:
+    1.  **Botão "Marcar como Concluída":** Por que o clique não atualiza o status da proposta para "CONCLUIDA" de forma consistente e não dispara a lógica subsequente (habilitação da UI do Banco Inter)? A falha está na invalidação do cache do TanStack Query, na mutação da API, ou a transação no backend está falhando silenciosamente?
+    2.  **Botão "Enviar para Assinatura (ClickSign)":** Por que as tentativas de refatorar este botão para também atualizar o status da proposta resultaram em falha? Existe um conflito entre a chamada à API da ClickSign e a nossa transação de banco de dados interna?
+    3.  **Componente "Gerenciar Status":** Por que a tentativa de atualização manual do status através deste componente também falha, e quais são as implicações sistêmicas disso? Este é o sintoma mais grave, pois indica uma possível falha na própria FSM ou nas políticas de RLS (Row-Level Security) que podem estar bloqueando a atualização.
+
+* **Análise de Código Fonte Requerida (Manifesto de Arquivos Críticos):**
+    Para uma análise forense completa, você deve receber e analisar o código-fonte integral dos seguintes arquivos. Instrua o Arquiteto Chefe a fornecer o conteúdo completo destes arquivos sem omissões:
+    * **Core do Frontend:**
+        * `client/src/pages/formalizacao.tsx`
+        * `client/src/components/propostas/EtapaFormalizacaoControl.tsx`
+    * **Camada de API e Lógica de Negócio:**
+        * `server/routes/propostas.ts`
+        * `server/services/propostaService.ts`
+    * **Núcleo da Máquina de Estados (CRÍTICO):**
+        * `server/services/statusFsmService.ts`
+        * `server/lib/status-context-helper.ts`
+    * **Serviços de Integração (Pontos de Falha):**
+        * `server/services/clickSignServiceV3.ts`
+        * `server/services/interBankService.ts`
+    * **Schema e ORM:**
+        * `shared/schema.ts` (especificamente as tabelas `propostas`, `status_proposta`, `historico_propostas`)
+    * **Análise Adicional:** Qualquer outro arquivo que sua análise do histórico de erros aponte como relevante.
+
+* **Entregável Final Esperado (Plano de Batalha Definitivo):**
+    O resultado da sua análise deve ser um relatório técnico claro e acionável contendo:
+    1.  **Diagnóstico da Causa Raiz:** Uma explicação inequívoca do porquê as atualizações de estado estão falhando. A falha é no frontend (gerenciamento de estado, mutação otimista), no backend (lógica de negócio, violação de RLS, falha na transação atômica, bug na FSM), ou em uma combinação complexa de ambos?
+    2.  **Roadmap de Correção Faseado e à Prova de Falhas:** Um plano de implementação passo a passo, projetado para ser executado cirurgicamente. Cada passo deve ser pequeno, validável e focado em uma única correção. O plano deve priorizar a estabilização da FSM e a garantia de transações atômicas antes de corrigir a UI. Para cada passo, detalhe o arquivo a ser modificado e o racional da correção.
+
+---
+**[FIM DO SUPER PROMPT]**
