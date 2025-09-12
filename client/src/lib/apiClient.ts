@@ -205,7 +205,7 @@ class TokenManager {
       }
 
       this.cachedToken = session.access_token;
-      console.log(`🔐 [TOKEN MANAGER] Fresh token obtained, length: ${this.cachedToken.length}`);
+      console.log(`🔐 [TOKEN MANAGER] Fresh token obtained, length: ${this.cachedToken?.length || 0}`);
       return this.cachedToken;
     } catch (error) {
       console.error('🔐 [TOKEN MANAGER] Error refreshing token:', error);
