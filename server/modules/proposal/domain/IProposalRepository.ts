@@ -139,6 +139,19 @@ export interface ProposalRepository {
    * Retorna dados otimizados para a UI com JOINs mínimos necessários
    */
   findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]>;
+
+  // 🚀 MÉTODOS EFICIENTES PARA OPERAÇÕES SIMPLES
+  /**
+   * Busca apenas o status de uma proposta (sem reconstituir objeto completo)
+   * PERFORMANCE: Muito mais eficiente que findById() para verificações de status
+   */
+  getProposalStatus(id: string): Promise<ProposalStatus | null>;
+
+  /**
+   * Atualiza apenas o status de uma proposta (sem carregar dados completos)  
+   * PERFORMANCE: Operação lean para transições de status simples
+   */
+  updateStatus(id: string, newStatus: ProposalStatus, userId: string): Promise<void>;
 }
 
 /**

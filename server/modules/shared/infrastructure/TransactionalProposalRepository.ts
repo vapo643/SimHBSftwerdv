@@ -356,4 +356,61 @@ export class TransactionalProposalRepository implements IProposalRepository {
 
     return result.map((r: any) => Proposal.fromDatabase(r));
   }
+
+  // 🚀 MÉTODOS EFICIENTES PARA OPERAÇÕES SIMPLES 
+  async getProposalStatus(id: string): Promise<ProposalStatus | null> {
+    const result = await this.tx
+      .select({ status: propostas.status })
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+    
+    return result.length > 0 ? result[0].status as ProposalStatus : null;
+  }
+
+  async updateStatus(id: string, newStatus: ProposalStatus, userId: string): Promise<void> {
+    await this.tx
+      .update(propostas)
+      .set({ 
+        status: newStatus,
+        updatedAt: new Date()
+      })
+      .where(eq(propostas.id, id));
+  }
+
+  async findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]> {
+    // Implementação lightweight que retorna apenas campos essenciais
+    const conditions = [isNull(propostas.deletedAt)];
+
+    if (criteria.status) {
+      conditions.push(eq(propostas.status, criteria.status as any));
+    }
+
+    if (criteria.lojaId) {
+      conditions.push(eq(propostas.lojaId, criteria.lojaId));
+    }
+
+    if (criteria.cpf) {
+      conditions.push(eq(propostas.clienteCpf, criteria.cpf));
+    }
+
+    const result = await this.tx
+      .select({
+        id: propostas.id,
+        numeroProposta: propostas.numeroProposta,
+        status: propostas.status,
+        clienteNome: propostas.clienteNome,
+        clienteCpf: propostas.clienteCpf,
+        valor: propostas.valor,
+        prazo: propostas.prazo,
+        lojaId: propostas.lojaId,
+        createdAt: propostas.createdAt,
+        updatedAt: propostas.updatedAt
+      })
+      .from(propostas)
+      .where(and(...conditions))
+      .orderBy(desc(propostas.createdAt));
+
+    return result;
+  }
 }
