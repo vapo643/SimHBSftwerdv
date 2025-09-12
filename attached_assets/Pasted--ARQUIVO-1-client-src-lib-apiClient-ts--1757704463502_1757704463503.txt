@@ -1,0 +1,355 @@
+// ============================================
+// ARQUIVO 1: client/src/lib/apiClient.ts
+// ============================================
+
+// CORREÇÃO 1: TokenManager Robusto com Retry Logic
+export class TokenManager {
+  private cachedToken: string | null = null;
+  private tokenExpiry: number | null = null;
+  private refreshPromise: Promise<string> | null = null;
+  private retryCount = 0;
+  private readonly MAX_RETRIES = 3;
+
+  async getToken(): Promise<string> {
+    // Se já existe uma promessa de refresh em andamento, aguarda ela
+    if (this.refreshPromise) {
+      console.log('🔄 [TOKEN MANAGER] Awaiting existing refresh promise');
+      return this.refreshPromise;
+    }
+
+    // Verifica se token ainda é válido (com margem de 30 segundos)
+    if (this.cachedToken && this.tokenExpiry && Date.now() < this.tokenExpiry - 30000) {
+      console.log('✅ [TOKEN MANAGER] Using cached token');
+      return this.cachedToken;
+    }
+
+    // Inicia refresh com retry logic
+    this.refreshPromise = this.refreshTokenWithRetry()
+      .finally(() => {
+        this.refreshPromise = null;
+        this.retryCount = 0;
+      });
+
+    return this.refreshPromise;
+  }
+
+  private async refreshTokenWithRetry(): Promise<string> {
+    while (this.retryCount < this.MAX_RETRIES) {
+      try {
+        console.log(`🔐 [TOKEN MANAGER] Refreshing token (attempt ${this.retryCount + 1}/${this.MAX_RETRIES})`);
+        
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          throw new Error(`Supabase auth error: ${error.message}`);
+        }
+        
+        if (!session?.access_token) {
+          // Token inválido - força re-login
+          window.location.href = '/login';
+          throw new Error('Session expired - redirecting to login');
+        }
+
+        this.cachedToken = session.access_token;
+        // Calcula expiry baseado no token JWT
+        const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+        this.tokenExpiry = payload.exp * 1000;
+        
+        console.log(`✅ [TOKEN MANAGER] Token refreshed successfully, expires at ${new Date(this.tokenExpiry).toISOString()}`);
+        
+        return this.cachedToken;
+      } catch (error) {
+        this.retryCount++;
+        console.error(`❌ [TOKEN MANAGER] Refresh attempt ${this.retryCount} failed:`, error);
+        
+        if (this.retryCount >= this.MAX_RETRIES) {
+          // Limpa cache e força re-login
+          this.cachedToken = null;
+          this.tokenExpiry = null;
+          throw error;
+        }
+        
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, this.retryCount) * 1000));
+      }
+    }
+    
+    throw new Error('Max token refresh retries exceeded');
+  }
+
+  invalidate() {
+    console.log('🗑️ [TOKEN MANAGER] Token invalidated');
+    this.cachedToken = null;
+    this.tokenExpiry = null;
+    this.refreshPromise = null;
+    this.retryCount = 0;
+  }
+}
+
+// CORREÇÃO 2: Request Interceptor com Error Handling Robusto
+export const apiClient = {
+  async request(url: string, options: RequestInit = {}) {
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const token = await tokenManager.getToken();
+        
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            ...options.headers,
+          },
+        });
+
+        // Log detalhado para debug
+        console.log(`📡 [API] ${options.method || 'GET'} ${url} - Status: ${response.status}`);
+
+        // Se é 401, invalida token e tenta novamente
+        if (response.status === 401 && attempt < maxRetries - 1) {
+          console.warn('🔄 [API] 401 received, invalidating token and retrying...');
+          tokenManager.invalidate();
+          continue;
+        }
+
+        // Para qualquer outro erro HTTP, lança exceção com detalhes
+        if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorBody || response.statusText}`);
+        }
+
+        return response;
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`❌ [API] Request attempt ${attempt + 1} failed:`, error);
+        
+        if (attempt === maxRetries - 1) {
+          throw lastError;
+        }
+        
+        // Exponential backoff entre tentativas
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+      }
+    }
+    
+    throw lastError || new Error('Request failed after max retries');
+  }
+};
+
+// ============================================
+// ARQUIVO 2: client/src/pages/formalizacao.tsx
+// ============================================
+
+// CORREÇÃO 3: Mutações com Invalidação Completa e Error Recovery
+const marcarComoConcluida = useMutation({
+  mutationFn: async () => {
+    console.log('🎯 [MUTATION] Starting marcarComoConcluida for proposta:', propostaId);
+    
+    // Valida estado atual antes de enviar
+    const currentProposta = queryClient.getQueryData(['proposta', propostaId]);
+    if (!currentProposta) {
+      throw new Error('Proposta não encontrada no cache local');
+    }
+    
+    const response = await apiClient.request(
+      `/api/propostas/${propostaId}/marcar-concluida`,
+      { 
+        method: 'PUT',
+        body: JSON.stringify({
+          // Envia estado atual para validação no backend
+          currentStatus: currentProposta.status,
+          timestamp: new Date().toISOString()
+        })
+      }
+    );
+    
+    const result = await response.json();
+    console.log('✅ [MUTATION] marcarComoConcluida response:', result);
+    return result;
+  },
+  
+  onMutate: async () => {
+    // Cancela queries em andamento para evitar race conditions
+    await queryClient.cancelQueries({ queryKey: ['proposta', propostaId] });
+    
+    // Snapshot do estado anterior para rollback
+    const previousProposta = queryClient.getQueryData(['proposta', propostaId]);
+    
+    // Optimistic update
+    queryClient.setQueryData(['proposta', propostaId], (old: any) => ({
+      ...old,
+      status: 'CONCLUIDA',
+      _optimistic: true
+    }));
+    
+    return { previousProposta };
+  },
+  
+  onError: (error, variables, context) => {
+    console.error('❌ [MUTATION] marcarComoConcluida failed:', error);
+    
+    // Rollback em caso de erro
+    if (context?.previousProposta) {
+      queryClient.setQueryData(['proposta', propostaId], context.previousProposta);
+    }
+    
+    // Notifica usuário com detalhes do erro
+    toast.error(`Erro ao marcar como concluída: ${error.message}`, {
+      duration: 5000,
+      description: 'Por favor, recarregue a página e tente novamente.'
+    });
+  },
+  
+  onSuccess: (data) => {
+    console.log('🎉 [MUTATION] marcarComoConcluida succeeded');
+    
+    // Invalida TODAS as queries relacionadas
+    queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
+    queryClient.invalidateQueries({ queryKey: ['propostas'] });
+    queryClient.invalidateQueries({ queryKey: ['timeline', propostaId] });
+    queryClient.invalidateQueries({ queryKey: ['formalizacao', propostaId] });
+    
+    // Força refetch imediato
+    queryClient.refetchQueries({ queryKey: ['proposta', propostaId] });
+    
+    toast.success('Proposta marcada como concluída!');
+  },
+  
+  onSettled: () => {
+    // Sempre refetch após mutation (sucesso ou erro)
+    queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
+  }
+});
+
+// CORREÇÃO 4: Gerenciar Status com Validação e Retry
+const updateStatusMutation = useMutation({
+  mutationFn: async ({ newStatus }: { newStatus: string }) => {
+    console.log('🔄 [MUTATION] Updating status to:', newStatus);
+    
+    // Validação local primeiro
+    if (!newStatus || newStatus === proposta?.status) {
+      throw new Error('Status inválido ou já está neste status');
+    }
+    
+    const response = await apiClient.request(
+      `/api/propostas/${propostaId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({
+          status: newStatus,
+          metadata: {
+            updatedBy: user?.id,
+            updatedAt: new Date().toISOString(),
+            source: 'MANUAL_UPDATE'
+          }
+        })
+      }
+    );
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Falha ao atualizar status');
+    }
+    
+    return response.json();
+  },
+  
+  onMutate: async ({ newStatus }) => {
+    await queryClient.cancelQueries({ queryKey: ['proposta', propostaId] });
+    
+    const previousData = queryClient.getQueryData(['proposta', propostaId]);
+    
+    // Optimistic update com flag
+    queryClient.setQueryData(['proposta', propostaId], (old: any) => ({
+      ...old,
+      status: newStatus,
+      _optimistic: true,
+      _previousStatus: old.status
+    }));
+    
+    return { previousData };
+  },
+  
+  onError: (error, variables, context) => {
+    console.error('❌ [MUTATION] Status update failed:', error);
+    
+    // Rollback completo
+    if (context?.previousData) {
+      queryClient.setQueryData(['proposta', propostaId], context.previousData);
+    }
+    
+    // Mensagem de erro detalhada
+    const errorMessage = error.message.includes('transição não permitida')
+      ? 'Esta mudança de status não é permitida. Verifique o fluxo correto.'
+      : `Erro ao atualizar status: ${error.message}`;
+    
+    toast.error(errorMessage, { duration: 7000 });
+  },
+  
+  onSuccess: () => {
+    // Invalidação em cascata
+    const queriesToInvalidate = [
+      ['proposta', propostaId],
+      ['propostas'],
+      ['timeline', propostaId],
+      ['formalizacao', propostaId],
+      ['historico-status', propostaId]
+    ];
+    
+    queriesToInvalidate.forEach(queryKey => {
+      queryClient.invalidateQueries({ queryKey });
+    });
+    
+    toast.success('Status atualizado com sucesso!');
+  }
+});
+
+// CORREÇÃO 5: ClickSign com Integração Robusta
+const enviarClickSignMutation = useMutation({
+  mutationFn: async () => {
+    console.log('📝 [MUTATION] Sending to ClickSign...');
+    
+    // Verifica pré-condições
+    if (proposta?.status !== 'CCB_GERADA') {
+      throw new Error('Proposta precisa estar com CCB gerada antes do envio');
+    }
+    
+    const response = await apiClient.request(
+      `/api/propostas/${propostaId}/clicksign/enviar`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          forceStatusUpdate: true, // Flag para forçar atualização de status
+          targetStatus: 'ASSINATURA_CONCLUIDA'
+        })
+      }
+    );
+    
+    return response.json();
+  },
+  
+  onSuccess: (data) => {
+    console.log('✅ [MUTATION] ClickSign sent successfully:', data);
+    
+    // Atualiza cache local imediatamente
+    queryClient.setQueryData(['proposta', propostaId], (old: any) => ({
+      ...old,
+      status: 'ASSINATURA_CONCLUIDA',
+      clicksignDocumentId: data.documentId
+    }));
+    
+    // Invalida e refetch
+    queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
+    queryClient.invalidateQueries({ queryKey: ['clicksign-status', propostaId] });
+    
+    toast.success('Documento enviado para assinatura!');
+  },
+  
+  onError: (error) => {
+    console.error('❌ [MUTATION] ClickSign failed:', error);
+    toast.error(`Erro ao enviar para ClickSign: ${error.message}`);
+  }
+});

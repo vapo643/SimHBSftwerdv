@@ -40,6 +40,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
+import { robustApiClient } from '@/lib/apiClient';
 import { useToast } from '@/hooks/use-toast';
 import RefreshButton from '@/components/RefreshButton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -741,41 +742,143 @@ export default function Formalizacao() {
   // 🎯 PAM V1.0: Nova mutation para orquestração manual de boletos
   const marcarComoConcluida = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest(`/api/propostas/${propostaId}/marcar-concluida`, {
-        method: 'PUT',
-      });
-      return response;
+      console.log('🎯 [MUTATION] Starting marcarComoConcluida for proposta:', propostaId);
+      
+      // Valida estado atual antes de enviar
+      const currentProposta = queryClient.getQueryData(['/api/propostas', propostaId]);
+      if (!currentProposta) {
+        throw new Error('Proposta não encontrada no cache local');
+      }
+      
+      const response = await robustApiClient.request(
+        `/api/propostas/${propostaId}/marcar-concluida`,
+        { 
+          method: 'PUT',
+          body: JSON.stringify({
+            // Envia estado atual para validação no backend
+            currentStatus: (currentProposta as any)?.status,
+            timestamp: new Date().toISOString()
+          })
+        }
+      );
+      
+      const result = await response.json();
+      console.log('✅ [MUTATION] marcarComoConcluida response:', result);
+      return result;
     },
-    onSuccess: () => {
-      toast({
-        title: 'Sucesso',
-        description: 'Processo de geração de boletos iniciado com sucesso',
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['/api/propostas', propostaId],
-      });
-      // Invalidate the specific detail query key
-      queryClient.invalidateQueries({
-        queryKey: ['/api/propostas', propostaId, 'formalizacao'],
-      });
-      // Also invalidate the formalization list
-      queryClient.invalidateQueries({
-        queryKey: ['/api/propostas/formalizacao'],
-      });
-      // 🎯 CORREÇÃO CRÍTICA: Invalidar cache dos boletos do Banco Inter
-      queryClient.invalidateQueries({
-        queryKey: ['/api/inter/collections', propostaId],
-      });
-      // Refetch current proposal to get updated status
-      refetch();
+    
+    onMutate: async () => {
+      // Cancela queries em andamento para evitar race conditions
+      await queryClient.cancelQueries({ queryKey: ['/api/propostas', propostaId] });
+      
+      // Snapshot do estado anterior para rollback
+      const previousProposta = queryClient.getQueryData(['/api/propostas', propostaId]);
+      
+      // Optimistic update
+      queryClient.setQueryData(['/api/propostas', propostaId], (old: any) => ({
+        ...old,
+        status: 'CONCLUIDA',
+        _optimistic: true
+      }));
+      
+      return { previousProposta };
     },
-    onError: (error: any) => {
+    
+    onError: (error, variables, context) => {
+      console.error('❌ [MUTATION] marcarComoConcluida failed:', error);
+      
+      // Rollback em caso de erro
+      if (context?.previousProposta) {
+        queryClient.setQueryData(['/api/propostas', propostaId], context.previousProposta);
+      }
+      
+      // Notifica usuário com detalhes do erro
       toast({
-        title: 'Erro',
-        description: error?.message || 'Erro ao marcar proposta como concluída',
+        title: 'Erro ao marcar como concluída',
+        description: `${error.message}. Por favor, recarregue a página e tente novamente.`,
         variant: 'destructive',
       });
     },
+    
+    onSuccess: (data) => {
+      console.log('🎉 [MUTATION] marcarComoConcluida succeeded');
+      
+      // Invalida TODAS as queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/inter/collections', propostaId] });
+      
+      // Força refetch imediato
+      queryClient.refetchQueries({ queryKey: ['/api/propostas', propostaId] });
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Proposta marcada como concluída! Processo de geração de boletos iniciado.',
+      });
+    },
+    
+    onSettled: () => {
+      // Sempre refetch após mutation (sucesso ou erro)
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
+    }
+  });
+
+  // 🎯 PAM V1.0: Mutação robusta para ClickSign conforme DeepThink
+  const enviarClickSignMutation = useMutation({
+    mutationFn: async () => {
+      console.log('📝 [MUTATION] Sending to ClickSign...');
+      
+      // Verifica pré-condições
+      if (proposta?.status !== 'CCB_GERADA' && proposta?.status !== 'AGUARDANDO_ASSINATURA') {
+        throw new Error('Proposta precisa estar com CCB gerada antes do envio');
+      }
+      
+      const response = await robustApiClient.request(
+        `/api/propostas/${propostaId}/clicksign/enviar`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            forceStatusUpdate: true, // Flag para forçar atualização de status
+            targetStatus: 'AGUARDANDO_ASSINATURA'
+          })
+        }
+      );
+      
+      return response.json();
+    },
+    
+    onSuccess: (data) => {
+      console.log('✅ [MUTATION] ClickSign sent successfully:', data);
+      
+      // Atualiza cache local imediatamente
+      queryClient.setQueryData(['/api/propostas', propostaId], (old: any) => ({
+        ...old,
+        status: 'AGUARDANDO_ASSINATURA',
+        clicksignDocumentId: data.documentId
+      }));
+      
+      // Atualiza dados ClickSign locais
+      setClickSignData(data);
+      
+      // Invalida e refetch
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/clicksign/status', propostaId] });
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Documento enviado para assinatura!',
+      });
+    },
+    
+    onError: (error) => {
+      console.error('❌ [MUTATION] ClickSign failed:', error);
+      toast({
+        title: 'Erro',
+        description: `Erro ao enviar para ClickSign: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
   });
 
   const formatCurrency = (value: string | number) => {
@@ -1422,48 +1525,12 @@ export default function Formalizacao() {
                                         ClickSign e gerar o link de assinatura para o cliente.
                                       </p>
                                       <Button
-                                        onClick={async () => {
-                                          setLoadingClickSign(true);
-                                          try {
-                                            console.log(
-                                              '🚀 [CLICKSIGN] Enviando CCB para proposta:',
-                                              proposta.id
-                                            );
-                                            const response = (await apiRequest(
-                                              `/api/propostas/${proposta.id}/clicksign/enviar`,
-                                              {
-                                                method: 'POST',
-                                              }
-                                            )) as ClickSignData;
-
-                                            console.log(
-                                              '✅ [CLICKSIGN] Resposta recebida:',
-                                              response
-                                            );
-                                            setClickSignData(response);
-
-                                            toast({
-                                              title: 'Sucesso',
-                                              description:
-                                                'Contrato enviado para ClickSign com sucesso!',
-                                            });
-                                          } catch (error: any) {
-                                            console.error('❌ [CLICKSIGN] Erro ao enviar:', error);
-                                            toast({
-                                              title: 'Erro',
-                                              description:
-                                                error.response?.data?.message ||
-                                                'Erro ao enviar para ClickSign',
-                                              variant: 'destructive',
-                                            });
-                                          } finally {
-                                            setLoadingClickSign(false);
-                                          }
-                                        }}
-                                        disabled={loadingClickSign}
+                                        onClick={() => enviarClickSignMutation.mutate()}
+                                        disabled={enviarClickSignMutation.isPending}
                                         className="w-full bg-blue-600 hover:bg-blue-700"
+                                        data-testid="button-clicksign-enviar"
                                       >
-                                        {loadingClickSign ? (
+                                        {enviarClickSignMutation.isPending ? (
                                           <div className="flex items-center">
                                             <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                                             Enviando para ClickSign...

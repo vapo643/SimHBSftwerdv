@@ -11,7 +11,7 @@
 import { updateStatusWithContext, StatusContexto } from '../lib/status-context-helper';
 import { db } from '../lib/supabase';
 import { propostas } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { ProposalStatus } from '../modules/proposal/domain/Proposal';
 
 /**
@@ -259,3 +259,213 @@ export function getTransitionGraphInfo() {
 
 // Exportar também o grafo para testes e documentação
 export { transitionGraph };
+
+// ============================================
+// NOVA CLASSE ROBUSTA PROPOSTA PELO DEEPTHINK
+// ============================================
+
+// Mapeamento canônico usando ProposalStatus (alinhado com o transitionGraph existente)
+const STATUS_TRANSITIONS = {
+  'RASCUNHO': ['EM_ANALISE', 'REJEITADA'],
+  'EM_ANALISE': ['APROVADO', 'REJEITADA', 'PENDENTE'],
+  'PENDENTE': ['EM_ANALISE', 'REJEITADA'],
+  'APROVADO': ['CCB_GERADA', 'REJEITADA'],
+  'CCB_GERADA': ['ASSINATURA_CONCLUIDA', 'REJEITADA'],
+  'ASSINATURA_CONCLUIDA': ['BOLETOS_EMITIDOS', 'REJEITADA'],
+  'BOLETOS_EMITIDOS': ['FINALIZADA'],
+  'REJEITADA': ['FINALIZADA'],
+  'FINALIZADA': [] // Estado final
+};
+
+// Normalização de status para evitar problemas de casing
+function normalizeStatus(status: string): string {
+  return status.toUpperCase().replace(/-/g, '_');
+}
+
+export class StatusFSMService {
+  private readonly maxRetries = 3;
+  private readonly lockTimeout = 5000; // 5 segundos
+
+  async processStatusTransition(
+    propostaId: string,
+    newStatus: string,
+    userId: string,
+    metadata?: Record<string, any>
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
+    console.log(`[FSM] 🚀 Iniciando transição para proposta ${propostaId}`);
+    console.log(`[FSM] 📊 Novo status desejado: ${newStatus}`);
+
+    // Normaliza o status para evitar problemas de casing
+    const normalizedNewStatus = normalizeStatus(newStatus);
+    
+    // Retry logic com exponential backoff
+    for (let attempt = 0; attempt < this.maxRetries; attempt++) {
+      try {
+        // Usa transação com lock pessimista
+        const result = await db.transaction(async (tx) => {
+          // 1. Obtém proposta com lock FOR UPDATE
+          const [proposta] = await tx
+            .select()
+            .from(propostas)
+            .where(eq(propostas.id, propostaId))
+            .for('update')
+            .execute();
+
+          if (!proposta) {
+            throw new Error(`Proposta ${propostaId} não encontrada no banco de dados`);
+          }
+
+          const currentStatus = normalizeStatus(proposta.status);
+          console.log(`[FSM] 📍 Status atual: ${currentStatus}`);
+
+          // 2. Valida transição
+          if (currentStatus === normalizedNewStatus) {
+            console.log(`[FSM] ✅ Status já está em ${normalizedNewStatus}, nada a fazer`);
+            return { success: true, data: proposta, noChange: true };
+          }
+
+          const allowedTransitions = (STATUS_TRANSITIONS as any)[currentStatus] || [];
+          if (!allowedTransitions.includes(normalizedNewStatus)) {
+            throw new Error(
+              `Transição não permitida: ${currentStatus} → ${normalizedNewStatus}. ` +
+              `Transições permitidas: ${allowedTransitions.join(', ')}`
+            );
+          }
+
+          // 3. Executa hooks pré-transição
+          await this.executePreTransitionHooks(currentStatus, normalizedNewStatus, proposta, metadata);
+
+          // 4. Atualiza status com timestamp
+          const updatedAt = new Date();
+          const [updatedProposta] = await tx
+            .update(propostas)
+            .set({
+              status: normalizedNewStatus,
+              updatedAt
+            })
+            .where(eq(propostas.id, propostaId))
+            .returning();
+
+          // 5. Registra no histórico (placeholder - implementar quando necessário)
+          console.log(`[FSM] 📝 Histórico: ${currentStatus} → ${normalizedNewStatus} para ${propostaId}`);
+
+          // 6. Executa hooks pós-transição
+          await this.executePostTransitionHooks(
+            currentStatus, 
+            normalizedNewStatus, 
+            updatedProposta, 
+            metadata
+          );
+
+          console.log(`[FSM] ✅ Transição concluída: ${currentStatus} → ${normalizedNewStatus}`);
+          return { success: true, data: updatedProposta };
+        });
+
+        // Se chegou aqui, transação foi bem-sucedida
+        return result;
+
+      } catch (error) {
+        console.error(`[FSM] ❌ Tentativa ${attempt + 1} falhou:`, error);
+        
+        if (attempt === this.maxRetries - 1) {
+          // Última tentativa falhou
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Erro desconhecido'
+          };
+        }
+
+        // Aguarda antes de tentar novamente (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Máximo de tentativas excedido'
+    };
+  }
+
+  private async executePreTransitionHooks(
+    fromStatus: string,
+    toStatus: string,
+    proposta: any,
+    metadata?: any
+  ): Promise<void> {
+    // Validações específicas por transição
+    
+    if (toStatus === 'CCB_GERADA') {
+      // Valida se todos os documentos necessários foram enviados
+      if (!proposta.documentosCompletos) {
+        throw new Error('Documentação incompleta para gerar CCB');
+      }
+    }
+
+    if (toStatus === 'ASSINATURA_CONCLUIDA') {
+      // Valida se existe documento na ClickSign
+      if (!metadata?.clicksignDocumentId && !proposta.clicksignDocumentId) {
+        throw new Error('Documento não encontrado na ClickSign');
+      }
+    }
+
+    if (toStatus === 'CONCLUIDA') {
+      // Valida se assinatura foi concluída
+      if (fromStatus !== 'ASSINATURA_CONCLUIDA') {
+        throw new Error('Proposta precisa ter assinatura concluída antes de ser marcada como concluída');
+      }
+    }
+  }
+
+  private async executePostTransitionHooks(
+    fromStatus: string,
+    toStatus: string,
+    proposta: any,
+    metadata?: any
+  ): Promise<void> {
+    // Ações após transição bem-sucedida
+    
+    if (toStatus === 'ASSINATURA_CONCLUIDA') {
+      // Trigger integração com Banco Inter
+      await this.triggerInterBankIntegration(proposta.id);
+    }
+
+    if (toStatus === 'CONCLUIDA') {
+      // Envia notificações
+      await this.sendCompletionNotifications(proposta);
+    }
+
+    if (toStatus === 'CANCELADA' || toStatus === 'REPROVADA') {
+      // Limpa recursos alocados
+      await this.cleanupProposalResources(proposta.id);
+    }
+  }
+
+  private async triggerInterBankIntegration(propostaId: string): Promise<void> {
+    try {
+      console.log(`[FSM] 🏦 Triggering Inter Bank integration for ${propostaId}`);
+      // Implementação da integração com Banco Inter
+      // Este é um placeholder - implemente conforme sua lógica
+    } catch (error) {
+      console.error('[FSM] ❌ Inter Bank integration failed:', error);
+      // Não falha a transação, mas registra o erro
+    }
+  }
+
+  private async sendCompletionNotifications(proposta: any): Promise<void> {
+    try {
+      console.log(`[FSM] 📧 Sending completion notifications for ${proposta.id}`);
+      // Implementação de notificações
+    } catch (error) {
+      console.error('[FSM] ❌ Notification sending failed:', error);
+    }
+  }
+
+  private async cleanupProposalResources(propostaId: string): Promise<void> {
+    try {
+      console.log(`[FSM] 🧹 Cleaning up resources for ${propostaId}`);
+      // Limpa arquivos temporários, cancela jobs pendentes, etc.
+    } catch (error) {
+      console.error('[FSM] ❌ Resource cleanup failed:', error);
+    }
+  }
+}

@@ -146,7 +146,9 @@ class TokenManager {
   private static instance: TokenManager;
   private cachedToken: string | null = null;
   private tokenExpiry: number | null = null;
-  private refreshPromise: Promise<string | null> | null = null;
+  private refreshPromise: Promise<string> | null = null;
+  private retryCount = 0;
+  private readonly MAX_RETRIES = 3;
 
   private constructor() {}
 
@@ -157,71 +159,94 @@ class TokenManager {
     return TokenManager.instance;
   }
 
-  async getValidToken(forceRefresh: boolean = false): Promise<string | null> {
-    // If forceRefresh is true, bypass cache
-    if (!forceRefresh) {
-      // Check if we have a valid cached token
-      if (this.cachedToken && this.tokenExpiry && Date.now() < this.tokenExpiry * 1000) {
-        return this.cachedToken;
-      }
-    }
-
-    // If there's already a refresh in progress, wait for it
+  async getValidToken(forceRefresh: boolean = false): Promise<string> {
+    // Se já existe uma promessa de refresh em andamento, aguarda ela
     if (this.refreshPromise) {
-      return await this.refreshPromise;
+      console.log('🔄 [TOKEN MANAGER] Awaiting existing refresh promise');
+      return this.refreshPromise;
     }
 
-    // Start token refresh
-    this.refreshPromise = this.refreshToken();
-    const token = await this.refreshPromise;
-    this.refreshPromise = null;
+    // Verifica se token ainda é válido (com margem de 30 segundos)
+    if (!forceRefresh && this.cachedToken && this.tokenExpiry && Date.now() < this.tokenExpiry - 30000) {
+      console.log('✅ [TOKEN MANAGER] Using cached token');
+      return this.cachedToken;
+    }
 
-    return token;
+    // Inicia refresh com retry logic
+    this.refreshPromise = this.refreshTokenWithRetry()
+      .finally(() => {
+        this.refreshPromise = null;
+        this.retryCount = 0;
+      });
+
+    return this.refreshPromise;
   }
 
-  private async refreshToken(): Promise<string | null> {
-    try {
-      // Get fresh session directly from Supabase - bypasses auth.ts abstraction
-      const supabase = getSupabase();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.access_token) {
-        this.clearCache();
-        return null;
-      }
-
-      // Decode JWT to get expiry (simple base64 decode of payload)
-      const tokenParts = session.access_token.split('.');
-      if (tokenParts.length === 3) {
-        try {
-          const payload = JSON.parse(atob(tokenParts[1]));
-          this.tokenExpiry = payload.exp;
-        } catch {
-          // If we can't decode, set a conservative expiry (30 minutes from now)
-          this.tokenExpiry = Math.floor(Date.now() / 1000) + 1800;
+  private async refreshTokenWithRetry(): Promise<string> {
+    while (this.retryCount < this.MAX_RETRIES) {
+      try {
+        console.log(`🔐 [TOKEN MANAGER] Refreshing token (attempt ${this.retryCount + 1}/${this.MAX_RETRIES})`);
+        
+        const supabase = getSupabase();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          throw new Error(`Supabase auth error: ${error.message}`);
         }
-      }
+        
+        if (!session?.access_token) {
+          // Token inválido - força re-login
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+          throw new Error('Session expired - redirecting to login');
+        }
 
-      this.cachedToken = session.access_token;
-      console.log(`🔐 [TOKEN MANAGER] Fresh token obtained, length: ${this.cachedToken?.length || 0}`);
-      return this.cachedToken;
-    } catch (error) {
-      console.error('🔐 [TOKEN MANAGER] Error refreshing token:', error);
-      this.clearCache();
-      return null;
+        this.cachedToken = session.access_token;
+        // Calcula expiry baseado no token JWT
+        const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+        this.tokenExpiry = payload.exp * 1000;
+        
+        console.log(`✅ [TOKEN MANAGER] Token refreshed successfully, expires at ${new Date(this.tokenExpiry).toISOString()}`);
+        
+        return this.cachedToken;
+      } catch (error) {
+        this.retryCount++;
+        console.error(`❌ [TOKEN MANAGER] Refresh attempt ${this.retryCount} failed:`, error);
+        
+        if (this.retryCount >= this.MAX_RETRIES) {
+          // Limpa cache e força re-login
+          this.cachedToken = null;
+          this.tokenExpiry = null;
+          throw error;
+        }
+        
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, this.retryCount) * 1000));
+      }
     }
+    
+    throw new Error('Max token refresh retries exceeded');
   }
 
   private clearCache(): void {
     this.cachedToken = null;
     this.tokenExpiry = null;
+    this.retryCount = 0;
   }
 
   // Method to invalidate token (useful when we get 401 errors)
+  invalidate(): void {
+    console.log('🗑️ [TOKEN MANAGER] Token invalidated');
+    this.cachedToken = null;
+    this.tokenExpiry = null;
+    this.refreshPromise = null;
+    this.retryCount = 0;
+  }
+
+  // Legacy method for compatibility
   invalidateToken(): void {
-    this.clearCache();
+    this.invalidate();
   }
 }
 
@@ -594,6 +619,62 @@ export async function apiClient<T = any>(
     );
   }
 }
+
+/**
+ * Robust API Client with enhanced retry logic for critical operations
+ */
+export const robustApiClient = {
+  async request(url: string, options: RequestInit = {}) {
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+    const tokenManager = TokenManager.getInstance();
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const token = await tokenManager.getValidToken();
+        
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            ...options.headers,
+          },
+        });
+
+        // Log detalhado para debug
+        console.log(`📡 [API] ${options.method || 'GET'} ${url} - Status: ${response.status}`);
+
+        // Se é 401, invalida token e tenta novamente
+        if (response.status === 401 && attempt < maxRetries - 1) {
+          console.warn('🔄 [API] 401 received, invalidating token and retrying...');
+          tokenManager.invalidate();
+          continue;
+        }
+
+        // Para qualquer outro erro HTTP, lança exceção com detalhes
+        if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorBody || response.statusText}`);
+        }
+
+        return response;
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`❌ [API] Request attempt ${attempt + 1} failed:`, error);
+        
+        if (attempt === maxRetries - 1) {
+          throw lastError;
+        }
+        
+        // Exponential backoff entre tentativas
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+      }
+    }
+    
+    throw lastError || new Error('Request failed after max retries');
+  }
+};
 
 /**
  * Convenience methods for common HTTP operations

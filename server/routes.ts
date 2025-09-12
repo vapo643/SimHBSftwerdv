@@ -1230,20 +1230,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // 🎯 PAM V1.0: PUT /api/propostas/:id/marcar-concluida - Orquestração manual de boletos
+  // 🎯 PAM V1.0: PUT /api/propostas/:id/marcar-concluida - Orquestração manual ROBUSTA (DeepThink)
   app.put(
     '/api/propostas/:id/marcar-concluida',
     jwtAuthMiddleware as any,
-    async (req: AuthenticatedRequest, res, next) => {
+    async (req: AuthenticatedRequest, res) => {
+      const propostaId = req.params.id; // Mantém como string!
+      const userId = req.user?.id;
+      
+      console.log(`[ROUTE] PUT /marcar-concluida - Proposta: ${propostaId}, User: ${userId}`);
+      
       try {
-        const { ProposalController } = await import(
-          './modules/proposal/presentation/proposalController'
+        // Valida UUID
+        if (!propostaId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+          return res.status(400).json({ 
+            error: 'ID de proposta inválido',
+            receivedId: propostaId 
+          });
+        }
+
+        const { StatusFSMService } = await import('./services/statusFsmService');
+        const fsmService = new StatusFSMService();
+        const result = await fsmService.processStatusTransition(
+          propostaId,
+          'BOLETOS_EMITIDOS',
+          userId,
+          {
+            source: 'MANUAL_COMPLETION',
+            timestamp: new Date().toISOString(),
+            ...req.body
+          }
         );
-        const proposalController = new ProposalController();
-        return proposalController.marcarPropostaComoConcluida(req, res, next);
+
+        if (!result.success) {
+          console.error('[ROUTE] FSM transition failed:', result.error);
+          return res.status(400).json({ 
+            error: result.error,
+            details: 'Transição de status falhou'
+          });
+        }
+
+        // Se não houve mudança (já estava concluída)
+        if (result.noChange) {
+          return res.status(200).json({
+            message: 'Proposta já estava concluída',
+            data: result.data
+          });
+        }
+
+        console.log('[ROUTE] ✅ Proposta marcada como concluída com sucesso');
+        res.json({
+          success: true,
+          data: result.data,
+          message: 'Proposta marcada como concluída'
+        });
+
       } catch (error) {
-        console.error('PUT /api/propostas/:id/marcar-concluida error:', error);
-        next(error);
+        console.error('[ROUTE] ❌ Error in marcar-concluida:', error);
+        res.status(500).json({ 
+          error: 'Erro interno ao processar requisição',
+          message: error instanceof Error ? error.message : 'Erro desconhecido'
+        });
       }
     }
   );
@@ -1500,23 +1547,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PATCH /api/propostas/:id - Atualizar status genérico ROBUSTO (DeepThink)
   app.patch(
     '/api/propostas/:id',
     jwtAuthMiddleware as any,
-    requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
+      const propostaId = req.params.id; // Mantém como string!
+      const { status, metadata } = req.body;
+      const userId = req.user?.id;
+      
+      console.log(`[ROUTE] PATCH /propostas/${propostaId} - New status: ${status}`);
+      
       try {
-        // 🚨 BUG CRÍTICO CORRIGIDO: UUID deve ser string, não parseInt()
-        const id = req.params.id; // Manter como string para UUIDs
-        const validatedData = updatePropostaSchema.parse(req.body);
-        const proposta = await storage.updateProposta(id, validatedData);
-        res.json(proposta);
-      } catch (error) {
-        if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+        // Validações
+        if (!propostaId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+          return res.status(400).json({ error: 'ID de proposta inválido' });
         }
-        console.error('Update proposta error:', error);
-        res.status(500).json({ message: 'Failed to update proposta' });
+
+        if (!status) {
+          return res.status(400).json({ error: 'Status é obrigatório' });
+        }
+
+        const { StatusFSMService } = await import('./services/statusFsmService');
+        const fsmService = new StatusFSMService();
+        const result = await fsmService.processStatusTransition(
+          propostaId,
+          status,
+          userId,
+          metadata || {}
+        );
+
+        if (!result.success) {
+          return res.status(400).json({ 
+            error: result.error,
+            currentStatus: result.data?.status
+          });
+        }
+
+        res.json({
+          success: true,
+          data: result.data,
+          message: `Status atualizado para ${status}`
+        });
+
+      } catch (error) {
+        console.error('[ROUTE] ❌ Error in PATCH proposta:', error);
+        res.status(500).json({ 
+          error: 'Erro ao atualizar status',
+          details: error instanceof Error ? error.message : 'Erro desconhecido'
+        });
       }
     }
   );
