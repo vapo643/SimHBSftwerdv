@@ -69,7 +69,7 @@ export class MarcarAguardandoAssinaturaUseCase {
           propostaId: dto.propostaId,
           novoStatus: 'AGUARDANDO_ASSINATURA',
           userId: dto.userId,
-          contexto: 'transicao_aguardando_assinatura',
+          contexto: 'formalizacao',
           observacoes: `CCB enviada para assinatura. Aguardando conclusão do processo de assinatura digital`,
           metadata: {
             tipoAcao: 'CCB_TO_SIGNATURE_PENDING',

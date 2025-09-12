@@ -66,7 +66,7 @@ export class MarcarAssinaturaConcluidaUseCase {
           propostaId: dto.propostaId,
           novoStatus: 'ASSINATURA_CONCLUIDA',
           userId: dto.userId,
-          contexto: 'manual_assinatura_concluida',
+          contexto: 'formalizacao',
           observacoes: `Assinatura marcada como concluída manualmente pelo usuário ${dto.userId}`,
           metadata: {
             tipoAcao: 'MANUAL_SIGNATURE_COMPLETED',

@@ -2975,12 +2975,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Importar UseCase e dependências
             const { MarcarAssinaturaConcluidaUseCase } = await import('./modules/proposal/application/MarcarAssinaturaConcluidaUseCase');
             const { DomainException } = await import('./modules/shared/domain/DomainException');
-            const { Container } = await import('./modules/shared/infrastructure/Container');
+            const { createUnitOfWork } = await import('./lib/unit-of-work');
             
             try {
-              // Instanciar UseCase via IoC Container
-              const container = Container.getInstance();
-              const unitOfWork = container.get('UnitOfWork');
+              // Instanciar UseCase via UnitOfWork
+              const unitOfWork = createUnitOfWork();
               const marcarAssinaturaUseCase = new MarcarAssinaturaConcluidaUseCase(unitOfWork);
 
               // Executar transição de status via UseCase
