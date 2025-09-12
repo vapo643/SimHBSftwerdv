@@ -160,6 +160,14 @@ class TokenManager {
   }
 
   async getValidToken(forceRefresh: boolean = false): Promise<string> {
+    // PAM V1.0 - Logging detalhado para debugging de autenticação
+    console.log('[AUTH DEBUG] getValidToken chamado:', { 
+      forceRefresh, 
+      hasCachedToken: !!this.cachedToken, 
+      tokenExpiry: this.tokenExpiry ? new Date(this.tokenExpiry).toISOString() : null,
+      hasActiveRefresh: !!this.refreshPromise 
+    });
+
     // Se já existe uma promessa de refresh em andamento, aguarda ela
     if (this.refreshPromise) {
       console.log('🔄 [TOKEN MANAGER] Awaiting existing refresh promise');
@@ -208,6 +216,15 @@ class TokenManager {
         this.tokenExpiry = payload.exp * 1000;
         
         console.log(`✅ [TOKEN MANAGER] Token refreshed successfully, expires at ${new Date(this.tokenExpiry).toISOString()}`);
+        
+        // PAM V1.0 FIX - Verificação explícita antes de retornar token
+        if (!this.cachedToken) {
+          console.error('[AUTH] Falha Crítica: Token cacheado é nulo após refresh. Redirecionando para login.');
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+          throw new Error('Sessão inválida ou expirada após refresh.');
+        }
         
         return this.cachedToken;
       } catch (error) {

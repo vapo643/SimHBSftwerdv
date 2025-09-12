@@ -1,0 +1,35 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Comando recebido. O "Super Prompt" é um dossiê de falha de altíssima qualidade. Agradeço pela compilação meticulosa dos dados brutos. A evidência é irrefutável e expõe uma falha em cascata que, embora se manifeste na tela de pagamentos, tem sua origem em um ponto muito mais fundamental do sistema.
+
+As tentativas anteriores de corrigir a query do banco de dados, embora lógicas, estavam atacando o sintoma final, não a causa raiz. A verdade, revelada pelos logs, é mais simples e ao mesmo tempo mais grave: o sistema está a sofrer uma falha catastrófica de autenticação no frontend.
+
+Veredito da Análise Forense:
+
+A causa raiz definitiva é uma quebra no fluxo de autenticação do lado do cliente. A evidência [AUTH EVENT] INITIAL_SESSION {"hasSession": false} é a prova irrefutável. O frontend acredita que o usuário não está autenticado. Consequentemente, o TokenManager em client/src/lib/apiClient.ts falha em obter um JWT válido. Sem um token, nenhuma chamada à API para /api/pagamentos é sequer iniciada, o que explica perfeitamente por que não há registos no backend e a tela permanece vazia.
+
+O problema não está na lógica de negócio do backend nem na query do banco de dados. O problema é que o porteiro (autenticação) está a barrar a entrada antes mesmo de a festa começar. O erro de tipo do LSP em apiClient.ts é o suspeito primário para o gatilho desta falha.
+
+Vamos proceder com uma correção cirúrgica para erradicar esta classe de erro de uma vez por todas.
+
+PROTOCOLO DE GERENCIAMENTO DE INTERRUPÇÃO (PGI) ATIVADO
+ALERTA: Interrupção de fluxo detectada devido a uma falha crítica de autenticação em produção.
+
+Roadmap em Standby: [N/A]
+Último Passo Concluído: N/A
+
+Causa da Interrupção: Falha na obtenção de sessão de usuário no frontend, bloqueando todas as chamadas de API autenticadas.
+
+Novo Foco (Missão de Emergência): "Operação Corrente de Confiança" - Restauração completa do fluxo de autenticação e validação de ponta-a-ponta da tela de pagamentos.
+
+STATUS: STANDBY (AGUARDANDO EXECUÇÃO DO PLANO DE BATALHA)
+Fase 3: Arquitetura da Solução - Roadmap de Implementação Faseado
+[P0 - CRÍTICO] Reparo do Núcleo de Autenticação: Corrigir a falha de tipo e robustecer o TokenManager para garantir que ele possa obter e gerir o JWT da Supabase sem falhas silenciosas.
+
+[P1 - ALTO] Verificação da Integridade dos Dados: Após restabelecer a comunicação com a API, validar que a proposta específica (#6206c1e3...) possui o status exato ASSINATURA_CONCLUIDA no banco de dados de produção para descartar a hipótese de mismatch de valor.
+
+[P2 - MÉDIO] Blindagem da Query de Pagamentos: Adicionar uma guarda defensiva na query do backend para prevenir conflitos lógicos entre o filtro base e os filtros da UI.
+
+[P3 - BAIXO] Validação Final e Limpeza: Executar uma verificação de diagnóstico completa para garantir que o sistema está 100% operacional e sem novos erros.
