@@ -19,14 +19,14 @@ router.post('/enviar/:id', async (req: AuthenticatedRequest, res) => {
       });
     }
 
-    // Transição para ASSINATURA_CONCLUIDA via FSM
+    // CORREÇÃO CRÍTICA: Transição para AGUARDANDO_ASSINATURA (não ASSINATURA_CONCLUIDA)
     const { StatusFSMService } = await import('../../services/statusFsmService');
     const fsmService = new StatusFSMService();
     
     const result = await fsmService.processStatusTransition(
       propostaId,
-      'ASSINATURA_CONCLUIDA',
-      userId || 'system',
+      'AGUARDANDO_ASSINATURA',
+      userId, // Remove fallback para 'system' - StatusFSMService agora trata isso
       {
         source: 'CLICKSIGN_SUBMISSION',
         timestamp: new Date().toISOString(),

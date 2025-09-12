@@ -162,6 +162,9 @@ export const db = client ? drizzle(client, {
   logger: true, // PERF-FIX-001: Ativar logging SQL para auditoria N+1
 }) : null;
 
+// UUID do sistema para operações automatizadas (corrige problema de cast UUID crítico)
+export const SYSTEM_USER_ID = process.env.SYSTEM_USER_ID || '00000000-0000-0000-0000-000000000001';
+
 // MISSION 3: Enhanced connection pool monitoring and testing
 setTimeout(async () => {
   try {

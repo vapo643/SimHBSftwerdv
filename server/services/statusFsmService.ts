@@ -9,7 +9,7 @@
  */
 
 import { updateStatusWithContext, StatusContexto } from '../lib/status-context-helper';
-import { db } from '../lib/supabase';
+import { db, SYSTEM_USER_ID } from '../lib/supabase';
 import { propostas } from '@shared/schema';
 import { eq, sql } from 'drizzle-orm';
 import { ProposalStatus } from '../modules/proposal/domain/Proposal';
@@ -264,13 +264,14 @@ export { transitionGraph };
 // NOVA CLASSE ROBUSTA PROPOSTA PELO DEEPTHINK
 // ============================================
 
-// Mapeamento canônico usando ProposalStatus (alinhado com o transitionGraph existente)
+// Mapeamento canônico usando ProposalStatus (CORRIGIDO para permitir ClickSign)
 const STATUS_TRANSITIONS = {
   'RASCUNHO': ['EM_ANALISE', 'REJEITADA'],
   'EM_ANALISE': ['APROVADO', 'REJEITADA', 'PENDENTE'],
   'PENDENTE': ['EM_ANALISE', 'REJEITADA'],
   'APROVADO': ['CCB_GERADA', 'REJEITADA'],
-  'CCB_GERADA': ['ASSINATURA_CONCLUIDA', 'REJEITADA'],
+  'CCB_GERADA': ['AGUARDANDO_ASSINATURA', 'ASSINATURA_CONCLUIDA', 'REJEITADA'], // CORREÇÃO CRÍTICA
+  'AGUARDANDO_ASSINATURA': ['ASSINATURA_CONCLUIDA', 'REJEITADA'], // NOVA TRANSIÇÃO
   'ASSINATURA_CONCLUIDA': ['BOLETOS_EMITIDOS', 'REJEITADA'],
   'BOLETOS_EMITIDOS': ['FINALIZADA'],
   'REJEITADA': ['FINALIZADA'],
@@ -289,7 +290,7 @@ export class StatusFSMService {
   async processStatusTransition(
     propostaId: string,
     newStatus: string,
-    userId: string,
+    userId?: string,
     metadata?: Record<string, any>
   ): Promise<{ success: boolean; data?: any; error?: string }> {
     console.log(`[FSM] 🚀 Iniciando transição para proposta ${propostaId}`);
@@ -298,9 +299,21 @@ export class StatusFSMService {
     // Normaliza o status para evitar problemas de casing
     const normalizedNewStatus = normalizeStatus(newStatus);
     
+    // Garante userId válido ou usa SYSTEM_USER_ID (corrige problema crítico de UUID)
+    const validUserId = (userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId))
+      ? userId 
+      : SYSTEM_USER_ID;
+    
+    console.log(`[FSM] 👤 Using userId: ${validUserId}`);
+    
     // Retry logic com exponential backoff
     for (let attempt = 0; attempt < this.maxRetries; attempt++) {
       try {
+        // Verifica se db está disponível
+        if (!db) {
+          throw new Error('Database connection not available');
+        }
+        
         // Usa transação com lock pessimista
         const result = await db.transaction(async (tx) => {
           // 1. Obtém proposta com lock FOR UPDATE

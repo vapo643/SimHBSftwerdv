@@ -10,6 +10,7 @@ import {
   PropostaWithDetails,
 } from '../repositories/proposta.repository';
 import { transitionTo, InvalidTransitionError } from './statusFsmService';
+import { SYSTEM_USER_ID } from '../lib/supabase';
 
 export interface PropostaToggleStatusRequest {
   propostaId: string;
@@ -77,7 +78,7 @@ export class PropostaService {
       await transitionTo({
         propostaId,
         novoStatus,
-        userId: userId || 'sistema',
+        userId: userId || SYSTEM_USER_ID,
         contexto: 'geral',
         observacoes: `Status ${novoStatus === 'suspensa' ? 'suspenso' : 'reativado'} pelo usuário`,
         metadata: {

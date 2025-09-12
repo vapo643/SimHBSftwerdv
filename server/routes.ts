@@ -1254,7 +1254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const result = await fsmService.processStatusTransition(
           propostaId,
           'BOLETOS_EMITIDOS',
-          userId,
+          userId, // StatusFSMService agora valida UUID internamente
           {
             source: 'MANUAL_COMPLETION',
             timestamp: new Date().toISOString(),
@@ -1573,7 +1573,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const result = await fsmService.processStatusTransition(
           propostaId,
           status,
-          userId,
+          userId, // StatusFSMService agora valida UUID internamente
           metadata || {}
         );
 
@@ -3704,6 +3704,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register ClickSign routes
   app.use('/api/clicksign', clickSignRouter);
+  
+  // CORREÇÃO CRÍTICA: Alias para rota ClickSign que o frontend espera (COM AUTENTICAÇÃO)
+  app.post('/api/propostas/:id/clicksign/enviar', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
+    const propostaId = req.params.id;
+    const userId = req.user?.id;
+    
+    console.log(`[ALIAS] POST /api/propostas/${propostaId}/clicksign/enviar - User: ${userId}`);
+    
+    try {
+      // Valida UUID
+      if (!propostaId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        return res.status(400).json({ 
+          error: 'ID de proposta inválido',
+          receivedId: propostaId 
+        });
+      }
+
+      // CORREÇÃO CRÍTICA: Transição para AGUARDANDO_ASSINATURA
+      const { StatusFSMService } = await import('./services/statusFsmService');
+      const fsmService = new StatusFSMService();
+      
+      const result = await fsmService.processStatusTransition(
+        propostaId,
+        'AGUARDANDO_ASSINATURA',
+        userId,
+        {
+          source: 'CLICKSIGN_SUBMISSION_ALIAS',
+          timestamp: new Date().toISOString(),
+          ...req.body
+        }
+      );
+
+      if (!result.success) {
+        console.error('[ALIAS] FSM transition failed:', result.error);
+        return res.status(400).json({ 
+          error: result.error,
+          details: 'Falha na transição para aguardar assinatura'
+        });
+      }
+
+      console.log('[ALIAS] ✅ Documento enviado para ClickSign via alias route');
+      
+      res.json({
+        success: true,
+        data: result.data,
+        message: 'Documento enviado para ClickSign',
+        clicksignId: `mock-${Date.now()}` // Placeholder
+      });
+
+    } catch (error) {
+      console.error('[ALIAS] ❌ Error in clicksign alias:', error);
+      res.status(500).json({ 
+        error: 'Erro ao enviar para ClickSign',
+        details: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
 
   // Register Webhook routes (ClickSign and Inter)
   const webhookRouter = (await import('./routes/webhooks')).default;

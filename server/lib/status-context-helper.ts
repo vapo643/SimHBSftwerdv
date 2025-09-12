@@ -8,7 +8,7 @@
  * e a nova tabela de contextos (status_contextuais)
  */
 
-import { db } from './supabase';
+import { db, SYSTEM_USER_ID } from './supabase';
 import { propostas, statusContextuais, propostaLogs, observacoesCobranca } from '@shared/schema';
 import { eq, and, sql } from 'drizzle-orm';
 
@@ -106,7 +106,7 @@ export async function updateStatusWithContext(
             status: novoStatus,
             statusAnterior: statusContextualExistente.status,
             atualizadoEm: new Date(),
-            atualizadoPor: userId || 'sistema',
+            atualizadoPor: userId || SYSTEM_USER_ID,
             observacoes,
             metadata: metadata
               ? sql`${JSON.stringify(metadata)}::jsonb`
@@ -120,7 +120,7 @@ export async function updateStatusWithContext(
           contexto,
           status: novoStatus,
           statusAnterior,
-          atualizadoPor: userId || 'sistema',
+          atualizadoPor: userId || SYSTEM_USER_ID,
           observacoes,
           metadata: metadata ? sql`${JSON.stringify(metadata)}::jsonb` : null,
         });
@@ -144,7 +144,7 @@ export async function updateStatusWithContext(
       console.log(`[DUPLA-ESCRITA] 📜 Registrando auditoria...`);
       await tx.insert(propostaLogs).values({
         propostaId,
-        autorId: userId || 'sistema',
+        autorId: userId || SYSTEM_USER_ID,
         statusAnterior,
         statusNovo: novoStatus,
         observacao: `[${contexto.toUpperCase()}] ${observacoes || 'Status atualizado via dupla escrita'}`,
