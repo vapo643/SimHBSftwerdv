@@ -9,7 +9,7 @@
 import { UnitOfWork } from '../modules/shared/infrastructure/UnitOfWork';
 import { MarkBoletoAsPaidUseCase } from '../modules/boleto/application/MarkBoletoAsPaidUseCase';
 import { securityRepository } from '../repositories/security.repository';
-import { SecureLogger, sanitizeWebhookPayload } from '../modules/shared/infrastructure/SanitizedLogger';
+import { SecureLogger, sanitizeWebhookPayload, redactPII } from '../modules/shared/infrastructure/SanitizedLogger';
 
 export interface InterWebhookPayload {
   event?: string;

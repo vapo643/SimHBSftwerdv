@@ -41,7 +41,11 @@ const PII_FIELDS = [
   'conta', 'account', 'agencia', 'branch', 'bank_account',
   
   // Webhook specific
-  'webhookData', 'payload', 'payer', 'payee'
+  'webhookData', 'payload', 'payer', 'payee',
+  
+  // Generic fields that commonly contain PII
+  'message', 'description', 'details', 'observacoes', 'text', 'content',
+  'metadata', 'info', 'data'
 ];
 
 /**
@@ -104,6 +108,9 @@ function deepSanitizeError(obj: any, depth: number = 0): any {
 
     if (isPIIField) {
       sanitized[key] = maskSensitiveValue(key, value);
+    } else if (typeof value === 'string') {
+      // CRITICAL FIX: Apply sanitizeString to ALL string values regardless of key
+      sanitized[key] = sanitizeString(value);
     } else if (typeof value === 'object' && value !== null) {
       sanitized[key] = deepSanitizeError(value, depth + 1);
     } else {
