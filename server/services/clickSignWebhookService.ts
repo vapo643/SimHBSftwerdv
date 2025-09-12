@@ -688,6 +688,10 @@ class ClickSignWebhookService {
           };
 
           console.log(`[CLICKSIGN → INTER] Creating boleto ${parcelaNumero}/${numeroParcelas}`);
+
+          // PAM V1.0 DIAGNÓSTICO: Antes de chamar serviço bancário
+          console.log('[LOG 3/5] Serviço de Orquestração: Prestes a chamar interBankService.emitirCobranca para a parcela', i + 1);
+
           const createResponse = await interBankService.emitirCobranca(boletoData);
 
           if (createResponse.codigoSolicitacao) {

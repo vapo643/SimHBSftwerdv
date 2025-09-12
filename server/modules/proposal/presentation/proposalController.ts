@@ -1045,6 +1045,10 @@ export class ProposalController {
    */
   async marcarPropostaComoConcluida(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
+      // PAM V1.0 DIAGNÓSTICO: Início da orquestração
+      console.log('--- DIAGNÓSTICO DE ORQUESTRAÇÃO (BACKEND) ---');
+      console.log('[LOG 1/5] Controlador: Ação "Marcar como Concluída" recebida para a proposta ID:', req.params.id);
+
       const { id } = req.params;
       const user = (req as any).user;
 
@@ -1108,25 +1112,40 @@ export class ProposalController {
         currentStatus: proposta.status,
       });
 
+      // PAM V1.0 DIAGNÓSTICO: Antes de chamar o serviço
+      console.log('[LOG 2/5] Controlador: Prestes a chamar triggerBoletoGeneration...');
+
       // Chamar orquestração de boletos
       await clickSignWebhookService.triggerBoletoGeneration(proposta);
+
+      // PAM V1.0 DIAGNÓSTICO: Após chamar o serviço
+      console.log('[LOG 4/5] Controlador: A chamada a triggerBoletoGeneration foi concluída.');
 
       SafeLogger.info('[marcarPropostaComoConcluida] Manual boleto generation completed', {
         proposalId: id,
         userId: user.id,
       });
 
+      // PAM V1.0 DIAGNÓSTICO: Antes de enviar resposta
+      console.log('[LOG 5/5] Controlador: Enviando resposta de sucesso para o cliente.');
+
       return res.status(200).json({
         success: true,
         message: 'Processo de geração de boletos concluído com sucesso',
       });
     } catch (error: any) {
+      // PAM V1.0 DIAGNÓSTICO: Log de erro
+      console.error('[ERRO NO CONTROLADOR] Falha na orquestração:', error);
+
       SafeLogger.error('[marcarPropostaComoConcluida] Error in manual boleto generation', {
         proposalId: req.params.id,
         userId: (req as any).user?.id,
         error: error.message,
       });
       next(error);
+    } finally {
+      // PAM V1.0 DIAGNÓSTICO: Log final sempre executado
+      console.log('[DIAGNÓSTICO] Controlador: Finalizando método marcarPropostaComoConcluida');
     }
   }
 }
