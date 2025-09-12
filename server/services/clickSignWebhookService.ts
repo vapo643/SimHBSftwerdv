@@ -17,6 +17,11 @@ import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { logStatusTransition } from './auditService.js';
 // PAM V1.0: Import do serviço de processamento de documentos
 import { documentProcessingService, ProcessingSource } from './documentProcessingService.js';
+// PAM V1.0 - OPERAÇÃO PONTE AUTOMATIZADA: Import do UseCase
+import { MarcarAssinaturaConcluidaUseCase } from '../modules/proposal/application/MarcarAssinaturaConcluidaUseCase.js';
+import { DomainException } from '../modules/shared/domain/DomainException.js';
+import { createUnitOfWork } from '../lib/unit-of-work.js';
+import { logInfo, logError } from '../lib/logger.js';
 
 interface WebhookEvent {
   event: string;
@@ -52,15 +57,25 @@ class ClickSignWebhookService {
   private readonly webhookSecret: string;
   private readonly maxTimestampAge: number = 300; // 5 minutes
   private processedEvents: Set<string> = new Set();
+  private readonly marcarAssinaturaConcluidaUseCase: MarcarAssinaturaConcluidaUseCase;
 
   constructor() {
     this.webhookSecret = process.env.CLICKSIGN_WEBHOOK_SECRET || '';
+
+    // PAM V1.0 - OPERAÇÃO PONTE AUTOMATIZADA: Injeção do UseCase
+    const unitOfWork = createUnitOfWork();
+    this.marcarAssinaturaConcluidaUseCase = new MarcarAssinaturaConcluidaUseCase(unitOfWork);
 
     if (!this.webhookSecret) {
       console.warn(
         '[CLICKSIGN WEBHOOK] ⚠️ Webhook secret not configured. Signature validation disabled.'
       );
     }
+
+    logInfo('[CLICKSIGN WEBHOOK SERVICE] ✅ Inicializado com UseCase MarcarAssinaturaConcluidaUseCase', {
+      webhookSecretConfigured: !!this.webhookSecret,
+      useCaseInjected: !!this.marcarAssinaturaConcluidaUseCase
+    });
   }
 
   /**

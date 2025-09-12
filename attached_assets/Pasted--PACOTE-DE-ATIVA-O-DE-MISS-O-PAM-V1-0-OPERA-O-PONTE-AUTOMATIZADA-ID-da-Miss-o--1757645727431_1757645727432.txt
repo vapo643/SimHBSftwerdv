@@ -1,0 +1,97 @@
+### **PACOTE DE ATIVAÇÃO DE MISSÃO (PAM) V1.0 - OPERAÇÃO "PONTE AUTOMATIZADA"**
+
+**ID da Missão:** `BUGFIX-FORMALIZATION-TIMELINE-001-STEP2`
+
+**Ferramenta Alocada:** `High Power` - Missão de Nível 3 (Crítica)
+
+---
+
+#### **[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+*Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise. No entanto, esta capacidade deve ser exercida com o máximo rigor e sob as seguintes regras de engajamento inegociáveis:*
+
+* **1. Prioridade às Fontes Primárias:** Sua busca deve priorizar **fontes de confiança e alta qualidade**. A hierarquia de fontes aceitáveis é:
+    * **P0 (Crítica): Documentação Oficial** (ex: Documentação da API do ClickSign, RFCs relevantes sobre HMAC).
+    * **P1 (Alta): Blogs de Engenharia de Empresas de Elite** (ex: Netflix, Google, AWS).
+
+* **2. Justificativa Estratégica (O "Porquê"):** A automação via webhook é um ponto crítico de falha se não for implementada corretamente. A introdução de informações de fontes não confiáveis sobre validação de webhooks (especialmente HMAC) representa um risco de segurança inaceitável. Sua função é garantir que a nossa implementação seja robusta e segura.
+
+---
+
+#### **Sumário da Missão (O Quê):**
+
+Integrar o `MarcarAssinaturaConcluidaUseCase.ts`, recém-criado, ao serviço que processa os webhooks do ClickSign (`clickSignWebhookService.ts`), para que o status da proposta seja atualizado automaticamente para `ASSINATURA_CONCLUIDA` quando um documento for finalizado.
+
+#### **Intenção Estratégica (O Porquê):**
+
+A intervenção manual do usuário para atualizar o status da assinatura deve ser uma contingência, não o fluxo principal. A automação via webhook é a implementação correta da regra de negócio, garantindo que o sistema reaja em tempo real a eventos externos, reduzindo a carga operacional e eliminando a possibilidade de erro humano no avanço da timeline de formalização.
+
+#### **Histórico Relevante (Consulta Obrigatória):**
+
+* A auditoria forense (`BUGFIX-FORMALIZATION-TIMELINE-001-AUDIT`) confirmou que o endpoint de webhook `POST /api/webhooks/clicksign` já existe e está funcional, com validação HMAC implementada.
+* A "Operação Restauração do Núcleo" (`...-STEP1`) criou o `MarcarAssinaturaConcluidaUseCase.ts`, que é a ferramenta correta para esta transição de estado.
+
+#### **Modelo Mental (Como se Encaixa):**
+
+Você está trabalhando na camada de **Serviços de Infraestrutura**. O `clickSignWebhookService.ts` atua como um "adaptador" entre o mundo externo (ClickSign) e nosso domínio de negócio (`proposal`). Sua missão é fazer a ponte entre o evento de webhook ("documento assinado") e a ação de domínio correspondente (invocar o `MarcarAssinaturaConcluidaUseCase`).
+
+#### **Riscos Antecipados e Contramedidas:**
+
+1.  **Risco de Execução Duplicada (Médio):** Se a lógica não for idempotente, um webhook reenviado pelo ClickSign poderia tentar processar a mesma transição de status duas vezes, potencialmente causando um erro.
+    * **Contramedida Mandatória:** O `MarcarAssinaturaConcluidaUseCase` já possui uma validação que impede a transição se o estado não for `AGUARDANDO_ASSINATURA`. Sua implementação deve capturar elegantemente a `DomainException` lançada por este `UseCase` e retornar um status `200 OK` para o ClickSign, confirmando o recebimento do webhook mesmo que nenhuma ação seja necessária. Isso evita que o ClickSign tente reenviar o webhook desnecessariamente.
+
+* * *
+
+#### **IMPLEMENTAR:**
+
+Integração do Webhook do ClickSign para automação de status.
+
+#### **CURRENT STATE:**
+
+O arquivo `server/services/clickSignWebhookService.ts` recebe e valida os webhooks do ClickSign, mas não invoca o `UseCase` apropriado para atualizar o status da proposta no nosso sistema. A automação está desconectada do domínio.
+
+#### **EXPECTED (Estado Final de Sucesso):**
+
+1.  O método `processEvent` dentro do `clickSignWebhookService.ts` foi modificado.
+2.  Quando um evento de `document.signed` ou `document.finished` é recebido, o serviço agora extrai o `propostaId` associado e invoca o `MarcarAssinaturaConcluidaUseCase.execute()`.
+3.  A lógica lida corretamente com exceções lançadas pelo `UseCase` (como transições de estado inválidas), registrando um log informativo e retornando um status `200` para o serviço de webhook.
+
+#### **CONSTRAINTS (Roadmap de Implementação):**
+
+Siga estes passos em ordem rigorosa.
+
+**Passo 2.1: Modificar o `clickSignWebhookService.ts`**
+* Injete o `MarcarAssinaturaConcluidaUseCase` no construtor do `clickSignWebhookService`. Utilize o `container` ou o método de injeção de dependência padrão do projeto.
+* Dentro do método `processEvent`, localize o bloco de código que manipula os eventos `document.signed` e `document.finished`.
+
+**Passo 2.2: Implementar a Lógica de Invocação**
+* Dentro do bloco de eventos de assinatura, adicione a seguinte lógica:
+    1.  Obtenha o `propostaId` a partir dos dados do webhook. (Você precisará de um método para buscar a proposta associada ao `documentKey` do ClickSign, se isso já não existir).
+    2.  Envolva a chamada em um bloco `try/catch`.
+    3.  No bloco `try`, chame `this.marcarAssinaturaConcluidaUseCase.execute({ propostaId, userId: 'sistema' })`. Use 'sistema' como o `userId` para indicar que a ação foi automática.
+    4.  No bloco `catch`, verifique se o erro é uma instância de `DomainException`. Se for, registre um log informativo: `logger.info('Webhook do ClickSign recebido para proposta {propostaId} que já foi processada. Nenhuma ação necessária.')`.
+    5.  Se for qualquer outro tipo de erro, registre-o como um erro crítico usando `logger.error`.
+
+**Passo 2.3: Garantir a Resposta Correta**
+* Independentemente do resultado (sucesso ou `DomainException` capturada), o método deve retornar uma resposta que resulte em um HTTP `200 OK` para o ClickSign.
+
+* * *
+
+#### **DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 90%
+* **RISCOS IDENTIFICADOS:** **BAIXO**. O principal risco é a lógica de mapeamento entre o `documentKey` do ClickSign e o nosso `propostaId` interno. Se este mapeamento falhar, a automação não funcionará.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumimos que existe uma forma de associar um documento do ClickSign a uma proposta no nosso banco de dados. A auditoria forense deve confirmar isso. A ação será atribuída a um `userId` genérico 'sistema'.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deverá realizar um teste de integração completo, disparando um evento de assinatura no ambiente de sandbox do ClickSign e verificando se o status da proposta é atualizado automaticamente no banco de dados.
+
+* * *
+
+#### **PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+
+1.  Mapeie o **1 arquivo modificado**: `server/services/clickSignWebhookService.ts`.
+2.  Garanta que a injeção de dependência do `MarcarAssinaturaConcluidaUseCase` está correta.
+3.  Execute `get_latest_lsp_diagnostics` e corrija **TODOS** os erros.
+4.  Declare seu **Nível de Confiança (0-100%)** final.
+5.  Categorize quaisquer **Riscos Descobertos**.
+6.  Realize um teste funcional simulando um payload de webhook do ClickSign para o seu endpoint local para verificar a invocação correta do `UseCase`.
+7.  Documente a decisão de usar 'sistema' como o `userId` para ações de webhook.
