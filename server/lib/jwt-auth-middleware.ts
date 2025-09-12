@@ -28,6 +28,16 @@ const MAX_AUTH_ATTEMPTS = isDevelopment ? 10000 : 50; // 10k dev, 50 prod
 const AUTH_WINDOW_MS = isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000; // 1min dev, 15min prod
 const AUTH_ATTEMPTS_TTL = Math.ceil(AUTH_WINDOW_MS / 1000); // Convert to seconds
 
+// ===== 🛡️ CIRCUIT BREAKER CONFIGURATION =====
+// PAM V1.0: Circuit breaker para proteção contra avalanche de requisições
+const CIRCUIT_BREAKER_FAILURE_THRESHOLD = isDevelopment ? 20 : 10; // Falhas para acionar circuit breaker
+const CIRCUIT_BREAKER_WINDOW_MS = 60 * 1000; // 60 segundos
+const CIRCUIT_BREAKER_COOLDOWN_MS = 120 * 1000; // 2 minutos de bloqueio
+const CIRCUIT_BREAKER_TTL = Math.ceil(CIRCUIT_BREAKER_COOLDOWN_MS / 1000); // Convert to seconds
+
+// Monitor de falhas em memória para circuit breaker
+const failureTracker = new Map<string, { failures: number; lastFailure: number; blockedUntil?: number }>();
+
 // REFATORADO: Redis client via Redis Manager centralizado (lazy loading)
 let redisClient: any = null;
 
@@ -54,6 +64,102 @@ interface TokenCacheEntry {
 }
 
 // Redis TTL handles automatic cleanup - no manual intervals needed
+
+/**
+ * 🛡️ PAM V1.0: Circuit Breaker - Verifica se IP está bloqueado por falhas excessivas
+ */
+function checkCircuitBreaker(clientIP: string): boolean {
+  const now = Date.now();
+  const entry = failureTracker.get(clientIP);
+  
+  if (!entry) {
+    return true; // Sem histórico, permitir
+  }
+  
+  // Limpar falhas antigas (fora da janela)
+  if (now - entry.lastFailure > CIRCUIT_BREAKER_WINDOW_MS) {
+    failureTracker.delete(clientIP);
+    return true; // Falhas antigas, permitir
+  }
+  
+  // Verificar se está em período de bloqueio
+  if (entry.blockedUntil && now < entry.blockedUntil) {
+    console.log(`[CIRCUIT BREAKER] 🚫 IP ${clientIP} bloqueado até ${new Date(entry.blockedUntil).toISOString()}`);
+    return false; // Ainda bloqueado
+  }
+  
+  // Se passou do período de bloqueio, limpar entrada
+  if (entry.blockedUntil && now >= entry.blockedUntil) {
+    failureTracker.delete(clientIP);
+    console.log(`[CIRCUIT BREAKER] ✅ IP ${clientIP} liberado após cooldown`);
+    return true;
+  }
+  
+  return true; // Permitir por padrão
+}
+
+/**
+ * 🛡️ PAM V1.0: Circuit Breaker - Registra falha de autenticação
+ */
+function recordAuthFailure(clientIP: string): void {
+  const now = Date.now();
+  const entry = failureTracker.get(clientIP) || { failures: 0, lastFailure: 0 };
+  
+  // Se a falha está fora da janela, resetar contador
+  if (now - entry.lastFailure > CIRCUIT_BREAKER_WINDOW_MS) {
+    entry.failures = 1;
+  } else {
+    entry.failures += 1;
+  }
+  
+  entry.lastFailure = now;
+  
+  // Verificar se atingiu o threshold para ativar circuit breaker
+  if (entry.failures >= CIRCUIT_BREAKER_FAILURE_THRESHOLD) {
+    entry.blockedUntil = now + CIRCUIT_BREAKER_COOLDOWN_MS;
+    console.log(`[CIRCUIT BREAKER] 🚨 IP ${clientIP} BLOQUEADO por ${CIRCUIT_BREAKER_COOLDOWN_MS/1000}s após ${entry.failures} falhas`);
+    
+    securityLogger.logEvent({
+      type: SecurityEventType.ACCESS_DENIED,
+      severity: 'HIGH',
+      ipAddress: clientIP,
+      success: false,
+      details: { 
+        reason: 'Circuit breaker activated - too many auth failures',
+        failures: entry.failures,
+        cooldownMs: CIRCUIT_BREAKER_COOLDOWN_MS
+      },
+    });
+  } else {
+    console.log(`[CIRCUIT BREAKER] ⚠️ IP ${clientIP} falha ${entry.failures}/${CIRCUIT_BREAKER_FAILURE_THRESHOLD}`);
+  }
+  
+  failureTracker.set(clientIP, entry);
+}
+
+/**
+ * 🛡️ PAM V1.0: Circuit Breaker - Limpeza periódica de entradas antigas
+ */
+function cleanupCircuitBreakerEntries(): void {
+  const now = Date.now();
+  let cleaned = 0;
+  
+  for (const [ip, entry] of failureTracker.entries()) {
+    // Remover entradas antigas ou que passaram do período de bloqueio
+    if (now - entry.lastFailure > CIRCUIT_BREAKER_WINDOW_MS || 
+        (entry.blockedUntil && now > entry.blockedUntil + CIRCUIT_BREAKER_WINDOW_MS)) {
+      failureTracker.delete(ip);
+      cleaned++;
+    }
+  }
+  
+  if (cleaned > 0) {
+    console.log(`[CIRCUIT BREAKER] 🧹 Limpeza: ${cleaned} entradas removidas`);
+  }
+}
+
+// Limpeza automática a cada 5 minutos
+setInterval(cleanupCircuitBreakerEntries, 5 * 60 * 1000);
 
 /**
  * Distributed rate limiting for authentication attempts using Redis
@@ -216,6 +322,18 @@ export async function jwtAuthMiddleware(
     console.log('[JWT DEBUG] Origin:', req.headers.origin);
     console.log('[JWT DEBUG] Referer:', req.headers.referer);
 
+    // 🛡️ PAM V1.0: CIRCUIT BREAKER CHECK - Primeira linha de defesa
+    const clientIP = getClientIP(req);
+    const circuitBreakerAllowed = checkCircuitBreaker(clientIP);
+    
+    if (!circuitBreakerAllowed) {
+      console.log(`[CIRCUIT BREAKER] 🚫 Requisição bloqueada para IP: ${clientIP}`);
+      return res.status(429).json({ 
+        message: 'Muitas falhas de autenticação. Acesso temporariamente bloqueado. Tente novamente em alguns minutos.',
+        code: 'CIRCUIT_BREAKER_ACTIVE'
+      });
+    }
+
     // Step a: Validate JWT token
     const authHeader = req.headers.authorization;
     console.log('[JWT DEBUG] Header Auth presente:', !!authHeader);
@@ -235,6 +353,10 @@ export async function jwtAuthMiddleware(
       if (req.path.includes('/pdf')) {
         console.error('[JWT AUTH - PDF DOWNLOAD] Missing or invalid auth header');
       }
+      
+      // 🛡️ PAM V1.0: Registrar falha de autenticação no circuit breaker
+      recordAuthFailure(clientIP);
+      
       securityLogger.logEvent({
         type: SecurityEventType.TOKEN_INVALID,
         severity: 'MEDIUM',
@@ -259,7 +381,7 @@ export async function jwtAuthMiddleware(
     }
 
     // Distributed rate limiting check (SAMM Optimization)
-    const clientIP = getClientIP(req);
+    // clientIP já foi declarado anteriormente na linha 329
     if (isDevelopment) {
       console.log(
         `[JWT DEBUG] Checking auth rate limit for IP: ${clientIP}, environment: ${process.env.NODE_ENV}`
@@ -316,6 +438,9 @@ export async function jwtAuthMiddleware(
 
     // Check blacklist result
     if (isBlacklisted) {
+      // 🛡️ PAM V1.0: Registrar falha de autenticação no circuit breaker
+      recordAuthFailure(clientIP);
+      
       securityLogger.logEvent({
         type: SecurityEventType.TOKEN_INVALID,
         severity: 'HIGH',
@@ -520,6 +645,10 @@ export async function jwtAuthMiddleware(
 
     if (error || !data?.user || !userId || !userEmail) {
       console.error('[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====');
+      
+      // 🛡️ PAM V1.0: Registrar falha de autenticação no circuit breaker
+      recordAuthFailure(clientIP);
+      
       securityLogger.logEvent({
         type: error?.message?.includes('expired')
           ? SecurityEventType.TOKEN_EXPIRED

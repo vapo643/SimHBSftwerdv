@@ -1,0 +1,28 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Implementação de "Circuit Breaker" no Middleware
+
+* **Sumário da Missão:** Refatorar o `jwt-auth-middleware.ts` para introduzir um mecanismo de "circuit breaker" que detete e bloqueie temporariamente utilizadores ou IPs que apresentem um número excessivo de falhas de autenticação num curto período.
+
+* **Intenção Estratégica:** Aumentar a resiliência e a segurança do servidor, protegendo-o contra "tempestades de requisições" (sejam elas maliciosas ou causadas por bugs no frontend) e prevenindo o bloqueio da aplicação por `rate limits` de serviços externos.
+
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria forense provou que um loop no frontend está a causar uma avalanche de requisições que derruba o servidor. O middleware atual não possui nenhuma proteção contra este padrão de abuso.
+
+---
+
+**IMPLEMENTAR:**
+Introduzir uma lógica de "circuit breaker" baseada em memória (utilizando um `Map` simples ou uma biblioteca como `rate-limiter-flexible`) no `jwt-auth-middleware.ts`.
+
+**LÓGICA DE EXECUÇÃO (BACKEND):**
+
+1.  **Inicializar um Monitor de Falhas:** No escopo do módulo (fora da função de middleware), inicialize uma estrutura para rastrear as falhas (ex: `const failureTracker = new Map();`).
+
+2.  **Lógica do Middleware (Início da Função):**
+    * No início da função de middleware, antes de qualquer validação de token, extraia o IP do cliente (`req.ip`).
+    * Verifique o `failureTracker` para este IP. Se o número de falhas recentes exceder um limite (ex: 10 falhas nos últimos 60 segundos), retorne **imediatamente** um erro `429 Too Many Requests` e não prossiga com a execução.
+
+3.  **Lógica do Middleware (Após Falha de Validação):**
+    * Nos blocos `catch` ou nos pontos onde a validação do JWT falha, **antes** de retornar um erro `401` ou `403`:
+    * Incremente o contador de falhas para o IP do cliente no `failureTracker`. Defina um tempo de expiração para cada registo de falha (ex: 60 segundos) para que as contagens antigas sejam limpas.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Execute a implementação e realize o protocolo 7-CHECK completo.

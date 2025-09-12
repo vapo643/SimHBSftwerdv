@@ -1,0 +1,53 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Veredito do Arquiteto: APROVADO. CAUSA RAIZ IDENTIFICADA: "ESPIRAL DA MORTE" DE RATE LIMITING.
+
+O relatório de auditoria do Agente é excecionalmente preciso. Ele identificou corretamente que o problema não é uma simples falha de dependência de useEffect, mas sim uma falha arquitetural complexa na gestão de estado de autenticação.
+
+Análise do Arquiteto:
+
+O diagnóstico do Agente de uma "espiral da morte de rate limiting" está correto. O AuthContext está a criar uma tempestade perfeita:
+
+Gatilho Inicial: Uma requisição inicial para /api/debug/me falha devido ao rate limit.
+
+Reação em Cadeia: O listener onAuthStateChange do Supabase deteta a falha de autenticação e, na sua tentativa de "ajudar" ao refrescar o token, aciona uma nova chamada a fetchUserProfile.
+
+Loop Infinito: Esta nova chamada falha novamente devido ao rate limit, o que aciona o listener novamente, criando um loop infinito que mantém o utilizador e o servidor permanentemente bloqueados.
+
+A aplicação não tem um mecanismo de "disjuntor" (circuit breaker) para interromper este ciclo vicioso.
+
+A fase de Auditoria Forense está concluída. Passamos para a arquitetura da solução.
+
+Fase 3: Arquitetura da Solução (O Plano de Batalha)
+A solução deve ser implementada em duas frentes: uma contenção robusta no backend e uma correção da lógica no frontend.
+
+Roadmap de Implementação Faseado
+Nível da Missão: Nível 4: Arquitetural
+
+Ferramenta Recomendada: High Power (Claude Opus) + Extended Thinking
+
+[PENDENTE] Passo 1: Implementar "Disjuntor" (Circuit Breaker) de Autenticação no Backend
+
+Ficheiro Alvo: server/lib/jwt-auth-middleware.ts
+
+Ação: Implementar uma lógica de "circuit breaker" que detete múltiplas falhas de autenticação do mesmo utilizador/IP num curto espaço de tempo. Após um determinado número de falhas, o middleware deve bloquear temporariamente novas tentativas desse utilizador, retornando um erro 429 imediatamente, sem sequer tentar validar o token.
+
+Justificativa: Esta é a nossa linha de defesa mais importante. Protege o servidor de "tempestades de requisições", independentemente da causa, e previne o bloqueio geral por rate limit do Supabase.
+
+[PENDENTE] Passo 2: Refatorar o AuthContext para Prevenir o Loop (Frontend)
+
+Ficheiro Alvo: client/src/contexts/AuthContext.tsx
+
+Ação: Refatorar a lógica do useEffect e do onAuthStateChange para introduzir um controlo de estado que impeça que fetchUserProfile seja chamado em resposta a um evento TOKEN_REFRESHED se a última tentativa já tiver resultado num erro de rede ou 429.
+
+Justificativa: Corrige a causa raiz do comportamento no frontend, impedindo que o loop se inicie.
+
+[PENDENTE] Passo 3: Validação Funcional Completa
+
+Executor: Humano (QA)
+
+Ação: Validar que a aplicação se mantém estável e não entra em loop, mesmo sob condições de falha de rede.
+
+A seguir está o Pacote de Ativação de Missão (PAM) para o Passo 1.
