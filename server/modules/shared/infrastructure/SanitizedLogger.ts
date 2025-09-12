@@ -1,64 +1,87 @@
 /**
- * Sanitized Logger - P0.2 GREEN CORRECTION
- * Remove PII (Personally Identifiable Information) dos logs
- *
- * Elimina violação de segurança identificada pelo advisor
+ * Enhanced Sanitized Logger - V2.0 SECURITY UPGRADE
+ * Advanced PII sanitization with Winston integration
+ * 
+ * FEATURES:
+ * - Comprehensive PII field detection
+ * - Smart masking algorithms
+ * - Winston logger integration
+ * - Webhook payload sanitization
+ * - Error object sanitization
  */
 
+import logger from '../../../lib/logger.js';
+
 const PII_FIELDS = [
-  'cpf',
-  'cliente_cpf',
-  'clienteCpf',
-  'cpfCliente',
-  'email',
-  'cliente_email',
-  'clienteEmail',
-  'emailCliente',
-  'telefone',
-  'cliente_telefone',
-  'clienteTelefone',
-  'telefoneCliente',
-  'nome',
-  'cliente_nome',
-  'clienteNome',
-  'nomeCliente',
-  'nomeCompleto',
-  'rg',
-  'cnpj',
-  'endereco',
-  'cep',
-  'password',
-  'token',
-  'authorization',
+  // CPF variations
+  'cpf', 'cliente_cpf', 'clienteCpf', 'cpfCliente', 'cpf_cliente',
+  
+  // Email variations
+  'email', 'cliente_email', 'clienteEmail', 'emailCliente', 'email_cliente',
+  
+  // Phone variations
+  'telefone', 'cliente_telefone', 'clienteTelefone', 'telefoneCliente', 'phone', 'cellphone',
+  
+  // Name variations
+  'nome', 'cliente_nome', 'clienteNome', 'nomeCliente', 'nomeCompleto', 'name', 'fullname',
+  
+  // Document variations
+  'rg', 'cnpj', 'documento', 'document',
+  
+  // Address variations
+  'endereco', 'logradouro', 'rua', 'avenida', 'address', 'street',
+  'complemento', 'bairro', 'cidade', 'city', 'neighborhood',
+  'cep', 'zipcode', 'postalcode',
+  
+  // Authentication/Security
+  'password', 'senha', 'token', 'authorization', 'auth', 'bearer',
+  'secret', 'key', 'private', 'credential',
+  
+  // Banking
+  'conta', 'account', 'agencia', 'branch', 'bank_account',
+  
+  // Webhook specific
+  'webhookData', 'payload', 'payer', 'payee'
 ];
 
 /**
- * Remove dados sensíveis de um objeto para logging seguro
+ * Advanced PII sanitization with smart field detection
  */
-export function sanitizeForLog(obj: any): any {
-  if (!obj || typeof obj !== 'object') {
+export function redactPII(obj: any, depth: number = 0): any {
+  // Prevent infinite recursion
+  if (depth > 10) {
+    return '[DEEP_OBJECT]';
+  }
+
+  if (!obj) {
+    return obj;
+  }
+
+  if (typeof obj === 'string') {
+    return sanitizeString(obj);
+  }
+
+  if (typeof obj !== 'object') {
     return obj;
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(sanitizeForLog);
+    return obj.map(item => redactPII(item, depth + 1));
   }
 
   const sanitized: any = {};
 
   for (const [key, value] of Object.entries(obj)) {
     const lowerKey = key.toLowerCase();
+    const isPIIField = PII_FIELDS.some(field => 
+      lowerKey.includes(field.toLowerCase()) || 
+      field.toLowerCase().includes(lowerKey)
+    );
 
-    // Verificar se é campo PII
-    if (PII_FIELDS.some((field) => lowerKey.includes(field.toLowerCase()))) {
-      if (typeof value === 'string' && value.length > 3) {
-        // Mascarar dados sensíveis - mostrar apenas primeiros e últimos caracteres
-        sanitized[key] = `${value.substring(0, 2)}***${value.substring(value.length - 2)}`;
-      } else {
-        sanitized[key] = '[REDACTED]';
-      }
+    if (isPIIField) {
+      sanitized[key] = maskSensitiveValue(key, value);
     } else if (typeof value === 'object' && value !== null) {
-      sanitized[key] = sanitizeForLog(value);
+      sanitized[key] = redactPII(value, depth + 1);
     } else {
       sanitized[key] = value;
     }
@@ -68,40 +91,172 @@ export function sanitizeForLog(obj: any): any {
 }
 
 /**
- * Logger seguro que remove PII automaticamente
+ * Smart masking based on field type and value
  */
-export class SafeLogger {
+function maskSensitiveValue(fieldName: string, value: any): string {
+  if (!value || typeof value !== 'string') {
+    return '[REDACTED]';
+  }
+
+  const lowerField = fieldName.toLowerCase();
+  const cleanValue = String(value).trim();
+
+  if (cleanValue.length === 0) {
+    return '[EMPTY]';
+  }
+
+  // CPF specific masking
+  if (lowerField.includes('cpf') && cleanValue.length >= 11) {
+    const digits = cleanValue.replace(/\D/g, '');
+    return `***.***.***-${digits.slice(-2)}`;
+  }
+
+  // Email specific masking
+  if (lowerField.includes('email') && cleanValue.includes('@')) {
+    const [local, domain] = cleanValue.split('@');
+    return `${local.charAt(0)}***@${domain}`;
+  }
+
+  // Phone specific masking
+  if (lowerField.includes('telefone') || lowerField.includes('phone')) {
+    const digits = cleanValue.replace(/\D/g, '');
+    if (digits.length >= 8) {
+      return `****-${digits.slice(-4)}`;
+    }
+  }
+
+  // Name specific masking
+  if (lowerField.includes('nome') || lowerField.includes('name')) {
+    if (cleanValue.length <= 2) {
+      return '[NAME]';
+    }
+    return `${cleanValue.charAt(0)}***${cleanValue.charAt(cleanValue.length - 1)}`;
+  }
+
+  // Generic masking for other sensitive fields
+  if (cleanValue.length <= 3) {
+    return '[REDACTED]';
+  }
+  
+  return `${cleanValue.substring(0, 2)}***${cleanValue.substring(cleanValue.length - 2)}`;
+}
+
+/**
+ * Sanitize plain strings that might contain sensitive data
+ */
+function sanitizeString(str: string): string {
+  // CPF pattern: 000.000.000-00 or 00000000000
+  str = str.replace(/(\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})/g, '***.***.***-**');
+  
+  // Email pattern
+  str = str.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '***@***.***');
+  
+  // Phone pattern
+  str = str.replace(/(\(?\d{2}\)?\s?\d{4,5}-?\d{4})/g, '(**) ****-****');
+  
+  return str;
+}
+
+/**
+ * Sanitize webhook payloads specifically
+ */
+export function sanitizeWebhookPayload(payload: any): any {
+  const commonWebhookPIIFields = [
+    'payer', 'payee', 'customer', 'cliente', 'pagador', 'beneficiario',
+    'transaction', 'transacao', 'payment', 'pagamento'
+  ];
+  
+  return redactPII(payload);
+}
+
+// Legacy compatibility
+export const sanitizeForLog = redactPII;
+
+/**
+ * Enhanced Safe Logger with Winston integration
+ */
+export class SecureLogger {
   private static isDevelopment = process.env.NODE_ENV === 'development';
 
-  static info(message: string, data?: any) {
-    if (data) {
-      console.log(`[SAFE] ${message}`, sanitizeForLog(data));
-    } else {
-      console.log(`[SAFE] ${message}`);
-    }
+  static info(message: string, data?: any, skipSanitization: boolean = false) {
+    const sanitizedData = skipSanitization || !data ? data : redactPII(data);
+    logger.info(`🛡️ ${message}`, sanitizedData);
   }
 
-  static debug(message: string, data?: any) {
-    if (SafeLogger.isDevelopment && data) {
-      console.log(`[SAFE-DEBUG] ${message}`, sanitizeForLog(data));
-    } else if (SafeLogger.isDevelopment) {
-      console.log(`[SAFE-DEBUG] ${message}`);
-    }
+  static debug(message: string, data?: any, skipSanitization: boolean = false) {
+    const sanitizedData = skipSanitization || !data ? data : redactPII(data);
+    logger.debug(`🛡️ ${message}`, sanitizedData);
   }
 
-  static warn(message: string, data?: any) {
-    if (data) {
-      console.warn(`[SAFE-WARN] ${message}`, sanitizeForLog(data));
-    } else {
-      console.warn(`[SAFE-WARN] ${message}`);
-    }
+  static warn(message: string, data?: any, skipSanitization: boolean = false) {
+    const sanitizedData = skipSanitization || !data ? data : redactPII(data);
+    logger.warn(`🛡️ ${message}`, sanitizedData);
   }
 
-  static error(message: string, error?: any) {
-    if (error) {
-      console.error(`[SAFE-ERROR] ${message}`, sanitizeForLog(error));
-    } else {
-      console.error(`[SAFE-ERROR] ${message}`);
+  static error(message: string, error?: any, skipSanitization: boolean = false) {
+    let sanitizedError = error;
+    
+    if (!skipSanitization && error) {
+      if (error instanceof Error) {
+        sanitizedError = {
+          message: error.message,
+          name: error.name,
+          stack: SecureLogger.isDevelopment ? error.stack : '[REDACTED_IN_PROD]',
+          ...redactPII(error)
+        };
+      } else {
+        sanitizedError = redactPII(error);
+      }
     }
+    
+    logger.error(`🛡️ ${message}`, sanitizedError);
+  }
+
+  static security(event: string, severity: 'low' | 'medium' | 'high' | 'critical', data?: any) {
+    const sanitizedData = data ? redactPII(data) : {};
+    logger.warn(`🔒 Security Event: ${event}`, {
+      severity,
+      event,
+      timestamp: new Date().toISOString(),
+      ...sanitizedData,
+    });
+  }
+
+  static audit(action: string, userId: string | null, resource: string, data?: any) {
+    const sanitizedData = data ? redactPII(data) : {};
+    logger.info(`📝 Secure Audit Log`, {
+      action,
+      userId,
+      resource,
+      timestamp: new Date().toISOString(),
+      ...sanitizedData,
+    });
+  }
+
+  static webhook(event: string, payload: any, source?: string) {
+    const sanitizedPayload = sanitizeWebhookPayload(payload);
+    logger.info(`🔗 Webhook Event: ${event}`, {
+      event,
+      source: source || 'unknown',
+      payload: sanitizedPayload,
+      timestamp: new Date().toISOString(),
+    });
   }
 }
+
+// Legacy compatibility
+export const SafeLogger = SecureLogger;
+
+// Helper functions for direct usage
+export const secureLog = {
+  info: SecureLogger.info,
+  debug: SecureLogger.debug,
+  warn: SecureLogger.warn,
+  error: SecureLogger.error,
+  security: SecureLogger.security,
+  audit: SecureLogger.audit,
+  webhook: SecureLogger.webhook,
+};
+
+// Default export for convenience
+export default SecureLogger;
