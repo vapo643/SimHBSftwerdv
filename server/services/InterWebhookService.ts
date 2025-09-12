@@ -80,7 +80,8 @@ export class InterWebhookService {
     } catch (error: any) {
       SecureLogger.error(`Webhook processing error for operation ${operation}`, error);
 
-      // Log erro crítico (COM SANITIZAÇÃO)
+      // Log erro crítico (COM SANITIZAÇÃO COMPLETA)
+      const sanitizedError = redactPII(error);
       await securityRepository.logSecurityEvent({
         eventType: 'WEBHOOK_PROCESSING_ERROR',
         severity: 'HIGH',
@@ -88,8 +89,8 @@ export class InterWebhookService {
           description: 'Inter webhook processing failed with critical error',
           service: 'inter',
           operation,
-          error: error.message,
-          errorStack: error.stack,
+          error: sanitizedError.message,
+          errorStack: process.env.NODE_ENV === 'production' ? '[REDACTED_IN_PROD]' : sanitizedError.stack,
           payload: sanitizeWebhookPayload(payload),
         },
       });
