@@ -179,7 +179,7 @@ class ClickSignServiceV3 {
           console.error(
             `[CLICKSIGN V1] Response text (first 1000 chars): ${responseText.substring(0, 1000)}`
           );
-          console.error(`[CLICKSIGN V1] Full URL was: ${url}`);
+          console.error(`[CLICKSIGN V1] Endpoint: ${method} ${endpoint}`);
           console.error(`[CLICKSIGN V1] Status: ${response.status}`);
           throw new Error(
             `Failed to parse JSON. Status: ${response.status}. Response starts with: ${responseText.substring(0, 100)}`
@@ -236,7 +236,7 @@ class ClickSignServiceV3 {
     // Sanitize: Remove all non-numeric characters
     const cleanCpf = rawCpf.replace(/\D/g, '');
 
-    console.log(`[CLICKSIGN V1] 🧹 CPF sanitization: ${rawCpf} → ${cleanCpf}`);
+    console.log(`[CLICKSIGN V1] 🧹 CPF sanitization: ***${rawCpf.slice(-2)} → ***${cleanCpf.slice(-2)}`);
 
     // Basic length check only (no validation per user request)
     if (cleanCpf.length !== 11) {
@@ -244,7 +244,7 @@ class ClickSignServiceV3 {
       throw new Error('CPF deve ter 11 dígitos.');
     }
 
-    console.log(`[CLICKSIGN V1] ✅ CPF format check passed: ${cleanCpf}`);
+    console.log(`[CLICKSIGN V1] ✅ CPF format check passed: ***${cleanCpf.slice(-2)}`);
     return cleanCpf;
   }
 
@@ -274,7 +274,7 @@ class ClickSignServiceV3 {
       },
     };
 
-    console.log(`[CLICKSIGN V1] 🔨 Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] 🔨 Document creation request (content redacted for security)`);
 
     const response = await this.makeRequest<any>('POST', '/documents', requestBody);
 
@@ -301,7 +301,7 @@ class ClickSignServiceV3 {
       },
     };
 
-    console.log(`[CLICKSIGN V1] Request body being sent:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] Signer creation request (PII redacted for security)`);
 
     const response = await this.makeRequest<any>(
       'POST',
@@ -356,7 +356,7 @@ class ClickSignServiceV3 {
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /signers`);
-    console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] Request body (content/PII redacted for security)`);
     console.log(
       `[CLICKSIGN V1] 🔐 BIOMETRIC AUTH ENABLED:`,
       signerData.useBiometricAuth ? 'YES' : 'NO'
@@ -394,7 +394,7 @@ class ClickSignServiceV3 {
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /envelopes/${envelopeId}/signers`);
-    console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] Request body (content/PII redacted for security)`);
 
     const response = await this.makeRequest<any>(
       'POST',
@@ -534,7 +534,7 @@ class ClickSignServiceV3 {
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /lists`);
-    console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] Request body (content/PII redacted for security)`);
     const response = await this.makeRequest<any>('POST', '/lists', requestBody);
     console.log(`[CLICKSIGN V1] 📦 List response:`, JSON.stringify(response, null, 2));
     const list = (response as any).data?.list || (response as any).list || response;
@@ -589,7 +589,7 @@ class ClickSignServiceV3 {
       const cleanBase64 = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
 
       // 2. Validate and sanitize CPF before proceeding
-      console.log(`[CLICKSIGN V1] Validating CPF for client: ${clientData.name}`);
+      console.log(`[CLICKSIGN V1] Validating CPF for client: ${clientData.name?.substring(0, 3)}***`);
       const validatedCpf = this.sanitizeAndValidateCPF(clientData.cpf);
 
       // 3. Upload document

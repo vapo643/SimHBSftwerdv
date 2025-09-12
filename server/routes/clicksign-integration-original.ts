@@ -6,7 +6,7 @@
 import express from 'express';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { type AuthenticatedRequest } from '../../shared/types/express.js';
-import { clickSignServiceV3 } from '../services/clickSignServiceV3.js';
+import { clickSignServiceV3, createClickSignServiceV3 } from '../services/clickSignServiceV3.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import fs from 'fs/promises';
 import path from 'path';
@@ -225,8 +225,16 @@ router.post(
         }
       }
 
-      // Gerar novo link usando o mesmo fluxo
-      const result = await clickSignServiceV3.sendCCBForSignature(propostaId, pdfBase64, {
+      // Gerar novo link usando o mesmo fluxo - usar factory function para garantir transição de status
+      // Criar instância com DI para automatizar transição de status
+      const { UnitOfWork } = await import('../modules/shared/infrastructure/UnitOfWork.js');
+      const { MarcarAguardandoAssinaturaUseCase } = await import('../modules/proposal/application/MarcarAguardandoAssinaturaUseCase.js');
+      
+      const unitOfWork = new UnitOfWork();
+      const marcarAguardandoAssinaturaUseCase = new MarcarAguardandoAssinaturaUseCase(unitOfWork);
+      const clickSignWithStatusUpdate = createClickSignServiceV3(marcarAguardandoAssinaturaUseCase);
+      
+      const result = await clickSignWithStatusUpdate.sendCCBForSignature(propostaId, pdfBase64, {
         name: clienteData.nome,
         email: clienteData.email,
         cpf: clienteData.cpf,
@@ -414,8 +422,15 @@ router.post(
 
       console.log(`[CLICKSIGN] Enviando para ClickSign API...`);
 
-      // Chamar ClickSign API
-      const result = await clickSignServiceV3.sendCCBForSignature(propostaId, base64Content, {
+      // Chamar ClickSign API - usar factory function para garantir transição de status
+      const { UnitOfWork } = await import('../modules/shared/infrastructure/UnitOfWork.js');
+      const { MarcarAguardandoAssinaturaUseCase } = await import('../modules/proposal/application/MarcarAguardandoAssinaturaUseCase.js');
+      
+      const unitOfWork = new UnitOfWork();
+      const marcarAguardandoAssinaturaUseCase = new MarcarAguardandoAssinaturaUseCase(unitOfWork);
+      const clickSignWithStatusUpdate = createClickSignServiceV3(marcarAguardandoAssinaturaUseCase);
+      
+      const result = await clickSignWithStatusUpdate.sendCCBForSignature(propostaId, base64Content, {
         name: clienteData.nome,
         email: clienteData.email,
         phone: clienteData.telefone || '',
