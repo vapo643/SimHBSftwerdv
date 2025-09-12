@@ -59,15 +59,14 @@ export class InterService {
       throw new Error('Já existe uma cobrança para esta proposta');
     }
 
-    // Create collection in Inter Bank
-    const interResult = await (interBankService as any).createCollection({
-      seuNumero: `PROP-${validated.proposalId}`,
-      valorNominal: validated.valorTotal,
+    // Create collection in Inter Bank using correct method
+    const interResult = await interBankService.criarCobrancaParaProposta({
+      id: validated.proposalId,
+      valorTotal: validated.valorTotal,
       dataVencimento: validated.dataVencimento,
-      numDiasAgenda: 30,
-      pagador: {
-        cpfCnpj: validated.clienteData.cpf.replace(/\D/g, ''),
+      clienteData: {
         nome: validated.clienteData.nome,
+        cpf: validated.clienteData.cpf,
         email: validated.clienteData.email,
         telefone: validated.clienteData.telefone,
         endereco: validated.clienteData.endereco,
@@ -76,11 +75,7 @@ export class InterService {
         bairro: validated.clienteData.bairro,
         cidade: validated.clienteData.cidade,
         uf: validated.clienteData.uf,
-        cep: validated.clienteData.cep.replace(/\D/g, ''),
-      },
-      mensagem: {
-        linha1: `Proposta: ${validated.proposalId}`,
-        linha2: 'Pagamento via Banco Inter',
+        cep: validated.clienteData.cep,
       },
     });
 
