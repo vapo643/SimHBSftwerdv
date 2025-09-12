@@ -98,7 +98,7 @@ class ClickSignServiceV3 {
 
     console.log(`[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)`);
     console.log(`[CLICKSIGN V1] API URL: ${this.config.apiUrl}`);
-    console.log(`[CLICKSIGN V1] Token configured: ${this.config.apiToken.substring(0, 10)}...`);
+    console.log(`[CLICKSIGN V1] Token configured: ${this.config.apiToken.substring(0, 8)}***`);
   }
 
   /**
@@ -124,7 +124,7 @@ class ClickSignServiceV3 {
       Accept: 'application/json',
     };
 
-    console.log(`[CLICKSIGN V1] 🌐 Full URL: ${url}`);
+    console.log(`[CLICKSIGN V1] 🌐 Request: ${method} ${this.config.apiUrl}${endpoint}`);
     console.log(`[CLICKSIGN V1] 📡 ${method} ${endpoint}`);
     console.log(`[CLICKSIGN V1] Headers:`, {
       'Content-Type': headers['Content-Type'],
