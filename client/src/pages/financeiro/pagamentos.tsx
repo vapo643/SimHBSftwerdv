@@ -208,17 +208,11 @@ export default function Pagamentos() {
       console.log('🔥 [DEBUG] URL final:', url);
 
       try {
-        // TESTE DIRETO COM FETCH SEM AUTENTICAÇÃO
-        console.log('🔥 [DEBUG] Fazendo fetch direto...');
-        const response = await fetch(url, {
+        // Query autenticada usando apiRequest
+        console.log('🔥 [DEBUG] Fazendo consulta autenticada...');
+        const responseData = await apiRequest(url, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
         });
-        
-        console.log('🔥 [DEBUG] Response status:', response.status);
-        const responseData = await response.json();
         console.log('🔥 [DEBUG] Response data:', responseData);
         
         if (responseData.success && Array.isArray(responseData.data)) {

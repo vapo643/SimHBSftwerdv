@@ -113,7 +113,7 @@ const router = Router();
  * Get payments list - SIMPLIFICADO
  * GET /api/pagamentos
  */
-router.get('/', async (req: AuthenticatedRequest, res) => {
+router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     console.log('[PAGAMENTOS] Endpoint simples chamado!');
     
