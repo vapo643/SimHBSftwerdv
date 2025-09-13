@@ -24,6 +24,9 @@ import { UnitOfWork } from '../lib/unit-of-work.js';
 import { logInfo, logError } from '../lib/logger.js';
 import { SecureLogger, sanitizeWebhookPayload } from '../modules/shared/infrastructure/SanitizedLogger';
 import { realtimeService } from './realtimeService.js';
+// SEGURANÇA DUPLA: Import para registrar assinaturas confirmadas
+import { db } from '../lib/supabase.js';
+import { clicksignAssinaturasConfirmadas } from '@shared/schema';
 
 interface WebhookEvent {
   event: string;
@@ -402,6 +405,9 @@ class ClickSignWebhookService {
     console.log(`[CLICKSIGN → INTER] 🚀 Triggering automatic boleto generation`);
     await this.triggerBoletoGeneration(proposta);
 
+    // SEGURANÇA DUPLA: Registrar assinatura confirmada via webhook (SEMPRE no final, após sucesso)
+    await this.registrarAssinaturaConfirmada(proposta, data, 'auto_close');
+
     return {
       processed: true,
       proposalId: proposta.id,
@@ -618,6 +624,9 @@ class ClickSignWebhookService {
       );
       // Erro não bloqueia o webhook - será processado posteriormente
     }
+
+    // SEGURANÇA DUPLA: Registrar assinatura confirmada via webhook (SEMPRE no final, após sucesso)
+    await this.registrarAssinaturaConfirmada(proposta, data, 'sign');
 
     return { processed: true, proposalId: proposta.id, documentKey: data.document?.key };
   }
@@ -992,6 +1001,65 @@ class ClickSignWebhookService {
   private formatDateBR(dateString: string): string {
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
+  }
+
+  /**
+   * SEGURANÇA DUPLA: Registrar assinatura confirmada via webhook
+   * Este método cria uma evidência imutável de que a assinatura foi realmente confirmada pelo ClickSign
+   */
+  private async registrarAssinaturaConfirmada(proposta: any, data: WebhookEvent['data'], eventType: string): Promise<void> {
+    try {
+      if (!db) {
+        logError('[CLICKSIGN WEBHOOK] ❌ Database não disponível para registrar assinatura confirmada', new Error('DB unavailable'), {
+          propostaId: proposta.id,
+          eventType,
+          method: 'registrarAssinaturaConfirmada'
+        });
+        return;
+      }
+
+      const webhookEventId = `${eventType}_${data.document?.key || data.list?.key}_${Date.now()}`;
+      
+      const assinaturaData = {
+        propostaId: proposta.id,
+        documentKey: data.document?.key || data.list?.key || '',
+        eventType: eventType,
+        signerEmail: data.signer?.email || null,
+        signerName: data.signer?.name || null,
+        signedAt: data.signer?.sign_at ? new Date(data.signer.sign_at) : new Date(),
+        webhookEventId: webhookEventId,
+        webhookPayload: {
+          eventType,
+          documentKey: data.document?.key,
+          listKey: data.list?.key,
+          signer: data.signer,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      await db.insert(clicksignAssinaturasConfirmadas).values(assinaturaData);
+
+      logInfo('[CLICKSIGN WEBHOOK] 🔐 Assinatura confirmada registrada para segurança dupla', {
+        propostaId: proposta.id,
+        documentKey: data.document?.key,
+        eventType,
+        webhookEventId,
+        signerEmail: data.signer?.email,
+        service: 'clickSignWebhookService',
+        method: 'registrarAssinaturaConfirmada'
+      });
+
+    } catch (error) {
+      logError('[CLICKSIGN WEBHOOK] ❌ Erro ao registrar assinatura confirmada (não bloqueia processo principal)', error as Error, {
+        propostaId: proposta.id,
+        eventType,
+        documentKey: data.document?.key,
+        method: 'registrarAssinaturaConfirmada'
+      });
+      
+      // Este erro não deve interromper o fluxo principal do webhook
+      // Apenas loga para investigação posterior
+    }
   }
 }
 

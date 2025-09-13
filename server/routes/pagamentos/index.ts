@@ -521,7 +521,7 @@ router.get('/:id/verificar-documentos', jwtAuthMiddleware, async (req: Authentic
 
     // Get proposal from database
     const { db } = await import('../../lib/supabase.ts');
-    const { propostas } = await import('@shared/schema');
+    const { propostas, clicksignAssinaturasConfirmadas } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
 
     if (!db) {
@@ -534,13 +534,38 @@ router.get('/:id/verificar-documentos', jwtAuthMiddleware, async (req: Authentic
       return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
+    // SEGURANÇA DUPLA: Verificar se assinatura foi realmente confirmada via webhook do ClickSign
+    const [assinaturaConfirmada] = await db
+      .select()
+      .from(clicksignAssinaturasConfirmadas)
+      .where(eq(clicksignAssinaturasConfirmadas.propostaId, id))
+      .limit(1);
+
+    console.log(`[PAGAMENTOS VERIFICAÇÃO] 🔍 Dupla validação para proposta ${id}:`, {
+      statusProposta: proposta.status,
+      ccbGerado: proposta.ccbGerado,
+      assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida,
+      assinaturaConfirmadaViaWebhook: !!assinaturaConfirmada,
+      documentKeyWebhook: assinaturaConfirmada?.documentKey,
+      eventoWebhook: assinaturaConfirmada?.eventType
+    });
+
+    // NOVA LÓGICA: CCB só é considerada assinada se atender AMBOS os critérios:
+    // 1. Status da proposta é ASSINATURA_CONCLUIDA E
+    // 2. Existe registro de webhook confirmando a assinatura
+    const ccbRealmenteAssinada = 
+      proposta.status === 'ASSINATURA_CONCLUIDA' && 
+      !!assinaturaConfirmada;
+
     // Build verification data
     const verificacoes = {
-      ccbAssinada: proposta.ccbGerado && proposta.assinaturaEletronicaConcluida,
+      ccbAssinada: ccbRealmenteAssinada,
       titularidadeConta: proposta.dadosPagamentoCpfTitular === proposta.clienteCpf,
       documentosCcb: {
-        urlCcb: proposta.ccbGerado ? `/api/propostas/${id}/ccb` : null,
-        dataAssinatura: proposta.dataAprovacao,
+        urlCcb: ccbRealmenteAssinada ? `/api/propostas/${id}/ccb` : null,
+        dataAssinatura: assinaturaConfirmada?.signedAt || proposta.dataAprovacao,
+        eventoConfirmacao: assinaturaConfirmada?.eventType,
+        assinantePorWebhook: assinaturaConfirmada?.signerEmail,
       },
       dadosPagamento: {
         valor: Number(proposta.valorTotalFinanciado || 0),
@@ -556,7 +581,25 @@ router.get('/:id/verificar-documentos', jwtAuthMiddleware, async (req: Authentic
           pix: proposta.dadosPagamentoPix,
         },
       },
+      // SEGURANÇA: Informações de auditoria (somente para debugging, não expor em produção)
+      _debug: process.env.NODE_ENV === 'development' ? {
+        statusProposta: proposta.status,
+        webhookConfirmado: !!assinaturaConfirmada,
+        motivoRejeicao: !ccbRealmenteAssinada ? 
+          (!proposta.status || proposta.status !== 'ASSINATURA_CONCLUIDA' ? 'Status não é ASSINATURA_CONCLUIDA' :
+           !assinaturaConfirmada ? 'Sem registro de webhook do ClickSign' : 'Motivo desconhecido') : null
+      } : undefined,
     };
+
+    // Log de segurança para auditoria
+    if (!ccbRealmenteAssinada) {
+      console.warn(`[PAGAMENTOS VERIFICAÇÃO] ⚠️ BLOQUEIO POR SEGURANÇA: Proposta ${id} não passou na dupla validação`, {
+        statusProposta: proposta.status,
+        assinaturaConfirmadaViaWebhook: !!assinaturaConfirmada,
+        userId,
+        timestamp: new Date().toISOString()
+      });
+    }
 
     res.json(verificacoes);
   } catch (error: any) {
