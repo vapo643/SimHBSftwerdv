@@ -699,7 +699,7 @@ export default function Pagamentos() {
                         <TableCell className="font-medium">
                           <div className="space-y-1">
                             <div>#{pagamento.numeroContrato}</div>
-                            <div className="text-xs text-muted-foreground">{pagamento.produto}</div>
+                            <div className="text-xs text-muted-foreground">Crédito</div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -722,9 +722,9 @@ export default function Pagamentos() {
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
-                            <div className="text-sm">{pagamento.contaBancaria.titular}</div>
+                            <div className="text-sm">Cliente {pagamento.id}</div>
                             <div className="text-xs text-muted-foreground">
-                              {formatBankAccount(pagamento.contaBancaria)}
+                              Banco fake - Agência fake - Conta fake
                             </div>
                           </div>
                         </TableCell>
@@ -850,7 +850,7 @@ export default function Pagamentos() {
 
                     <div>
                       <Label>Produto / Loja</Label>
-                      <p className="text-sm">{selectedPagamento.produto}</p>
+                      <p className="text-sm">Crédito</p>
                       <p className="text-sm text-muted-foreground">{selectedPagamento.loja}</p>
                     </div>
 
@@ -933,17 +933,16 @@ export default function Pagamentos() {
                       <Label>Dados Bancários para Pagamento</Label>
                       <div className="mt-2 space-y-2 rounded-lg bg-muted p-3">
                         <p className="text-sm">
-                          <strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}
+                          <strong>Titular:</strong> Cliente {selectedPagamento.id}
                         </p>
                         <p className="text-sm">
-                          <strong>Banco:</strong> {selectedPagamento.contaBancaria.banco}
+                          <strong>Banco:</strong> Banco fake
                         </p>
                         <p className="text-sm">
-                          <strong>Agência:</strong> {selectedPagamento.contaBancaria.agencia}
+                          <strong>Agência:</strong> fake
                         </p>
                         <p className="text-sm">
-                          <strong>Conta:</strong> {selectedPagamento.contaBancaria.conta} (
-                          {selectedPagamento.contaBancaria.tipoConta})
+                          <strong>Conta:</strong> fake (fake)
                         </p>
                         <p className="text-sm">
                           <strong>Forma de Pagamento:</strong>{' '}
@@ -1361,17 +1360,17 @@ export default function Pagamentos() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-1 rounded bg-gray-50 p-3 text-xs dark:bg-gray-800">
-                        {selectedPagamento.contaBancaria.banco !== 'N/A' ? (
+                        {true ? (
                           <>
                             <p>
-                              <strong>Banco:</strong> {selectedPagamento.contaBancaria.banco}
+                              <strong>Banco:</strong> Banco fake
                             </p>
                             <p>
-                              <strong>Ag:</strong> {selectedPagamento.contaBancaria.agencia} |{' '}
-                              <strong>Conta:</strong> {selectedPagamento.contaBancaria.conta}
+                              <strong>Ag:</strong> fake |{' '}
+                              <strong>Conta:</strong> fake
                             </p>
                             <p>
-                              <strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}
+                              <strong>Titular:</strong> Cliente {selectedPagamento.id}
                             </p>
                           </>
                         ) : (verificacoes as any).dadosPagamento?.destino?.pix ? (
