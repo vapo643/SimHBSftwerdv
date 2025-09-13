@@ -73,7 +73,16 @@ class ClickSignWebhookService {
     } else {
       // Fallback para compatibilidade - criar internamente se não injetado
       const unitOfWork = new UnitOfWork();
-      this.marcarAssinaturaConcluidaUseCase = new MarcarAssinaturaConcluidaUseCase(unitOfWork);
+      // Usar adaptador para compatibilidade com interface IUnitOfWork
+      const unitOfWorkAdapter = {
+        proposals: null,
+        ccbs: null,
+        boletos: null,
+        executeInTransaction: unitOfWork.withTransaction.bind(unitOfWork),
+        isInTransaction: false,
+        transactionId: null
+      };
+      this.marcarAssinaturaConcluidaUseCase = new MarcarAssinaturaConcluidaUseCase(unitOfWorkAdapter as any);
     }
 
     if (!this.webhookSecret) {

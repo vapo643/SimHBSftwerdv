@@ -216,9 +216,9 @@ export default function Pagamentos() {
         });
         console.log('🔥 [DEBUG] Response data:', responseData);
         
-        if (responseData.success && Array.isArray(responseData.data)) {
-          console.log('🔥 [DEBUG] Retornando', responseData.data.length, 'itens');
-          return responseData.data;
+        if ((responseData as any).success && Array.isArray((responseData as any).data)) {
+          console.log('🔥 [DEBUG] Retornando', (responseData as any).data.length, 'itens');
+          return (responseData as any).data;
         }
         
         console.log('🔥 [DEBUG] Retornando array vazio');
@@ -1292,6 +1292,70 @@ export default function Pagamentos() {
                         </span>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* Informações do Webhook ClickSign */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4" />
+                      Verificação ClickSign
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Informações de transparência sobre a assinatura eletrônica
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {(verificacoes as any)?.webhookConfirmacao?.confirmadoViaWebhook ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-700">
+                            Assinatura confirmada automaticamente via webhook
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 text-xs">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Evento:</Label>
+                            <p className="font-mono text-xs">
+                              {(verificacoes as any).webhookConfirmacao.eventoWebhook}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Assinante:</Label>
+                            <p className="text-xs">
+                              {(verificacoes as any).webhookConfirmacao.assinantePorWebhook}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Data de Confirmação:</Label>
+                            <p className="text-xs">
+                              {(verificacoes as any).webhookConfirmacao.dataConfirmacao
+                                ? format(
+                                    new Date((verificacoes as any).webhookConfirmacao.dataConfirmacao),
+                                    "dd/MM/yyyy 'às' HH:mm",
+                                    { locale: ptBR }
+                                  )
+                                : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <UserCheck className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium text-blue-700">
+                            Proposta marcada manualmente como assinada
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {(verificacoes as any)?.webhookConfirmacao?.observacao || 
+                           'Esta proposta foi processada manualmente pelo atendente.'}
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
