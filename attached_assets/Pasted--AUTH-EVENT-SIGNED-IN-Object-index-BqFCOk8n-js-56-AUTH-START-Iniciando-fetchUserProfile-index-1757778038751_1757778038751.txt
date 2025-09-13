@@ -1,0 +1,66 @@
+ [AUTH EVENT] SIGNED_IN Object
+index-BqFCOk8n.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-BqFCOk8n.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BqFCOk8n.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 0 Array(0)
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 0
+index-BqFCOk8n.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BqFCOk8n.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-BqFCOk8n.js:56 🔥 [DEBUG] Query function executando!
+index-BqFCOk8n.js:56 🔥 [DEBUG] URL final: /api/pagamentos?
+index-BqFCOk8n.js:56 🔥 [DEBUG] Fazendo fetch direto...
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+index-BqFCOk8n.js:56 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+index-BqFCOk8n.js:56 🔐 [AUTH EVENT] INITIAL_SESSION Object
+index-BqFCOk8n.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-13T16:16:05.000Z
+index-BqFCOk8n.js:56 [PASSO 3 - ENVIO] Object
+index-BqFCOk8n.js:56 [PASSO 3 - ENVIO] Object
+index-BqFCOk8n.js:56 🔥 [DEBUG] Response status: 200
+index-BqFCOk8n.js:56 🔥 [DEBUG] Response data: Object
+index-BqFCOk8n.js:56 🔥 [DEBUG] Retornando 1 itens
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-BqFCOk8n.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-BqFCOk8n.js:56 TypeError: Cannot read properties of undefined (reading 'papel')
+    at index-BqFCOk8n.js:679:91520
+    at Array.map (<anonymous>)
+    at iIe (index-BqFCOk8n.js:679:89917)
+    at jA (index-BqFCOk8n.js:38:17830)
+    at IA (index-BqFCOk8n.js:40:3162)
+    at IF (index-BqFCOk8n.js:40:45557)
+    at PF (index-BqFCOk8n.js:40:40356)
+    at Gie (index-BqFCOk8n.js:40:40282)
+    at Ax (index-BqFCOk8n.js:40:40133)
+    at YA (index-BqFCOk8n.js:40:36414)
+    at EF (index-BqFCOk8n.js:40:37227)
+    at Hl (index-BqFCOk8n.js:38:3281)
+    at index-BqFCOk8n.js:40:34722Caused by: React ErrorBoundary TypeError: Cannot read properties of undefined (reading 'papel')
+    at iIe (index-BqFCOk8n.js:679:77946)
+    at Lr (index-BqFCOk8n.js:666:12842)
+    at Tr (index-BqFCOk8n.js:83:3352)
+    at bbe (index-BqFCOk8n.js:83:4153)
+    at H9e
+    at u (index-BqFCOk8n.js:107:46323)
+    at dY (index-BqFCOk8n.js:622:51116)
+    at o1e (index-BqFCOk8n.js:666:8793)
+    at n1e (index-BqFCOk8n.js:666:5347)
+    at s1e (index-BqFCOk8n.js:666:7828)
+    at Ube (index-BqFCOk8n.js:83:35955)
+    at W9e
+    at J0e (index-BqFCOk8n.js:75:3511)
+    at q2 (index-BqFCOk8n.js:681:44575)
+(anonymous) @ index-BqFCOk8n.js:56Understand this error
+index-BqFCOk8n.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-BqFCOk8n.js:56 [API Client] After dual-key transformation: Object
+index-BqFCOk8n.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-BqFCOk8n.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+index-BqFCOk8n.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-BqFCOk8n.js:56 [API Client] After dual-key transformation: Object

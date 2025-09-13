@@ -747,7 +747,7 @@ export default function Pagamentos() {
                           <div className="space-y-1">
                             <div className="text-sm">Solicitado por Sistema</div>
                             <div className="text-xs text-muted-foreground">
-                              {pagamento.requisitadoPor.papel}
+                              Administrador
                             </div>
                           </div>
                         </TableCell>
@@ -858,7 +858,7 @@ export default function Pagamentos() {
                       <Label>Solicitado por</Label>
                       <p className="text-sm">Sistema</p>
                       <p className="text-sm text-muted-foreground">
-                        {selectedPagamento.requisitadoPor.papel} -{' '}
+                        Administrador -{' '}
                         {format(
                           new Date(selectedPagamento.dataRequisicao),
                           "dd/MM/yyyy 'às' HH:mm"
@@ -871,7 +871,7 @@ export default function Pagamentos() {
                         <Label>Aprovado por</Label>
                         <p className="text-sm">Sistema</p>
                         <p className="text-sm text-muted-foreground">
-                          {selectedPagamento.aprovadoPor.papel} -{' '}
+                          Administrador -{' '}
                           {selectedPagamento.dataAprovacao &&
                             format(
                               new Date(selectedPagamento.dataAprovacao),
