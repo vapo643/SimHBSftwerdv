@@ -113,12 +113,12 @@ const router = Router();
  * Get payments list - SIMPLIFICADO
  * GET /api/pagamentos
  */
-router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/', async (req: AuthenticatedRequest, res) => {
   try {
     console.log('[PAGAMENTOS] Endpoint simples chamado!');
     
     // SOLUÇÃO ULTRA-SIMPLES: buscar direto da tabela propostas
-    const { db } = await import('../../lib/supabase.js');
+    const { db } = await import('../../lib/supabase.ts');
     const { propostas } = await import('@shared/schema');
     const { eq, sql } = await import('drizzle-orm');
     

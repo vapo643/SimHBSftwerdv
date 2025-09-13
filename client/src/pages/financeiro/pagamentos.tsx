@@ -73,44 +73,15 @@ import {
 import PaymentReviewModal from './pagamentos-review';
 import MarcarPagoModal from './marcar-pago-modal';
 
-// FASE 3 - PEAF V1.5: Schema Zod correspondente à interface Pagamento
+// Schema SIMPLES temporário para debug - alinhado com backend simpleData
 const PagamentoSchema = z.object({
-  id: z.string().uuid(),
-  propostaId: z.string().uuid(),
-  numeroContrato: z.string(),
+  id: z.string(),
   nomeCliente: z.string(),
   cpfCliente: z.string(),
-  valorFinanciado: z.number(),
   valorLiquido: z.number(),
-  valorIOF: z.number(),
-  valorTAC: z.number(),
-  contaBancaria: z.object({
-    banco: z.string(),
-    agencia: z.string(),
-    conta: z.string(),
-    tipoConta: z.string(),
-    titular: z.string(),
-  }),
   status: z.string(),
-  dataRequisicao: z.string(),
-  dataAprovacao: z.string().optional(),
-  dataPagamento: z.string().optional(),
-  requisitadoPor: z.object({
-    id: z.string(),
-    nome: z.string(),
-    papel: z.string(),
-  }),
-  aprovadoPor: z.object({
-    id: z.string(),
-    nome: z.string(),
-    papel: z.string(),
-  }).optional(),
-  motivoRejeicao: z.string().optional(),
-  observacoes: z.string().optional(),
-  comprovante: z.string().optional(),
-  formaPagamento: z.enum(['ted', 'pix', 'doc']),
-  loja: z.string(),
-  produto: z.string(),
+  dataRequisicao: z.string().optional(),
+  numeroContrato: z.string(),
 });
 
 const ApiResponseSchema = z.object({

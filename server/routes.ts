@@ -3823,7 +3823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api', observacoesRouter);
 
   // Register Pagamentos routes
-  const pagamentosRouter = (await import('./routes/pagamentos/index.js')).default;
+  const pagamentosRouter = (await import('./routes/pagamentos/index.ts')).default;
   app.use('/api/pagamentos', pagamentosRouter);
 
   // Register Formalização routes
@@ -4182,9 +4182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const cobrancasRoutes = (await import('./routes/cobrancas.js')).default;
   app.use('/api/cobrancas', cobrancasRoutes);
 
-  // Pagamentos routes
-  const pagamentosRoutes = (await import('./routes/pagamentos/index.js')).default;
-  app.use('/api/financeiro/pagamentos', pagamentosRoutes);
+  // REMOVIDO: Rota duplicada de pagamentos - usando apenas /api/pagamentos
 
   // ClickSign Integration routes
   app.use('/api', clicksignIntegrationRoutes);
