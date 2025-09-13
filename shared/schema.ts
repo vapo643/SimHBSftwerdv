@@ -1261,6 +1261,28 @@ export const clicksignWebhookEvents = pgTable('clicksign_webhook_events', {
   eventIdIdx: index('idx_clicksign_webhook_events_event_id').on(table.eventId),
 }));
 
+// Tabela para registrar assinaturas confirmadas via webhook - SEGURANÇA DUPLA
+export const clicksignAssinaturasConfirmadas = pgTable('clicksign_assinaturas_confirmadas', {
+  id: serial('id').primaryKey(),
+  propostaId: text('proposta_id')
+    .references(() => propostas.id)
+    .notNull(),
+  documentKey: text('document_key').notNull(), // ClickSign document key
+  eventType: text('event_type').notNull(), // 'auto_close', 'sign', 'document_closed'
+  signerEmail: text('signer_email'), // Email do assinante (quando disponível)
+  signerName: text('signer_name'), // Nome do assinante (quando disponível) 
+  signedAt: timestamp('signed_at'), // Quando foi assinado (do webhook)
+  webhookReceivedAt: timestamp('webhook_received_at').defaultNow().notNull(),
+  webhookEventId: text('webhook_event_id').notNull().unique(), // Para evitar duplicatas
+  webhookPayload: jsonb('webhook_payload'), // Payload completo do webhook para auditoria
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  // Índices para performance e segurança
+  propostaIdx: index('idx_clicksign_assinaturas_proposta').on(table.propostaId),
+  documentKeyIdx: index('idx_clicksign_assinaturas_document').on(table.documentKey),
+  webhookEventIdx: index('idx_clicksign_assinaturas_webhook_event').on(table.webhookEventId),
+}));
+
 // Schema and types
 export const insertClicksignWebhookEventSchema = createInsertSchema(clicksignWebhookEvents).omit({
   id: true,
@@ -1270,3 +1292,13 @@ export const insertClicksignWebhookEventSchema = createInsertSchema(clicksignWeb
 
 export type InsertClicksignWebhookEvent = z.infer<typeof insertClicksignWebhookEventSchema>;
 export type ClicksignWebhookEvent = typeof clicksignWebhookEvents.$inferSelect;
+
+// Schemas e types para assinaturas confirmadas
+export const insertClicksignAssinaturaConfirmadaSchema = createInsertSchema(clicksignAssinaturasConfirmadas).omit({
+  id: true,
+  createdAt: true,
+  webhookReceivedAt: true,
+});
+
+export type InsertClicksignAssinaturaConfirmada = z.infer<typeof insertClicksignAssinaturaConfirmadaSchema>;
+export type ClicksignAssinaturaConfirmada = typeof clicksignAssinaturasConfirmadas.$inferSelect;
