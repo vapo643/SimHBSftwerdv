@@ -1,0 +1,30 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - AUDITORIA CIRÚRGICA (PRÉ-IMPLEMENTAÇÃO)
+
+* **Sumário da Missão:** Executar uma auditoria forense detalhada e final sobre os arquivos-alvo identificados no plano estratégico, extraindo os trechos de código exatos que serão modificados na fase de implementação.
+* **Intenção Estratégica:** Criar a "fotografia" final do estado "antes" da modificação. Este passo é mandatório para garantir que o plano de implementação (Fase 3 do PDME) seja baseado na realidade absoluta do código, prevenindo quaisquer surpresas durante a execução.
+* **Restrição Absoluta:** Auditoria apenas. **NÃO FAÇA NENHUMA MODIFICAÇÃO DE CÓDIGO.**
+
+---
+
+**[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+*Continue a utilizar a documentação oficial da ClickSign como sua fonte primária de verdade para validar qualquer detalhe relacionado a payloads de eventos ou assinaturas HMAC durante esta auditoria.*
+
+---
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Mapeamento de Pontos de Contato:**
+    * **Webhook Handler:** Apresente o código completo do arquivo `server/routes/webhooks.ts`. Destaque a lógica de validação HMAC e o `switch` ou `if/else` que processa os eventos.
+    * **Serviços Relevantes:** Apresente os métodos relevantes dos serviços `pagamentoService.ts` e `propostaService.ts` que são ou deveriam ser chamados pelo webhook para atualizar o status da proposta.
+    * **Componente da Timeline:** Apresente o componente React (`.tsx`) completo que renderiza a timeline de formalização.
+    * **Componente de Pagamentos:** Apresente o componente React (`.tsx`) completo que renderiza a tela de pagamentos, com foco no botão "Confirmar Veracidade".
+
+**2. Relatório de Análise de Vulnerabilidades Atuais:**
+    * Com base no código apresentado, forneça uma análise detalhada:
+        * **Falha HMAC:** Explique por que a comparação de buffers atual está incorreta.
+        * **Lógica Quebrada:** Aponte exatamente onde a lógica do botão "Confirmar Veracidade" falha e porquê.
+        * **Débito de Reatividade:** Confirme que não existe nenhum mecanismo de atualização em tempo real (como SSE ou WebSockets) implementado para estes componentes de UI.
+
+**EXPECTED (Entregável Final):**
+Um relatório de auditoria consolidado, contendo todos os trechos de código solicitados e uma análise técnica detalhada das falhas, confirmando o plano estratégico que foi definido. Este relatório nos dará a autorização final para prosseguir com a fase de implementação.
