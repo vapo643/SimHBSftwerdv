@@ -1,0 +1,165 @@
+ [AUTH EVENT] SIGNED_IN Object
+index-Dj-65JdK.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 0 Array(0)
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 0
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-Dj-65JdK.js:56 🔥 [DEBUG] Query function executando!
+index-Dj-65JdK.js:56 🔥 [DEBUG] URL final: /api/pagamentos?
+index-Dj-65JdK.js:56 🔥 [DEBUG] Fazendo consulta autenticada...
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+index-Dj-65JdK.js:56 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+index-Dj-65JdK.js:56 🔐 [AUTH EVENT] INITIAL_SESSION Object
+/api/events:1  Failed to load resource: the server responded with a status of 401 ()Understand this error
+index-Dj-65JdK.js:56 [SSE PAGAMENTOS] ❌ Connection error: Event
+(anonymous) @ index-Dj-65JdK.js:56Understand this error
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-13T22:40:18.000Z
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-Dj-65JdK.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos? : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 🔥 [DEBUG] Response data: Object
+index-Dj-65JdK.js:56 🔥 [DEBUG] Retornando 1 itens
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+index-Dj-65JdK.js:56 🔍 [IDLE TIMER] Tab became hidden, timer continues
+/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-Dj-65JdK.js:56 🔐 [AUTH EVENT] SIGNED_IN Object
+index-Dj-65JdK.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] Object
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-Dj-65JdK.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-13T22:40:18.000Z', hasActiveRefresh: false}
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/pagamentos/6206c1…-686a-4084-b28f-d999ef0a0e9f/verificar-documentos', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Hq3LcqDRr_G60tki1IxymzC-RhszSjXR08IjizDyqlA', hasToken: true, isFormData: false}
+requests.js:1  GET https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos 500 (Internal Server Error)
+(anonymous) @ requests.js:1
+(anonymous) @ index-Dj-65JdK.js:56
+fetchWithTimeout @ index-Dj-65JdK.js:107
+Cu @ index-Dj-65JdK.js:107
+await in Cu
+get @ index-Dj-65JdK.js:107
+Ze @ index-Dj-65JdK.js:107
+queryFn @ index-Dj-65JdK.js:679
+s @ index-Dj-65JdK.js:83
+x @ index-Dj-65JdK.js:83
+(anonymous) @ index-Dj-65JdK.js:83Understand this error
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : {error: 'Erro ao verificar documentos', details: 'relation "clicksign_assinaturas_confirmadas" does not exist'}details: "relation \"clicksign_assinaturas_confirmadas\" does not exist"error: "Erro ao verificar documentos"[[Prototype]]: Object
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: {error: 'Erro ao verificar documentos', details: 'relation "clicksign_assinaturas_confirmadas" does not exist'}details: "relation \"clicksign_assinaturas_confirmadas\" does not exist"error: "Erro ao verificar documentos"[[Prototype]]: Object
+index-Dj-65JdK.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-13T22:40:18.000Z', hasActiveRefresh: false}
+index-Dj-65JdK.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-Dj-65JdK.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/pagamentos/6206c1…-686a-4084-b28f-d999ef0a0e9f/verificar-documentos', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Hq3LcqDRr_G60tki1IxymzC-RhszSjXR08IjizDyqlA', hasToken: true, isFormData: false}
+requests.js:1  GET https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos 500 (Internal Server Error)
+(anonymous) @ requests.js:1
+(anonymous) @ index-Dj-65JdK.js:56
+fetchWithTimeout @ index-Dj-65JdK.js:107
+Cu @ index-Dj-65JdK.js:107
+await in Cu
+get @ index-Dj-65JdK.js:107
+Ze @ index-Dj-65JdK.js:107
+queryFn @ index-Dj-65JdK.js:679
+s @ index-Dj-65JdK.js:83
+x @ index-Dj-65JdK.js:83
+(anonymous) @ index-Dj-65JdK.js:83
+Promise.then
+(anonymous) @ index-Dj-65JdK.js:83
+Promise.catch
+x @ index-Dj-65JdK.js:83
+(anonymous) @ index-Dj-65JdK.js:83Understand this error
+index-Dj-65JdK.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : {error: 'Erro ao verificar documentos', details: 'relation "clicksign_assinaturas_confirmadas" does not exist'}
+index-Dj-65JdK.js:56 [API Client] After dual-key transformation: {error: 'Erro ao verificar documentos', details: 'relation "clicksign_assinaturas_confirmadas" does not exist'}
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 [{…}]
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-Dj-65JdK.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: {id: '6206c1e3-686a-4084-b28f-d999ef0a0e9f', nomeCliente: 'Gabriel Santana Jesus Santana', cpfCliente: '20528464760', valorLiquido: 9999.99, status: 'ASSINATURA_CONCLUIDA', …}

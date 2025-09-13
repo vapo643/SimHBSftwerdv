@@ -1303,7 +1303,7 @@ export default function Pagamentos() {
                       Verificação ClickSign
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      Informações de transparência sobre a assinatura eletrônica
+                      Verificação automática via webhook. Se não confirmado, consulte manualmente no ClickSign.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -1543,8 +1543,7 @@ export default function Pagamentos() {
                   }
                 }}
                 disabled={
-                  (!(verificacoes as any)?.ccbAssinada && 
-                   selectedPagamento?.status !== 'ASSINATURA_CONCLUIDA') ||
+                  selectedPagamento?.status !== 'ASSINATURA_CONCLUIDA' ||
                   confirmarDesembolsoMutation.isPending
                 }
               >
