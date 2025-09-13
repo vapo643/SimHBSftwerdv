@@ -110,42 +110,56 @@ const upload = multer({
 const router = Router();
 
 /**
- * Get payments list with filters
+ * Get payments list - SIMPLIFICADO
  * GET /api/pagamentos
  */
 router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const { status, periodo, incluir_pagos } = req.query;
-    const userId = req.user?.id;
-    const userRole = req.user?.role;
-
-    if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' });
+    console.log('[PAGAMENTOS] Endpoint simples chamado!');
+    
+    // SOLUÇÃO ULTRA-SIMPLES: buscar direto da tabela propostas
+    const { db } = await import('../../lib/supabase.js');
+    const { propostas } = await import('@shared/schema');
+    const { eq, sql } = await import('drizzle-orm');
+    
+    if (!db) {
+      console.error('[PAGAMENTOS] Database connection not available');
+      return res.status(500).json({ error: 'Database not connected' });
     }
 
-    const paymentsNested = await pagamentoService.getPayments({
-      status: status as string,
-      periodo: periodo as string,
-      incluir_pagos: incluir_pagos === 'true',
-      userId,
-      userRole: userRole || undefined,
-    });
-
-    // ✅ FASE 2 - PEAF V1.5: APLICAR MAPEAMENTO DTO
-    const paymentsFlat = paymentsNested.map(mapToPagamentoDTO);
-
-    console.log(`[PAGAMENTOS] Mapped ${paymentsFlat.length} proposals to DTO format`);
+    // Query DIRETA e SIMPLES
+    const result = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.status, 'ASSINATURA_CONCLUIDA'))
+      .limit(10); // Limitar para teste
+    
+    console.log(`[PAGAMENTOS] Encontrou ${result.length} propostas com ASSINATURA_CONCLUIDA`);
+    
+    // Resposta SIMPLES sem DTO complexo
+    const simpleData = result.map(proposta => ({
+      id: proposta.id,
+      nomeCliente: proposta.clienteNome || 'N/A',
+      cpfCliente: proposta.clienteCpf || 'N/A', 
+      valorLiquido: parseFloat(proposta.valorLiquidoLiberado || proposta.valor || '0'),
+      status: proposta.status,
+      dataRequisicao: proposta.createdAt?.toISOString(),
+      numeroContrato: proposta.numeroProposta?.toString() || `PROP-${proposta.id.slice(0, 8)}`
+    }));
 
     res.json({
       success: true,
-      data: paymentsFlat, // ✅ Enviar dados planos (DTO)
-      total: paymentsFlat.length,
+      data: simpleData,
+      total: simpleData.length,
+      debug: `Query executada: SELECT * FROM propostas WHERE status = 'ASSINATURA_CONCLUIDA'`
     });
+    
   } catch (error: any) {
     console.error('[PAGAMENTOS] Error getting payments:', error);
     res.status(500).json({
       error: 'Erro ao buscar pagamentos',
       details: error.message,
+      stack: error.stack
     });
   }
 });
