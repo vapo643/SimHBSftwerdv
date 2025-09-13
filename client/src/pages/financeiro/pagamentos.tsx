@@ -748,7 +748,7 @@ export default function Pagamentos() {
                           <div className="space-y-1">
                             <div className="text-sm">Cliente {pagamento.id}</div>
                             <div className="text-xs text-muted-foreground">
-                              Banco fake - Agência fake - Conta fake
+                              {pagamento.dadosPagamentoBanco || 'Banco não informado'} - Agência {pagamento.dadosPagamentoAgencia || 'N/A'} - Conta {pagamento.dadosPagamentoConta || 'N/A'}
                             </div>
                           </div>
                         </TableCell>
@@ -975,16 +975,16 @@ export default function Pagamentos() {
                       <Label>Dados Bancários para Pagamento</Label>
                       <div className="mt-2 space-y-2 rounded-lg bg-muted p-3">
                         <p className="text-sm">
-                          <strong>Titular:</strong> Cliente {selectedPagamento.id}
+                          <strong>Titular:</strong> {selectedPagamento.clienteNome || 'Não informado'}
                         </p>
                         <p className="text-sm">
-                          <strong>Banco:</strong> Banco fake
+                          <strong>Banco:</strong> {selectedPagamento.dadosPagamentoBanco || 'Não informado'}
                         </p>
                         <p className="text-sm">
-                          <strong>Agência:</strong> fake
+                          <strong>Agência:</strong> {selectedPagamento.dadosPagamentoAgencia || 'N/A'}
                         </p>
                         <p className="text-sm">
-                          <strong>Conta:</strong> fake (fake)
+                          <strong>Conta:</strong> {selectedPagamento.dadosPagamentoConta || 'N/A'}
                         </p>
                         <p className="text-sm">
                           <strong>Forma de Pagamento:</strong>{' '}
@@ -1415,17 +1415,17 @@ export default function Pagamentos() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-1 rounded bg-gray-50 p-3 text-xs dark:bg-gray-800">
-                        {true ? (
+                        {(verificacoes as any).dadosPagamento?.destino?.tipo === 'CONTA_BANCARIA' ? (
                           <>
                             <p>
-                              <strong>Banco:</strong> Banco fake
+                              <strong>Banco:</strong> {(verificacoes as any).dadosPagamento.destino.banco || 'Não informado'}
                             </p>
                             <p>
-                              <strong>Ag:</strong> fake |{' '}
-                              <strong>Conta:</strong> fake
+                              <strong>Ag:</strong> {(verificacoes as any).dadosPagamento.destino.agencia || 'N/A'} |{' '}
+                              <strong>Conta:</strong> {(verificacoes as any).dadosPagamento.destino.conta || 'N/A'}
                             </p>
                             <p>
-                              <strong>Titular:</strong> Cliente {selectedPagamento.id}
+                              <strong>Titular:</strong> {selectedPagamento?.clienteNome || 'Não informado'}
                             </p>
                           </>
                         ) : (verificacoes as any).dadosPagamento?.destino?.pix ? (
