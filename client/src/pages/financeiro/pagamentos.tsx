@@ -1252,20 +1252,6 @@ export default function Pagamentos() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        {(verificacoes as any).boletosGerados ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-red-600" />
-                        )}
-                        <span
-                          className={
-                            (verificacoes as any).boletosGerados ? 'text-green-700' : 'text-red-700'
-                          }
-                        >
-                          Boletos Registrados no Inter
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
                         {(verificacoes as any).titularidadeConta ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
@@ -1489,7 +1475,6 @@ export default function Pagamentos() {
                 disabled={
                   !paymentPassword ||
                   !(verificacoes as any)?.ccbAssinada ||
-                  !(verificacoes as any)?.boletosGerados ||
                   confirmarDesembolsoMutation.isPending
                 }
               >
