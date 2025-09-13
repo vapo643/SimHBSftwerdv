@@ -1302,58 +1302,21 @@ export default function Pagamentos() {
                       <ShieldCheck className="h-4 w-4" />
                       Verificação ClickSign
                     </CardTitle>
-                    <CardDescription className="text-xs">
-                      Verificação automática via webhook. Se não confirmado, consulte manualmente no ClickSign.
-                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {(verificacoes as any)?.webhookConfirmacao?.confirmadoViaWebhook ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium text-green-700">
-                            Assinatura confirmada automaticamente via webhook
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-1 gap-2 text-xs">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Evento:</Label>
-                            <p className="font-mono text-xs">
-                              {(verificacoes as any).webhookConfirmacao.eventoWebhook}
-                            </p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Assinante:</Label>
-                            <p className="text-xs">
-                              {(verificacoes as any).webhookConfirmacao.assinantePorWebhook}
-                            </p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Data de Confirmação:</Label>
-                            <p className="text-xs">
-                              {(verificacoes as any).webhookConfirmacao.dataConfirmacao
-                                ? format(
-                                    new Date((verificacoes as any).webhookConfirmacao.dataConfirmacao),
-                                    "dd/MM/yyyy 'às' HH:mm",
-                                    { locale: ptBR }
-                                  )
-                                : 'N/A'}
-                            </p>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-2 text-green-600">
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          CCB ASSINADA VALIDADA PELO WEBHOOK
+                        </span>
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <UserCheck className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium text-blue-700">
-                            Proposta marcada manualmente como assinada
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {(verificacoes as any)?.webhookConfirmacao?.observacao || 
-                           'Esta proposta foi processada manualmente pelo atendente.'}
-                        </p>
+                      <div className="flex items-center gap-2 text-amber-600">
+                        <AlertCircle className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          CCB ASSINADA NÃO VALIDADA PELO WEBHOOK, RECOMENDADO CONFERIR MANUALMENTE NO CLICKSIGN
+                        </span>
                       </div>
                     )}
                   </CardContent>
