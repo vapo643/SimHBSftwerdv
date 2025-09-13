@@ -1256,10 +1256,10 @@ export const clicksignWebhookEvents = pgTable('clicksign_webhook_events', {
   documentKey: text('document_key'), // document.key ou envelope.id
   receivedAt: timestamp('received_at').defaultNow().notNull(),
   createdAt: timestamp('created_at').defaultNow(),
-});
-
-// Index for performance
-export const clicksignWebhookEventsIndex = index('idx_clicksign_webhook_events_event_id').on(clicksignWebhookEvents.eventId);
+}, (table) => ({
+  // Index for performance
+  eventIdIdx: index('idx_clicksign_webhook_events_event_id').on(table.eventId),
+}));
 
 // Schema and types
 export const insertClicksignWebhookEventSchema = createInsertSchema(clicksignWebhookEvents).omit({

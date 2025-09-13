@@ -3767,6 +3767,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/webhooks', webhookRouter);
   app.use('/webhooks/inter', interWebhookRouter);
 
+  // Register Server-Sent Events route - PAM V1.0
+  const eventsRouter = (await import('./routes/events.js')).default;
+  app.use('/api/events', eventsRouter);
+
   // Register Inter Collections routes FIRST (more specific route)
   const interCollectionsRouter = (await import('./routes/inter-collections.js')).default;
   app.use('/api/inter/collections', interCollectionsRouter);

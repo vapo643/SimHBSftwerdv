@@ -23,6 +23,7 @@ import { DomainException } from '../modules/shared/domain/DomainException.js';
 import { UnitOfWork } from '../lib/unit-of-work.js';
 import { logInfo, logError } from '../lib/logger.js';
 import { SecureLogger, sanitizeWebhookPayload } from '../modules/shared/infrastructure/SanitizedLogger';
+import { realtimeService } from './realtimeService.js';
 
 interface WebhookEvent {
   event: string;
@@ -287,6 +288,22 @@ class ClickSignWebhookService {
 
       await storage.updateProposta(proposta.id, clickSignUpdateData);
 
+      // PAM V1.0: Enviar evento SSE para atualizações em tempo real
+      try {
+        realtimeService.sendProposalSigned(proposta.id);
+        logInfo('[CLICKSIGN WEBHOOK] 📡 Evento SSE enviado - Proposta assinada', {
+          propostaId: proposta.id,
+          event: 'PROPOSAL_SIGNED',
+          triggeredBy: 'webhook_auto_close'
+        });
+      } catch (sseError) {
+        // Não interromper processamento por erro de SSE
+        logError('[CLICKSIGN WEBHOOK] ⚠️ Erro ao enviar evento SSE (não crítico)', sseError as Error, {
+          propostaId: proposta.id,
+          method: 'handleAutoClose'
+        });
+      }
+
     } catch (error) {
       if (error instanceof DomainException) {
         // PAM V1.0: Tratamento idempotente - Se já processado, é sucesso para o webhook
@@ -508,6 +525,21 @@ class ClickSignWebhookService {
         statusNovo: 'ASSINATURA_CONCLUIDA',
         observacao: `✍️ Documento assinado${signerInfo} - Status atualizado automaticamente para ASSINATURA_CONCLUIDA`,
       });
+
+      // PAM V1.0: Enviar evento SSE para atualizações em tempo real
+      try {
+        realtimeService.sendProposalSigned(proposta.id);
+        logInfo('[CLICKSIGN WEBHOOK] 📡 Evento SSE enviado - Proposta assinada via SIGN', {
+          propostaId: proposta.id,
+          event: 'PROPOSAL_SIGNED',
+          triggeredBy: 'webhook_sign'
+        });
+      } catch (sseError) {
+        logError('[CLICKSIGN WEBHOOK] ⚠️ Erro ao enviar evento SSE (não crítico)', sseError as Error, {
+          propostaId: proposta.id,
+          method: 'handleSign'
+        });
+      }
 
     } catch (error) {
       if (error instanceof DomainException) {
