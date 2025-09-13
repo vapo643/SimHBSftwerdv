@@ -946,7 +946,7 @@ export default function Pagamentos() {
                         </p>
                         <p className="text-sm">
                           <strong>Forma de Pagamento:</strong>{' '}
-                          {selectedPagamento.formaPagamento.toUpperCase()}
+                          PIX
                         </p>
                       </div>
                     </div>
