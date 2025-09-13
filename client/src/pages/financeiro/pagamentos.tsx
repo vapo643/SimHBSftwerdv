@@ -745,7 +745,7 @@ export default function Pagamentos() {
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
-                            <div className="text-sm">{pagamento.requisitadoPor.nome}</div>
+                            <div className="text-sm">Solicitado por Sistema</div>
                             <div className="text-xs text-muted-foreground">
                               {pagamento.requisitadoPor.papel}
                             </div>
@@ -856,7 +856,7 @@ export default function Pagamentos() {
 
                     <div>
                       <Label>Solicitado por</Label>
-                      <p className="text-sm">{selectedPagamento.requisitadoPor.nome}</p>
+                      <p className="text-sm">Sistema</p>
                       <p className="text-sm text-muted-foreground">
                         {selectedPagamento.requisitadoPor.papel} -{' '}
                         {format(
@@ -869,7 +869,7 @@ export default function Pagamentos() {
                     {selectedPagamento.aprovadoPor && (
                       <div>
                         <Label>Aprovado por</Label>
-                        <p className="text-sm">{selectedPagamento.aprovadoPor.nome}</p>
+                        <p className="text-sm">Sistema</p>
                         <p className="text-sm text-muted-foreground">
                           {selectedPagamento.aprovadoPor.papel} -{' '}
                           {selectedPagamento.dataAprovacao &&
@@ -976,7 +976,7 @@ export default function Pagamentos() {
                       <div className="flex-1">
                         <p className="text-sm font-medium">Solicitação Criada</p>
                         <p className="text-sm text-muted-foreground">
-                          Por {selectedPagamento.requisitadoPor.nome} em{' '}
+                          Por Sistema em{' '}
                           {format(
                             new Date(selectedPagamento.dataRequisicao),
                             "dd/MM/yyyy 'às' HH:mm"
@@ -993,7 +993,7 @@ export default function Pagamentos() {
                         <div className="flex-1">
                           <p className="text-sm font-medium">Pagamento Aprovado</p>
                           <p className="text-sm text-muted-foreground">
-                            Por {selectedPagamento.aprovadoPor?.nome} em{' '}
+                            Por Sistema em{' '}
                             {format(
                               new Date(selectedPagamento.dataAprovacao),
                               "dd/MM/yyyy 'às' HH:mm"
