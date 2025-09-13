@@ -156,6 +156,39 @@ function FormalizacaoList() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  // PAM V1.0: SSE connection for real-time updates
+  useEffect(() => {
+    const eventSource = new EventSource('/api/events');
+
+    eventSource.onopen = () => {
+      console.log('[SSE] 📡 Connected to real-time events');
+    };
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('[SSE] 📨 Event received:', data);
+
+        if (data.type === 'PROPOSAL_SIGNED' && data.proposalId) {
+          // Invalidate formalizacao queries to refresh data
+          queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+          console.log('[SSE] 🔄 Proposta atualizada em tempo real:', data.proposalId);
+        }
+      } catch (error) {
+        console.error('[SSE] ❌ Error parsing event data:', error);
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('[SSE] ❌ Connection error:', error);
+    };
+
+    return () => {
+      eventSource.close();
+      console.log('[SSE] 🔌 Connection closed');
+    };
+  }, [queryClient]);
+
   // Função para parsing defensivo de dados JSONB
   const parseJsonbField = (field: any, fieldName: string, propostaId: string) => {
     // Se é null, undefined ou vazio, retornar objeto vazio
