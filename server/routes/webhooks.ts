@@ -10,6 +10,7 @@ import { sql } from 'drizzle-orm';
 import { documentProcessingService, ProcessingSource } from '../services/documentProcessingService';
 import { clickSignWebhookService } from '../services/clickSignWebhookService';
 import { z } from 'zod';
+import { clicksignWebhookEvents } from '../../shared/schema.js';
 
 const router = express.Router();
 
@@ -58,8 +59,8 @@ function validateClickSignHMAC(payload: string, signature: string): boolean {
 
   const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 
-  // Timing-safe comparison
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+  // Timing-safe comparison with proper hex format
+  return crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expectedSignature, 'hex'));
 }
 
 /**
@@ -140,8 +141,8 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
     const { event, document } = webhookData;
     console.log(`📋 [WEBHOOK] Event: ${event.name}, Document: ${document?.key || 'N/A'}`);
 
-    // 3. Processar apenas eventos de documento finalizado
-    const signedEvents = ['document.signed', 'document.finished', 'auto_close'];
+    // 3. Processar apenas eventos de documento finalizado (API v1/v2) e envelope (API v3)
+    const signedEvents = ['document.signed', 'document.finished', 'auto_close', 'document.close', 'envelope.finished', 'envelope.closed'];
 
     if (!signedEvents.includes(event.name)) {
       console.log(`ℹ️ [WEBHOOK] Ignoring event ${event.name} (not a signing completion event)`);
@@ -159,6 +160,33 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
         message: 'Document not ready',
         status: document?.status,
       });
+    }
+
+    // 3.5. Verificar idempotência - PAM V1.0
+    const eventId = `${document.key}:${event.occurred_at}`;
+    
+    try {
+      // Tentar inserir o evento na tabela de idempotência
+      await db.insert(clicksignWebhookEvents).values({
+        eventId: eventId,
+        eventType: event.name,
+        documentKey: document.key,
+      });
+      
+      console.log(`✅ [WEBHOOK] New event registered: ${eventId}`);
+    } catch (error) {
+      // Se o erro for de violação de constraint UNIQUE, é um evento duplicado
+      if (error instanceof Error && error.message.includes('unique constraint')) {
+        console.log(`ℹ️ [WEBHOOK] Duplicate event detected: ${eventId} - ignoring`);
+        return res.status(200).json({
+          message: 'Duplicate event - already processed',
+          eventId: eventId,
+        });
+      }
+      
+      // Outros erros são problemas reais que devem ser logados
+      console.error('❌ [WEBHOOK] Error checking event idempotency:', error);
+      throw error;
     }
 
     // 4. Buscar proposta associada ao documento

@@ -1,0 +1,57 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - OPERAÇÃO WEBHOOK RESILIENTE
+
+* **Sumário da Missão:** Refatorar a integração de webhooks da ClickSign para ser segura, resiliente e operar em tempo real, corrigindo a validação HMAC, implementando idempotência e estabelecendo um canal de Server-Sent Events (SSE) para atualizações automáticas da UI.
+* **Intenção Estratégica:** Transformar o fluxo de atualização de status de um sistema frágil e manual para um processo automatizado, seguro e em tempo real. Isso irá erradicar a inconsistência de dados, eliminar a necessidade de atualização manual pelo usuário e restaurar a confiança no fluxo de formalização e pagamento.
+* **Modelo Mental (Como se Encaixa):** A correção se inicia no ponto de entrada (`webhooks.ts`), fortalecendo sua segurança (HMAC) e resiliência (idempotência). Uma vez que o backend possa confiar nos eventos, ele atualizará o banco de dados e emitirá um evento de domínio (`ProposalSigned`). Um novo serviço de SSE escutará esses eventos e os transmitirá para o frontend. O frontend, por sua vez, irá subscrever a estes eventos e usá-los para invalidar as queries do TanStack, forçando uma atualização automática e reativa da UI.
+
+---
+**IMPLEMENTAR:**
+Plano de Refatoração Completo para o Sistema de Webhooks da ClickSign.
+
+**CURRENT STATE:**
+O endpoint de webhook em `server/routes/webhooks.ts` possui uma falha de segurança na validação HMAC, não lida com todos os eventos de finalização da API V3 e não previne o processamento de eventos duplicados. O frontend não tem mecanismo de atualização em tempo real.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A validação HMAC em `server/routes/webhooks.ts` está corrigida e funcional, validando corretamente as assinaturas da ClickSign.
+2.  O webhook processa de forma segura e idempotente todos os eventos relevantes (`document.close`, `envelope.finished`, etc.).
+3.  Quando um evento de assinatura concluída é processado, o status da proposta no banco de dados é atualizado para `ASSINATURA_CONCLUIDA`.
+4.  Imediatamente após a atualização do banco de dados, um evento é enviado via SSE para o cliente.
+5.  Os componentes da "Timeline de Formalização" e "Tela de Pagamentos" recebem o evento SSE e atualizam seus dados automaticamente, sem a necessidade de refresh manual.
+6.  O botão "Confirmar Veracidade" funciona corretamente, refletindo o estado atual do banco de dados.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**Passo 1: [P0 - CRÍTICO] Blindagem do Endpoint de Webhook**
+1.  Abra o arquivo `server/routes/webhooks.ts`.
+2.  **Corrija a Validação HMAC:** Na função `validateClickSignHMAC`, altere a linha `crypto.timingSafeEqual` para comparar os buffers em formato 'hex':
+    ```typescript
+    // ANTES: Buffer.from(signature)
+    // DEPOIS:
+    return crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expectedSignature, 'hex'));
+    ```
+3.  **Expanda os Eventos Suportados:** Adicione os eventos faltantes da API V3 à lista de `signedEvents`: `['document.signed', 'document.finished', 'auto_close', 'document.close', 'envelope.finished', 'envelope.closed']`.
+4.  **Implemente Idempotência:**
+    * Crie uma nova tabela no schema (`shared/schema.ts`) chamada `clicksign_webhook_events` com as colunas: `id` (PK), `event_id` (string, unique), `event_type` (string), `document_key` (string), `received_at` (timestamp).
+    * No handler do webhook em `webhooks.ts`, antes de processar o evento, tente inserir o `event_id` (uma combinação única como `data.document.key + ':' + data.occurred_at`) na nova tabela.
+    * Se a inserção falhar devido à constraint de unicidade, ignore o evento e retorne uma resposta `200 OK`. Se a inserção for bem-sucedida, prossiga com o processamento.
+
+**Passo 2: [P1 - FUNCIONALIDADE CORE] Implementação do Real-Time (Backend)**
+1.  Crie um novo serviço, `server/services/realtimeService.ts`, para gerenciar conexões SSE. Ele deve ter métodos para `addClient(res)` e `sendEvent(data)`.
+2.  Crie uma nova rota, `GET /api/events`, que utilize este serviço para manter uma conexão SSE aberta com o cliente.
+3.  No `clickSignWebhookService.ts`, após a atualização bem-sucedida do status da proposta no banco de dados, chame o `realtimeService.sendEvent({ event: 'PROPOSAL_SIGNED', proposalId: proposta.id })`.
+
+**Passo 3: [P1 - FUNCIONALIDADE CORE] Implementação do Real-Time (Frontend)**
+1.  No componente `client/src/pages/formalizacao.tsx`, utilize a API `EventSource` para se conectar ao endpoint `/api/events`.
+2.  Crie um `useEffect` que estabeleça a conexão e defina um `onmessage` listener.
+3.  Quando uma mensagem com `event: 'PROPOSAL_SIGNED'` for recebida, utilize o `queryClient` do TanStack Query para invalidar as queries relevantes (ex: `queryClient.invalidateQueries(['/api/propostas/formalizacao'])`).
+4.  Replique esta mesma lógica no componente da tela de pagamentos (`client/src/pages/financeiro/pagamentos.tsx`) para invalidar a query `['/api/pagamentos']`.
+
+**Passo 4: [P2 - UX] Correção do Fluxo de Veracidade**
+1.  Audite a rota `GET /api/pagamentos/:id/verificar-documentos`. Certifique-se de que ela busca os dados mais recentes do **seu próprio banco de dados** (que agora é a fonte da verdade), em vez de fazer uma chamada em tempo real para a ClickSign.
+2.  A rota deve retornar um JSON simples como `{ ccbAssinada: boolean, signedAt: timestamp }` baseado nos campos da tabela `propostas`.
+
+**Passo 5: [P3 - VALIDAÇÃO] Limpeza e Verificação Final**
+1.  Resolva os 7 erros de LSP restantes em `server/routes/webhooks.ts`.
+2.  Execute `get_latest_lsp_diagnostics` para garantir que o projeto está 100% limpo de erros.
+
+---

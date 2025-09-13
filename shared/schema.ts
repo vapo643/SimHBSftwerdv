@@ -1243,3 +1243,30 @@ export type InsertRegraAlerta = z.infer<typeof insertRegraAlertaSchema>;
 export type RegraAlerta = typeof regrasAlertas.$inferSelect;
 export type InsertHistoricoExecucaoAlerta = z.infer<typeof insertHistoricoExecucaoAlertaSchema>;
 export type HistoricoExecucaoAlerta = typeof historicoExecucoesAlertas.$inferSelect;
+
+// ========================================================================
+// WEBHOOK IDEMPOTENCY TABLE - PAM V1.0
+// ========================================================================
+
+// Tabela para controle de idempotência de webhooks ClickSign
+export const clicksignWebhookEvents = pgTable('clicksign_webhook_events', {
+  id: serial('id').primaryKey(),
+  eventId: text('event_id').notNull().unique(), // document_key + ':' + occurred_at
+  eventType: text('event_type').notNull(), // event.name
+  documentKey: text('document_key'), // document.key ou envelope.id
+  receivedAt: timestamp('received_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Index for performance
+export const clicksignWebhookEventsIndex = index('idx_clicksign_webhook_events_event_id').on(clicksignWebhookEvents.eventId);
+
+// Schema and types
+export const insertClicksignWebhookEventSchema = createInsertSchema(clicksignWebhookEvents).omit({
+  id: true,
+  createdAt: true,
+  receivedAt: true,
+});
+
+export type InsertClicksignWebhookEvent = z.infer<typeof insertClicksignWebhookEventSchema>;
+export type ClicksignWebhookEvent = typeof clicksignWebhookEvents.$inferSelect;
