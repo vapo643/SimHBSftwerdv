@@ -761,6 +761,24 @@ export default function Pagamentos() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
+                            
+                            {/* BOTÃO DE VERIFICAÇÃO/REVISAR - Para status ASSINATURA_CONCLUIDA */}
+                            {pagamento.status === 'ASSINATURA_CONCLUIDA' && (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="gap-2 bg-blue-600 hover:bg-blue-700"
+                                onClick={() => {
+                                  setSelectedPagamento(pagamento);
+                                  setShowSecurityVerificationModal(true);
+                                }}
+                                title="Revisar e Verificar Documentos"
+                              >
+                                <Shield className="h-4 w-4" />
+                                Revisar
+                              </Button>
+                            )}
+                            
                             {/* FASE 2: Alinhamento Frontend/Backend - Botão para status em_processamento (BOLETOS_EMITIDOS) */}
                             {pagamento.status === 'em_processamento' &&
                               userHasApprovalPermission() && (
