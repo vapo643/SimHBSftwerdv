@@ -507,6 +507,68 @@ router.post('/:id/rejeitar', jwtAuthMiddleware, async (req: AuthenticatedRequest
 });
 
 /**
+ * Verify documents before payment
+ * GET /api/pagamentos/:id/verificar-documentos
+ */
+router.get('/:id/verificar-documentos', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+
+    // Get proposal from database
+    const { db } = await import('../../lib/supabase.ts');
+    const { propostas } = await import('@shared/schema');
+    const { eq } = await import('drizzle-orm');
+
+    if (!db) {
+      return res.status(500).json({ error: 'Database connection not available' });
+    }
+
+    const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
+
+    if (!proposta) {
+      return res.status(404).json({ error: 'Proposta não encontrada' });
+    }
+
+    // Build verification data
+    const verificacoes = {
+      ccbAssinada: proposta.ccbGerado && proposta.assinaturaEletronicaConcluida,
+      titularidadeConta: proposta.dadosPagamentoCpfTitular === proposta.clienteCpf,
+      documentosCcb: {
+        urlCcb: proposta.ccbGerado ? `/api/propostas/${id}/ccb` : null,
+        dataAssinatura: proposta.dataAprovacao,
+      },
+      dadosPagamento: {
+        valor: Number(proposta.valorTotalFinanciado || 0),
+        valorLiquido:
+          Number(proposta.valorTotalFinanciado || 0) -
+          Number(proposta.valorIof || 0) -
+          Number(proposta.valorTac || 0),
+        destino: {
+          tipo: proposta.dadosPagamentoPix ? 'PIX' : 'CONTA_BANCARIA',
+          banco: proposta.dadosPagamentoBanco,
+          agencia: proposta.dadosPagamentoAgencia,
+          conta: proposta.dadosPagamentoConta,
+          pix: proposta.dadosPagamentoPix,
+        },
+      },
+    };
+
+    res.json(verificacoes);
+  } catch (error: any) {
+    console.error('[PAGAMENTOS] Error verifying documents:', error);
+    res.status(500).json({
+      error: 'Erro ao verificar documentos',
+      details: error.message,
+    });
+  }
+});
+
+/**
  * Upload payment document
  * POST /api/pagamentos/:id/documents
  */
