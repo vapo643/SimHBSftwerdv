@@ -36,6 +36,18 @@ const HIGH_RISK_FIELDS = ['cpf', 'cnpj', 'email', 'telefone', 'rg'];
  */
 export function inputSanitizerMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
+    // Skip security checks for Vite development files
+    const isDevelopmentFile = req.path.startsWith('/src/') || 
+                              req.path.startsWith('/@') || 
+                              req.path.includes('.tsx') || 
+                              req.path.includes('.ts') ||
+                              req.path.includes('.js') ||
+                              req.path.includes('.css') ||
+                              req.path.includes('react-refresh');
+    
+    if (isDevelopmentFile && process.env.NODE_ENV === 'development') {
+      return next();
+    }
     // Sanitizar query params
     if (req.query) {
       req.query = sanitizeObject(req.query, req);

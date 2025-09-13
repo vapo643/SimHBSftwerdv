@@ -1,0 +1,95 @@
+4
+User
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+2025-09-13 19:54:39.95
+36f0e364
+User
+[JWT DEBUG] Auto-detected token type: supabase
+2025-09-13 19:54:39.95
+36f0e364
+User
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-13 19:54:40.24
+36f0e364
+User
+Query: select "id", "numero_proposta", "loja_id", "produto_id", "tabela_comercial_id", "cliente_nome", "cliente_cpf", "cliente_email", "cliente_telefone", "cliente_data_nascimento", "cliente_renda", "cliente_rg", "cliente_orgao_emissor", "cliente_rg_uf", "cliente_rg_data_emissao", "cliente_estado_civil", "cliente_nacionalidade", "cliente_local_nascimento", "cliente_cep", "cliente_endereco", "cliente_logradouro", "cliente_numero", "cliente_complemento", "cliente_bairro", "cliente_cidade", "cliente_uf", "cliente_ocupacao", "tipo_pessoa", "cliente_razao_social", "cliente_cnpj", "valor", "prazo", "finalidade", "garantia", "valor_tac", "valor_iof", "valor_total_financiado", "valor_liquido_liberado", "juros_modalidade", "periodicidade_capitalizacao", "taxa_juros_anual", "praca_pagamento", "forma_pagamento", "ano_base", "tarifa_ted", "taxa_credito", "data_liberacao", "forma_liberacao", "calculo_encargos", "status", "analista_id", "data_analise", "motivo_pendencia", "valor_aprovado", "taxa_juros", "observacoes", "documentos", "ccb_documento_url", "data_aprovacao", "documentos_adicionais", "contrato_gerado", "contrato_assinado", "data_assinatura", "data_pagamento", "observacoes_formalizacao", "ccb_gerado", "caminho_ccb", "ccb_gerado_em", "assinatura_eletronica_concluida", "biometria_concluida", "caminho_ccb_assinado", "clicksign_document_key", "clicksign_signer_key", "clicksign_list_key", "clicksign_status", "clicksign_sign_url", "clicksign_sent_at", "clicksign_signed_at", "dados_pagamento_banco", "dados_pagamento_codigo_banco", "dados_pagamento_agencia", "dados_pagamento_conta", "dados_pagamento_digito", "dados_pagamento_tipo", "dados_pagamento_nome_titular", "dados_pagamento_cpf_titular", "dados_pagamento_pix", "dados_pagamento_tipo_pix", "dados_pagamento_pix_banco", "dados_pagamento_pix_nome_titular", "dados_pagamento_pix_cpf_titular", "metodo_pagamento", "url_comprovante_pagamento", "inter_boleto_gerado", "inter_boleto_gerado_em", "cliente_data", "condicoes_data", "cliente_empresa_nome", "cliente_empresa_cnpj", "cliente_cargo_funcao", "cliente_tempo_emprego", "cliente_renda_comprovada", "cliente_dividas_existentes", "cliente_comprometimento_renda", "cliente_score_serasa", "cliente_restricoes_cpf", "user_id", "created_at", "updated_at", "deleted_at" from "propostas" where "propostas"."id" = $1 limit $2 -- params: ["6206c1e3-686a-4084-b28f-d999ef0a0e9f", 1]
+2025-09-13 19:54:40.53
+36f0e364
+User
+Query: select "id", "proposta_id", "document_key", "event_type", "signer_email", "signer_name", "signed_at", "webhook_received_at", "webhook_event_id", "webhook_payload", "created_at" from "clicksign_assinaturas_confirmadas" where "clicksign_assinaturas_confirmadas"."proposta_id" = $1 limit $2 -- params: ["6206c1e3-686a-4084-b28f-d999ef0a0e9f", 1]
+2025-09-13 19:54:40.67
+36f0e364
+User
+[PAGAMENTOS] Error verifying documents: PostgresError: relation "clicksign_assinaturas_confirmadas" does not exist
+2025-09-13 19:54:40.67
+36f0e364
+User
+at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+2025-09-13 19:54:40.67
+36f0e364
+User
+at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+2025-09-13 19:54:40.67
+36f0e364
+User
+at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+2025-09-13 19:54:40.67
+36f0e364
+User
+at TLSSocket.emit (node:events:524:28)
+2025-09-13 19:54:40.67
+36f0e364
+User
+at addChunk (node:internal/streams/readable:561:12)
+2025-09-13 19:54:40.67
+36f0e364
+User
+at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+2025-09-13 19:54:40.67
+36f0e364
+User
+at Readable.push (node:internal/streams/readable:392:5)
+2025-09-13 19:54:40.67
+36f0e364
+User
+at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+2025-09-13 19:54:40.67
+36f0e364
+User
+severity_local: 'ERROR',
+2025-09-13 19:54:40.67
+36f0e364
+User
+severity: 'ERROR',
+2025-09-13 19:54:40.67
+36f0e364
+User
+code: '42P01',
+2025-09-13 19:54:40.67
+36f0e364
+User
+position: '183',
+2025-09-13 19:54:40.67
+36f0e364
+User
+file: 'parse_relation.c',
+2025-09-13 19:54:40.67
+36f0e364
+User
+line: '1449',
+2025-09-13 19:54:40.67
+36f0e364
+User
+routine: 'parserOpenTable'
+2025-09-13 19:54:40.67
+36f0e364
+User
+}
+2025-09-13 19:54:40.67
+36f0e364
+User
+{"correlationId":"a050d2f3-8293-4c16-92ac-06871525dec1","duration":1301,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":128,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-13 22:54:40","url":"/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos","version":"1.0.0"}
+2025-09-13 19:54:40.67
+36f0e364
+User
+{"correlationId":"a050d2f3-8293-4c16-92ac-06871525d

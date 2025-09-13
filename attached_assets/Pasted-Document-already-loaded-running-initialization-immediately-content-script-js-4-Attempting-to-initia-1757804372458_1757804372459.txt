@@ -1,0 +1,86 @@
+Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+index-BZjwp8VY.js:56 🔐 [AUTH EVENT] SIGNED_IN Object
+index-BZjwp8VY.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-BZjwp8VY.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BZjwp8VY.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 0 Array(0)
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 0
+index-BZjwp8VY.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BZjwp8VY.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-BZjwp8VY.js:56 🔥 [DEBUG] Query function executando!
+index-BZjwp8VY.js:56 🔥 [DEBUG] URL final: /api/pagamentos?
+index-BZjwp8VY.js:56 🔥 [DEBUG] Fazendo consulta autenticada...
+index-BZjwp8VY.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BZjwp8VY.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-BZjwp8VY.js:56 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+index-BZjwp8VY.js:56 🔐 [AUTH EVENT] INITIAL_SESSION Object
+index-BZjwp8VY.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-13T23:54:18.000Z
+index-BZjwp8VY.js:56 [PASSO 3 - ENVIO] Object
+index-BZjwp8VY.js:56 [PASSO 3 - ENVIO] Object
+index-BZjwp8VY.js:56 [PASSO 3 - ENVIO] Object
+/api/events:1  Failed to load resource: the server responded with a status of 401 ()Understand this error
+index-BZjwp8VY.js:56 [SSE PAGAMENTOS] ❌ Connection error: Event
+(anonymous) @ index-BZjwp8VY.js:56Understand this error
+index-BZjwp8VY.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-BZjwp8VY.js:56 [API Client] After dual-key transformation: Object
+index-BZjwp8VY.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-BZjwp8VY.js:56 [API Client] After dual-key transformation: Object
+index-BZjwp8VY.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-BZjwp8VY.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+index-BZjwp8VY.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos? : Object
+index-BZjwp8VY.js:56 [API Client] After dual-key transformation: Object
+index-BZjwp8VY.js:56 🔥 [DEBUG] Response data: Object
+index-BZjwp8VY.js:56 🔥 [DEBUG] Retornando 1 itens
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-BZjwp8VY.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BZjwp8VY.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-BZjwp8VY.js:56 [PASSO 3 - ENVIO] Object
+/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-BZjwp8VY.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-BZjwp8VY.js:56 [API Client] After dual-key transformation: Object
+index-BZjwp8VY.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BZjwp8VY.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-BZjwp8VY.js:56 [PASSO 3 - ENVIO] Object
+/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-BZjwp8VY.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-BZjwp8VY.js:56 [API Client] After dual-key transformation: Object
+index-BZjwp8VY.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BZjwp8VY.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-BZjwp8VY.js:56 [PASSO 3 - ENVIO] Object
+/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-BZjwp8VY.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-BZjwp8VY.js:56 [API Client] After dual-key transformation: Object
+index-BZjwp8VY.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BZjwp8VY.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-BZjwp8VY.js:56 [PASSO 3 - ENVIO] Object
+/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-BZjwp8VY.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/pagamentos/6206c1e3-686a-4084-b28f-d999ef0a0e9f/verificar-documentos : Object
+index-BZjwp8VY.js:56 [API Client] After dual-key transformation: Object
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-BZjwp8VY.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-BZjwp8VY.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-BZjwp8VY.js:56 [PASSO 3 - ENVIO] Object
+index-BZjwp8VY.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-BZjwp8VY.js:56 [API Client] After dual-key transformation: Object
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados recebidos: 1 Array(1)
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Termo de busca: 
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+index-BZjwp8VY.js:56 [PAGAMENTOS FRONTEND] Primeiro pagamento: Object
+index-BZjwp8VY.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-13T23:54:18.000Z', hasActiveRefresh: false}
+index-BZjwp8VY.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-BZjwp8VY.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.1-AkV1EMSrZBR1knDU_OKHWAX_WZsetbCLTH9_Pkdwg', hasToken: true, isFormData: false}
+index-BZjwp8VY.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : {flags: {…}, context: {…}}
+index-BZjwp8VY.js:56 [API Client] After dual-key transformation: {flags: {…}, context: {…}}

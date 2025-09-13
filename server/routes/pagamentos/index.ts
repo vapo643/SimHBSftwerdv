@@ -535,11 +535,19 @@ router.get('/:id/verificar-documentos', jwtAuthMiddleware, async (req: Authentic
     }
 
     // INFORMAÇÃO ADICIONAL: Buscar confirmação de webhook do ClickSign para transparência
-    const [webhookConfirmacao] = await db
-      .select()
-      .from(clicksignAssinaturasConfirmadas)
-      .where(eq(clicksignAssinaturasConfirmadas.propostaId, id))
-      .limit(1);
+    let webhookConfirmacao = null;
+    try {
+      const [webhook] = await db
+        .select()
+        .from(clicksignAssinaturasConfirmadas)
+        .where(eq(clicksignAssinaturasConfirmadas.propostaId, id))
+        .limit(1);
+      webhookConfirmacao = webhook;
+    } catch (error: any) {
+      // Graceful fallback: Se tabela não existir, continuar sem webhook info
+      console.warn(`[PAGAMENTOS] Webhook table not available: ${error.message}`);
+      webhookConfirmacao = null;
+    }
 
     console.log(`[PAGAMENTOS VERIFICAÇÃO] 📋 Informações para proposta ${id}:`, {
       statusProposta: proposta.status,
