@@ -166,6 +166,12 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
     const eventId = `${document.key}:${event.occurred_at}`;
     
     try {
+      // Verificar se db está disponível
+      if (!db) {
+        console.error('❌ [WEBHOOK] Database connection not available');
+        return res.status(500).json({ error: 'Database not available' });
+      }
+      
       // Tentar inserir o evento na tabela de idempotência
       await db.insert(clicksignWebhookEvents).values({
         eventId: eventId,
@@ -190,6 +196,11 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
     }
 
     // 4. Buscar proposta associada ao documento
+    if (!db) {
+      console.error('❌ [WEBHOOK] Database connection not available for proposal lookup');
+      return res.status(500).json({ error: 'Database not available' });
+    }
+    
     const proposalResult = await db.execute(sql`
       SELECT id, cliente_nome, status
       FROM propostas 
@@ -242,23 +253,25 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
           }
 
           // Log webhook success
-          await db.execute(sql`
-            INSERT INTO webhook_logs (
-              source,
-              event_type,
-              payload,
-              processed,
-              processing_time,
-              created_at
-            ) VALUES (
-              ${'clicksign'},
-              ${event.name},
-              ${JSON.stringify(webhookData)},
-              ${true},
-              ${Date.now() - startTime},
-              NOW()
-            )
-          `);
+          if (db) {
+            await db.execute(sql`
+              INSERT INTO webhook_logs (
+                source,
+                event_type,
+                payload,
+                processed,
+                processing_time,
+                created_at
+              ) VALUES (
+                ${'clicksign'},
+                ${event.name},
+                ${JSON.stringify(webhookData)},
+                ${true},
+                ${Date.now() - startTime},
+                NOW()
+              )
+            `);
+          }
         } else {
           console.error(
             `❌ [WEBHOOK] Failed to process document for proposal ${proposal.id}: ${result.reason}`
@@ -272,26 +285,28 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
     console.error('❌ [WEBHOOK] Unexpected error:', error);
 
     // Log webhook error
-    try {
-      await db.execute(sql`
-        INSERT INTO webhook_logs (
-          source,
-          event_type,
-          payload,
-          processed,
-          error,
-          created_at
-        ) VALUES (
-          ${'clicksign'},
-          ${'error'},
-          ${JSON.stringify({ headers: req.headers, body: req.body?.toString() || '' })},
-          ${false},
-          ${error instanceof Error ? error.message : 'Unknown error'},
-          NOW()
-        )
-      `);
-    } catch (logError) {
-      console.error('Failed to log webhook error:', logError);
+    if (db) {
+      try {
+        await db.execute(sql`
+          INSERT INTO webhook_logs (
+            source,
+            event_type,
+            payload,
+            processed,
+            error,
+            created_at
+          ) VALUES (
+            ${'clicksign'},
+            ${'error'},
+            ${JSON.stringify({ headers: req.headers, body: req.body?.toString() || '' })},
+            ${false},
+            ${error instanceof Error ? error.message : 'Unknown error'},
+            NOW()
+          )
+        `);
+      } catch (logError) {
+        console.error('Failed to log webhook error:', logError);
+      }
     }
 
     res.status(500).json({ error: 'Internal server error' });
@@ -363,6 +378,11 @@ router.post('/inter', express.json(), async (req, res) => {
     );
 
     // 5. Salvar callback na tabela inter_callbacks
+    if (!db) {
+      console.error('❌ [WEBHOOK INTER] Database connection not available');
+      return res.status(500).json({ error: 'Database not available' });
+    }
+    
     await db.execute(sql`
       INSERT INTO inter_callbacks (
         codigo_solicitacao,
@@ -393,19 +413,21 @@ router.post('/inter', express.json(), async (req, res) => {
         console.error(`❌ [WEBHOOK INTER] Erro no processamento em background:`, error);
 
         // Marcar como erro no banco
-        await db.execute(sql`
-          UPDATE inter_callbacks 
-          SET erro = ${error instanceof Error ? error.message : 'Unknown error'} 
-          WHERE codigo_solicitacao = ${codigoSolicitacao} 
-          AND created_at >= NOW() - INTERVAL '1 minute'
-        `);
+        if (db) {
+          await db.execute(sql`
+            UPDATE inter_callbacks 
+            SET erro = ${error instanceof Error ? error.message : 'Unknown error'} 
+            WHERE codigo_solicitacao = ${codigoSolicitacao} 
+            AND created_at >= NOW() - INTERVAL '1 minute'
+          `);
+        }
       }
     });
   } catch (error) {
     console.error('❌ [WEBHOOK INTER] Erro inesperado:', error);
 
     // Salvar erro se conseguimos extrair o codigoSolicitacao
-    if (codigoSolicitacao) {
+    if (codigoSolicitacao && db) {
       try {
         await db.execute(sql`
           INSERT INTO inter_callbacks (
@@ -448,6 +470,12 @@ async function processInterWebhookEvent(
   const dataPagamento = webhookData.dataPagamento;
   const origemRecebimento = webhookData.origemRecebimento;
 
+  // Verificar se db está disponível
+  if (!db) {
+    console.error('❌ [WEBHOOK INTER] Database connection not available for transaction');
+    throw new Error('Database not available');
+  }
+  
   // PAM V1.0 - TRANSAÇÃO ATÔMICA: Envolver todas as operações de escrita em uma única transação
   await db.transaction(async (tx) => {
     // Atualizar registro na tabela inter_collections
