@@ -152,7 +152,6 @@ export default function Pagamentos() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [approvalObservation, setApprovalObservation] = useState('');
   const [verificationData, setVerificationData] = useState<any>(null);
-  const [paymentPassword, setPaymentPassword] = useState('');
   const [paymentObservation, setPaymentObservation] = useState('');
   const [mostrarPagos, setMostrarPagos] = useState(false);
 
@@ -278,20 +277,18 @@ export default function Pagamentos() {
     },
   });
 
-  // Confirmar desembolso com segurança
+  // Confirmar desembolso
   const confirmarDesembolsoMutation = useMutation({
     mutationFn: async ({
       id,
-      senha,
       observacoes,
     }: {
       id: string;
-      senha: string;
       observacoes: string;
     }) => {
       return await apiRequest(`/api/pagamentos/${id}/confirmar-desembolso`, {
         method: 'POST',
-        body: JSON.stringify({ senha, observacoes }),
+        body: JSON.stringify({ observacoes }),
       });
     },
     onSuccess: () => {
@@ -301,7 +298,6 @@ export default function Pagamentos() {
         className: 'bg-green-50 border-green-200',
       });
       setShowSecurityVerificationModal(false);
-      setPaymentPassword('');
       setPaymentObservation('');
       queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
@@ -1432,32 +1428,16 @@ export default function Pagamentos() {
                   </Card>
                 </div>
 
-                {/* Confirmação Final */}
-                <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+                {/* Observações Finais */}
+                <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base text-red-800 dark:text-red-200">
-                      Confirmação de Segurança
-                    </CardTitle>
+                    <CardTitle className="text-base">Observações</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent>
                     <div>
-                      <Label className="text-sm">Senha de Confirmação* (Segurança Adicional)</Label>
-                      <Input
-                        type="password"
-                        placeholder="Digite sua senha de segurança para pagamentos"
-                        value={paymentPassword}
-                        onChange={(e) => setPaymentPassword(e.target.value)}
-                        className="mt-1"
-                      />
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Esta é uma senha adicional de segurança para pagamentos, pode ser diferente
-                        da sua senha de login.
-                      </p>
-                    </div>
-                    <div>
-                      <Label className="text-sm">Observações (opcional)</Label>
+                      <Label className="text-sm">Observações sobre o desembolso (opcional)</Label>
                       <Textarea
-                        placeholder="Observações sobre o desembolso"
+                        placeholder="Digite observações sobre o desembolso"
                         value={paymentObservation}
                         onChange={(e) => setPaymentObservation(e.target.value)}
                         className="mt-1 h-20"
@@ -1474,7 +1454,6 @@ export default function Pagamentos() {
                 size="sm"
                 onClick={() => {
                   setShowSecurityVerificationModal(false);
-                  setPaymentPassword('');
                   setPaymentObservation('');
                 }}
               >
@@ -1497,16 +1476,14 @@ export default function Pagamentos() {
                 size="sm"
                 className="bg-green-600 hover:bg-green-700"
                 onClick={() => {
-                  if (selectedPagamento && paymentPassword) {
+                  if (selectedPagamento) {
                     confirmarDesembolsoMutation.mutate({
                       id: selectedPagamento.id,
-                      senha: paymentPassword,
                       observacoes: paymentObservation,
                     });
                   }
                 }}
                 disabled={
-                  !paymentPassword ||
                   !(verificacoes as any)?.ccbAssinada ||
                   confirmarDesembolsoMutation.isPending
                 }
