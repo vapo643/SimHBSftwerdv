@@ -156,7 +156,7 @@ export default function Pagamentos() {
   const [paymentObservation, setPaymentObservation] = useState('');
   const [mostrarPagos, setMostrarPagos] = useState(false);
 
-  // Buscar pagamentos
+  // Buscar pagamentos - DEBUG ULTRA SIMPLES
   const {
     data: pagamentos = [],
     isLoading,
@@ -165,33 +165,40 @@ export default function Pagamentos() {
   } = useQuery({
     queryKey: ['/api/pagamentos', { status: statusFilter, periodo: periodoFilter, mostrarPagos }],
     queryFn: async () => {
+      console.log('🔥 [DEBUG] Query function executando!');
+      
       const params = new URLSearchParams();
       if (statusFilter !== 'todos') params.append('status', statusFilter);
       if (periodoFilter !== 'todos') params.append('periodo', periodoFilter);
       if (mostrarPagos) params.append('incluir_pagos', 'true');
 
+      const url = `/api/pagamentos?${params.toString()}`;
+      console.log('🔥 [DEBUG] URL final:', url);
 
       try {
-        const responseRaw = await apiRequest(`/api/pagamentos?${params.toString()}`, {
+        // TESTE DIRETO COM FETCH SEM AUTENTICAÇÃO
+        console.log('🔥 [DEBUG] Fazendo fetch direto...');
+        const response = await fetch(url, {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
         
-        console.log(`[PAGAMENTOS] Raw API response:`, responseRaw);
-
-        // ✅ FASE 3 - PEAF V1.5: VALIDAÇÃO ZOD
-        const parsed = ApiResponseSchema.safeParse(responseRaw);
-        if (!parsed.success) {
-          console.error("🚨 CRITICAL API SHAPE MISMATCH DETECTADO!", parsed.error.format());
-          // Retornar array vazio em caso de erro de formato para não quebrar a UI
-          console.warn("[PAGAMENTOS] Retornando array vazio devido a shape mismatch");
-          return [];
+        console.log('🔥 [DEBUG] Response status:', response.status);
+        const responseData = await response.json();
+        console.log('🔥 [DEBUG] Response data:', responseData);
+        
+        if (responseData.success && Array.isArray(responseData.data)) {
+          console.log('🔥 [DEBUG] Retornando', responseData.data.length, 'itens');
+          return responseData.data;
         }
         
-        console.log(`[PAGAMENTOS] Validated ${parsed.data.data.length} proposals successfully`);
-        return parsed.data.data; // ✅ Retorna o array validado
+        console.log('🔥 [DEBUG] Retornando array vazio');
+        return [];
       } catch (err) {
-        console.error('[PAGAMENTOS] Error in API call:', err);
-        throw err;
+        console.error('🔥 [DEBUG] Error in API call:', err);
+        return [];
       }
     },
     retry: 2,
