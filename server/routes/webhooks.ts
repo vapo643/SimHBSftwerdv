@@ -123,6 +123,7 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
       return res.status(401).json({ error: 'Missing signature' });
     }
 
+    // ✅ HMAC validation reabilitada após OPERAÇÃO BANDEIRA FALSA
     if (!validateClickSignHMAC(payload, signature)) {
       console.error('❌ [WEBHOOK] Invalid HMAC signature');
       return res.status(401).json({ error: 'Invalid signature' });

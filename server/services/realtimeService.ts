@@ -129,7 +129,7 @@ class RealtimeService {
       }
 
       try {
-        const message = `data: ${JSON.stringify(eventData)}\n\n`;
+        const message = `data: ${JSON.stringify({ type: eventData.event, data: eventData.data, timestamp: eventData.timestamp })}\n\n`;
         client.res.write(message);
         sentCount++;
         
