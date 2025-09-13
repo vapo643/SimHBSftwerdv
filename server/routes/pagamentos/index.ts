@@ -429,6 +429,84 @@ router.post('/validate', jwtAuthMiddleware, async (req: AuthenticatedRequest, re
 });
 
 /**
+ * Confirm payment disbursement
+ * POST /api/pagamentos/:id/confirmar-desembolso
+ */
+router.post('/:id/confirmar-desembolso', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { observacoes } = req.body;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+
+    // Check permissions - SEGREGATION OF DUTIES
+    if (!['ADMINISTRADOR', 'FINANCEIRO'].includes(userRole || '')) {
+      return res.status(403).json({ error: 'Usuário sem permissão para confirmar desembolsos' });
+    }
+
+    // Use service to confirm disbursement
+    const result = await pagamentoService.confirmarDesembolso(id, userId, observacoes || '');
+
+    res.json({
+      success: true,
+      message: 'Desembolso confirmado com sucesso',
+      data: result,
+    });
+  } catch (error: any) {
+    console.error('[PAGAMENTOS] Error confirming disbursement:', error);
+    res.status(500).json({
+      error: 'Erro ao confirmar desembolso',
+      details: error.message,
+    });
+  }
+});
+
+/**
+ * Reject payment
+ * POST /api/pagamentos/:id/rejeitar
+ */
+router.post('/:id/rejeitar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { motivo } = req.body;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+
+    // Check if user has permission to reject
+    if (!['ADMINISTRADOR', 'DIRETOR', 'FINANCEIRO', 'GERENTE'].includes(userRole || '')) {
+      return res.status(403).json({ error: 'Sem permissão para rejeitar pagamentos' });
+    }
+
+    if (!motivo) {
+      return res.status(400).json({ error: 'Motivo da rejeição é obrigatório' });
+    }
+
+    // Use service to reject payment
+    const result = await pagamentoService.rejeitarPagamento(id, userId, motivo);
+
+    res.json({
+      success: true,
+      message: 'Pagamento rejeitado com sucesso',
+      data: result,
+    });
+  } catch (error: any) {
+    console.error('[PAGAMENTOS] Error rejecting payment:', error);
+    res.status(500).json({
+      error: 'Erro ao rejeitar pagamento',
+      details: error.message,
+    });
+  }
+});
+
+/**
  * Upload payment document
  * POST /api/pagamentos/:id/documents
  */

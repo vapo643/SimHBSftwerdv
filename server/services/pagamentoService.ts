@@ -519,6 +519,120 @@ export class PagamentoService {
       formaPagamentoOptions: ['ted', 'pix', 'doc'],
     };
   }
+
+  /**
+   * Confirm payment disbursement
+   */
+  async confirmarDesembolso(propostaId: string, userId: string, observacoes: string): Promise<any> {
+    // Import database and dependencies
+    const { db } = await import('../lib/supabase.js');
+    const { propostas } = await import('@shared/schema');
+    const { eq } = await import('drizzle-orm');
+
+    if (!db) {
+      throw new Error('Database connection not available');
+    }
+
+    // Get proposal
+    const [proposta] = await db.select().from(propostas).where(eq(propostas.id, propostaId)).limit(1);
+
+    if (!proposta) {
+      throw new Error('Proposta não encontrada');
+    }
+
+    // Critical verifications
+    if (!proposta.ccbGerado || !proposta.assinaturaEletronicaConcluida) {
+      throw new Error('CCB não assinada. Desembolso bloqueado.');
+    }
+
+    try {
+      // Use FSM to transition status
+      await transitionTo({
+        propostaId,
+        novoStatus: 'pago',
+        userId,
+        contexto: 'pagamentos',
+        observacoes: `[DESEMBOLSO CONFIRMADO] ${observacoes}`,
+        metadata: {
+          tipoAcao: 'DESEMBOLSO_CONFIRMADO',
+          valorDesembolsado: proposta.valorTotalFinanciado,
+          dataPagamento: new Date().toISOString(),
+          destino: {
+            tipo: proposta.dadosPagamentoPix ? 'PIX' : 'TED',
+            dados: proposta.dadosPagamentoPix || 
+                  `${proposta.dadosPagamentoBanco} AG:${proposta.dadosPagamentoAgencia} CC:${proposta.dadosPagamentoConta}`,
+          },
+        },
+      });
+    } catch (error) {
+      if (error instanceof InvalidTransitionError) {
+        throw new Error(`Transição de status inválida: ${error.message}`);
+      }
+      throw error;
+    }
+
+    // Update additional fields
+    await db
+      .update(propostas)
+      .set({
+        dataPagamento: new Date(),
+        observacoes: `${proposta.observacoes || ''}\n\n[DESEMBOLSO CONFIRMADO] ${observacoes}`,
+      })
+      .where(eq(propostas.id, propostaId));
+
+    SecureLogger.info('Payment disbursement confirmed', {
+      propostaId,
+      userId,
+      valor: proposta.valorTotalFinanciado,
+      observacoes
+    });
+
+    return {
+      propostaId,
+      status: 'pago',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Reject payment
+   */
+  async rejeitarPagamento(propostaId: string, userId: string, motivo: string): Promise<any> {
+    try {
+      // Use FSM to transition status
+      await transitionTo({
+        propostaId,
+        novoStatus: 'rejeitado',
+        userId,
+        contexto: 'pagamentos',
+        observacoes: `Pagamento rejeitado. Motivo: ${motivo}`,
+        metadata: {
+          tipoAcao: 'REJEITAR_PAGAMENTO',
+          rejeitadoPor: userId,
+          motivoRejeicao: motivo,
+          dataRejeicao: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      if (error instanceof InvalidTransitionError) {
+        throw new Error(`Transição de status inválida: ${error.message}`);
+      }
+      throw error;
+    }
+
+    SecureLogger.info('Payment rejected', {
+      propostaId,
+      userId,
+      motivo
+    });
+
+    return {
+      propostaId,
+      status: 'rejeitado',
+      motivo,
+      timestamp: new Date().toISOString(),
+    };
+  }
 }
 
 export const pagamentoService = new PagamentoService();
