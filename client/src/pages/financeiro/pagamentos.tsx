@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { z } from 'zod';
@@ -155,6 +155,39 @@ export default function Pagamentos() {
   const [paymentPassword, setPaymentPassword] = useState('');
   const [paymentObservation, setPaymentObservation] = useState('');
   const [mostrarPagos, setMostrarPagos] = useState(false);
+
+  // PAM V1.0: SSE connection for real-time payment updates
+  useEffect(() => {
+    const eventSource = new EventSource('/api/events');
+
+    eventSource.onopen = () => {
+      console.log('[SSE PAGAMENTOS] 📡 Connected to real-time events');
+    };
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('[SSE PAGAMENTOS] 📨 Event received:', data);
+
+        if (data.type === 'PROPOSAL_SIGNED' && data.proposalId) {
+          // Invalidate pagamentos queries to refresh payment data
+          queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
+          console.log('[SSE PAGAMENTOS] 🔄 Dados de pagamento atualizados em tempo real:', data.proposalId);
+        }
+      } catch (error) {
+        console.error('[SSE PAGAMENTOS] ❌ Error parsing event data:', error);
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('[SSE PAGAMENTOS] ❌ Connection error:', error);
+    };
+
+    return () => {
+      eventSource.close();
+      console.log('[SSE PAGAMENTOS] 🔌 Connection closed');
+    };
+  }, []);
 
   // Buscar pagamentos - DEBUG ULTRA SIMPLES
   const {
