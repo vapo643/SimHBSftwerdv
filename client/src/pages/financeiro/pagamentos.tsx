@@ -113,7 +113,8 @@ interface Pagamento {
     | 'em_processamento'
     | 'pago'
     | 'rejeitado'
-    | 'cancelado';
+    | 'cancelado'
+    | 'ASSINATURA_CONCLUIDA';
   dataRequisicao: string;
   dataAprovacao?: string;
   dataPagamento?: string;
@@ -1261,14 +1262,14 @@ export default function Pagamentos() {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm">
-                        {(verificacoes as any).ccbAssinada ? (
+                        {(verificacoes as any)?.ccbAssinada || selectedPagamento?.status === 'ASSINATURA_CONCLUIDA' ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span
                           className={
-                            (verificacoes as any).ccbAssinada ? 'text-green-700' : 'text-red-700'
+                            (verificacoes as any)?.ccbAssinada || selectedPagamento?.status === 'ASSINATURA_CONCLUIDA' ? 'text-green-700' : 'text-red-700'
                           }
                         >
                           CCB Assinada e Localizada
@@ -1302,7 +1303,7 @@ export default function Pagamentos() {
                       <CardTitle className="text-base">Documentação</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {(verificacoes as any).documentosCcb?.urlCcb ? (
+                      {(verificacoes as any)?.documentosCcb?.urlCcb || selectedPagamento?.status === 'ASSINATURA_CONCLUIDA' ? (
                         <Button
                           variant="outline"
                           size="sm"
@@ -1478,7 +1479,8 @@ export default function Pagamentos() {
                   }
                 }}
                 disabled={
-                  !(verificacoes as any)?.ccbAssinada ||
+                  (!(verificacoes as any)?.ccbAssinada && 
+                   selectedPagamento?.status !== 'ASSINATURA_CONCLUIDA') ||
                   confirmarDesembolsoMutation.isPending
                 }
               >
