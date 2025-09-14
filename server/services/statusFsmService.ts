@@ -154,6 +154,11 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
   console.log(`[FSM] 📊 Novo status desejado: ${novoStatus}`);
 
   try {
+    // Verificar se db está disponível
+    if (!db) {
+      throw new Error('Database connection not available');
+    }
+
     // 1. Buscar o estado atual da proposta
     const [propostaAtual] = await db
       .select({

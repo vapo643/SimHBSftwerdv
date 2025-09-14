@@ -546,12 +546,30 @@ export class PagamentoService {
     }
 
     try {
-      // Use FSM to transition status
+      // Follow FSM flow: ASSINATURA_CONCLUIDA → BOLETOS_EMITIDOS → PAGAMENTO_AUTORIZADO
+      const currentStatus = proposta.status;
+      
+      // Step 1: If currently ASSINATURA_CONCLUIDA, transition to BOLETOS_EMITIDOS first
+      if (currentStatus === 'ASSINATURA_CONCLUIDA') {
+        await transitionTo({
+          propostaId,
+          novoStatus: 'BOLETOS_EMITIDOS',
+          userId,
+          contexto: 'pagamentos',
+          observacoes: '[SISTEMA] Transição automática: boletos emitidos para desembolso',
+          metadata: {
+            tipoAcao: 'EMISSAO_BOLETOS_AUTOMATICA',
+            razao: 'Preparação para desembolso confirmado',
+          },
+        });
+      }
+      
+      // Step 2: Transition to final status PAGAMENTO_AUTORIZADO
       await transitionTo({
         propostaId,
-        novoStatus: 'pago',
+        novoStatus: 'pagamento_autorizado',
         userId,
-        contexto: 'pagamentos',
+        contexto: 'pagamentos', 
         observacoes: `[DESEMBOLSO CONFIRMADO] ${observacoes}`,
         metadata: {
           tipoAcao: 'DESEMBOLSO_CONFIRMADO',
@@ -589,7 +607,7 @@ export class PagamentoService {
 
     return {
       propostaId,
-      status: 'pago',
+      status: 'pagamento_autorizado',
       timestamp: new Date().toISOString(),
     };
   }
