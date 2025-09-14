@@ -73,15 +73,25 @@ import {
 import PaymentReviewModal from './pagamentos-review';
 import MarcarPagoModal from './marcar-pago-modal';
 
-// Schema SIMPLES temporário para debug - alinhado com backend simpleData
+// Schema COMPLETO para auditoria - alinhado com backend mappedData
 const PagamentoSchema = z.object({
   id: z.string(),
   nomeCliente: z.string(),
+  clienteNome: z.string().optional(), // Alias para compatibilidade
   cpfCliente: z.string(),
   valorLiquido: z.number(),
+  valorFinanciado: z.number().optional(),
+  valorIOF: z.number().optional(),
+  valorTAC: z.number().optional(),
   status: z.string(),
   dataRequisicao: z.string().optional(),
+  dataPagamento: z.string().optional(),
   numeroContrato: z.string(),
+  // Dados bancários para auditoria
+  dadosPagamentoBanco: z.string().optional(),
+  dadosPagamentoAgencia: z.string().optional(),
+  dadosPagamentoConta: z.string().optional(),
+  dadosPagamentoPix: z.string().optional(),
 });
 
 const ApiResponseSchema = z.object({
@@ -92,15 +102,21 @@ const ApiResponseSchema = z.object({
 
 interface Pagamento {
   id: string;
-  propostaId: string;
+  propostaId?: string;
   numeroContrato: string;
   nomeCliente: string;
+  clienteNome?: string; // Alias para compatibilidade
   cpfCliente: string;
-  valorFinanciado: number;
+  valorFinanciado?: number;
   valorLiquido: number;
-  valorIOF: number;
-  valorTAC: number;
-  contaBancaria: {
+  valorIOF?: number;
+  valorTAC?: number;
+  // Dados bancários para auditoria
+  dadosPagamentoBanco?: string;
+  dadosPagamentoAgencia?: string;
+  dadosPagamentoConta?: string;
+  dadosPagamentoPix?: string;
+  contaBancaria?: {
     banco: string;
     agencia: string;
     conta: string;
@@ -114,11 +130,13 @@ interface Pagamento {
     | 'pago'
     | 'rejeitado'
     | 'cancelado'
-    | 'ASSINATURA_CONCLUIDA';
-  dataRequisicao: string;
+    | 'ASSINATURA_CONCLUIDA'
+    | 'BOLETOS_EMITIDOS'
+    | 'pagamento_autorizado';
+  dataRequisicao?: string;
   dataAprovacao?: string;
   dataPagamento?: string;
-  requisitadoPor: {
+  requisitadoPor?: {
     id: string;
     nome: string;
     papel: string;
@@ -131,9 +149,9 @@ interface Pagamento {
   motivoRejeicao?: string;
   observacoes?: string;
   comprovante?: string;
-  formaPagamento: 'ted' | 'pix' | 'doc';
-  loja: string;
-  produto: string;
+  formaPagamento?: 'ted' | 'pix' | 'doc';
+  loja?: string;
+  produto?: string;
 }
 
 export default function Pagamentos() {

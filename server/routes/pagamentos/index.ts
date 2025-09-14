@@ -110,48 +110,113 @@ const upload = multer({
 const router = Router();
 
 /**
- * Get payments list - SIMPLIFICADO
+ * Get payments list - COM FILTROS IMPLEMENTADOS
  * GET /api/pagamentos
  */
 router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    console.log('[PAGAMENTOS] Endpoint simples chamado!');
+    const { status, periodo, incluir_pagos } = req.query;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    console.log(`[PAGAMENTOS] Filtros recebidos - status: ${status}, periodo: ${periodo}, incluir_pagos: ${incluir_pagos}`);
     
-    // SOLUÇÃO ULTRA-SIMPLES: buscar direto da tabela propostas
+    // SOLUÇÃO: buscar direto da tabela propostas COM FILTROS
     const { db } = await import('../../lib/supabase.ts');
     const { propostas } = await import('@shared/schema');
-    const { eq, sql } = await import('drizzle-orm');
+    const { eq, sql, inArray, gte } = await import('drizzle-orm');
     
     if (!db) {
       console.error('[PAGAMENTOS] Database connection not available');
       return res.status(500).json({ error: 'Database not connected' });
     }
 
-    // Query DIRETA e SIMPLES
-    const result = await db
-      .select()
-      .from(propostas)
-      .where(eq(propostas.status, 'ASSINATURA_CONCLUIDA'))
-      .limit(10); // Limitar para teste
+    // Construir condições da query baseadas nos filtros
+    let whereConditions = [];
     
-    console.log(`[PAGAMENTOS] Encontrou ${result.length} propostas com ASSINATURA_CONCLUIDA`);
+    // Status filter - determina quais propostas buscar
+    if (incluir_pagos === 'true') {
+      // 📋 AUDITORIA: Incluir propostas pagas E pendentes
+      whereConditions.push(
+        inArray(propostas.status, ['ASSINATURA_CONCLUIDA', 'BOLETOS_EMITIDOS', 'pagamento_autorizado'])
+      );
+      console.log('[PAGAMENTOS] 📋 Modo auditoria ativo - incluindo propostas pagas');
+    } else {
+      // Modo normal: apenas propostas prontas para pagamento
+      whereConditions.push(
+        inArray(propostas.status, ['ASSINATURA_CONCLUIDA', 'BOLETOS_EMITIDOS'])
+      );
+      console.log('[PAGAMENTOS] Modo normal - apenas propostas prontas para pagamento');
+    }
     
-    // Resposta SIMPLES sem DTO complexo
-    const simpleData = result.map(proposta => ({
+    // Período filter
+    if (periodo && periodo !== 'todos') {
+      const now = new Date();
+      let startDate: Date;
+      
+      switch (periodo) {
+        case 'hoje':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'semana':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'mes':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        default:
+          startDate = new Date(0); // Início dos tempos
+      }
+      
+      whereConditions.push(gte(propostas.createdAt, startDate));
+    }
+
+    // Executar query COM filtros
+    let queryBuilder = db.select().from(propostas);
+    
+    if (whereConditions.length > 0) {
+      // Combinar condições usando AND
+      const combinedCondition = whereConditions.reduce((acc, condition) => 
+        acc ? sql`${acc} AND ${condition}` : condition
+      );
+      queryBuilder = queryBuilder.where(combinedCondition);
+    }
+    
+    const result = await queryBuilder.limit(50); // Aumentar limite para auditoria
+    
+    console.log(`[PAGAMENTOS] Encontrou ${result.length} propostas`);
+    
+    // Mapeamento com dados completos para auditoria
+    const mappedData = result.map(proposta => ({
       id: proposta.id,
       nomeCliente: proposta.clienteNome || 'N/A',
-      cpfCliente: proposta.clienteCpf || 'N/A', 
+      clienteNome: proposta.clienteNome || 'N/A', // Alias para compatibilidade
+      cpfCliente: proposta.clienteCpf || 'N/A',
       valorLiquido: parseFloat(proposta.valorLiquidoLiberado || proposta.valor || '0'),
+      valorFinanciado: parseFloat(proposta.valorTotalFinanciado || proposta.valor || '0'),
+      valorIOF: parseFloat(proposta.valorIof || '0'),
+      valorTAC: parseFloat(proposta.valorTac || '0'),
       status: proposta.status,
       dataRequisicao: proposta.createdAt?.toISOString(),
-      numeroContrato: proposta.numeroProposta?.toString() || `PROP-${proposta.id.slice(0, 8)}`
+      dataPagamento: proposta.dataPagamento?.toISOString(),
+      numeroContrato: proposta.numeroProposta?.toString() || `PROP-${proposta.id.slice(0, 8)}`,
+      // Dados bancários para exibição
+      dadosPagamentoBanco: proposta.dadosPagamentoBanco,
+      dadosPagamentoAgencia: proposta.dadosPagamentoAgencia,
+      dadosPagamentoConta: proposta.dadosPagamentoConta,
+      dadosPagamentoPix: proposta.dadosPagamentoPix,
     }));
 
     res.json({
       success: true,
-      data: simpleData,
-      total: simpleData.length,
-      debug: `Query executada: SELECT * FROM propostas WHERE status = 'ASSINATURA_CONCLUIDA'`
+      data: mappedData,
+      total: mappedData.length,
+      filters: {
+        status: status || 'todos',
+        periodo: periodo || 'todos',
+        incluirPagos: incluir_pagos === 'true'
+      },
+      debug: `Query executada com ${whereConditions.length} filtros aplicados`
     });
     
   } catch (error: any) {
