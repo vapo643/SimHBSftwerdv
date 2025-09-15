@@ -24,12 +24,18 @@ import HistoricoCompartilhado from '@/components/HistoricoCompartilhado';
 import RefreshButton from '@/components/RefreshButton';
 
 import { api } from '@/lib/apiClient';
+import { PropostaMapper } from '@/mappers/proposta.mapper';
 // Removido temporariamente para resolver problema do Vite
 
 // 🔧 Helper function to safely render complex values
 const safeRender = (value: any): string => {
   if (value === null || value === undefined) return 'N/A';
-  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  if (typeof value === 'number') {
+    return PropostaMapper.formatMoney(value); // ✅ CORREÇÃO
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
   if (typeof value === 'object') {
     // If it has a 'cents' property, convert to currency
     if (value.cents !== undefined) {

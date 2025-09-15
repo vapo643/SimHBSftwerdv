@@ -248,7 +248,7 @@ export class PropostaMapper {
   /**
    * Formata um valor monetário
    */
-  private static formatMoney(value: any): string {
+  public static formatMoney(value: any): string {
     if (value === null || value === undefined || value === 'N/A') {
       return 'N/A';
     }

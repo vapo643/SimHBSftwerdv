@@ -1,0 +1,75 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - Correção Cirúrgica**
+
+* **Sumário da Missão (O Quê):** Refatorar a função `safeRender` no componente da Fila de Análise para utilizar o `formatMoney` existente, garantindo que todos os valores de `rendaMensal` sejam exibidos com a formatação monetária correta e consistente em todo o sistema.
+* **Intenção Estratégica (O Porquê):** Corrigir a corrupção de dados visuais que está a induzir os analistas de crédito a erro, restaurando a integridade e a confiança nas informações financeiras apresentadas e eliminando um risco operacional crítico.
+* **Modelo Mental (Como se Encaixa):** A solução envolve uma pequena, mas crítica, refatoração. Em vez de duplicar a lógica, vamos promover o reuso de código. Iremos modificar o `proposta.mapper.ts` para exportar a sua funcionalidade de formatação e, em seguida, importar e aplicar essa função no local exato da falha em `analise.tsx`.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A função `formatMoney` pode não estar acessível (ex: ser `private`). A modificação para torná-la `public` pode, teoricamente, ter efeitos colaterais se mal gerida.
+    * **Contramedida:** O roadmap é faseado. A primeira etapa é garantir a acessibilidade da função `formatMoney` de forma segura. A validação final garantirá que a mudança não introduziu regressões.
+
+---
+
+**IMPLEMENTAR:**
+Plano de Refinamento para a Formatação Monetária na Fila de Análise.
+
+**CURRENT STATE:**
+A função `safeRender` em `/client/src/pages/credito/analise.tsx` não formata valores numéricos como moeda. Um `rendaMensal` de `300000` é exibido incorretamente como a string `"300000"` em vez de `"R$ 300.000,00"`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1. A função `safeRender` em `/client/src/pages/credito/analise.tsx` deve invocar a lógica de formatação monetária correta para qualquer valor numérico.
+2. Uma proposta com `rendaMensal` de `300000` deve ser exibida na UI da Fila de Análise como **"R$ 300.000,00"**.
+3. A solução deve priorizar o reuso do código existente, evitando duplicação de lógica.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**Passo 1: [Preparação] Expor a Função de Formatação Existente**
+1.  Abra o ficheiro `/client/src/mappers/proposta.mapper.ts`.
+2.  Localize a função `formatMoney`.
+3.  Garanta que a sua assinatura seja `public static formatMoney(value: any): string`. Se for `private`, altere-a para `public`. Isto é essencial para permitir o reuso.
+
+**Passo 2: [Execução] Corrigir a Renderização na Fila de Análise**
+1.  Abra o ficheiro `/client/src/pages/credito/analise.tsx`.
+2.  Adicione a seguinte importação no topo do ficheiro:
+    ```typescript
+    import { PropostaMapper } from '../../mappers/proposta.mapper';
+    ```
+3.  Localize a função `safeRender`.
+4.  Modifique a linha de verificação de `string` ou `number`:
+    * **DE:**
+        ```typescript
+        if (typeof value === 'string' || typeof value === 'number') return String(value); // 🚨 BUG
+        ```
+    * **PARA:**
+        ```typescript
+        if (typeof value === 'number') {
+          return PropostaMapper.formatMoney(value); // ✅ CORREÇÃO
+        }
+        if (typeof value === 'string') {
+          return value;
+        }
+        ```
+
+**Passo 3: [Validação] Verificação Final de Integridade**
+1.  Após as modificações, execute o comando `get_latest_lsp_diagnostics`.
+2.  **O resultado DEVE ser zero erros.** Se houver qualquer erro, pare e corrija-o antes de prosseguir.
+3.  Declare a sua confiança na implementação e os riscos identificados.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas.
+2.  Garantir importações e tipos corretos.
+3.  Executar `get_latest_lsp_diagnostics` e corrigir **TODOS** os erros.
+4.  **Declarar Nível de Confiança (0-100%)** na implementação.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  Realizar teste funcional completo, confirmando que a renda é exibida corretamente.
+7.  **Documentar Decisões Técnicas** assumidas (ex: "Tornada a função `formatMoney` pública para promover reuso de código.").
