@@ -119,30 +119,30 @@ function generateSecureSecret(name: string): string {
 
 // REMOVIDA: Função detectEnvironmentFromDomain - lógica de detecção eliminada
 
-// OPÇÃO A: Função ambiente-específica para JWT secrets
+// OPERAÇÃO PHOENIX: Função JWT EXPLÍCITA e SEGURA
 function getJwtSecret(): string {
-  const env = process.env.NODE_ENV || 'development';
-  
-  // Use environment-specific JWT secrets
-  const secret = env === 'production' 
-    ? process.env.SUPABASE_JWT_SECRET
-    : process.env.SUPABASE_DEV_JWT_SECRET;
-  
-  const secretName = env === 'production' ? 'SUPABASE_JWT_SECRET' : 'SUPABASE_DEV_JWT_SECRET';
-  
+  // A configuração DEVE vir explicitamente do ambiente. Sem fallbacks, sem magia.
+  const secret = process.env.SUPABASE_JWT_SECRET;
+
   if (!secret) {
-    console.error(`[CONFIG] 🚨 FATAL: ${secretName} não configurado para ambiente ${env}`);
-    console.error(`Configure em: Settings → Environment Variables → ${secretName}`);
-    process.exit(1);
+    console.error('🚨 FATAL ERROR (OPERAÇÃO PHOENIX): SUPABASE_JWT_SECRET não está configurado.');
+    console.error('Configure em: Settings → Environment Variables → SUPABASE_JWT_SECRET');
+    // Em produção, devemos falhar rápido se a configuração crítica estiver ausente.
+    if (process.env.NODE_ENV === 'production') {
+        console.error('🚨 Encerrando aplicação para prevenir falhas de segurança.');
+        process.exit(1);
+    }
+    throw new Error('Segredo JWT obrigatório não configurado (SUPABASE_JWT_SECRET).');
   }
-  
+
   // Validação de formato
   if (secret.length < 20) {
-    console.error(`[CONFIG] 🚨 FATAL: ${secretName} inválido (muito curto)`);
+    console.error('🚨 FATAL: SUPABASE_JWT_SECRET inválido (muito curto)');
     process.exit(1);
   }
-  
-  console.log(`[CONFIG] ✅ ${secretName} carregado com sucesso para ambiente ${env}`);
+
+  // Log de confirmação seguro (apenas comprimento)
+  console.log(`[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: ${secret.length})`);
   return secret;
 }
 

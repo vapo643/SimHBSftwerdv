@@ -3,6 +3,46 @@ import { setupVite, serveStatic, log } from './vite';
 import { config, logConfigStatus, isAppOperational, getJwtSecret } from './lib/config';
 import { registerRoutes } from './routes';
 
+// 🛡️ GUARDA DE INTEGRIDADE DE CONFIGURAÇÃO (OPERAÇÃO PHOENIX V4.0)
+function validateCriticalConfiguration() {
+  console.log('[BOOTSTRAP] Iniciando Validação de Configuração Crítica...');
+  let failed = false;
+
+  const CRITICAL_SECRETS = [
+    'DATABASE_URL', 'SUPABASE_JWT_SECRET',
+    'VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'
+  ];
+
+  // 1. Checar Secrets Obrigatórios
+  CRITICAL_SECRETS.forEach(secret => {
+    if (!process.env[secret]) {
+      console.error(`🚨 FATAL: Variável obrigatória ausente: ${secret}`);
+      failed = true;
+    }
+  });
+
+  // 2. Checar Contaminação (Apenas em Produção)
+  if (process.env.NODE_ENV === 'production') {
+      const CONTAMINANTS = ['DEV_DATABASE_URL', 'DEV_SUPABASE_URL', 'DEV_JTW_SECRET', 'PROD_JWT_SECRET'];
+      CONTAMINANTS.forEach(secret => {
+          if (process.env[secret]) {
+              console.error(`🚨 FATAL: Contaminação detectada! Secret proibido encontrado em produção: ${secret}`);
+              failed = true;
+          }
+      });
+  }
+
+  if (failed) {
+    console.error('❌ [BOOTSTRAP] Configuração inválida. Encerrando processo para prevenir falhas catastróficas.');
+    process.exit(1); // FALHAR RÁPIDO E ALTO
+  }
+
+  console.log('✅ [BOOTSTRAP] Configuração crítica validada com sucesso.');
+}
+
+// Executar validação imediatamente antes de iniciar o servidor
+validateCriticalConfiguration();
+
 // 🏡 P0.2 - Initialize IoC Container BEFORE route registration
 import { configureContainer } from './modules/shared/infrastructure/ServiceRegistry';
 

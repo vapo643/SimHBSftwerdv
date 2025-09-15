@@ -37,23 +37,29 @@ router.get('/ready', (req: Request, res: Response) => {
  * Endpoint de validação de configuração conforme protocolo Opus
  */
 router.get('/config', (req: Request, res: Response) => {
-  const urlsMatch = process.env.VITE_SUPABASE_URL?.includes(
-    process.env.SUPABASE_URL?.split('.')[0].split('//')[1] || ''
-  );
-  
-  res.json({
-    status: 'OPERATIONAL',
+  // OPERAÇÃO PHOENIX: Validação rigorosa de configuração
+  const configHealth = {
+    supabaseUrlsMatch: process.env.VITE_SUPABASE_URL === process.env.SUPABASE_URL,
+    hasJwtSecret: !!process.env.SUPABASE_JWT_SECRET,
+    hasSupabaseUrl: !!process.env.SUPABASE_URL,
+    contaminationDetected: !!(
+      process.env.DEV_JWT_SECRET || 
+      process.env.DEV_JTW_SECRET || 
+      process.env.PROD_JWT_SECRET ||
+      process.env.DEV_SUPABASE_URL || 
+      process.env.PROD_SUPABASE_URL
+    )
+  };
+
+  const healthy = configHealth.supabaseUrlsMatch && 
+                  configHealth.hasJwtSecret && 
+                  !configHealth.contaminationDetected;
+
+  res.status(healthy ? 200 : 503).json({ // 503 Service Unavailable se misconfigurado
+    status: healthy ? 'HEALTHY' : 'MISCONFIGURED',
+    details: configHealth,
     timestamp: new Date().toISOString(),
-    config: {
-      hasJwtSecret: !!process.env.SUPABASE_JWT_SECRET,
-      hasSupabaseUrl: !!process.env.SUPABASE_URL,
-      urlsAligned: urlsMatch,
-      contamination: {
-        dev_secrets: !!process.env.DEV_JWT_SECRET || !!process.env.DEV_JTW_SECRET || !!process.env.DEV_SUPABASE_URL,
-        prod_secrets: !!process.env.PROD_JWT_SECRET || !!process.env.PROD_SUPABASE_URL
-      }
-    },
-    recommendation: urlsMatch ? 'HEALTHY' : 'CHECK_URLS'
+    recommendation: healthy ? 'HEALTHY' : 'CONFIGURATION_REQUIRED'
   });
 });
 
