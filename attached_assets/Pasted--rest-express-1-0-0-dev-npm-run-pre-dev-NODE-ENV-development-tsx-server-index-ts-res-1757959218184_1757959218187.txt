@@ -1,0 +1,137 @@
+
+> rest-express@1.0.0 dev
+> npm run pre-dev && NODE_ENV=development tsx server/index.ts
+
+
+> rest-express@1.0.0 pre-dev
+> bash scripts/prevent-neon-autoconfiguration.sh
+
+🛡️ EXECUTANDO PROTEÇÃO ANTI-NEON DATABASE
+
+🔍 VERIFICAÇÃO FINAL:
+  - DATABASE_URL: postgresql://postgres.fkfmirnn...
+  - Ambiente: development
+ ⚠️ Supabase environment variables not configured. Some features may be limited.
+   Missing: SUPABASE_ANON_KEY
+ℹ️  Configure SUPABASE_URL and SUPABASE_ANON_KEY in deployment secrets
+✅ Database: Configuring Supabase connection...
+✅ Database: Connection pool configured with 20 max connections (Mission 3 optimization)
+📊 Pool Config: idle_timeout=30s, connect_timeout=10s, prepared_statements=disabled
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c87...
+[CLICKSIGN] 🔴 Circuit Breaker will be initialized on first use
+[INTER] 🏦 Initialized in production mode
+[INTER] 🌐 API URL: https://cdpj.partners.bancointer.com.br
+[INTER] 🔴 Circuit Breakers will be initialized on first use
+2025-09-15 17:51:01 [info]: [REALTIME SERVICE] ✅ Inicializado com heartbeat a cada 30s {"service":"simpix-api","environment":"development","version":"1.0.0"}
+2025-09-15 17:51:01 [info]: [CLICKSIGN WEBHOOK SERVICE] ✅ Inicializado com UseCase MarcarAssinaturaConcluidaUseCase {"service":"simpix-api","environment":"development","version":"1.0.0","webhookSecretConfigured":true,"useCaseInjected":true,"injectionMethod":"internal_fallback"}
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90***
+[CLICKSIGN V1] UseCase DI attached: false
+[DEV QUEUE] 📦 Created development queue: pdf-processing
+[DEV QUEUE] 📦 Created development queue: boleto-sync
+[DEV QUEUE] 📦 Created development queue: document-processing
+[DEV QUEUE] 📦 Created development queue: notifications
+[DEV QUEUE] 🚀 Development queues initialized with REAL worker processing
+2025-09-15 17:51:01 [info]: Dead-Letter Queue Manager initialized {"service":"simpix-api","environment":"development","version":"1.0.0"}
+[QUEUE] 🚀 Job queues initialized with DLQ support
+2025-09-15 17:51:01 [info]: 📊 MetricsService initialized with Sentry integration {"service":"simpix-api","environment":"development","version":"1.0.0"}
+2025-09-15 17:51:01 [info]: 📊 BullMQ MetricsService module loaded {"service":"simpix-api","environment":"development","version":"1.0.0"}
+🚀 [TIMING MIDDLEWARE] Creating middleware instance...
+🚀 [TIMING MIDDLEWARE] Middleware instance created and exported
+5:51:02 PM [express] ⚠️  Missing optional secrets: SUPABASE_ANON_KEY, SUPABASE_JWT_SECRET, SUPABASE_DEV_JWT_SECRET, CLICKSIGN_API_KEY
+🚨 FATAL ERROR (OPERAÇÃO PHOENIX): SUPABASE_JWT_SECRET não está configurado.
+Configure em: Settings → Environment Variables → SUPABASE_JWT_SECRET
+5:51:02 PM [express] ❌ Error loading config: Segredo JWT obrigatório não configurado (SUPABASE_JWT_SECRET).
+5:51:02 PM [express] ⚠️  JWT_SECRET not configured! Using secure random value for development.
+5:51:02 PM [express] ⚠️  SESSION_SECRET not configured! Using secure random value for development.
+5:51:02 PM [express] ⚠️  CSRF_SECRET not configured! Using secure random value for development.
+[BOOTSTRAP] Iniciando Validação de Configuração Crítica...
+⚠️ [DEVELOPMENT] Validação crítica PULADA - desenvolvimento permite fallbacks
+✅ [BOOTSTRAP] Arquitetura canônica aplicada - variáveis unificadas por ambiente
+✅ [BOOTSTRAP] Configuração crítica validada com sucesso.
+5:51:02 PM [express] 🏗️ Initializing IoC Container...
+5:51:02 PM [express] ✅ IoC Container initialized successfully
+🚨 FATAL ERROR (OPERAÇÃO PHOENIX): SUPABASE_JWT_SECRET não está configurado.
+Configure em: Settings → Environment Variables → SUPABASE_JWT_SECRET
+⚠️ [DEVELOPMENT] JWT Secret não configurado - usando fallback seguro
+2025-09-15 17:51:02 [info]: ✅ Sentry initialized successfully {"service":"simpix-api","environment":"development","version":"1.0.0","dsn":"not configured"}
+2025-09-15 17:51:02 [info]: 📊 Observability layer initialized {"service":"simpix-api","environment":"development","version":"1.0.0","sentry":true,"logging":true}
+2025-09-15 17:51:02 [info]: 🔄 Aplicação iniciando com Redis lazy loading (graceful degradation) {"service":"redis-lazy","environment":"development","version":"1.0.0","redis_available":"on-demand-check","degraded_mode":false}
+5:51:02 PM [express] 🔒 [SECURITY] CORS protection configured - ASVS V13.2.1
+5:51:02 PM [express] 🔒 [SECURITY] OPTIONS preflight handling configured
+5:51:02 PM [express] 🔒 [SECURITY] Input sanitization middleware activated
+5:51:02 PM [express] 🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1
+5:51:02 PM [express] 🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet
+🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos
+🚫 [SECURITY] Rate limiting DESABILITADO PERMANENTEMENTE por solicitação do usuário
+2025-09-15 17:51:02 [info]: 🏥 Health check endpoints registered {"service":"simpix-api","environment":"development","version":"1.0.0","endpoints":["/api/health","/api/health/live","/api/health/ready"]}
+[Sentry] express is not instrumented. Please make sure to initialize Sentry in a separate file that you `--import` when running node, see: https://docs.sentry.io/platforms/javascript/guides/express/install/esm/.
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 0, proposalRequests: 0, threshold: '50 proposals/day' }
+[SEMGREP MCP] Connected to Redis via Redis Manager
+🔌 [Security WS] Event listeners configurados (aguardando implementação de EventEmitter nos scanners)
+5:51:02 PM [express] 🔐 Security WebSocket initialized
+[CCB SYNC] 🚀 Starting fallback polling (every 6 hours)
+[CCB SYNC] ℹ️ Primary processing via webhooks, polling is safety net only
+5:51:02 PM [express] 🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours
+2025-09-15 17:51:02 [warn]: ⚠️ [FormalizationWorker] Start called but Queue unavailable - no async processing {"service":"simpix-api","environment":"development","version":"1.0.0"}
+5:51:02 PM [express] ⚡ Formalization Worker initialized - Processing async events
+5:51:02 PM [express] 🎯 Specialized queue workers configured for lazy initialization
+5:51:02 PM [express]    - Workers will start when first job is processed (on-demand)
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 0, proposalRequests: 0, threshold: '50 proposals/day' }
+2025-09-15 17:51:02 [warn]: ⚠️ [FormalizationWorker] Queue unavailable - async processing disabled {"service":"simpix-api","environment":"development","version":"1.0.0","error":"Redis connection not available - using synchronous processing"}
+2025-09-15 17:51:02 [warn]: 💡 [FormalizationWorker] Events will be processed synchronously (graceful degradation) {"service":"simpix-api","environment":"development","version":"1.0.0"}
+5:51:02 PM [express] 🔔 Sistema de Alertas Proativos inicializado - Próxima execução: 16/09/2025, 04:00:00
+5:51:02 PM [express] ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable
+5:51:02 PM [express] 🔧 App Config Status:
+5:51:02 PM [express]   - Port: 5000
+5:51:02 PM [express]   - Environment: development
+5:51:02 PM [express]   - Database: ❌ Not configured
+5:51:02 PM [express]   - Supabase: ❌ Not configured
+5:51:02 PM [express]   - Security: Rate Limit ❌, Helmet ❌
+5:51:02 PM [express] 🚀 Server running on port 5000
+5:51:02 PM [express] 🌍 Environment: development
+5:51:02 PM [express] 📦 Checking storage buckets...
+2025-09-15 17:51:03 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f861e3b6-de7d-42d0-8448-ad12c659b4a7","method":"GET","url":"/","path":"/","query":{},"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/140.0.0.0 Safari/537.36"}
+2025-09-15 17:51:03 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"968dd83a-046f-41b7-95c7-82fa41362e84","method":"GET","url":"/","path":"/","query":{},"ip":"172.31.104.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Arqo%3A"}
+2025-09-15 17:51:04 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d386d428-a666-4037-b2f0-e65a53ce5856","method":"GET","url":"/src/main.tsx?v=nx0YTZEmkWyoHJ-kDWYI1","path":"/src/main.tsx","query":{"v":"nx0YTZEmkWyoHJ-kDWYI1"},"ip":"172.31.104.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/"}
+5:51:04 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+2025-09-15 17:51:09 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"cf191ea9-0312-42bf-a518-a7361db04d19","method":"GET","url":"/@react-refresh","path":"/@react-refresh","query":{},"ip":"172.31.104.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/"}
+[PERFORMANCE] ⚠️  SLOW GET /src/index.css {
+  correlationId: 'perf-1757958669471-meq0g2uxe',
+  duration: 1796,
+  memoryDeltaMB: 47,
+  statusCode: 304,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /src/index.css {
+  correlationId: 'perf-1757958669471-w4uryaaqe',
+  duration: 1796,
+  memoryDeltaMB: 47,
+  statusCode: 304,
+  isCritical: false,
+  threshold: 1000
+}
+2025-09-15 17:51:12 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"be4f3d68-41bb-4859-a92d-0a35f5207667","method":"GET","url":"/src/main.tsx?v=4ksDZSgLjng0GX8fRk64N","path":"/src/main.tsx","query":{"v":"4ksDZSgLjng0GX8fRk64N"},"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/140.0.0.0 Safari/537.36","referrer":"http://127.0.0.1:5000/"}
+✅ Database: Connection pool test successful
+📊 Connection latency: 9424ms
+🔧 Connection pool ready for high concurrency workload
+2025-09-15 17:51:12 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4e3ad32f-7120-48bc-a3c8-5b4ccf08fa0d","method":"GET","url":"/@react-refresh","path":"/@react-refresh","query":{},"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/140.0.0.0 Safari/537.36","referrer":"http://127.0.0.1:5000/"}
+[PERFORMANCE] ⚠️  SLOW GET /src/contexts/FeatureFlagContext.tsx {
+  correlationId: 'perf-1757958671530-z2a3s7r6t',
+  duration: 1915,
+  memoryDeltaMB: 144,
+  statusCode: 304,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /src/contexts/FeatureFlagContext.tsx {
+  correlationId: 'perf-1757958671530-vu5gdtr21',
+  duration: 1915,
+  memoryDeltaMB: 144,
+  statusCode: 304,
+  isCritical: false,
+  threshold: 1000
