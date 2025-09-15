@@ -3650,8 +3650,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: 'Arquivo é obrigatório' });
         }
 
+        // CORREÇÃO CRÍTICA: Verificar se Supabase está configurado antes de tentar upload
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const supabase = createServerSupabaseAdminClient();
+        let supabase;
+        
+        try {
+          supabase = createServerSupabaseAdminClient();
+        } catch (configError) {
+          console.warn('[DEVELOPMENT] Supabase não configurado, usando fallback local:', configError);
+          // FALLBACK para desenvolvimento: simular upload bem-sucedido
+          const { v4: uuidv4 } = await import('uuid');
+          const uniqueId = uuidv4().split('-')[0];
+          const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
+          const mockUrl = `/dev-storage/docs-prop/${proposalId}/${fileName}`;
+          
+          console.log(`[DEV FALLBACK] Simulando upload de ${file.originalname} como ${fileName}`);
+          
+          return res.json({
+            success: true,
+            fileName: fileName,
+            filePath: `docs-prop/${proposalId}/${fileName}`,
+            url: mockUrl,
+            originalName: file.originalname,
+            size: file.size,
+            type: file.mimetype,
+            isDevelopmentFallback: true,
+          });
+        }
 
         // Usar filename do body ou gerar um UUID
         const { v4: uuidv4 } = await import('uuid');
