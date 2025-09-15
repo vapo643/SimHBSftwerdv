@@ -3642,41 +3642,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const file = req.file;
         const { proposalId } = req.body;
-        if (!proposalId || typeof proposalId !== 'string' || proposalId === 'undefined') {
-          return res.status(400).json({ success: false, message: 'ID da proposta inválido ou não fornecido.' });
+        // CORREÇÃO CRÍTICA: Validação mais rigorosa do proposalId
+        if (!proposalId || 
+            typeof proposalId !== 'string' || 
+            proposalId.trim() === '' || 
+            proposalId === 'undefined' || 
+            proposalId === 'null' ||
+            proposalId.includes('%') ||  // URL encoded que falhou
+            proposalId.length < 10) {    // UUID mínimo
+          console.error(`[ERROR] Upload - proposalId inválido: "${proposalId}" (tipo: ${typeof proposalId})`);
+          return res.status(400).json({ 
+            success: false, 
+            message: 'ID da proposta inválido ou não fornecido.',
+            debug: { 
+              received: proposalId, 
+              type: typeof proposalId,
+              length: proposalId?.length || 0
+            }
+          });
         }
 
         if (!file) {
           return res.status(400).json({ message: 'Arquivo é obrigatório' });
         }
 
-        // CORREÇÃO CRÍTICA: Verificar se Supabase está configurado antes de tentar upload
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        let supabase;
+        const supabase = createServerSupabaseAdminClient();
         
-        try {
-          supabase = createServerSupabaseAdminClient();
-        } catch (configError) {
-          console.warn('[DEVELOPMENT] Supabase não configurado, usando fallback local:', configError);
-          // FALLBACK para desenvolvimento: simular upload bem-sucedido
-          const { v4: uuidv4 } = await import('uuid');
-          const uniqueId = uuidv4().split('-')[0];
-          const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
-          const mockUrl = `/dev-storage/docs-prop/${proposalId}/${fileName}`;
-          
-          console.log(`[DEV FALLBACK] Simulando upload de ${file.originalname} como ${fileName}`);
-          
-          return res.json({
-            success: true,
-            fileName: fileName,
-            filePath: `docs-prop/${proposalId}/${fileName}`,
-            url: mockUrl,
-            originalName: file.originalname,
-            size: file.size,
-            type: file.mimetype,
-            isDevelopmentFallback: true,
-          });
-        }
+        // CORREÇÃO CRÍTICA: Validação mais robusta do proposalId 
+        console.log(`[DEBUG] Upload - proposalId recebido: "${proposalId}"`);
+        console.log(`[DEBUG] Upload - tipo do proposalId: ${typeof proposalId}`);
 
         // Usar filename do body ou gerar um UUID
         const { v4: uuidv4 } = await import('uuid');

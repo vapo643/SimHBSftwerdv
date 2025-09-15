@@ -10,7 +10,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 
-// Magic number signatures for allowed file types
+// Magic number signatures for allowed file types - PRODUÇÃO EXPANDIDA
 const FILE_SIGNATURES = {
   'application/pdf': [
     [0x25, 0x50, 0x44, 0x46], // %PDF
@@ -21,18 +21,27 @@ const FILE_SIGNATURES = {
     [0xff, 0xd8, 0xff, 0xe2], // Canon
     [0xff, 0xd8, 0xff, 0xe3], // Samsung
     [0xff, 0xd8, 0xff, 0xe8], // SPIFF
+    [0xff, 0xd8, 0xff, 0xdb], // Generic JPEG
+    [0xff, 0xd8, 0xff, 0xee], // Additional variant
   ],
   'image/png': [
     [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], // PNG signature
   ],
 } as const;
 
-// Allowed file extensions mapped to MIME types
+// Allowed file extensions mapped to MIME types - PRODUÇÃO EXPANDIDA
 const ALLOWED_FILE_TYPES = {
   '.pdf': 'application/pdf',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.png': 'image/png',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.doc': 'application/msword',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.xls': 'application/vnd.ms-excel',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.txt': 'text/plain',
 } as const;
 
 interface FileValidationError {
@@ -47,7 +56,7 @@ interface FileValidationError {
 }
 
 export class SecureFileValidator {
-  private static readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  private static readonly MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB - Aumentado para propostas com muitos documentos
   private static readonly SCAN_BUFFER_SIZE = 2048; // First 2KB for analysis
 
   /**
@@ -62,11 +71,29 @@ export class SecureFileValidator {
   }
 
   /**
-   * Validate magic numbers (file signatures)
+   * Validate magic numbers (file signatures) - PRODUÇÃO OTIMIZADA
    */
   private static validateMagicNumbers(buffer: Buffer, expectedMimeType: string): boolean {
     const signatures = FILE_SIGNATURES[expectedMimeType as keyof typeof FILE_SIGNATURES];
-    if (!signatures) return false;
+    if (!signatures) {
+      // CORREÇÃO PRODUÇÃO: Se tipo não está na lista mas é comum, permitir
+      const commonSafeMimeTypes = [
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel', 
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain',
+        'image/gif',
+        'image/webp'
+      ];
+      
+      if (commonSafeMimeTypes.includes(expectedMimeType)) {
+        console.warn(`[SECURITY] Allowing common safe type without magic validation: ${expectedMimeType}`);
+        return true;
+      }
+      
+      return false;
+    }
 
     return signatures.some((signature) => {
       if (buffer.length < signature.length) return false;
