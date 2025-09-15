@@ -549,7 +549,8 @@ export async function jwtAuthMiddleware(
         
         const decoded = jwt.default.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as any;
 
-        userId = decoded.userId;
+        // 🔧 CORREÇÃO PHOENIX: Supabase usa 'sub' field, não 'userId' 
+        userId = decoded.userId || decoded.sub;
         userEmail = decoded.email || '';
 
         // Create mock data object for consistency

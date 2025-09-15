@@ -1,0 +1,146 @@
+User
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+2025-09-15 14:34:46.86
+cfb0cca1
+User
+[JWT DEBUG] Origin: undefined
+2025-09-15 14:34:46.86
+cfb0cca1
+User
+[JWT DEBUG] Referer: https://sistemasimpix.com.br/dashboard
+2025-09-15 14:34:46.86
+cfb0cca1
+User
+[JWT DEBUG] Header Auth presente: true
+2025-09-15 14:34:46.86
+cfb0cca1
+User
+[JWT DEBUG] Header começa com Bearer: true
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 2, proposalRequests: 0, threshold: '50 proposals/day' }
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 2, proposalRequests: 0, threshold: '50 proposals/day' }
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[JWT DEBUG] Using local JWT validation
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[JWT DEBUG] JWT decoded successfully: {
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+userId: undefined,
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+email: 'ramon.barbosa@eellevepromotora.com.br',
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+role: 'authenticated'
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+}
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+[CIRCUIT BREAKER] ⚠️ IP 187.36.168.240 falha 3/999999999
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+{"correlationId":"d1c2c776-f167-48e6-b9c6-49486c05d0e8","duration":7,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":47,"service":"simpix-api","statusCode":401,"timestamp":"2025-09-15 17:34:46","url":"/api/debug/me","version":"1.0.0"}
+2025-09-15 14:34:46.87
+cfb0cca1
+User
+{"correlationId":"d1c2c776-f167-48e6-b9c6-49486c05d0e8","duration":7,"environment":"production","error":"{\"message\":\"Token inválido ou expirado\"}","level":"error","message":"❌ Request error","method":"GET","service":"simpix-api","statusCode":401,"timestamp":"2025-09-15 17:34:46","url":"/api/debug/me","version":"1.0.0"}
+2025-09-15 14:34:47.06
+cfb0cca1
+User
+{"correlationId":"afab554f-1181-4802-ac41-4f2123f92ce4","environment":"production","ip":"34.60.209.83","level":"info","message":"📥 Request received","method":"GET","path":"/api/debug/me","query":{},"referrer":"https://sistemasimpix.com.br/dashboard","service":"simpix-api","timestamp":"2025-09-15 17:34:47","url":"/api/debug/me","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] Rota acessada: /api/debug/me
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] Método: GET
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] Origin: undefined
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] Referer: https://sistemasimpix.com.br/dashboard
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] Header Auth presente: true
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] Header começa com Bearer: true
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 2, proposalRequests: 0, threshold: '50 proposals/day' }
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 2, proposalRequests: 0, threshold: '50 proposals/day' }
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+2025-09-15 14:34:47.07
+cfb0cca1
+User
+[JWT DEBUG] Using local JWT validation
