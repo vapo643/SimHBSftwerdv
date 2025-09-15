@@ -27,31 +27,22 @@ import { api } from '@/lib/apiClient';
 import { PropostaMapper } from '@/mappers/proposta.mapper';
 // Removido temporariamente para resolver problema do Vite
 
-// 🔧 Helper function to safely render complex values
-const safeRender = (value: any): string => {
+// 🔧 Formatadores específicos para diferentes tipos de dados
+const formatAsCurrency = (value: any): string => {
   if (value === null || value === undefined) return 'N/A';
-  if (typeof value === 'number') {
-    return PropostaMapper.formatMoney(value); // ✅ CORREÇÃO
-  }
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (typeof value === 'object') {
-    // If it has a 'cents' property, convert to currency
-    if (value.cents !== undefined) {
-      const reais = value.cents / 100;
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      }).format(reais);
-    }
-    // If it has a 'value' property, use that
-    if (value.value !== undefined) return String(value.value);
-    // If it's an array, join with commas
-    if (Array.isArray(value)) return value.join(', ');
-    // Otherwise, return JSON string
-    return JSON.stringify(value);
-  }
+  return PropostaMapper.formatMoney(value);
+};
+
+const formatAsPercent = (value: any): string => {
+  if (value === null || value === undefined) return 'N/A';
+  const numValue = Number(value);
+  if (isNaN(numValue)) return String(value);
+  return `${numValue.toFixed(2).replace('.', ',')}%`;
+};
+
+// 🔧 Helper function simplificada - apenas para valores nulos e conversão de string
+const safeRender = (value: any): string => {
+  if (value === null || value === undefined || value === '') return 'N/A';
   return String(value);
 };
 
@@ -248,19 +239,19 @@ const AnaliseManualPage: React.FC = () => {
       },
       condicoes: {
         // ✍️ CORREÇÃO: Usar dados diretos da API com fallbacks mínimos para compatibilidade
-        valorSolicitado: safeRender(
+        valorSolicitado: formatAsCurrency(
           rawData.valorSolicitado || rawData.valor || condicoesData.valorSolicitado
         ),
         prazo: rawData.prazo || condicoesData.prazo || 'N/A',
         finalidade: rawData.finalidade || condicoesData.finalidade || 'N/A',
         garantia: rawData.garantia || condicoesData.garantia || 'N/A',
-        valorTac: safeRender(rawData.valorTac || condicoesData.valorTac),
+        valorTac: formatAsCurrency(rawData.valorTac || condicoesData.valorTac),
         tacTipo: rawData.tacTipo || 'valor',
-        valorIof: safeRender(rawData.valorIof || condicoesData.valorIof),
-        valorTotalFinanciado: safeRender(
+        valorIof: formatAsCurrency(rawData.valorIof || condicoesData.valorIof),
+        valorTotalFinanciado: formatAsCurrency(
           rawData.valorTotalFinanciado || condicoesData.valorTotalFinanciado
         ),
-        taxaJuros: safeRender(rawData.taxaJuros || tabelaComercial.taxaJuros),
+        taxaJuros: formatAsPercent(rawData.taxaJuros || tabelaComercial.taxaJuros),
       },
       produto: {
         id: rawData.produtoId || rawData.produto_id,
@@ -358,11 +349,11 @@ const AnaliseManualPage: React.FC = () => {
             <CardContent className="space-y-2">
               <p>
                 <strong>Valor Solicitado:</strong>{' '}
-                {safeRender(propostaMapeada.condicoes.valorSolicitado)}
+                {propostaMapeada.condicoes.valorSolicitado}
               </p>
               <p>
                 <strong>Prazo:</strong>{' '}
-                {Number.isFinite(Number(safeRender(propostaMapeada.condicoes.prazo)))
+                {Number.isFinite(Number(propostaMapeada.condicoes.prazo))
                   ? `${safeRender(propostaMapeada.condicoes.prazo)} meses`
                   : safeRender(propostaMapeada.condicoes.prazo)}
               </p>
@@ -374,8 +365,13 @@ const AnaliseManualPage: React.FC = () => {
               </p>
               <p>
                 <strong>Valor Total Financiado:</strong>{' '}
-                {safeRender(propostaMapeada.condicoes.valorTotalFinanciado)}
+                {propostaMapeada.condicoes.valorTotalFinanciado}
               </p>
+              {propostaMapeada.condicoes.taxaJuros !== 'N/A' && (
+                <p>
+                  <strong>Taxa de Juros:</strong> {propostaMapeada.condicoes.taxaJuros}
+                </p>
+              )}
             </CardContent>
           </Card>
 

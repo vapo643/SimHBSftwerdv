@@ -1,0 +1,93 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - Refatoração de Alta Precisão (Nível Crítico)**
+
+* **Ferramenta Alocada:** High Power (Claude Opus)
+* **Sumário da Missão (O Quê):** Realizar uma refatoração cirúrgica no componente `/client/src/pages/credito/analise.tsx` para eliminar a função genérica `safeRender` e substituí-la por chamadas de formatação contextualmente corretas e explícitas para cada tipo de dado (moeda, número, percentual, texto), corrigindo a corrupção de dados e a regressão introduzida.
+* **Intenção Estratégica (O Porquê):** Restaurar a integridade total dos dados exibidos ao analista de crédito, garantindo que as decisões de negócio sejam baseadas em informações precisas e eliminando o risco sistêmico causado por funções de formatação genéricas e ambíguas.
+* **Modelo Mental (Como se Encaixa):** A abordagem "mágica" falhou. A nova arquitetura será explícita. Para cada um dos 29 pontos de renderização, aplicaremos a função de formatação correta. Campos monetários usarão `PropostaMapper.formatMoney`, campos numéricos simples usarão `String()`, e campos percentuais serão tratados adequadamente. A função `safeRender` será simplificada para tratar apenas casos nulos, tornando o código mais legível e seguro.
+
+---
+
+**IMPLEMENTAR:**
+Plano de Refatoração de Formatação Contextual na Fila de Análise.
+
+**CURRENT STATE:**
+A função `safeRender` em `/client/src/pages/credito/analise.tsx` aplica incorretamente a formatação monetária a todos os campos numéricos.
+* `rendaMensal` (300000) é exibido como `R$ 300,00`.
+* `prazo` (6) é exibido como `R$ 6,00`.
+* `taxaJuros` (2.5) é exibido como `R$ 2,50`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O código deve ser refatorado para não depender de uma função `safeRender` genérica para formatação de tipos.
+2.  **`rendaMensal`**: O valor `300000` deve ser exibido como **"R$ 300.000,00"**.
+3.  **`prazo`**: O valor `6` deve ser exibido como **"6"**.
+4.  **`taxaJuros`**: O valor `2.5` deve ser exibido como **"2.5%"**.
+5.  Todos os outros 26 campos devem ser renderizados corretamente, sem formatação monetária indevida.
+6.  O código deve ser mais limpo, explícito e seguro contra futuras regressões de formatação.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**Passo 1: [Preparação] Criar Formatadores Específicos**
+1.  No ficheiro `/client/src/pages/credito/analise.tsx`, crie duas novas funções auxiliares, claras e com responsabilidade única:
+    ```typescript
+    const formatAsCurrency = (value: any): string => {
+      if (value === null || value === undefined) return 'N/A';
+      return PropostaMapper.formatMoney(value);
+    };
+
+    const formatAsPercent = (value: any): string => {
+      if (value === null || value === undefined) return 'N/A';
+      const numValue = Number(value);
+      if (isNaN(numValue)) return String(value);
+      return `${numValue.toFixed(2).replace('.', ',')}%`;
+    };
+    ```
+
+**Passo 2: [Refatoração] Simplificar a `safeRender`**
+1.  Modifique a função `safeRender` para que ela trate **APENAS** valores nulos ou strings, servindo como um fallback seguro. **Remova toda a lógica de `number` e `object` dela.**
+    * **DE (Código defeituoso atual):**
+        ```typescript
+        const safeRender = (value: any): string => { ... lógica complexa ... };
+        ```
+    * **PARA (Código limpo e seguro):**
+        ```typescript
+        const safeRender = (value: any): string => {
+          if (value === null || value === undefined || value === '') return 'N/A';
+          return String(value);
+        };
+        ```
+
+**Passo 3: [Execução] Aplicar Formatadores Corretos em TODAS as 29 Chamadas**
+1.  Com base na auditoria forense anterior, substitua **CADA UMA** das 29 chamadas de `safeRender` pela função de formatação correta.
+    * **Para campos monetários (ex: `valorSolicitado`):**
+        * `{formatAsCurrency(propostaMapeada.condicoes.valorSolicitado)}`
+    * **Para o campo `rendaMensal` (o bug original):**
+        * `{formatAsCurrency(propostaMapeada.cliente.rendaMensal)}`
+    * **Para o campo `taxaJuros`:**
+        * `{formatAsPercent(propostaMapeada.condicoes.taxaJuros)}`
+    * **Para campos numéricos simples (ex: `prazo`):**
+        * `{safeRender(propostaMapeada.condicoes.prazo)}` // Agora seguro, pois só converte para string.
+    * **Para todos os outros campos de texto:**
+        * `{safeRender(propostaMapeada.cliente.nome)}`
+
+**Passo 4: [Validação] Verificação Final de Integridade**
+1.  Execute `get_latest_lsp_diagnostics`. O resultado **DEVE** ser zero erros.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os ficheiros e funções exatas afetadas.
+2.  Garantir importações e tipos corretos.
+3.  Executar `get_latest_lsp_diagnostics` e corrigir **TODOS** os erros.
+4.  **Declarar Nível de Confiança (0-100%)** na implementação.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  Realizar teste funcional completo, confirmando que TODOS os 29 campos são exibidos corretamente.
+7.  **Documentar Decisões Técnicas** (ex: "Função `safeRender` foi refatorada para remover a lógica de formatação de tipo, que foi movida para funções específicas e explícitas, eliminando o vetor de regressão.").
