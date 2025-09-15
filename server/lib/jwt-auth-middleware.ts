@@ -505,12 +505,49 @@ export async function jwtAuthMiddleware(
         const { getJwtSecret } = await import('./config');
         const JWT_SECRET = getJwtSecret();
 
-        const decoded = jwt.default.verify(token, JWT_SECRET) as any;
-        console.log('[JWT DEBUG] JWT decoded successfully:', {
-          userId: decoded.userId,
-          email: decoded.email,
-          role: decoded.role,
-        });
+        // 🔍 OPERAÇÃO PHOENIX - DIAGNÓSTICO CRÍTICO
+        console.log(`[PHOENIX DEBUG] JWT_SECRET length: ${JWT_SECRET.length}`);
+        console.log(`[PHOENIX DEBUG] Token first 50 chars: ${token.substring(0, 50)}...`);
+        
+        // Decodificar token SEM verificação para ver o conteúdo
+        const decoded_no_verify = jwt.default.decode(token) as any;
+        if (decoded_no_verify) {
+          console.log('[PHOENIX DEBUG] Token claims (unverified):', {
+            iss: decoded_no_verify.iss,
+            aud: decoded_no_verify.aud,
+            exp: decoded_no_verify.exp,
+            sub: decoded_no_verify.sub,
+            algorithm: decoded_no_verify.alg || 'not specified'
+          });
+          
+          // Extrair PROJECT_ID do issuer
+          if (decoded_no_verify.iss) {
+            const projectMatch = decoded_no_verify.iss.match(/https:\/\/([^.]+)\.supabase\.co/);
+            if (projectMatch) {
+              console.log(`[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: ${projectMatch[1]}`);
+              console.log(`[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!`);
+            }
+          }
+        }
+        
+        // Tentar verificação com log detalhado de erro
+        try {
+          const decoded = jwt.default.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as any;
+          console.log('[PHOENIX DEBUG] ✅ JWT verification SUCCESS:', {
+            userId: decoded.userId || decoded.sub,
+            email: decoded.email,
+            role: decoded.role,
+          });
+        } catch (verifyError: any) {
+          console.log(`[PHOENIX DEBUG] ❌ JWT verification FAILED: ${verifyError.message}`);
+          console.log(`[PHOENIX DEBUG] ❌ Error name: ${verifyError.name}`);
+          if (verifyError.name === 'JsonWebTokenError') {
+            console.log('[PHOENIX DEBUG] 🚨 SIGNATURE MISMATCH - JWT_SECRET provavelmente está errado!');
+          }
+          throw verifyError;
+        }
+        
+        const decoded = jwt.default.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as any;
 
         userId = decoded.userId;
         userEmail = decoded.email || '';
