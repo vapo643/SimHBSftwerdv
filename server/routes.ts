@@ -80,6 +80,7 @@ import { getPropostaDocuments, uploadPropostaDocument, deletePropostaDocument } 
 import featureFlagService from './services/featureFlagService';
 import { performanceMonitor } from './middleware/performance-monitor';
 import { performance } from 'perf_hooks';
+import healthConfigRoutes from './routes/health-config';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -158,6 +159,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       rateLimit: 'active',
     });
   });
+
+  // OPUS PROTOCOL - Health Config Endpoint
+  app.use('/api/health', healthConfigRoutes);
 
   // Feature Flags endpoint - PÚBLICO (não precisa de autenticação)
   app.get('/api/features', async (req: Request, res: Response) => {

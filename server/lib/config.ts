@@ -121,27 +121,24 @@ function generateSecureSecret(name: string): string {
 
 // REMOVIDA: Função detectEnvironmentFromDomain - lógica de detecção eliminada
 
-// getJwtSecret ajustado para usar secrets de produção existentes
+// HOTFIX EMERGENCIAL: Função simplificada para usar APENAS SUPABASE_JWT_SECRET
 function getJwtSecret(): string {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const secret = process.env.SUPABASE_JWT_SECRET;
   
-  if (isProduction) {
-    const prodSecret = process.env.PROD_JWT_SECRET || process.env.SUPABASE_JWT_SECRET;
-    if (!prodSecret) {
-      console.error('[CONFIG] 🚨 FALHA CRÍTICA: Nenhuma das variáveis PROD_JWT_SECRET ou SUPABASE_JWT_SECRET está definida em produção.');
-      throw new Error('Segredo JWT de produção não configurado.');
-    }
-    console.log('[CONFIG] ✅ Segredo JWT de produção carregado:', process.env.PROD_JWT_SECRET ? 'PROD_JWT_SECRET' : 'SUPABASE_JWT_SECRET');
-    return prodSecret;
-  } else {
-    const devSecret = process.env.DEV_JTW_SECRET || process.env.SUPABASE_JWT_SECRET;
-    if (!devSecret) {
-      console.error('[CONFIG] 🚨 FALHA CRÍTICA: Nenhuma das variáveis DEV_JTW_SECRET ou SUPABASE_JWT_SECRET está definida em desenvolvimento.');
-      throw new Error('Segredo JWT de desenvolvimento não configurado.');
-    }
-    console.log('[CONFIG] ✅ Segredo JWT de desenvolvimento carregado:', process.env.DEV_JTW_SECRET ? 'DEV_JTW_SECRET' : 'SUPABASE_JWT_SECRET');
-    return devSecret;
+  if (!secret) {
+    console.error('[CONFIG] 🚨 FATAL: SUPABASE_JWT_SECRET não configurado');
+    console.error('Configure em: Settings → Environment Variables → SUPABASE_JWT_SECRET');
+    process.exit(1);
   }
+  
+  // Validação de formato
+  if (secret.length < 20) {
+    console.error('[CONFIG] 🚨 FATAL: SUPABASE_JWT_SECRET inválido (muito curto)');
+    process.exit(1);
+  }
+  
+  console.log('[CONFIG] ✅ SUPABASE_JWT_SECRET carregado com sucesso');
+  return secret;
 }
 
 function getSessionSecret(): string {
