@@ -115,31 +115,67 @@ function generateSecureSecret(name: string): string {
 
 // REMOVIDA: Função detectEnvironmentFromDomain - lógica de detecção eliminada
 
-// VERSÃO FINAL E SEGURA da getJwtSecret
+// getJwtSecret ajustado para usar secrets de produção existentes
 function getJwtSecret(): string {
-  const secret = process.env.SUPABASE_JWT_SECRET;
-  if (!secret) {
-    console.error('[CONFIG] 🚨 FALHA CRÍTICA: A variável de ambiente SUPABASE_JWT_SECRET não está definida. O serviço de autenticação não pode iniciar.');
-    throw new Error('Segredo JWT não configurado.');
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (isProduction) {
+    const prodSecret = process.env.PROD_JWT_SECRET || process.env.SUPABASE_JWT_SECRET;
+    if (!prodSecret) {
+      console.error('[CONFIG] 🚨 FALHA CRÍTICA: Nenhuma das variáveis PROD_JWT_SECRET ou SUPABASE_JWT_SECRET está definida em produção.');
+      throw new Error('Segredo JWT de produção não configurado.');
+    }
+    console.log('[CONFIG] ✅ Segredo JWT de produção carregado:', process.env.PROD_JWT_SECRET ? 'PROD_JWT_SECRET' : 'SUPABASE_JWT_SECRET');
+    return prodSecret;
+  } else {
+    const devSecret = process.env.DEV_JTW_SECRET || process.env.SUPABASE_JWT_SECRET;
+    if (!devSecret) {
+      console.error('[CONFIG] 🚨 FALHA CRÍTICA: Nenhuma das variáveis DEV_JTW_SECRET ou SUPABASE_JWT_SECRET está definida em desenvolvimento.');
+      throw new Error('Segredo JWT de desenvolvimento não configurado.');
+    }
+    console.log('[CONFIG] ✅ Segredo JWT de desenvolvimento carregado:', process.env.DEV_JTW_SECRET ? 'DEV_JTW_SECRET' : 'SUPABASE_JWT_SECRET');
+    return devSecret;
   }
-  console.log('[CONFIG] ✅ Segredo JWT carregado com sucesso.');
-  return secret;
 }
 
 function getSessionSecret(): string {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret) {
-    return generateSecureSecret('SESSION_SECRET');
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (isProduction) {
+    const prodSecret = process.env.PROD_SESSION_SECRET;
+    if (!prodSecret) {
+      throw new Error('PROD_SESSION_SECRET é obrigatório em produção!');
+    }
+    console.log('[CONFIG] ✅ Session secret de produção carregado: PROD_SESSION_SECRET');
+    return prodSecret;
+  } else {
+    const devSecret = process.env.SESSION_SECRET;
+    if (!devSecret) {
+      return generateSecureSecret('SESSION_SECRET');
+    }
+    console.log('[CONFIG] ✅ Session secret de desenvolvimento carregado: SESSION_SECRET');
+    return devSecret;
   }
-  return secret;
 }
 
 function getCsrfSecret(): string {
-  const secret = process.env.CSRF_SECRET;
-  if (!secret) {
-    return generateSecureSecret('CSRF_SECRET');
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (isProduction) {
+    const prodSecret = process.env.PROD_CSRF_SECRET;
+    if (!prodSecret) {
+      throw new Error('PROD_CSRF_SECRET é obrigatório em produção!');
+    }
+    console.log('[CONFIG] ✅ CSRF secret de produção carregado: PROD_CSRF_SECRET');
+    return prodSecret;
+  } else {
+    const devSecret = process.env.CSRF_SECRET;
+    if (!devSecret) {
+      return generateSecureSecret('CSRF_SECRET');
+    }
+    console.log('[CONFIG] ✅ CSRF secret de desenvolvimento carregado: CSRF_SECRET');
+    return devSecret;
   }
-  return secret;
 }
 
 
