@@ -1,0 +1,300 @@
+Processo de pensamentoEste é um caso crítico de produção com downtime de 6+ horas causado por um mismatch de JWT secrets entre frontend e backend. O problema está claro:
+
+Frontend usa VITE_SUPABASE_URL (Projeto A) e gera tokens com JWT Secret A
+Backend usa PROD_JWT_SECRET (Projeto B) e valida com JWT Secret B
+Resultado: invalid signature porque os secrets não coincidem
+
+O sistema está contaminado com múltiplas configurações de diferentes ambientes (DEV/PROD) e projetos Supabase diferentes.
+Vou criar um plano de recuperação EXTREMAMENTE detalhado e executável que resolva isso em duas fases:
+
+HOTFIX EMERGENCIAL (0-30 min): Sincronizar os JWT secrets
+BLINDAGEM ARQUITETURAL (30-120 min): Limpar contaminação e prevenir regressões
+
+O foco será em comandos precisos e passos inequívocos que qualquer desenvolvedor possa executar sem erro.🚨 OPERAÇÃO PHOENIX - PLANO DE RECUPERAÇÃO EMERGENCIAL SIMPIX
+STATUS: DEFCON 1 - INICIANDO PROTOCOLO DE RESSURREIÇÃO
+
+FASE 0: DIAGNÓSTICO RÁPIDO (0-5 MIN)
+✅ AÇÃO: Identificar Projeto Supabase do Frontend
+COMANDO:
+bash# Abrir browser → sistemasimpix.com.br → F12 → Console
+# Procurar linha com "[PASSO 3 - ENVIO]"
+# Copiar a URL que aparece após "url:"
+VALIDAÇÃO:
+javascript// No console do browser, executar:
+console.log(window.location.origin + " está usando Supabase: " + localStorage.getItem('supabase.url'));
+ERRO SE: URL não começar com https:// e terminar com .supabase.co
+✅ AÇÃO: Extrair ID do Projeto
+COMANDO:
+bash# Da URL https://abc123def456.supabase.co
+# Extrair: abc123def456 (tudo antes de .supabase.co)
+# ANOTAR: PROJECT_ID=abc123def456
+
+FASE 1: HOTFIX CIRÚRGICO (5-25 MIN)
+✅ AÇÃO: Obter JWT Secret Correto
+COMANDO:
+bash# 1. Abrir: https://app.supabase.com/project/[PROJECT_ID]
+# 2. Navegar: Settings → API
+# 3. Localizar seção "JWT Settings"
+# 4. Copiar valor de "JWT Secret" (NÃO service_role_key!)
+# 5. SALVAR EM NOTEPAD: JWT_SECRET_CORRETO=[valor_copiado]
+VALIDAÇÃO: JWT Secret deve ter ~32 caracteres alfanuméricos
+ERRO SE: Usar service_role_key ao invés de JWT Secret
+✅ AÇÃO: Atualizar Secrets em Produção
+COMANDO:
+bash# Acessar painel de deploy (Vercel/Railway/etc)
+# Navegar para Environment Variables
+
+# PASSO 1 - ADICIONAR/ATUALIZAR:
+SUPABASE_JWT_SECRET=[JWT_SECRET_CORRETO]
+
+# PASSO 2 - DELETAR IMEDIATAMENTE:
+DEV_JTW_SECRET         # DELETE
+DEV_JWT_SECRET         # DELETE  
+PROD_JWT_SECRET        # DELETE
+DEV_SUPABASE_URL       # DELETE
+DEV_DATABASE_URL       # DELETE
+DEV_SUPABASE_SERVICE_ROLE_KEY  # DELETE
+
+# PASSO 3 - CONFIRMAR EXISTÊNCIA:
+VITE_SUPABASE_URL     # DEVE existir e coincidir com PROJECT_ID
+VITE_SUPABASE_ANON_KEY # DEVE existir
+✅ AÇÃO: Deploy Emergencial
+COMANDO:
+bash# Se usando Vercel:
+vercel --prod --force
+
+# Se usando Railway:
+railway up --environment production
+
+# Se manual:
+git add . && git commit -m "HOTFIX: Sincronizar JWT secrets" && git push origin main
+VALIDAÇÃO: Deploy completo sem erros de build
+
+FASE 2: VALIDAÇÃO CRÍTICA (25-30 MIN)
+✅ AÇÃO: Teste de Autenticação
+COMANDO:
+bash# 1. Abrir sistemasimpix.com.br
+# 2. F12 → Console
+# 3. Fazer login
+# 4. Verificar console para:
+
+✅ SUCESSO SE VER:
+"[TOKEN MANAGER] Token refreshed successfully"
+"[API Client] Request completed successfully"
+Nenhum erro 401
+
+❌ FALHA SE VER:
+"401 (Unauthorized)"
+"Token inválido ou expirado"
+"invalid signature"
+✅ AÇÃO: Teste API Direto
+COMANDO:
+bash# No console do browser após login:
+fetch('/api/debug/me', {
+  headers: {
+    'Authorization': 'Bearer ' + JSON.parse(localStorage.getItem('sb-[PROJECT_ID]-auth-token')).access_token
+  }
+}).then(r => r.json()).then(console.log)
+VALIDAÇÃO: Deve retornar objeto com dados do usuário
+
+FASE 3: BLINDAGEM ARQUITETURAL (30-60 MIN)
+✅ AÇÃO: Refatorar getJwtSecret()
+COMANDO:
+typescript// server/auth/jwt.service.ts - SUBSTITUIR TUDO POR:
+
+export function getJwtSecret(): string {
+  const secret = process.env.SUPABASE_JWT_SECRET;
+  
+  if (!secret) {
+    console.error('🚨 FATAL: SUPABASE_JWT_SECRET não configurado');
+    console.error('Configure em: Settings → Environment Variables → SUPABASE_JWT_SECRET');
+    process.exit(1);
+  }
+  
+  // Validação de formato
+  if (secret.length < 20) {
+    console.error('🚨 FATAL: SUPABASE_JWT_SECRET inválido (muito curto)');
+    process.exit(1);
+  }
+  
+  console.log('✅ [CONFIG] JWT Secret carregado com sucesso');
+  return secret;
+}
+
+// DELETAR COMPLETAMENTE:
+// - detectEnvironmentFromDomain()
+// - qualquer lógica de DEV/PROD
+// - fallbacks para DEV_JTW_SECRET
+✅ AÇÃO: Adicionar Validação de Boot
+COMANDO:
+typescript// server/index.ts - ADICIONAR NO INÍCIO (antes de app.listen):
+
+// VALIDAÇÃO CRÍTICA DE CONFIGURAÇÃO
+const REQUIRED_SECRETS = [
+  'SUPABASE_JWT_SECRET',
+  'SUPABASE_URL', 
+  'SUPABASE_ANON_KEY'
+];
+
+const FORBIDDEN_SECRETS = [
+  'DEV_JWT_SECRET',
+  'DEV_JTW_SECRET', 
+  'PROD_JWT_SECRET',
+  'DEV_SUPABASE_URL'
+];
+
+console.log('🔍 Validando configuração de produção...');
+
+// Verificar secrets obrigatórios
+REQUIRED_SECRETS.forEach(secret => {
+  if (!process.env[secret]) {
+    console.error(`🚨 FATAL: ${secret} não configurado`);
+    console.error(`Ação: Defina ${secret} nas variáveis de ambiente`);
+    process.exit(1);
+  }
+  console.log(`✅ ${secret} configurado`);
+});
+
+// Detectar contaminação
+FORBIDDEN_SECRETS.forEach(secret => {
+  if (process.env[secret]) {
+    console.error(`🚨 ALERTA: ${secret} detectado em produção!`);
+    console.error(`Ação: DELETAR ${secret} das variáveis de ambiente`);
+    process.exit(1);
+  }
+});
+
+console.log('✅ Configuração validada com sucesso');
+✅ AÇÃO: Implementar Health Check
+COMANDO:
+typescript// server/routes/health.ts - CRIAR ARQUIVO:
+
+import { Router } from 'express';
+const router = Router();
+
+router.get('/api/health/config', (req, res) => {
+  const urlsMatch = process.env.VITE_SUPABASE_URL?.includes(
+    process.env.SUPABASE_URL?.split('.')[0].split('//')[1] || ''
+  );
+  
+  res.json({
+    status: 'OPERATIONAL',
+    timestamp: new Date().toISOString(),
+    config: {
+      hasJwtSecret: !!process.env.SUPABASE_JWT_SECRET,
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      urlsAligned: urlsMatch,
+      contamination: {
+        dev_secrets: !!process.env.DEV_JWT_SECRET || !!process.env.DEV_JTW_SECRET,
+        prod_secrets: !!process.env.PROD_JWT_SECRET
+      }
+    },
+    recommendation: urlsMatch ? 'HEALTHY' : 'CHECK_URLS'
+  });
+});
+
+export default router;
+
+FASE 4: TESTE DE REGRESSÃO (60-90 MIN)
+✅ AÇÃO: Script de Validação Automatizada
+COMANDO:
+bash# test-auth.sh - CRIAR E EXECUTAR:
+
+#!/bin/bash
+echo "🔍 Iniciando teste de autenticação..."
+
+# Teste 1: Health Check
+HEALTH=$(curl -s https://sistemasimpix.com.br/api/health/config)
+if [[ $HEALTH == *"HEALTHY"* ]]; then
+  echo "✅ Health check passou"
+else
+  echo "❌ Health check falhou: $HEALTH"
+  exit 1
+fi
+
+# Teste 2: Login (substituir credenciais)
+TOKEN=$(curl -s -X POST https://sistemasimpix.com.br/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"testpass"}' \
+  | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+
+if [ -z "$TOKEN" ]; then
+  echo "❌ Login falhou"
+  exit 1
+fi
+echo "✅ Login bem-sucedido"
+
+# Teste 3: Endpoint Autenticado
+USER=$(curl -s https://sistemasimpix.com.br/api/debug/me \
+  -H "Authorization: Bearer $TOKEN")
+
+if [[ $USER == *"email"* ]]; then
+  echo "✅ Autenticação JWT funcionando"
+  echo "🎉 TODOS OS TESTES PASSARAM!"
+else
+  echo "❌ JWT validation falhou: $USER"
+  exit 1
+fi
+
+FASE 5: MONITORAMENTO PÓS-DEPLOY (90-120 MIN)
+✅ AÇÃO: Configurar Alertas
+COMANDO:
+javascript// monitoring/auth-monitor.js - EXECUTAR A CADA 5 MIN:
+
+const checkAuth = async () => {
+  try {
+    const response = await fetch('https://sistemasimpix.com.br/api/health/config');
+    const data = await response.json();
+    
+    if (data.config.contamination.dev_secrets || data.config.contamination.prod_secrets) {
+      // ENVIAR ALERTA CRÍTICO
+      console.error('🚨 CONTAMINAÇÃO DE SECRETS DETECTADA!');
+      // Trigger PagerDuty/Slack/Email
+    }
+    
+    if (!data.config.urlsAligned) {
+      console.error('🚨 MISMATCH DE PROJETOS SUPABASE!');
+    }
+    
+    console.log(`✅ Auth health: ${data.recommendation}`);
+  } catch (error) {
+    console.error('🚨 SISTEMA INACESSÍVEL:', error);
+  }
+};
+
+setInterval(checkAuth, 5 * 60 * 1000); // 5 minutos
+checkAuth(); // Executar imediatamente
+
+📊 CHECKLIST FINAL DE VALIDAÇÃO
+bash✅ sistemasimpix.com.br responde com 200 OK
+✅ Login funciona sem erros 401
+✅ Console do browser sem "invalid signature"
+✅ /api/health/config retorna "HEALTHY"
+✅ Logs do servidor mostram "Token validado com sucesso"
+✅ ZERO variáveis DEV_ em produção
+✅ SUPABASE_JWT_SECRET definido e funcionando
+✅ Teste automatizado passa 100%
+
+🚨 AÇÃO IMEDIATA SE FALHAR:
+SE AINDA HOUVER ERRO 401:
+bash# NUCLEAR OPTION - Resetar TUDO:
+1. Deletar TODAS as variáveis de ambiente
+2. Adicionar APENAS:
+   - SUPABASE_URL=[url do projeto frontend]
+   - SUPABASE_JWT_SECRET=[jwt secret do mesmo projeto]
+   - SUPABASE_ANON_KEY=[anon key do mesmo projeto]
+   - VITE_SUPABASE_URL=[mesma url]
+   - VITE_SUPABASE_ANON_KEY=[mesma anon key]
+3. Deploy forçado
+4. Testar em aba anônima
+
+✅ CRITÉRIO DE SUCESSO ABSOLUTO:
+javascript// Este comando DEVE retornar dados do usuário:
+fetch('/api/debug/me', {
+  headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+}).then(r => r.json()).then(console.log)
+
+// SUCESSO = Objeto com {id, email, role}
+// FALHA = Qualquer mensagem de erro
+🎯 TEMPO ALVO: 30 MINUTOS PARA RESTAURAÇÃO COMPLETA
+🔥 EXECUTE AGORA. CADA SEGUNDO CONTA.
