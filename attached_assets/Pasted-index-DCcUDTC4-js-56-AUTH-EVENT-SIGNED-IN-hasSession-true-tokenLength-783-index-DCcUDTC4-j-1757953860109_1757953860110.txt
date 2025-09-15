@@ -1,0 +1,81 @@
+index-DCcUDTC4.js:56 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 783}
+index-DCcUDTC4.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-DCcUDTC4.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: false, tokenExpiry: null, hasActiveRefresh: false}
+index-DCcUDTC4.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+index-DCcUDTC4.js:56 DEBUG - First 3 proposals values: []
+index-DCcUDTC4.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: false, tokenExpiry: null, hasActiveRefresh: true}
+index-DCcUDTC4.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-DCcUDTC4.js:25 [Violation] 'message' handler took 150ms
+[Violation] Forced reflow while executing JavaScript took 88ms
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+index-DCcUDTC4.js:56 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+index-DCcUDTC4.js:56 DEBUG - First 3 proposals values: []
+index-DCcUDTC4.js:56 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 783}
+index-DCcUDTC4.js:56 DEBUG - First 3 proposals values: []
+index-DCcUDTC4.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-15T17:24:04.000Z
+index-DCcUDTC4.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.pVpIXD640-ca8bSUJ9rIYzaTgo_V4EkdoxCr2I8R9p8', hasToken: true, isFormData: false}
+index-DCcUDTC4.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.pVpIXD640-ca8bSUJ9rIYzaTgo_V4EkdoxCr2I8R9p8', hasToken: true, isFormData: false}
+index-DCcUDTC4.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : {flags: {…}, context: {…}}
+index-DCcUDTC4.js:56 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+requests.js:1  GET https://sistemasimpix.com.br/api/debug/me 401 (Unauthorized)
+(anonymous) @ requests.js:1
+(anonymous) @ index-DCcUDTC4.js:56
+fetchWithTimeout @ index-DCcUDTC4.js:107
+Eu @ index-DCcUDTC4.js:107
+await in Eu
+get @ index-DCcUDTC4.js:107
+(anonymous) @ index-DCcUDTC4.js:666
+(anonymous) @ index-DCcUDTC4.js:666
+(anonymous) @ index-DCcUDTC4.js:107
+_notifyAllSubscribers @ index-DCcUDTC4.js:107
+_recoverAndRefresh @ index-DCcUDTC4.js:107
+await in _recoverAndRefresh
+_initialize @ index-DCcUDTC4.js:106
+await in _initialize
+(anonymous) @ index-DCcUDTC4.js:106
+(anonymous) @ index-DCcUDTC4.js:107
+(anonymous) @ index-DCcUDTC4.js:106Understand this error
+index-DCcUDTC4.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : {message: 'Token inválido ou expirado'}
+index-DCcUDTC4.js:56 [API Client] After dual-key transformation: {message: 'Token inválido ou expirado'}
+index-DCcUDTC4.js:56 🗑️ [TOKEN MANAGER] Token invalidated
+index-DCcUDTC4.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: false, tokenExpiry: null, hasActiveRefresh: false}
+index-DCcUDTC4.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+index-DCcUDTC4.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-15T17:24:04.000Z
+requests.js:1  GET https://sistemasimpix.com.br/api/debug/me 401 (Unauthorized)
+(anonymous) @ requests.js:1
+(anonymous) @ index-DCcUDTC4.js:56
+fetchWithTimeout @ index-DCcUDTC4.js:107
+Eu @ index-DCcUDTC4.js:107
+await in Eu
+get @ index-DCcUDTC4.js:107
+(anonymous) @ index-DCcUDTC4.js:666
+(anonymous) @ index-DCcUDTC4.js:666
+(anonymous) @ index-DCcUDTC4.js:107
+_notifyAllSubscribers @ index-DCcUDTC4.js:107
+_recoverAndRefresh @ index-DCcUDTC4.js:107
+await in _recoverAndRefresh
+_initialize @ index-DCcUDTC4.js:106
+await in _initialize
+(anonymous) @ index-DCcUDTC4.js:106
+(anonymous) @ index-DCcUDTC4.js:107
+(anonymous) @ index-DCcUDTC4.js:106Understand this error
+index-DCcUDTC4.js:56 Error fetching profile data: ApiError: Token inválido ou expirado
+    at Eu (index-DCcUDTC4.js:107:40749)
+    at async index-DCcUDTC4.js:666:6282
+(anonymous) @ index-DCcUDTC4.js:56
+(anonymous) @ index-DCcUDTC4.js:666
+await in (anonymous)
+(anonymous) @ index-DCcUDTC4.js:666
+(anonymous) @ index-DCcUDTC4.js:107
+_notifyAllSubscribers @ index-DCcUDTC4.js:107
+_recoverAndRefresh @ index-DCcUDTC4.js:107
+await in _recoverAndRefresh
+_initialize @ index-DCcUDTC4.js:106
+await in _initialize
+(anonymous) @ index-DCcUDTC4.js:106
+(anonymous) @ index-DCcUDTC4.js:107
+(anonymous) @ index-DCcUDTC4.js:106Understand this error
+index-DCcUDTC4.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+index-DCcUDTC4.js:56 DEBUG - First 3 proposals values: []
