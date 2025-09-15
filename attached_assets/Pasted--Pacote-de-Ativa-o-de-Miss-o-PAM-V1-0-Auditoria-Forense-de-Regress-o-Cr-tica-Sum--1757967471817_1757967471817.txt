@@ -1,0 +1,43 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - Auditoria Forense de Regressão Crítica**
+
+* **Sumário da Missão:** Realizar uma auditoria forense completa e de alta precisão no componente `/client/src/pages/credito/analise.tsx` para identificar a causa raiz exata da regressão que corrompeu a formatação de múltiplos campos de dados (ex: `Renda Mensal`, `Prazo`) após a última tentativa de correção.
+* **Intenção Estratégica:** Obter um mapa detalhado e irrefutável de como múltiplos campos numéricos são renderizados na UI do analista, para arquitetar uma solução de refinamento que corrija a formatação de moeda sem introduzir efeitos colaterais em outros campos.
+* **Modelo Mental (Como se Encaixa):** A última modificação na função `safeRender` foi defeituosa. Ela aplicou incorretamente a formatação monetária a todos os valores numéricos. Precisamos entender o contexto de **cada chamada** a `safeRender` (e suas novas variantes) dentro do ficheiro para diferenciar os campos que devem ser formatados como moeda daqueles que devem ser renderizados como números simples. A investigação deve também incluir a lógica de criação do objeto `propostaMapeada` para encontrar a origem da corrupção do valor da `rendaMensal`.
+
+---
+
+**[DIRETIVA DE DIVULGAÇÃO TOTAL (DDT) V1.0 - ANTI-OMISSÃO]**
+
+* Você está operando sob a Doutrina de Divulgação Total. Apresente **TODOS** os trechos de código relevantes, sem resumo. A sua missão é expor a totalidade do problema.
+
+---
+
+**IMPLEMENTAR (Plano de Auditoria Forense Detalhado):**
+
+**CURRENT STATE:**
+Uma tentativa de corrigir a formatação do campo `rendaMensal` resultou em uma regressão. Agora, o campo `rendaMensal` continua a ser exibido incorretamente como `R$ 300,00` (em vez de `R$ 300.000,00`), e o campo `Prazo` está a ser exibido incorretamente como `R$ 6,00` (em vez de `6`).
+
+**EXPECTED (Estado Final da Auditoria):**
+Um relatório forense completo contendo:
+1.  O código-fonte **completo e atual** das funções de formatação (`safeRender`, `formatAsCurrency`, `formatAsPercent`) em `/client/src/pages/credito/analise.tsx`.
+2.  Uma lista de **TODOS** os locais dentro de `/client/src/pages/credito/analise.tsx` onde estas funções de formatação são chamadas. Para cada chamada, apresente o trecho de código (snippet) e o nome da propriedade que está a ser renderizada (ex: `propostaMapeada.cliente.rendaMensal`).
+3.  O trecho de código **completo** onde o objeto `propostaMapeada` é definido e populado. Queremos analisar a lógica de mapeamento de dados em busca de divisões ou transformações incorretas.
+4.  O código-fonte **completo e atual** da função `PropostaMapper.formatMoney` no ficheiro `/client/src/mappers/proposta.mapper.ts`.
+
+**CONSTRAINTS (Roadmap de Auditoria de Regressão):**
+1.  **Extração de Evidência 1:** Apresente o código completo das funções de formatação encontradas em `/client/src/pages/credito/analise.tsx`.
+2.  **Análise de Impacto:** Faça uma busca por todas as utilizações dessas funções de formatação dentro de `/client/src/pages/credito/analise.tsx` e liste cada uma delas.
+3.  **Análise de Causa Raiz:** Localize e apresente o bloco de código onde a variável `propostaMapeada` é criada.
+4.  **Extração de Evidência 2:** Apresente o código completo da função `formatMoney` em `/client/src/mappers/proposta.mapper.ts`.
+5.  **NÃO FAÇA NENHUMA MODIFICAÇÃO NO CÓDIGO.** Esta é estritamente uma missão de reconhecimento.
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK (MODO AUDITORIA):**
+1.  Mapear os ficheiros exatos a serem auditados.
+2.  Confirmar os caminhos de importação relevantes.
+3.  Executar `get_latest_lsp_diagnostics` para validar o estado do ambiente.
+4.  **Declarar Nível de Confiança (0-100%)** de que a análise forense é completa.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  Realizar uma verificação de sanidade para confirmar que a lista de chamadas de formatação está completa.
+7.  **Documentar Decisões Técnicas** tomadas durante a auditoria.
