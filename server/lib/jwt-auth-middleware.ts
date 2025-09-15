@@ -502,7 +502,8 @@ export async function jwtAuthMiddleware(
       try {
         console.log('[JWT DEBUG] Using local JWT validation');
         const jwt = await import('jsonwebtoken');
-        const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
+        const { getJwtSecret } = await import('./config');
+        const JWT_SECRET = getJwtSecret();
 
         const decoded = jwt.default.verify(token, JWT_SECRET) as any;
         console.log('[JWT DEBUG] JWT decoded successfully:', {

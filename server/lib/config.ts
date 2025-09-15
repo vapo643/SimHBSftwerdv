@@ -61,9 +61,11 @@ function getCriticalSecrets(env: string): string[] {
 }
 
 const OPTIONAL_SECRETS = [
-  'SUPABASE_URL',
-  'SUPABASE_ANON_KEY',
-  'SUPABASE_SERVICE_ROLE_KEY',
+  // Environment-specific Supabase configs (prioritize PROD_ prefixed)
+  'PROD_SUPABASE_URL', 'SUPABASE_URL',
+  'PROD_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY', 
+  'PROD_SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
+  'DEV_SUPABASE_URL', 'DEV_SUPABASE_ANON_KEY', 'DEV_SUPABASE_SERVICE_ROLE_KEY',
   'SENTRY_DSN',
   'CLICKSIGN_API_KEY',
   'CLICKSIGN_WEBHOOK_SECRET',
@@ -118,6 +120,13 @@ function generateSecureSecret(name: string): string {
 // Funções específicas para cada tipo de secret com validação por ambiente
 function getJwtSecret(): string {
   const env = process.env.NODE_ENV || 'development';
+  
+  // STRATEGIC: Use PROD_ secrets even in development per user configuration
+  // O usuário quer usar os segredos de produção para testes de desenvolvimento
+  if (process.env.PROD_JWT_SECRET) {
+    console.log('[CONFIG] Using PROD_JWT_SECRET for JWT validation');
+    return process.env.PROD_JWT_SECRET;
+  }
   
   switch (env) {
     case 'production':
@@ -274,6 +283,9 @@ export const config = loadConfig();
 export function isAppOperational(): boolean {
   return config.database.url !== null || config.nodeEnv === 'development';
 }
+
+// Export das funções para uso externo
+export { getJwtSecret, getSessionSecret, getCsrfSecret };
 
 // Helper para logs de status
 export function logConfigStatus(): void {
