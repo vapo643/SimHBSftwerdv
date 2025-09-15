@@ -22,18 +22,19 @@ export interface AuthenticatedRequest extends Request {
 
 // Constants for Redis-based security features
 const TOKEN_BLACKLIST_TTL = 60 * 60; // 1 hour in seconds
-// Configuração dinâmica por ambiente
+// RATE LIMITING COMPLETAMENTE DESABILITADO POR SOLICITAÇÃO DO USUÁRIO
+// Configuração dummy para manter compatibilidade
 const isDevelopment = process.env.NODE_ENV === 'development';
-const MAX_AUTH_ATTEMPTS = isDevelopment ? 50000 : 500; // 50k dev, 500 prod (AUMENTADO 10X)
-const AUTH_WINDOW_MS = isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000; // 1min dev, 15min prod
-const AUTH_ATTEMPTS_TTL = Math.ceil(AUTH_WINDOW_MS / 1000); // Convert to seconds
+const MAX_AUTH_ATTEMPTS = 999999999; // Efetivamente infinito 
+const AUTH_WINDOW_MS = 1 * 60 * 1000; // Irrelevante, mas mantém compatibilidade
+const AUTH_ATTEMPTS_TTL = 1; // Mínimo possível
 
-// ===== 🛡️ CIRCUIT BREAKER CONFIGURATION =====
-// PAM V1.0: Circuit breaker para proteção contra avalanche de requisições
-const CIRCUIT_BREAKER_FAILURE_THRESHOLD = isDevelopment ? 100 : 50; // Falhas para acionar circuit breaker (AUMENTADO 5X)
-const CIRCUIT_BREAKER_WINDOW_MS = 60 * 1000; // 60 segundos
-const CIRCUIT_BREAKER_COOLDOWN_MS = 120 * 1000; // 2 minutos de bloqueio
-const CIRCUIT_BREAKER_TTL = Math.ceil(CIRCUIT_BREAKER_COOLDOWN_MS / 1000); // Convert to seconds
+// ===== 🛡️ CIRCUIT BREAKER DESABILITADO =====
+// CIRCUIT BREAKER COMPLETAMENTE DESABILITADO POR SOLICITAÇÃO DO USUÁRIO
+const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 999999999; // Efetivamente infinito
+const CIRCUIT_BREAKER_WINDOW_MS = 60 * 1000; // Mantido por compatibilidade
+const CIRCUIT_BREAKER_COOLDOWN_MS = 1; // Mínimo possível
+const CIRCUIT_BREAKER_TTL = 1; // Mínimo possível
 
 // Monitor de falhas em memória para circuit breaker
 const failureTracker = new Map<string, { failures: number; lastFailure: number; blockedUntil?: number }>();
@@ -459,23 +460,30 @@ export async function jwtAuthMiddleware(
     let error: any = null;
     let profileFromCache: any = null;
 
-    // Auto-detect token type by checking JWT header
+    // CORREÇÃO CRÍTICA: Sempre usar validação JWT local em desenvolvimento
+    // O auto-detect estava causando falhas "Auth session missing!" em produção
     let tokenType: 'supabase' | 'local' = 'local';
-    try {
-      const tokenParts = token.split('.');
-      if (tokenParts.length === 3) {
-        const header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
-        // Supabase tokens have 'kid' (Key ID) in header
-        if (header.kid) {
-          tokenType = 'supabase';
+    
+    // Só usar Supabase se explicitamente configurado E em produção
+    const forceLocalJWT = process.env.FORCE_LOCAL_JWT === 'true' || process.env.NODE_ENV === 'development';
+    
+    if (!forceLocalJWT) {
+      try {
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+          const header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
+          // Supabase tokens have 'kid' (Key ID) in header
+          if (header.kid) {
+            tokenType = 'supabase';
+          }
         }
+      } catch (e) {
+        // If header parsing fails, default to local
+        tokenType = 'local';
       }
-    } catch (e) {
-      // If header parsing fails, default to local
-      tokenType = 'local';
     }
 
-    console.log('[JWT DEBUG] Auto-detected token type:', tokenType);
+    console.log('[JWT DEBUG] Token type:', tokenType, '(forceLocal:', forceLocalJWT, ')');
 
     // P0.1 OPTIMIZATION: Use cached entry with profile data
     if (cachedEntry) {

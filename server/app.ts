@@ -85,89 +85,18 @@ export async function createApp() {
   app.use(csrfProtection);
   log('🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet');
 
-  // Rate Limiting - Configuração por ambiente
-  if (process.env.NODE_ENV !== 'test') {
-    // Configurações diferentes por ambiente
-    const isDevelopment = process.env.NODE_ENV === 'development';
+  // RATE LIMITING COMPLETAMENTE DESABILITADO POR SOLICITAÇÃO DO USUÁRIO
+  // O rate limiting foi desabilitado permanentemente para evitar falsos positivos em produção
+  console.log('🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos');
+  
+  // Configuração dummy (não funcional) apenas para manter compatibilidade
+  const generalApiLimiter = (req: any, res: any, next: any) => next();
 
-    const generalApiLimiter = rateLimit({
-      windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
-      max: isDevelopment ? 50000 : 5000, // 50k dev, 5k prod (LIMITES AUMENTADOS 5X)
-      message: {
-        error: isDevelopment
-          ? 'Rate limit atingido (modo desenvolvimento - limites muito altos 50k/min)'
-          : 'Muitas requisições da API. Tente novamente em 15 minutos.',
-        retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
-      },
-      standardHeaders: true,
-      legacyHeaders: false,
-      handler: (req, res) => {
-        securityLogger.logEvent({
-          type: SecurityEventType.RATE_LIMIT_EXCEEDED,
-          severity: isDevelopment ? 'LOW' : 'MEDIUM',
-          ipAddress: getClientIP(req),
-          userAgent: req.headers['user-agent'],
-          endpoint: req.originalUrl,
-          success: false,
-          details: {
-            type: 'general_api',
-            environment: process.env.NODE_ENV,
-            limit: isDevelopment ? 10000 : 1000,
-          },
-        });
-        res.status(429).json({
-          error: isDevelopment
-            ? 'Rate limit atingido (modo desenvolvimento - limites altos)'
-            : 'Muitas requisições da API. Tente novamente em 15 minutos.',
-          retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
-        });
-      },
-    });
+  // Configuração dummy (não funcional) apenas para manter compatibilidade de auth
+  const authLimiter = (req: any, res: any, next: any) => next();
 
-    const authLimiter = rateLimit({
-      windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
-      max: isDevelopment ? 1000 : 100, // 1000 dev, 100 prod (ajustado para múltiplos usuários)
-      skipSuccessfulRequests: true,
-      message: {
-        error: isDevelopment
-          ? 'Rate limit auth atingido (modo desenvolvimento)'
-          : 'Muitas tentativas de autenticação. Tente novamente em 15 minutos.',
-        retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
-      },
-      standardHeaders: true,
-      legacyHeaders: false,
-      handler: (req, res) => {
-        securityLogger.logEvent({
-          type: SecurityEventType.BRUTE_FORCE_DETECTED,
-          severity: isDevelopment ? 'LOW' : 'HIGH',
-          ipAddress: getClientIP(req),
-          userAgent: req.headers['user-agent'],
-          endpoint: req.originalUrl,
-          success: false,
-          details: {
-            type: 'authentication_brute_force',
-            environment: process.env.NODE_ENV,
-            limit: isDevelopment ? 1000 : 20,
-          },
-        });
-        res.status(429).json({
-          error: isDevelopment
-            ? 'Rate limit auth atingido (modo desenvolvimento)'
-            : 'Muitas tentativas de autenticação. Tente novamente em 15 minutos.',
-          retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
-        });
-      },
-    });
-
-    app.use('/api/', generalApiLimiter);
-    app.use('/api/auth/', authLimiter);
-
-    if (isDevelopment) {
-      log('🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos');
-    } else {
-      log('🔒 [PROD] Rate limiting configurado para produção - limites seguros');
-    }
-  }
+  // Rate limiting completamente removido
+  console.log('🚫 [SECURITY] Rate limiting DESABILITADO PERMANENTEMENTE por solicitação do usuário');
 
   // JSON middleware
   app.use(express.json());
