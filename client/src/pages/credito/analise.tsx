@@ -225,7 +225,7 @@ const AnaliseManualPage: React.FC = () => {
           clienteData.dataNascimento ||
           rawData.cliente_data_nascimento ||
           'N/A',
-        rendaMensal: safeRender(
+        rendaMensal: PropostaMapper.formatMoney(
           clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda
         ),
         rg: clienteData.rg || rawData.cliente_rg || rawData.clienteRg || 'N/A',
@@ -324,7 +324,7 @@ const AnaliseManualPage: React.FC = () => {
                 {safeRender(propostaMapeada.cliente.dataNascimento)}
               </p>
               <p>
-                <strong>Renda Mensal:</strong> {safeRender(propostaMapeada.cliente.rendaMensal)}
+                <strong>Renda Mensal:</strong> {propostaMapeada.cliente.rendaMensal}
               </p>
               <p>
                 <strong>RG:</strong> {safeRender(propostaMapeada.cliente.rg)}
