@@ -665,141 +665,299 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // MOVED TO server/routes/propostas/core.ts - PUT /api/propostas/:id/status
 
   // 🔧 CORREÇÃO CRÍTICA: Mover endpoint específico ANTES da rota genérica /:id
-  // New endpoint for formalization proposals (filtered by status)
+  // New endpoint for formalization proposals (filtered by status) - VERSÃO ROBUSTA
   app.get(
     '/api/propostas/formalizacao',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
-      console.log('🔍 [DEBUG] SPECIFIC FORMALIZATION ROUTE HIT!');
-      console.log('🔍 [DEBUG] URL:', req.url);
-      console.log('🔍 [DEBUG] Path:', req.path);
-      console.log('🔍 [DEBUG] Params:', req.params);
+      const startTime = Date.now();
+      const correlationId = Math.random().toString(36).substr(2, 9);
+      
+      logInfo('🚀 [FORMALIZATION] Route accessed', {
+        correlationId,
+        url: req.url,
+        path: req.path,
+        method: req.method,
+        userAgent: req.get('User-Agent'),
+        ip: req.ip
+      });
+
       try {
-        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const supabase = createServerSupabaseAdminClient();
-
-        // Formalization statuses - TODOS exceto BOLETOS_EMITIDOS
-        // BOLETOS_EMITIDOS vai para Cobranças e Pagamentos
-        const formalizationStatuses = [
-          'aprovado',
-          'aceito_atendente',
-          'documentos_enviados',
-          // Status V2.0 de formalização
-          'CCB_GERADA',
-          'AGUARDANDO_ASSINATURA',
-          'ASSINATURA_PENDENTE',
-          'ASSINATURA_CONCLUIDA',
-          // NÃO incluir BOLETOS_EMITIDOS - vai para cobranças/pagamentos
-          'PAGAMENTO_PENDENTE',
-          'PAGAMENTO_PARCIAL',
-          // Status legados para compatibilidade
-          'contratos_preparados', // será migrado para CCB_GERADA
-          'contratos_assinados', // será migrado para ASSINATURA_CONCLUIDA
-          // NÃO incluir "pronto_pagamento" - é o antigo BOLETOS_EMITIDOS
-        ];
-
+        // 🔍 ETAPA 1: Validação de Autenticação
         const userId = req.user?.id;
         const userRole = req.user?.role;
         const userLojaId = req.user?.loja_id;
 
-        console.log(
-          `🔐 [FORMALIZATION] Querying for user ${userId} with role ${userRole} from loja ${userLojaId}`
-        );
+        if (!userId || !userRole) {
+          logError('❌ [FORMALIZATION] Authentication validation failed', {
+            correlationId,
+            userId,
+            userRole,
+            userLojaId,
+            step: 'AUTH_VALIDATION'
+          });
+          return res.status(401).json({ 
+            message: 'Usuário não autenticado corretamente',
+            error: 'AUTHENTICATION_FAILED',
+            correlationId 
+          });
+        }
 
-        // Build query based on user role
-        let query = supabase.from('propostas').select('*').in('status', formalizationStatuses);
+        logInfo('✅ [FORMALIZATION] Authentication validated', {
+          correlationId,
+          userId,
+          userRole,
+          userLojaId,
+          step: 'AUTH_VALIDATED'
+        });
+
+        // 🔍 ETAPA 2: Inicialização do Supabase Client
+        let supabase;
+        try {
+          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+          supabase = createServerSupabaseAdminClient();
+          
+          logInfo('✅ [FORMALIZATION] Supabase client initialized', {
+            correlationId,
+            step: 'SUPABASE_INIT'
+          });
+        } catch (supabaseError) {
+          logError('❌ [FORMALIZATION] Supabase client initialization failed', {
+            correlationId,
+            error: supabaseError instanceof Error ? supabaseError.message : String(supabaseError),
+            step: 'SUPABASE_INIT_FAILED'
+          });
+          return res.status(500).json({
+            message: 'Erro na inicialização da conexão com banco de dados',
+            error: 'DATABASE_CONNECTION_FAILED',
+            correlationId
+          });
+        }
+
+        // 🔍 ETAPA 3: Configuração da Query
+        const formalizationStatuses = [
+          'aprovado',
+          'aceito_atendente',
+          'documentos_enviados',
+          'CCB_GERADA',
+          'AGUARDANDO_ASSINATURA',
+          'ASSINATURA_PENDENTE',
+          'ASSINATURA_CONCLUIDA',
+          'PAGAMENTO_PENDENTE',
+          'PAGAMENTO_PARCIAL',
+          'contratos_preparados',
+          'contratos_assinados'
+        ];
+
+        let query = supabase
+          .from('propostas')
+          .select('*')
+          .in('status', formalizationStatuses);
 
         // Apply role-based filtering
         if (userRole === 'ATENDENTE') {
-          // ATENDENTE sees only proposals they created
           query = query.eq('user_id', userId);
-          console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${userId}`);
+          logInfo('🔐 [FORMALIZATION] ATENDENTE filter applied', {
+            correlationId,
+            filter: `user_id = ${userId}`,
+            step: 'QUERY_FILTER'
+          });
         } else if (userRole === 'GERENTE') {
-          // GERENTE sees all proposals from their store
           query = query.eq('loja_id', userLojaId);
-          console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${userLojaId}`);
+          logInfo('🔐 [FORMALIZATION] GERENTE filter applied', {
+            correlationId,
+            filter: `loja_id = ${userLojaId}`,
+            step: 'QUERY_FILTER'
+          });
+        } else {
+          logInfo('🔐 [FORMALIZATION] No additional filter (ADMIN/ANALISTA)', {
+            correlationId,
+            userRole,
+            step: 'QUERY_FILTER'
+          });
         }
-        // For other roles (ADMINISTRADOR, ANALISTA, etc.), no additional filtering
 
-        const { data: rawPropostas, error } = await query.order('created_at', { ascending: false });
+        // 🔍 ETAPA 4: Execução da Query com Timeout
+        let rawPropostas, error;
+        const queryStartTime = Date.now();
+        
+        try {
+          const result = await Promise.race([
+            query.order('created_at', { ascending: false }),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Query timeout after 30 seconds')), 30000)
+            )
+          ]) as any;
+          
+          rawPropostas = result.data;
+          error = result.error;
+          
+          logInfo('✅ [FORMALIZATION] Database query executed', {
+            correlationId,
+            queryDuration: Date.now() - queryStartTime,
+            resultCount: rawPropostas?.length || 0,
+            hasError: !!error,
+            step: 'QUERY_EXECUTED'
+          });
+          
+        } catch (queryError) {
+          logError('❌ [FORMALIZATION] Database query failed', {
+            correlationId,
+            error: queryError instanceof Error ? queryError.message : String(queryError),
+            queryDuration: Date.now() - queryStartTime,
+            step: 'QUERY_FAILED'
+          });
+          
+          return res.status(500).json({
+            message: 'Timeout ou erro na consulta ao banco de dados',
+            error: 'DATABASE_QUERY_FAILED',
+            correlationId
+          });
+        }
 
         if (error) {
-          console.error('🚨 [FORMALIZATION] Supabase error:', error);
-          return res.status(500).json({ message: 'Erro ao consultar propostas de formalização' });
+          logError('❌ [FORMALIZATION] Supabase query returned error', {
+            correlationId,
+            error: error.message || String(error),
+            code: error.code || 'UNKNOWN',
+            step: 'QUERY_ERROR'
+          });
+          
+          return res.status(500).json({ 
+            message: 'Erro na consulta de propostas de formalização',
+            error: 'SUPABASE_QUERY_ERROR',
+            details: error.message,
+            correlationId
+          });
         }
 
         if (!rawPropostas || rawPropostas.length === 0) {
-          console.log(
-            `🔐 [FORMALIZATION] No proposals found for user ${userId} with role ${userRole}`
-          );
+          logInfo('ℹ️ [FORMALIZATION] No proposals found', {
+            correlationId,
+            userId,
+            userRole,
+            userLojaId,
+            statusesSearched: formalizationStatuses,
+            step: 'NO_RESULTS'
+          });
+          
           return res.json([]);
         }
 
-        console.log(`🔐 [FORMALIZATION] Found ${rawPropostas.length} proposals for user ${userId}`);
-        console.log(
-          '🔐 [FORMALIZATION] First proposal:',
-          rawPropostas[0]?.id,
-          rawPropostas[0]?.status
-        );
+        // 🔍 ETAPA 5: Processamento e Parsing dos Dados
+        let formalizacaoPropostas;
+        try {
+          formalizacaoPropostas = rawPropostas.map((proposta, index) => {
+            let clienteData = null;
+            let condicoesData = null;
 
-        // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
-        const formalizacaoPropostas = rawPropostas.map((proposta) => {
-          let clienteData = null;
-          let condicoesData = null;
-
-          // Parse cliente_data se for string
-          if (typeof proposta.cliente_data === 'string') {
+            // Parse cliente_data com tratamento robusto
             try {
-              clienteData = JSON.parse(proposta.cliente_data);
-            } catch (e) {
-              console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
+              if (typeof proposta.cliente_data === 'string') {
+                clienteData = JSON.parse(proposta.cliente_data);
+              } else if (typeof proposta.cliente_data === 'object') {
+                clienteData = proposta.cliente_data || {};
+              } else {
+                clienteData = {};
+              }
+            } catch (parseError) {
+              logError('⚠️ [FORMALIZATION] Error parsing cliente_data', {
+                correlationId,
+                propostaId: proposta.id,
+                index,
+                parseError: parseError instanceof Error ? parseError.message : String(parseError),
+                step: 'PARSE_CLIENTE_DATA'
+              });
               clienteData = {};
             }
-          } else {
-            clienteData = proposta.cliente_data || {};
-          }
 
-          // Parse condicoes_data se for string
-          if (typeof proposta.condicoes_data === 'string') {
+            // Parse condicoes_data com tratamento robusto
             try {
-              condicoesData = JSON.parse(proposta.condicoes_data);
-            } catch (e) {
-              console.warn(
-                `Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`,
-                e
-              );
+              if (typeof proposta.condicoes_data === 'string') {
+                condicoesData = JSON.parse(proposta.condicoes_data);
+              } else if (typeof proposta.condicoes_data === 'object') {
+                condicoesData = proposta.condicoes_data || {};
+              } else {
+                condicoesData = {};
+              }
+            } catch (parseError) {
+              logError('⚠️ [FORMALIZATION] Error parsing condicoes_data', {
+                correlationId,
+                propostaId: proposta.id,
+                index,
+                parseError: parseError instanceof Error ? parseError.message : String(parseError),
+                step: 'PARSE_CONDICOES_DATA'
+              });
               condicoesData = {};
             }
-          } else {
-            condicoesData = proposta.condicoes_data || {};
-          }
 
-          return {
-            ...proposta,
-            cliente_data: clienteData,
-            condicoes_data: condicoesData,
-            // Map database fields to frontend format
-            documentos_adicionais: proposta.documentos_adicionais,
-            contrato_gerado: proposta.contrato_gerado,
-            contrato_assinado: proposta.contrato_assinado,
-            data_aprovacao: proposta.data_aprovacao,
-            data_assinatura: proposta.data_assinatura,
-            data_pagamento: proposta.data_pagamento,
-            observacoes_formalizacao: proposta.observacoes_formalizacao,
-            // 🔥 NOVO: Campos de tracking do Banco Inter
-            interBoletoGerado: proposta.inter_boleto_gerado,
-            interBoletoGeradoEm: proposta.inter_boleto_gerado_em,
-          };
+            return {
+              ...proposta,
+              cliente_data: clienteData,
+              condicoes_data: condicoesData,
+              documentos_adicionais: proposta.documentos_adicionais,
+              contrato_gerado: proposta.contrato_gerado,
+              contrato_assinado: proposta.contrato_assinado,
+              data_aprovacao: proposta.data_aprovacao,
+              data_assinatura: proposta.data_assinatura,
+              data_pagamento: proposta.data_pagamento,
+              observacoes_formalizacao: proposta.observacoes_formalizacao,
+              interBoletoGerado: proposta.inter_boleto_gerado,
+              interBoletoGeradoEm: proposta.inter_boleto_gerado_em,
+            };
+          });
+
+          logInfo('✅ [FORMALIZATION] Data processing completed', {
+            correlationId,
+            processedCount: formalizacaoPropostas.length,
+            originalCount: rawPropostas.length,
+            step: 'DATA_PROCESSED'
+          });
+
+        } catch (processingError) {
+          logError('❌ [FORMALIZATION] Error processing proposal data', {
+            correlationId,
+            error: processingError instanceof Error ? processingError.message : String(processingError),
+            step: 'DATA_PROCESSING_FAILED'
+          });
+          
+          return res.status(500).json({
+            message: 'Erro no processamento dos dados das propostas',
+            error: 'DATA_PROCESSING_ERROR',
+            correlationId
+          });
+        }
+
+        // 🔍 ETAPA 6: Resposta Final
+        const totalDuration = Date.now() - startTime;
+        
+        logInfo('🎉 [FORMALIZATION] Request completed successfully', {
+          correlationId,
+          proposalCount: formalizacaoPropostas.length,
+          totalDuration,
+          userId,
+          userRole,
+          timestamp: getBrasiliaTimestamp(),
+          step: 'SUCCESS'
         });
 
-        console.log(
-          `[${getBrasiliaTimestamp()}] Retornando ${formalizacaoPropostas.length} propostas em formalização via RLS`
-        );
         res.json(formalizacaoPropostas);
-      } catch (error) {
-        console.error('Erro ao buscar propostas de formalização:', error);
+        
+      } catch (globalError) {
+        const totalDuration = Date.now() - startTime;
+        
+        logError('💥 [FORMALIZATION] Unexpected error in formalization route', {
+          correlationId,
+          error: globalError instanceof Error ? globalError.message : String(globalError),
+          stack: globalError instanceof Error ? globalError.stack : undefined,
+          totalDuration,
+          step: 'GLOBAL_ERROR'
+        });
+        
         res.status(500).json({
-          message: 'Erro ao buscar propostas de formalização',
+          message: 'Erro interno na consulta de propostas de formalização',
+          error: 'INTERNAL_SERVER_ERROR',
+          correlationId
         });
       }
     }
