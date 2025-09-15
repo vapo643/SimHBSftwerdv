@@ -1,0 +1,45 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - Auditoria Forense**
+
+* **Sumário da Missão:** Localizar e analisar a função de formatação monetária responsável por exibir a `rendaMensal` na tela da "Fila de Análise" do Analista, para identificar a causa raiz da corrupção de dados na UI.
+* **Intenção Estratégica:** Diagnosticar precisamente por que um valor de `300000` armazenado corretamente no banco de dados está a ser exibido como `R$ 300` na interface do analista. A correção desta falha é crítica para a integridade das decisões de crédito.
+* **Modelo Mental (Como se Encaixa):** O fluxo é: API envia um JSON com o campo `rendaMensal` (tipo `numeric`). Um componente React (provavelmente em `/client/src/pages/credito/fila.tsx` ou similar) recebe estes dados. Antes de renderizar na tela, uma função utilitária de formatação é chamada para converter o número em uma string `R$ xxx,xx`. A falha está, muito provavelmente, dentro desta função de formatação.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** O Agente pode identificar uma função de formatação genérica usada em todo o sistema. Alterá-la sem critério poderia introduzir bugs em outras telas.
+    * **Contramedida:** A auditoria deve focar-se em identificar o ponto **exato** onde a formatação é chamada no contexto da Fila de Análise.
+
+---
+
+**[DIRETIVA DE DIVULGAÇÃO TOTAL (DDT) V1.0 - ANTI-OMISSÃO]**
+
+* Você está operando sob a Doutrina de Divulgação Total. Apresente a lista **COMPLETA** de ficheiros e funções relevantes. Não resuma. A sua missão é revelar a realidade total do fluxo de dados.
+
+---
+
+**IMPLEMENTAR (Plano de Auditoria Forense):**
+
+**CURRENT STATE:**
+Um valor de `rendaMensal` igual a `300000` (numeric) é enviado do backend para o frontend. Na tela do analista, este valor é exibido incorretamente como `R$ 300`.
+
+**EXPECTED (Estado Final da Auditoria):**
+Um relatório detalhado contendo:
+1.  O caminho completo para o ficheiro do componente React que renderiza a tabela ou lista da "Fila de Análise".
+2.  O trecho de código exato (`snippet`) dentro desse componente que renderiza o valor da `rendaMensal`.
+3.  O caminho completo para o ficheiro da **função utilitária** que formata o valor monetário.
+4.  O código-fonte **completo** dessa função de formatação, para que eu possa realizar a análise de causa raiz.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  **Mapeamento Inicial:** Comece a sua busca pelo ficheiro `/client/src/pages/credito/fila.tsx`. Este é o local mais provável da interface do analista.
+2.  **Rastreamento do Fluxo de Dados:** Dentro deste ficheiro, localize onde os dados da proposta são recebidos e como a propriedade `rendaMensal` é passada para a renderização.
+3.  **Identificação da Função de Formatação:** Identifique a função (ex: `formatCurrency`, `toBRL`) que é chamada para formatar o valor antes de ser exibido.
+4.  **Extração de Evidências:** Apresente os caminhos e os blocos de código exatos, conforme solicitado no "Estado Final da Auditoria".
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK (MODO AUDITORIA):**
+1.  Mapear ficheiros e funções exatas afetadas pela análise.
+2.  Garantir que todos os caminhos de importação citados estejam corretos.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está limpo antes da análise.
+4.  **Declarar Nível de Confiança (0-100%)** de que os ficheiros identificados são os corretos.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO) durante a análise.
+6.  Realizar uma verificação de sanidade para confirmar que a função de formatação é realmente a utilizada no componente.
+7.  **Documentar Decisões Técnicas** tomadas durante a busca.
