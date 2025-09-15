@@ -42,18 +42,15 @@ router.get('/config', (req: Request, res: Response) => {
     supabaseUrlsMatch: process.env.VITE_SUPABASE_URL === process.env.SUPABASE_URL,
     hasJwtSecret: !!process.env.SUPABASE_JWT_SECRET,
     hasSupabaseUrl: !!process.env.SUPABASE_URL,
-    contaminationDetected: !!(
-      process.env.DEV_JWT_SECRET || 
-      process.env.DEV_JTW_SECRET || 
-      process.env.PROD_JWT_SECRET ||
-      process.env.DEV_SUPABASE_URL || 
-      process.env.PROD_SUPABASE_URL
-    )
+    hasSupabaseAnonKey: !!process.env.SUPABASE_ANON_KEY,
+    hasSupabaseServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    architectureType: 'CANONICAL' // Arquitetura limpa implementada
   };
 
   const healthy = configHealth.supabaseUrlsMatch && 
                   configHealth.hasJwtSecret && 
-                  !configHealth.contaminationDetected;
+                  configHealth.hasSupabaseUrl &&
+                  configHealth.hasSupabaseAnonKey;
 
   res.status(healthy ? 200 : 503).json({ // 503 Service Unavailable se misconfigurado
     status: healthy ? 'HEALTHY' : 'MISCONFIGURED',

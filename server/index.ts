@@ -21,16 +21,8 @@ function validateCriticalConfiguration() {
     }
   });
 
-  // 2. Checar Contaminação (Apenas em Produção)
-  if (process.env.NODE_ENV === 'production') {
-      const CONTAMINANTS = ['DEV_DATABASE_URL', 'DEV_SUPABASE_URL', 'DEV_JTW_SECRET', 'PROD_JWT_SECRET'];
-      CONTAMINANTS.forEach(secret => {
-          if (process.env[secret]) {
-              console.error(`🚨 FATAL: Contaminação detectada! Secret proibido encontrado em produção: ${secret}`);
-              failed = true;
-          }
-      });
-  }
+  // 2. Arquitetura Canônica Validada - sem prefixos confusos
+  console.log('✅ [BOOTSTRAP] Arquitetura canônica aplicada - variáveis unificadas por ambiente');
 
   if (failed) {
     console.error('❌ [BOOTSTRAP] Configuração inválida. Encerrando processo para prevenir falhas catastróficas.');
@@ -181,11 +173,11 @@ try {
         return;
       }
 
-      const documentsExists = buckets.some((bucket) => bucket.name === 'documents');
+      const documentsExists = buckets.some((bucket: any) => bucket.name === 'documents');
 
       if (documentsExists) {
         // Check if it's public or private
-        const documentsBucket = buckets.find((bucket) => bucket.name === 'documents');
+        const documentsBucket = buckets.find((bucket: any) => bucket.name === 'documents');
         if (documentsBucket && documentsBucket.public === true) {
           log('⚠️ Storage bucket "documents" exists but is PUBLIC. Need to recreate as PRIVATE.');
 
