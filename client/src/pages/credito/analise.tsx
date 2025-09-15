@@ -97,16 +97,16 @@ const decisionSchema = z
     observacao: z.string().optional(),
   })
   .refine(
-    (data) => {
-      // Observação é obrigatória APENAS quando o status é "pendenciado"
-      if (data.status === 'pendenciado') {
+    (data: { status: string; observacao?: string }) => {
+      // Observação é obrigatória quando o status é "pendenciado" OU "rejeitado"
+      if (data.status === 'pendenciado' || data.status === 'rejeitado') {
         return data.observacao && data.observacao.trim().length > 0;
       }
-      // Para "aprovado" e "rejeitado", observação é opcional
+      // Para "aprovado", observação é opcional
       return true;
     },
     {
-      message: 'Observação é obrigatória quando a proposta é pendenciada',
+      message: 'Observação/motivo é obrigatório para rejeições e pendências',
       path: ['observacao'], // Aplica o erro no campo observacao
     }
   );
@@ -450,7 +450,7 @@ const AnaliseManualPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="observacao">Observações (obrigatório se pendenciar)</Label>
+                    <Label htmlFor="observacao">Observações (obrigatório para rejeições e pendências)</Label>
                     <Textarea id="observacao" {...register('observacao')} />
                   </div>
                   <Button type="submit" className="w-full" disabled={mutation.isPending}>

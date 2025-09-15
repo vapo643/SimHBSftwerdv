@@ -491,7 +491,8 @@ export class ProposalController {
   async reject(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
-      const { motivo } = req.body;
+      // CORREÇÃO CRÍTICA: Aceitar tanto 'motivo' quanto 'observacao' para compatibilidade frontend/backend
+      const motivo = req.body.motivo || req.body.observacao;
       const analistaId = (req as any).user?.id;
 
       if (!analistaId) {
