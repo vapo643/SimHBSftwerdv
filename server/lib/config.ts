@@ -48,27 +48,15 @@ export interface AppConfig {
   };
 }
 
-// Lista de secrets críticos vs opcionais - ajustado para diferentes ambientes
+// Lista de secrets críticos vs opcionais - simplificada e unificada
 function getCriticalSecrets(env: string): string[] {
-  switch (env) {
-    case 'production':
-      return ['PROD_DATABASE_URL', 'PROD_JWT_SECRET', 'PROD_SESSION_SECRET', 'PROD_CSRF_SECRET'];
-    case 'staging':
-      return ['STAGING_DATABASE_URL', 'STAGING_JWT_SECRET', 'STAGING_SESSION_SECRET', 'STAGING_CSRF_SECRET'];
-    default:
-      return ['DATABASE_URL', 'JWT_SECRET', 'SESSION_SECRET', 'CSRF_SECRET'];
-  }
+  return ['DATABASE_URL', 'SUPABASE_JWT_SECRET', 'SESSION_SECRET', 'CSRF_SECRET'];
 }
 
 const OPTIONAL_SECRETS = [
-  // Environment-specific JWT secrets (SEGURANÇA: isolamento por ambiente)
-  'DEV_JTW_SECRET', 'PROD_JWT_SECRET',
-  // Session and CSRF secrets
-  'SESSION_DEV', 'CSRF_DEV',
-  'PROD_SUPABASE_URL', 'SUPABASE_URL',
-  'PROD_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY', 
-  'PROD_SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
-  'DEV_SUPABASE_URL', 'DEV_SUPABASE_ANON_KEY', 'DEV_SUPABASE_SERVICE_ROLE_KEY',
+  // Supabase environment variables
+  'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
+  // External integrations
   'SENTRY_DSN',
   'CLICKSIGN_API_KEY',
   'CLICKSIGN_WEBHOOK_SECRET',
@@ -76,6 +64,11 @@ const OPTIONAL_SECRETS = [
   'INTER_CLIENT_SECRET',
   'INTER_CERTIFICATE',
   'INTER_WEBHOOK_SECRET',
+  // Legacy environment-specific variables (mantidas para compatibilidade)
+  'DEV_JTW_SECRET', 'PROD_JWT_SECRET',
+  'SESSION_DEV', 'CSRF_DEV',
+  'PROD_SUPABASE_URL', 'PROD_SUPABASE_ANON_KEY', 'PROD_SUPABASE_SERVICE_ROLE_KEY',
+  'DEV_SUPABASE_URL', 'DEV_SUPABASE_ANON_KEY', 'DEV_SUPABASE_SERVICE_ROLE_KEY',
 ] as const;
 
 // Validação não-bloqueante de secrets adaptada por ambiente
@@ -120,100 +113,33 @@ function generateSecureSecret(name: string): string {
   return fallback;
 }
 
-// Função para detectar ambiente baseado no domínio/URL
-function detectEnvironmentFromDomain(): 'dev' | 'prod' {
-  // Se temos variáveis específicas, usamos elas para detectar
-  const host = process.env.HOST || process.env.REPL_SLUG || 'localhost';
-  const isDevelopment = 
-    host.includes('localhost') ||
-    host.includes('127.0.0.1') ||
-    host.includes('.replit.dev') ||
-    host.includes('replit-') ||
-    process.env.REPLIT_DEV_DOMAIN;
-    
-  return isDevelopment ? 'dev' : 'prod';
-}
+// REMOVIDA: Função detectEnvironmentFromDomain - lógica de detecção eliminada
 
-// Função para leitura do segredo JWT com isolamento de ambiente (SEGURANÇA)
+// VERSÃO FINAL E SEGURA da getJwtSecret
 function getJwtSecret(): string {
-  console.log('[DIAGNOSTICO JWT] Tentando obter segredo. Valores atuais:', {
-    NODE_ENV: process.env.NODE_ENV,
-    DOMAIN: process.env.REPL_SLUG ? `${process.env.REPL_SLUG}.replit.dev` : 'localhost',
-    DEV_JTW_SECRET_EXISTS: !!process.env.DEV_JTW_SECRET,
-    PROD_JWT_SECRET_EXISTS: !!process.env.PROD_JWT_SECRET,
-    SUPABASE_JWT_SECRET_EXISTS: !!process.env.SUPABASE_JWT_SECRET
-  });
-  
-  const environmentType = detectEnvironmentFromDomain();
-  
-  if (environmentType === 'dev' && process.env.DEV_JTW_SECRET) {
-    console.log('[CONFIG] 🔧 DEV Environment detected - Using DEV_JTW_SECRET for JWT validation');
-    return process.env.DEV_JTW_SECRET;
+  const secret = process.env.SUPABASE_JWT_SECRET;
+  if (!secret) {
+    console.error('[CONFIG] 🚨 FALHA CRÍTICA: A variável de ambiente SUPABASE_JWT_SECRET não está definida. O serviço de autenticação não pode iniciar.');
+    throw new Error('Segredo JWT não configurado.');
   }
-  
-  if (environmentType === 'prod' && process.env.PROD_JWT_SECRET) {
-    console.log('[CONFIG] 🏭 PROD Environment detected - Using PROD_JWT_SECRET for JWT validation');
-    return process.env.PROD_JWT_SECRET;
-  }
-  
-  // Fallback seguro com erro claro
-  throw new Error(`🚨 JWT Secret não configurado para ambiente: ${environmentType}. Configure DEV_JTW_SECRET ou PROD_JWT_SECRET.`);
+  console.log('[CONFIG] ✅ Segredo JWT carregado com sucesso.');
+  return secret;
 }
 
 function getSessionSecret(): string {
-  const environmentType = detectEnvironmentFromDomain();
-  
-  if (environmentType === 'dev' && process.env.SESSION_DEV) {
-    console.log('[CONFIG] 🔧 DEV Environment - Using SESSION_DEV');
-    return process.env.SESSION_DEV;
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    return generateSecureSecret('SESSION_SECRET');
   }
-  
-  if (environmentType === 'prod' && process.env.PROD_SESSION_SECRET) {
-    console.log('[CONFIG] 🏭 PROD Environment - Using PROD_SESSION_SECRET');
-    return process.env.PROD_SESSION_SECRET;
-  }
-  
-  // Fallback para a lógica anterior
-  const env = process.env.NODE_ENV || 'development';
-  
-  switch (env) {
-    case 'production':
-      return process.env.PROD_SESSION_SECRET || (() => {
-        throw new Error('PROD_SESSION_SECRET is required in production environment!');
-      })();
-    case 'staging':
-      return process.env.STAGING_SESSION_SECRET || generateSecureSecret('STAGING_SESSION_SECRET');
-    default:
-      return process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET');
-  }
+  return secret;
 }
 
 function getCsrfSecret(): string {
-  const environmentType = detectEnvironmentFromDomain();
-  
-  if (environmentType === 'dev' && process.env.CSRF_DEV) {
-    console.log('[CONFIG] 🔧 DEV Environment - Using CSRF_DEV');
-    return process.env.CSRF_DEV;
+  const secret = process.env.CSRF_SECRET;
+  if (!secret) {
+    return generateSecureSecret('CSRF_SECRET');
   }
-  
-  if (environmentType === 'prod' && process.env.PROD_CSRF_SECRET) {
-    console.log('[CONFIG] 🏭 PROD Environment - Using PROD_CSRF_SECRET');
-    return process.env.PROD_CSRF_SECRET;
-  }
-  
-  // Fallback para a lógica anterior
-  const env = process.env.NODE_ENV || 'development';
-  
-  switch (env) {
-    case 'production':
-      return process.env.PROD_CSRF_SECRET || (() => {
-        throw new Error('PROD_CSRF_SECRET is required in production environment!');
-      })();
-    case 'staging':
-      return process.env.STAGING_CSRF_SECRET || generateSecureSecret('STAGING_CSRF_SECRET');
-    default:
-      return process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET');
-  }
+  return secret;
 }
 
 
