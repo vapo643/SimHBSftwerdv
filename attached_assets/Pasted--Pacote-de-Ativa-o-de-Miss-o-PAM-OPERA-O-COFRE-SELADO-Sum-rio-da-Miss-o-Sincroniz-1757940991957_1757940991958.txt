@@ -1,0 +1,38 @@
+### Pacote de Ativação de Missão (PAM) - OPERAÇÃO COFRE SELADO
+
+* **Sumário da Missão:** Sincronizar o segredo JWT entre a Supabase e o nosso ambiente de produção no Replit para restaurar o fluxo de autenticação.
+
+* **Intenção Estratégica:** Erradicar a causa raiz da falha de autenticação 401, restabelecer a operacionalidade total do sistema e garantir que esta classe de erro de configuração seja documentada para prevenir futuras recorrências.
+
+* **Restrição de Segurança:** Em nenhum momento, o segredo JWT deve ser colado no chat ou em qualquer outro local não seguro. A operação deve ocorrer exclusivamente entre o dashboard da Supabase e os segredos do Replit.
+
+---
+
+**CONSTRAINTS (Roadmap de Execução Manual):**
+
+**Passo 1: Obtenção da Fonte da Verdade**
+1.  Navegue até o seu projeto na [plataforma Supabase](https://supabase.com/).
+2.  No menu lateral, vá para **Project Settings** (Configurações do Projeto).
+3.  Selecione a secção **API**.
+4.  Role para baixo até encontrar a secção **JWT Settings**.
+5.  Clique em "Generate a new secret" e copie o valor do campo **JWT Secret**. Este é o segredo correto e a nossa única fonte da verdade.
+
+**Passo 2: Verificação e Correção do Ambiente**
+1.  Abra o nosso projeto no **Replit**.
+2.  Navegue até a ferramenta **Secrets**.
+3.  Localize a variável de ambiente chamada `SUPABASE_JWT_SECRET` (ou `JWT_SECRET`).
+4.  **Compare** o valor desta variável com o segredo que você copiou da Supabase. Eles estarão diferentes.
+5.  **Substitua** o valor no Replit Secrets pelo valor correto que você obteve da Supabase.
+
+**Passo 3: Validação Final**
+1.  Reinicie completamente o servidor da aplicação no Replit.
+2.  Abra a aplicação no navegador em uma nova aba anónima.
+3.  Faça o login.
+4.  Observe o console do navegador. As chamadas de API devem agora retornar o status `200 OK`, e as telas devem carregar normalmente.
+
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** Todos
+- **Próximo Passo a ser Retomado:** N/A
+- **Missão de Emergência Atual:** "Operação Cofre Selado" - Aguardando Sincronização de Segredos JWT.
+---
