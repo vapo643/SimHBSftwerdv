@@ -1,0 +1,87 @@
+forwarding local port 5000 to external port 80 (mapped as 1104)
+> NODE_ENV=production node dist/index.js
+> rest-express@1.0.0 start
+starting up user application
+[CLICKSIGN] 🔴 Circuit Breaker will be initialized on first use
+{"environment":"production","level":"info","message":"[REALTIME SERVICE] ✅ Inicializado com heartbeat a cada 30s","service":"simpix-api","timestamp":"2025-09-15 17:28:38","version":"1.0.0"}
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[DEV QUEUE] 🚀 Development queues initialized with REAL worker processing
+[CONFIG] ✅ CSRF secret carregado: CSRF_SECRET
+✅ Database: Connection pool configured with 20 max connections (Mission 3 optimization)
+[INTER] 🏦 Initialized in production mode
+{"environment":"production","injectionMethod":"internal_fallback","level":"info","message":"[CLICKSIGN WEBHOOK SERVICE] ✅ Inicializado com UseCase MarcarAssinaturaConcluidaUseCase","service":"simpix-api","timestamp":"2025-09-15 17:28:38","useCaseInjected":true,"version":"1.0.0","webhookSecretConfigured":true}
+✅ Database: Configuring Supabase connection...
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[DEV QUEUE] 📦 Created development queue: document-processing
+[DEV QUEUE] 📦 Created development queue: boleto-sync
+5:28:39 PM [express] 🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet
+5:28:39 PM [express] 🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos
+🚀 [TIMING MIDDLEWARE] Middleware instance created and exported
+[INTER] 🔴 Circuit Breakers will be initialized on first use
+[CONFIG] ✅ Session secret carregado: SESSION_SECRET
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 0, proposalRequests: 0, threshold: '50 proposals/day' }
+✅ [BOOTSTRAP] Configuração crítica validada com sucesso.
+[DEV QUEUE] 📦 Created development queue: pdf-processing
+[CLICKSIGN V1] Token configured: b73b3b90***
+5:28:39 PM [express] ✅ Configurações críticas validadas com sucesso
+5:28:38 PM [express] ⚠️  Missing optional secrets: SUPABASE_DEV_JWT_SECRET, CLICKSIGN_API_KEY
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+{"endpoints":["/api/health","/api/health/live","/api/health/ready"],"environment":"production","level":"info","message":"🏥 Health check endpoints registered","service":"simpix-api","timestamp":"2025-09-15 17:28:39","version":"1.0.0"}
+5:28:39 PM [express] 🏗️ Initializing IoC Container...
+[DEV QUEUE] 📦 Created development queue: notifications
+5:28:39 PM [express] 🎯 Specialized queue workers configured for lazy initialization
+🚀 [TIMING MIDDLEWARE] Creating middleware instance...
+{"environment":"production","level":"warn","message":"💡 [FormalizationWorker] Events will be processed synchronously (graceful degradation)","service":"simpix-api","timestamp":"2025-09-15 17:28:39","version":"1.0.0"}
+[INTER] 🌐 API URL: https://cdpj.partners.bancointer.com.br
+{"environment":"production","error":"Redis connection not available - using synchronous processing","level":"warn","message":"⚠️ [FormalizationWorker] Queue unavailable - async processing disabled","service":"simpix-api","timestamp":"2025-09-15 17:28:39","version":"1.0.0"}
+5:28:39 PM [express] 🔧 App Config Status:
+5:28:39 PM [express] 🔒 [SECURITY] Enhanced security headers and strict CSP activated
+[SEMGREP MCP] Connected to Redis via Redis Manager
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+5:28:39 PM [express] 📦 Checking storage buckets...
+📊 Pool Config: idle_timeout=30s, connect_timeout=10s, prepared_statements=disabled
+5:28:39 PM [express] 🚀 Server running on port 5000
+{"environment":"production","level":"info","message":"Dead-Letter Queue Manager initialized","service":"simpix-api","timestamp":"2025-09-15 17:28:38","version":"1.0.0"}
+[BOOTSTRAP] Iniciando Validação de Configuração Crítica...
+5:28:39 PM [express] ⚡ Formalization Worker initialized - Processing async events
+🚫 [SECURITY] Rate limiting DESABILITADO PERMANENTEMENTE por solicitação do usuário
+{"environment":"production","level":"info","logging":true,"message":"📊 Observability layer initialized","sentry":true,"service":"simpix-api","timestamp":"2025-09-15 17:28:39","version":"1.0.0"}
+5:28:39 PM [express] 🔐 Security WebSocket initialized
+✅ [BOOTSTRAP] Arquitetura canônica aplicada - variáveis unificadas por ambiente
+🔌 [Security WS] Event listeners configurados (aguardando implementação de EventEmitter nos scanners)
+5:28:39 PM [express] ✅ IoC Container initialized successfully
+5:28:39 PM [express]   - Port: 5000
+{"dsn":"https://7018ab54dbb8...","environment":"production","level":"info","message":"✅ Sentry initialized successfully","service":"simpix-api","timestamp":"2025-09-15 17:28:39","version":"1.0.0"}
+5:28:39 PM [express] 🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours
+[QUEUE] 🚀 Job queues initialized with DLQ support
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 0, proposalRequests: 0, threshold: '50 proposals/day' }
+{"environment":"production","level":"info","message":"📊 BullMQ MetricsService module loaded","service":"simpix-api","timestamp":"2025-09-15 17:28:38","version":"1.0.0"}
+[CLICKSIGN V1] Token configured: b73b3b90-c87...
+5:28:39 PM [express] 🔒 [SECURITY] Input sanitization middleware activated
+{"environment":"production","level":"warn","message":"⚠️ [FormalizationWorker] Start called but Queue unavailable - no async processing","service":"simpix-api","timestamp":"2025-09-15 17:28:39","version":"1.0.0"}
+5:28:39 PM [express] 🔒 [SECURITY] CORS protection configured - ASVS V13.2.1
+5:28:39 PM [express] ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable
+[Sentry] express is not instrumented. Please make sure to initialize Sentry in a separate file that you `--import` when running node, see: https://docs.sentry.io/platforms/javascript/guides/express/install/esm/.
+5:28:39 PM [express]    - Workers will start when first job is processed (on-demand)
+5:28:39 PM [express] 🔒 [SECURITY] OPTIONS preflight handling configured
+5:28:39 PM [express]   - Supabase: ✅ Connected
+5:28:39 PM [express]   - Environment: production
+{"degraded_mode":false,"environment":"production","level":"info","message":"🔄 Aplicação iniciando com Redis lazy loading (graceful degradation)","redis_available":"on-demand-check","service":"redis-lazy","timestamp":"2025-09-15 17:28:39","version":"1.0.0"}
+5:28:39 PM [express] 🌍 Environment: production
+[CCB SYNC] ℹ️ Primary processing via webhooks, polling is safety net only
+5:28:39 PM [express]   - Security: Rate Limit ✅, Helmet ✅
+{"environment":"production","level":"info","message":"📊 MetricsService initialized with Sentry integration","service":"simpix-api","timestamp":"2025-09-15 17:28:38","version":"1.0.0"}
+[CLICKSIGN V1] UseCase DI attached: false
+[CCB SYNC] 🚀 Starting fallback polling (every 6 hours)
+5:28:39 PM [express]   - Database: ✅ Connected
+5:28:39 PM [express] 🔔 Sistema de Alertas Proativos inicializado - Próxima execução: 16/09/2025, 04:00:00
+2025-09-15T17:28:43Z info: Waiting for service to be ready
+🔧 Connection pool ready for high concurrency workload
+📊 Connection latency: 2244ms
+5:28:40 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+✅ Database: Connection pool test successful
+{"correlationId":"02517d67-b7e2-43ec-b8cf-d8ed3bc3d905","environment":"production","ip":"127.0.0.1","level":"info","message":"📥 Request received","method":"GET","path":"/","query":{},"service":"simpix-api","timestamp":"2025-09-15 17:28:40","url":"/","userAgent":"Go-http-client/1.1","version":"1.0.0"}
+2025-09-15T17:28:46Z info: Deployment successful

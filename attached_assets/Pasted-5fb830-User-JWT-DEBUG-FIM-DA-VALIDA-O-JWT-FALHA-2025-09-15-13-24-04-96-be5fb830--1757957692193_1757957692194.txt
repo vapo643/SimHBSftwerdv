@@ -1,0 +1,147 @@
+5fb830
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 13:24:04.96
+be5fb830
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me
+2025-09-15 13:24:05.26
+be5fb830
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 13:24:05.26
+be5fb830
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 13:24:05.27
+be5fb830
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 13:24:05.27
+be5fb830
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me
+2025-09-15 13:24:08.50
+be5fb830
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 13:24:08.51
+be5fb830
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 13:24:08.51
+be5fb830
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 13:24:08.51
+be5fb830
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me
+2025-09-15 13:24:08.74
+be5fb830
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 13:24:08.74
+be5fb830
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 13:24:08.74
+be5fb830
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 13:24:08.74
+be5fb830
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me
+2025-09-15 13:24:18.84
+be5fb830
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 13:24:18.84
+be5fb830
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 13:24:18.84
+be5fb830
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 13:24:18.84
+be5fb830
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me
+2025-09-15 13:24:19.06
+be5fb830
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 13:24:19.06
+be5fb830
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 13:24:19.06
+be5fb830
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 13:24:19.06
+be5fb830
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me
+2025-09-15 13:24:20.26
+be5fb830
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 13:24:20.26
+be5fb830
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 13:24:20.26
+be5fb830
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 13:24:20.26
+be5fb830
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me
+2025-09-15 13:24:20.63
+be5fb830
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 13:24:20.63
+be5fb830
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 13:24:20.64
+be5fb830
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 13:24:20.64
+be5fb830
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me
+2025-09-15 13:24:59.92
+4cccca76
+User
+⚠️ Supabase environment variables not configured. Some features may be limited.
+2025-09-15 13:24:59.92
+4cccca76
+User
+Missing: SUPABASE_URL SUPABASE_ANON_KEY
+2025-09-15 13:24:59.92
+4cccca76
+User
+ℹ️ Configure SUPABASE_URL and SUPABASE_ANON_KEY in deployment secrets
+2025-09-15 13:24:59.97
+4cccca76
+User
+--- ERRO CRÍTICO DE CONFIGURAÇÃO ---
+2025-09-15 13:24:59.97
+4cccca76
+User
+As variáveis canônicas (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) não estão configuradas.
+2025-09-15 13:24:59.97
+4cccca76
+User
+As operações de Admin do Supabase serão desativadas.
+2025-09-15 13:24:59.97
+4cccca76
+User
+--- FIM DO ERRO ---
