@@ -28,19 +28,53 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
 
 // OPUS PROTOCOL: Admin client using canonical variables only
 export const createServerSupabaseAdminClient = () => {
-  // Use canonical environment variables
-  const url = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // 🔧 PAM V1.0 HOTFIX - Enhanced environment variable detection with detailed logging
+  const timestamp = new Date().toISOString();
+  const nodeEnv = process.env.NODE_ENV || 'unknown';
+  
+  console.log(`🔍 [${timestamp}] SUPABASE_ADMIN_CLIENT_DEBUG - Environment: ${nodeEnv}`);
+  
+  // Multi-tier environment variable detection with fallbacks
+  const url = process.env.SUPABASE_URL || 
+              process.env.VITE_SUPABASE_URL || 
+              process.env.PROD_SUPABASE_URL ||
+              process.env.STAGING_SUPABASE_URL ||
+              process.env.DEV_SUPABASE_URL;
+              
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ||
+                     process.env.PROD_SUPABASE_SERVICE_ROLE_KEY ||
+                     process.env.STAGING_SUPABASE_SERVICE_ROLE_KEY ||
+                     process.env.DEV_SUPABASE_SERVICE_ROLE_KEY;
 
-  // Validation with informative error message
+  // Detailed diagnostic logging for production debugging
+  console.log(`🔍 [${timestamp}] SUPABASE_URL: ${url ? '[FOUND]' : '[MISSING]'}`);
+  console.log(`🔍 [${timestamp}] SERVICE_KEY: ${serviceKey ? '[FOUND]' : '[MISSING]'}`);
+  
+  if (url) {
+    console.log(`🔍 [${timestamp}] URL source: ${url.includes('supabase.co') ? 'valid-supabase-domain' : 'custom-domain'}`);
+  }
+  
+  if (serviceKey) {
+    console.log(`🔍 [${timestamp}] SERVICE_KEY length: ${serviceKey.length} chars`);
+  }
+
+  // Enhanced validation with specific missing variable reporting
   if (!serviceKey || !url) {
-    console.error('--- ERRO CRÍTICO DE CONFIGURAÇÃO ---');
-    console.error('As variáveis canônicas (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) não estão configuradas.');
+    console.error(`--- [${timestamp}] ERRO CRÍTICO DE CONFIGURAÇÃO ---`);
+    console.error(`Environment: ${nodeEnv}`);
+    console.error(`SUPABASE_URL: ${!url ? '❌ MISSING' : '✅ PRESENT'}`);
+    console.error(`SUPABASE_SERVICE_ROLE_KEY: ${!serviceKey ? '❌ MISSING' : '✅ PRESENT'}`);
+    
+    // List all available SUPABASE env vars for debugging
+    const supabaseVars = Object.keys(process.env).filter(key => key.includes('SUPABASE'));
+    console.error(`Available SUPABASE env vars: ${supabaseVars.join(', ')}`);
     console.error('As operações de Admin do Supabase serão desativadas.');
     console.error('--- FIM DO ERRO ---');
     return null as any; 
   }
 
+  console.log(`✅ [${timestamp}] Supabase Admin Client configurado com sucesso`);
+  
   // Return admin client configured with canonical credentials
   return createClient(url, serviceKey, {
     auth: {
