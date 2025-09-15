@@ -1,0 +1,72 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - Hardening de Configuração de Produção**
+
+* **Sumário da Missão (O Quê):** Implementar um "health check" de auto-validação no arranque do servidor que verifica a integridade da `SUPABASE_JWT_SECRET`. Se o segredo for inválido, a aplicação deve falhar imediatamente (`fail-fast`) e recusar-se a iniciar, prevenindo um deploy defeituoso.
+* **Intenção Estratégica (O Porquê):** Transformar uma falha silenciosa de configuração (que só se manifesta em runtime quando o Redis está offline) num erro explícito e ruidoso no momento do deploy. Isto protege a produção de ser paralisada por uma dessincronização de segredos.
+* **Modelo Mental (Como se Encaixa):** Modificaremos o ficheiro `/server/lib/config.ts`. A função `getJwtSecret()` será aprimorada para não apenas verificar a existência e o comprimento do segredo, mas também para tentar usá-lo para assinar e verificar um payload de teste. Se a verificação falhar, significa que o segredo está corrompido ou é inválido, e o processo será encerrado.
+
+---
+
+**IMPLEMENTAR:**
+Plano de Blindagem Arquitetural para a Validação da `SUPABASE_JWT_SECRET`.
+
+**CURRENT STATE:**
+A aplicação inicia mesmo com uma `SUPABASE_JWT_SECRET` inválida. O erro só ocorre em runtime, sob a condição específica de o Redis estar offline, causando uma paragem total do sistema.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Se a `SUPABASE_JWT_SECRET` no ambiente for inválida, a aplicação **deve recusar-se a iniciar**.
+2.  O log de arranque deve apresentar uma mensagem de erro **FATAL e inequívoca**, explicando que a validação do segredo JWT falhou e que o deploy foi abortado para proteger o sistema.
+3.  Se a `SUPABASE_JWT_SECRET` for válida, a aplicação deve iniciar normalmente.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**Passo 1: [Refatoração] Aprimorar a Função `getJwtSecret`**
+1.  Abra o ficheiro `/server/lib/config.ts`.
+2.  Importe a biblioteca `jsonwebtoken` no topo do ficheiro:
+    ```typescript
+    import jwt from 'jsonwebtoken';
+    ```
+3.  Modifique a função `getJwtSecret()` para incluir um bloco de auto-validação antes do `return`.
+    * **DEPOIS** da verificação de comprimento (`secret.length < 20`), adicione o seguinte bloco `try/catch`:
+
+    ```typescript
+    // ... após a verificação de comprimento
+    try {
+      const payload = { test: 'self-validation' };
+      const token = jwt.sign(payload, secret);
+      jwt.verify(token, secret);
+      console.log(`[CONFIG] ✅ Auto-validação do Segredo JWT bem-sucedida.`);
+    } catch (e) {
+      console.error('🚨 FATAL ERROR (OPERAÇÃO PHOENIX): Falha na auto-validação da SUPABASE_JWT_SECRET.');
+      console.error('O segredo JWT configurado é inválido ou está corrompido.');
+      if (process.env.NODE_ENV === 'production') {
+          console.error('🚨 Encerrando aplicação para prevenir falhas de segurança.');
+          process.exit(1);
+      }
+      throw new Error('Falha na auto-validação do segredo JWT.');
+    }
+    // ... antes do return secret;
+    ```
+
+**Passo 2: [Validação] Verificação Final de Integridade**
+1.  Execute `get_latest_lsp_diagnostics` para garantir que não há erros de sintaxe.
+2.  Declare o seu nível de confiança e quaisquer riscos identificados.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas.
+2.  Garantir importações e tipos corretos.
+3.  Executar `get_latest_lsp_diagnostics` e corrigir **TODOS** os erros.
+4.  **Declarar Nível de Confiança (0-100%)** na implementação.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  Realizar teste funcional completo do arranque do servidor.
+7.  **Documentar Decisões Técnicas** assumidas (ex: "Adicionado health check de auto-validação para `SUPABASE_JWT_SECRET` para implementar uma estratégia de 'fail-fast'.").

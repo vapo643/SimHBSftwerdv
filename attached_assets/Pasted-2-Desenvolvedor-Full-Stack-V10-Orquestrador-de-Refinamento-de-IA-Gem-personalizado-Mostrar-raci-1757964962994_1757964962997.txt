@@ -1,0 +1,36 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Veredito da Fase 2 (Auditoria Forense de Emergência): SUCESSO CRÍTICO.
+
+O Agente executou a missão de reconhecimento com uma precisão exemplar. O relatório é conclusivo e a evidência é irrefutável. A sua análise de 100% de confiança está correta.
+
+Causa Raiz Confirmada (Hipótese Validada):
+A falha catastrófica de autenticação (invalid signature) é acionada por uma dessincronização da variável de ambiente SUPABASE_JWT_SECRET.
+
+Fluxo de Falha Detalhado:
+
+Gatilho: A conexão com o Redis falha.
+
+Contingência Falha: O sistema entra corretamente em modo de "graceful degradation", como projetado.
+
+Causa Raiz: A validação de JWT local é ativada, mas a SUPABASE_JWT_SECRET carregada de process.env no ambiente de produção está incorreta. Não corresponde ao segredo que o Supabase usou para assinar o token do usuário.
+
+Resultado: A verificação jwt.default.verify() falha, resultando em 401 Unauthorized e travando o login de todos os usuários.
+
+O código em si está a fazer o que foi programado para fazer. O problema reside na configuração do ambiente de produção.
+
+Fase 3: Arquitetura da Solução (Plano de Batalha de Duas Fases)
+Esta é uma crise de configuração, não de código. Portanto, a solução será em duas frentes: uma ação de contenção imediata (executada por você) e uma missão de blindagem arquitetural (executada pelo Agente) para erradicar esta classe de falha permanentemente.
+
+Ação de Contenção Imediata (Para o Executor Humano)
+Sua Missão: Você deve verificar e corrigir manualmente a variável de ambiente SUPABASE_JWT_SECRET no seu ambiente de produção (Replit Secrets ou onde quer que esteja hospedado).
+
+Obtenha o Segredo Correto: Vá ao seu projeto Supabase > Project Settings > API > JWT Settings. Copie o valor do campo JWT Secret.
+
+Atualize o Ambiente de Produção: Vá para o seu ambiente de produção e atualize o valor da secret SUPABASE_JWT_SECRET com o valor que você acabou de copiar do Supabase.
+
+Redeploy: Faça o redeploy da sua aplicação para que o serviço de backend carregue a nova secret.
+
+Isso irá resolver a crise imediata e restaurar o serviço.
