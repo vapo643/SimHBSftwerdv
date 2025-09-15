@@ -31,11 +31,12 @@ export const createClientSupabaseClient = () => {
 
   // Check if we're in a browser environment before accessing import.meta.env
   if (typeof window !== 'undefined') {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    // Support both standard and production-prefixed environment variables
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_PROD_SUPABASE_URL || '';
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_PROD_SUPABASE_ANON_KEY || '';
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.warn('⚠️ Supabase client credentials not configured. Some features may be limited.');
+      console.warn('⚠️ Supabase client credentials not configured. Configure VITE_SUPABASE_* ou VITE_PROD_SUPABASE_* variables.');
       return null as any;
     }
 

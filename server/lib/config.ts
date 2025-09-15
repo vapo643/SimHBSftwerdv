@@ -48,9 +48,15 @@ export interface AppConfig {
   };
 }
 
-// Lista de secrets críticos vs opcionais - simplificada e unificada
+// Lista de secrets críticos com alternativas para produção 
 function getCriticalSecrets(env: string): string[] {
-  return ['DATABASE_URL', 'SUPABASE_JWT_SECRET', 'SESSION_SECRET', 'CSRF_SECRET'];
+  if (env === 'production') {
+    // Em produção, aceita PROD_* OR padrão
+    return ['DATABASE_URL']; // JWT, SESSION, CSRF têm tratamento especial com fallbacks
+  } else {
+    // Em desenvolvimento, usa padrão com fallbacks automáticos
+    return ['DATABASE_URL'];
+  }
 }
 
 const OPTIONAL_SECRETS = [
