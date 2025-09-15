@@ -1,0 +1,42 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - Auditoria de Causa Raiz (Fase 1.1)**
+
+* **Sumário da Missão:** Rastrear o fluxo de execução da rota de API `/api/propostas/formalizacao` para identificar o serviço responsável pela comunicação com o Supabase e como as variáveis de ambiente, especificamente a `SUPABASE_SERVICE_ROLE_KEY`, são carregadas e utilizadas nesse contexto.
+* **Intenção Estratégica:** Isolar a origem do erro `500 - Invalid API key` para confirmar a hipótese de falha de carregamento de `secrets` e permitir uma correção precisa, restaurando a funcionalidade crítica de formalização de propostas.
+* **Modelo Mental (Como se Encaixa):** Uma requisição para `/api/propostas/formalizacao` é recebida pelo servidor Express. A rota correspondente aciona um controlador, que por sua vez invoca um serviço (ex: `FormalizacaoService` ou `SupabaseAdminService`). Este serviço é responsável por criar um cliente Supabase usando as `secrets` do ambiente (`process.env`). A falha está a ocorrer neste ponto, onde o cliente Supabase é instanciado ou utilizado com uma chave de API inválida.
+
+---
+
+**[DIRETIVA DE DIVULGAÇÃO TOTAL (DDT) V1.0 - ANTI-OMISSÃO]**
+
+* Você está operando sob a Doutrina de Divulgação Total. Apresente o código-fonte **completo** dos ficheiros e funções relevantes. Não resuma. A sua missão é revelar a realidade total do fluxo de configuração e execução.
+
+---
+
+**IMPLEMENTAR (Plano de Auditoria Forense):**
+
+**CURRENT STATE:**
+Uma chamada `GET` para a rota `/api/propostas/formalizacao` está a resultar num erro `500 Internal Server Error`. Os logs do backend indicam explicitamente `Supabase error: { message: 'Invalid API key' }`.
+
+**EXPECTED (Estado Final da Auditoria):**
+Um relatório forense detalhado contendo:
+1.  O caminho completo para o ficheiro que define a rota `/api/propostas/formalizacao`.
+2.  O código-fonte completo do **controlador** e do **serviço** que são acionados por esta rota.
+3.  O trecho de código exato (`snippet`) dentro do serviço identificado que é responsável por criar o cliente Supabase (ex: `createClient` ou `createSupabaseAdminClient`).
+4.  A linha de código específica que lê a variável de ambiente `SUPABASE_SERVICE_ROLE_KEY` (ou similar) a partir do `process.env`.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  **Ponto de Partida:** Comece a análise no ficheiro de roteamento principal (`/server/routes.ts`) para encontrar a definição da rota `/api/propostas/formalizacao`.
+2.  **Rastreamento do Fluxo:** A partir da definição da rota, siga as chamadas de função para identificar o controlador e o(s) serviço(s) correspondente(s).
+3.  **Identificação do Ponto de Falha:** Dentro do serviço, localize a lógica de interação com o Supabase. O ponto de falha mais provável é a inicialização do cliente Supabase.
+4.  **Extração de Evidências:** Apresente os caminhos e os blocos de código exatos, conforme solicitado no "Estado Final da Auditoria". **NÃO MODIFIQUE NENHUM CÓDIGO.**
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK (MODO AUDITORIA):**
+1.  Mapear ficheiros e funções exatas afetadas pela análise.
+2.  Garantir que todos os caminhos de importação citados estejam corretos.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está limpo antes da análise.
+4.  **Declarar Nível de Confiança (0-100%)** de que os ficheiros e a lógica identificados são os corretos para este fluxo.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO) durante a análise.
+6.  Realizar uma verificação de sanidade para confirmar que a lógica identificada corresponde aos sintomas descritos nos logs.
+7.  **Documentar Decisões Técnicas** tomadas durante a busca.

@@ -1,0 +1,380 @@
+emacpote essa validação como um amissao de id e diexe ela como pendente para lembrarmos depois. temos um problema maior agora; ao abrir nova proposta (unicamente ela, as demais funciona normal), aparece; Erro ao carregar dados necessários. Por favor, recarregue a página. console navegador; Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-9UZKkr5o.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+index-9UZKkr5o.js:56 [API Client] After dual-key transformation: Object >> eu te mostrei erros da tela de formalição e na tela de nova proposta! crie primeiro o roadmap antes dos prompts de auditoria
+/api/origination/context:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+index-9UZKkr5o.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/origination/context : Object
+index-9UZKkr5o.js:56 [API Client] After dual-key transformation: Object
+index-9UZKkr5o.js:56 Erro ao carregar contexto: ApiError: Perfil do usuário não encontrado
+    at Eu (index-9UZKkr5o.js:107:40749)
+    at async Ze (index-9UZKkr5o.js:107:42759)
+    at async queryFn (index-9UZKkr5o.js:679:21212) logs deploy; 2025-09-15 17:32:48.21
+0d3ade86
+User
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+2025-09-15 17:32:48.21
+0d3ade86
+User
+[JWT DEBUG] Using local JWT validation
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] JWT_SECRET length: 88
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] Token claims (unverified): {
+2025-09-15 17:32:48.22
+0d3ade86
+User
+iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+aud: 'authenticated',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+exp: 1757968662,
+2025-09-15 17:32:48.22
+0d3ade86
+User
+sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+algorithm: 'not specified'
+2025-09-15 17:32:48.22
+0d3ade86
+User
+}
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+2025-09-15 17:32:48.22
+0d3ade86
+User
+userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+email: 'ramon.barbosa@eellevepromotora.com.br',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+role: 'authenticated'
+2025-09-15 17:32:48.22
+0d3ade86
+User
+}
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[JWT DEBUG] Profile not in cache, querying database
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] JWT_SECRET length: 88
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] Token claims (unverified): {
+2025-09-15 17:32:48.22
+0d3ade86
+User
+iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+aud: 'authenticated',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+exp: 1757968662,
+2025-09-15 17:32:48.22
+0d3ade86
+User
+sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+algorithm: 'not specified'
+2025-09-15 17:32:48.22
+0d3ade86
+User
+}
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+2025-09-15 17:32:48.22
+0d3ade86
+User
+userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+email: 'ramon.barbosa@eellevepromotora.com.br',
+2025-09-15 17:32:48.22
+0d3ade86
+User
+role: 'authenticated'
+2025-09-15 17:32:48.22
+0d3ade86
+User
+}
+2025-09-15 17:32:48.22
+0d3ade86
+User
+[JWT DEBUG] Profile not in cache, querying database
+2025-09-15 17:32:48.22
+0d3ade86
+User
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+2025-09-15 17:32:48.22
+0d3ade86
+User
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+2025-09-15 17:32:48.72
+0d3ade86
+User
+{"correlationId":"be55fb6f-f5cb-4b7c-ba99-e13ace972227","environment":"production","ip":"34.30.242.206","level":"info","message":"📥 Request received","method":"GET","path":"/propostas/nova","query":{},"referrer":"https://sistemasimpix.com.br/login","service":"simpix-api","timestamp":"2025-09-15 20:32:48","url":"/propostas/nova","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-15 17:32:49.14
+0d3ade86
+User
+{"correlationId":"c8feb933-ed01-4881-b05a-0b761a6be931","environment":"production","ip":"35.223.5.74","level":"info","message":"📥 Request received","method":"GET","path":"/assets/index-9UZKkr5o.js","query":{},"referrer":"https://sistemasimpix.com.br/propostas/nova","service":"simpix-api","timestamp":"2025-09-15 20:32:49","url":"/assets/index-9UZKkr5o.js","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-15 17:32:49.15
+0d3ade86
+User
+{"correlationId":"c8ef8dff-e8c5-426d-8c3a-2d7e6d720eac","environment":"production","ip":"34.30.242.206","level":"info","message":"📥 Request received","method":"GET","path":"/assets/index-DZVEieC9.css","query":{},"referrer":"https://sistemasimpix.com.br/propostas/nova","service":"simpix-api","timestamp":"2025-09-15 20:32:49","url":"/assets/index-DZVEieC9.css","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-15 17:32:50.00
+0d3ade86
+User
+{"correlationId":"31b45b29-5136-4a22-baec-b36d85a2c9d4","duration":2209,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":314,"service":"simpix-api","statusCode":200,"timestamp":"2025-09-15 20:32:50","url":"/api/debug/me","version":"1.0.0"}
+2025-09-15 17:32:50.00
+0d3ade86
+User
+{"correlationId":"31b45b29-5136-4a22-baec-b36d85a2c9d4","duration":2209,"environment":"production","level":"warn","message":"⚠️ Slow request detected","service":"simpix-api","threshold":1000,"timestamp":"2025-09-15 20:32:50","url":"/api/debug/me","version":"1.0.0"}
+2025-09-15 17:32:50.00
+0d3ade86
+User
+[PERFORMANCE] ⚠️ SLOW GET /api/debug/me {
+2025-09-15 17:32:50.00
+0d3ade86
+User
+correlationId: 'perf-1757968367799-redc3uf0q',
+2025-09-15 17:32:50.00
+0d3ade86
+User
+duration: 2209,
+2025-09-15 17:32:50.00
+0d3ade86
+User
+memoryDeltaMB: 1,
+2025-09-15 17:32:50.00
+0d3ade86
+User
+statusCode: 200,
+2025-09-15 17:32:50.00
+0d3ade86
+User
+isCritical: false,
+
+Wrap
+
+
+Colors >>ATENÇÃO; TODOS OS SECRETS ESTAO CONFIGURADOS CORRETAMENYTE. E TAMBEM EM FORMALIÇÃO ESTA COM ESSE ERRO; 
+🔍 [DEBUG] Params: {}
+2025-09-15 17:34:11.58
+0d3ade86
+User
+🔐 [FORMALIZATION] Querying for user 2c3feed3-6b45-4a47-8031-96cdab09fbe9 with role ADMINISTRADOR from loja null
+2025-09-15 17:34:11.62
+0d3ade86
+User
+🚨 [FORMALIZATION] Supabase error: {
+2025-09-15 17:34:11.62
+0d3ade86
+User
+message: 'Invalid API key',
+2025-09-15 17:34:11.62
+0d3ade86
+User
+hint: 'Double check your Supabase `anon` or `service_role` API key.'
+2025-09-15 17:34:11.62
+0d3ade86
+User
+}
+2025-09-15 17:34:11.62
+0d3ade86
+User
+{"correlationId":"ebd92be4-c584-45e8-bdba-38a8055cbab2","duration":1037,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":65,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-15 20:34:11","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 17:34:11.62
+0d3ade86
+User
+{"correlationId":"ebd92be4-c584-45e8-bdba-38a8055cbab2","duration":1037,"environment":"production","level":"warn","message":"⚠️ Slow request detected","service":"simpix-api","threshold":1000,"timestamp":"2025-09-15 20:34:11","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 17:34:11.62
+0d3ade86
+User
+{"correlationId":"ebd92be4-c584-45e8-bdba-38a8055cbab2","duration":1037,"environment":"production","error":"{\"message\":\"Erro ao consultar propostas de formalização\"}","level":"error","message":"❌ Request error","method":"GET","service":"simpix-api","statusCode":500,"timestamp":"2025-09-15 20:34:11","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 17:34:11.62
+0d3ade86
+User
+[PERFORMANCE] ⚠️ SLOW GET /api/propostas/formalizacao {
+2025-09-15 17:34:11.62
+0d3ade86
+User
+correlationId: 'perf-1757968450590-d60 >> tudo esta correto! provalemente deve ser o env que nao esta, nao sei. secrets do deploy; oduction app secrets
+
+
+Secrets now sync automatically with your team's published apps. Production app secrets added before 4/17/2025 12:00 AM remain unchanged to avoid disrupting existing workflows. Manage syncing below.
+
+SESSION_SECRET
+••••••••
+
+
+VITE_SUPABASE_URL
+••••••••
+
+
+VITE_SUPABASE_ANON_KEY
+••••••••
+
+
+CLICKSIGN_API_TOKEN
+••••••••
+
+
+CLICKSIGN_WEBHOOK_SECRET
+••••••••
+
+
+INTER_WEBHOOK_SECRET
+••••••••
+
+
+INTER_CONTA_CORRENTE
+••••••••
+
+
+INTER_PRIVATE_KEY
+••••••••
+
+
+INTER_CERTIFICATE
+••••••••
+
+
+INTER_CLIENT_SECRET
+••••••••
+
+
+INTER_CLIENT_ID
+••••••••
+
+
+VITE_HMR_CLIENT_HOST
+••••••••
+
+
+VITE_HMR_CLIENT_PORT
+••••••••
+
+
+REDIS_PORT
+••••••••
+
+
+REDIS_PASSWORD
+••••••••
+
+
+REDIS_HOST
+••••••••
+
+
+SENTRY_DSN
+••••••••
+
+
+VITE_SENTRY_DSN
+••••••••
+
+
+CSRF_SECRET
+••••••••
+
+
+PROD_FRONTEND_URL
+••••••••
+
+
+PROD_ALERT_EMAIL
+••••••••
+
+
+SUPABASE_SERVICE_ROLE_KEY
+••••••••
+
+
+SUPABASE_ANON_KEY
+••••••••
+
+
+SUPABASE_URL
+••••••••
+
+
+DATABASE_URL
+••••••••
+
+
+SUPABASE_SERVICE_KEY
+••••••••
+
+
+REDIS_URL
+••••••••
+
+
+CONNECTORS_HOSTNAME
+••••••••
+
+
+REPLIT_CONNECTORS_HOSTNAME
+••••••••
+
+
+SUPABASE_JWT_SECRET

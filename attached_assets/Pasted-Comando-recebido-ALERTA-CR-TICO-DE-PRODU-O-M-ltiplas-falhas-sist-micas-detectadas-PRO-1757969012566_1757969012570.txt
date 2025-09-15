@@ -1,0 +1,77 @@
+Comando recebido. **ALERTA CRÍTICO DE PRODUÇÃO.** Múltiplas falhas sistêmicas detectadas.
+
+--- PROTOCOLO DE GERENCIAMENTO DE INTERRUPÇÃO (PGI) ATIVADO ---
+
+**ALERTA:** Interrupção de fluxo detectada. A missão principal será colocada em espera no ponto exato de execução.
+
+**Roadmap em Standby:** "Roadmap de Implementação Faseado - Correção de Causa Raiz e Blindagem de Mapper"
+**Último Passo Concluído:** Fase 2 (Auditoria Forense)
+**Passo Interrompido:** Fase 3 (Arquitetura da Solução)
+
+**Causa da Interrupção:** Novo Bug Crítico de Produção - Falha de carregamento (`500 Internal Server Error` e `404 Not Found`) nas telas de "Nova Proposta" e "Formalização".
+
+**Novo Foco (Missão de Emergência):** Diagnóstico e Planejamento Cirúrgico para a Cascata de Falhas de API (`/api/propostas/formalizacao` e `/api/origination/context`).
+
+**STATUS:** STANDBY (INICIANDO FASE DE PLANEJAMENTO)
+---
+
+### **Sumário das Missões em Standby**
+
+1.  **[PENDENTE] Missão de Validação Visual (Renda Mensal):** Coletar o JSON da resposta da API da tela de "Análise de Crédito" para identificar o caminho correto da propriedade `rendaMensal` e aplicar a correção final de mapeamento de dados.
+---
+### **Análise Forense de Causa Raiz (RCA) - Incidente Atual**
+
+A análise dos logs do frontend e do backend aponta para duas falhas distintas, mas possivelmente interligadas:
+
+1.  **Falha na "Nova Proposta" (`404 - Perfil não encontrado`):** O frontend chama a rota `/api/origination/context`. O backend valida o token JWT do usuário com sucesso, mas a consulta subsequente ao banco de dados (`select ... from "profiles" where "profiles"."id" = $1`) não retorna nenhum perfil. Isso indica um problema na camada de acesso a dados ou na lógica que busca o perfil do usuário após a autenticação.
+2.  **Falha na "Formalização" (`500 - Invalid API key`):** O backend, ao tentar se comunicar com a API do Supabase para a rota `/api/propostas/formalizacao`, recebe um erro de "Invalid API key".
+
+**Hipótese Central:**
+A causa raiz é uma **falha na carga ou no escopo das variáveis de ambiente (`secrets`) no backend**. Apesar de você confirmar que os segredos estão configurados corretamente no Replit, o serviço que lida com a formalização não está a receber a `SUPABASE_SERVICE_ROLE_KEY` correta, e o serviço que busca o perfil do usuário para a nova proposta pode estar a falhar por uma razão semelhante (ex: `DATABASE_URL` incorreta ou não carregada a tempo). O fato de o JWT ser validado com sucesso sugere que a `SUPABASE_JWT_SECRET` está a ser carregada, mas outras `secrets` críticas não estão.
+
+Iniciando o **Protocolo de Design de Missão de Elite (PDME) V1.3**.
+
+### **Fase 3: Arquitetura da Solução (O Plano de Batalha)**
+
+Abaixo está o **Roadmap de Implementação Faseado** para diagnosticar e resolver esta crise. A complexidade e a criticidade exigem uma abordagem metódica, começando pelo erro mais explícito.
+
+---
+
+### **Roadmap de Diagnóstico e Correção de Falha Crítica de API**
+
+**Objetivo:** Isolar e corrigir as falhas de configuração e acesso a dados que causam os erros `500` e `404` nas rotas de `formalizacao` e `nova-proposta`.
+
+---
+
+#### **Fase 1: Diagnóstico da Falha de Chave de API (Erro 500)**
+
+* **Objetivo:** Confirmar como a `SUPABASE_SERVICE_ROLE_KEY` é carregada e utilizada no contexto da rota `/api/propostas/formalizacao`.
+* **Passo 1.1: [AUDITORIA] Mapear o Fluxo de Configuração do Serviço de Formalização.**
+    * **Ação:** Gerar um prompt de auditoria para o Agente rastrear o código desde a definição da rota `/api/propostas/formalizacao` até o serviço que interage com o Supabase, identificando onde e como as `secrets` são injetadas.
+* **Passo 1.2: [AUDITORIA] Inspecionar a Instanciação do Cliente Supabase.**
+    * **Ação:** Com base no Passo 1.1, gerar um prompt para o Agente focar no ficheiro exato que cria o cliente Supabase para esta operação, verificando se ele utiliza `process.env.SUPABASE_SERVICE_ROLE_KEY` diretamente.
+
+---
+
+#### **Fase 2: Diagnóstico da Falha de Perfil Não Encontrado (Erro 404)**
+
+* **Objetivo:** Entender por que a consulta ao perfil do usuário falha após uma autenticação JWT bem-sucedida na rota `/api/origination/context`.
+* **Passo 2.1: [AUDITORIA] Mapear o Fluxo de Dados de Contexto de Originação.**
+    * **Ação:** Gerar um prompt de auditoria para o Agente rastrear o código da rota `/api/origination/context`, passando pelo middleware de autenticação, até a execução da query `select * from "profiles"`.
+* **Passo 2.2: [AUDITORIA] Analisar a Lógica de Busca de Perfil.**
+    * **Ação:** Gerar um prompt focado no repositório ou serviço que executa a busca na tabela `profiles`, para verificar se há alguma lógica de tratamento de erro ou condição que possa resultar em "perfil não encontrado" mesmo com um ID válido.
+
+---
+
+#### **Fase 3: Correção Cirúrgica e Validação**
+
+* **Objetivo:** Com base nos diagnósticos das Fases 1 e 2, implementar as correções necessárias.
+* **Passo 3.1: [EXECUÇÃO] Implementar a Correção Arquitetada.**
+    * **Ação:** Gerar o(s) "Pacote(s) de Ativação de Missão" para o Agente executar a correção (provavelmente relacionada à forma como o `process.env` é lido ou propagado).
+* **Passo 3.2: [VALIDAÇÃO] Teste de Ponta a Ponta.**
+    * **Ação:** Solicitar que você, o Executor Humano, valide funcionalmente as telas de "Nova Proposta" e "Formalização" para confirmar a resolução dos erros.
+
+---
+
+**Próxima Ação:**
+Estou pronto para gerar o prompt de auditoria para o **Passo 1.1** deste roadmap. Por favor, confirme para prosseguirmos.
