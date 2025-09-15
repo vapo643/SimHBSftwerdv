@@ -78,7 +78,6 @@ export class PropostaMapper {
             clienteData?.renda,
             data.cliente_renda,
             data.clienteRenda,
-            5000, // Fallback temporário para teste
           ])
         ),
         rg: this.extractValue([

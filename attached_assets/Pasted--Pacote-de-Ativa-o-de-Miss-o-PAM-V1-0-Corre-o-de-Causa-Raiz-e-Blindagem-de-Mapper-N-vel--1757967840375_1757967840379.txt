@@ -1,0 +1,81 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - Correção de Causa Raiz e Blindagem de Mapper (Nível Crítico)**
+
+* **Ferramenta Alocada:** High Power (Claude Opus)
+* **Sumário da Missão (O Quê):** Realizar uma correção de duas etapas: primeiro, remover o fallback perigoso da função `PropostaMapper.formatMoney` para expor falhas de dados; segundo, corrigir a lógica de mapeamento dentro de `mapProposta` em `/client/src/pages/credito/analise.tsx` para extrair e exibir corretamente o valor real de `rendaMensal`.
+* **Intenção Estratégica (O Porquê):** Erradicar a corrupção de dados financeiros na sua origem (a camada de mapeamento), garantindo que a UI do analista seja um espelho fiel dos dados da proposta, restaurando a confiança e a integridade do sistema de análise de crédito.
+* **Modelo Mental (Como se Encaixa):** A estratégia é "limpar a ferida antes de fechar". Primeiro, removemos o `fallback` no `PropostaMapper` que mascara o problema. Depois, corrigimos o `mapProposta` para que ele encontre o caminho correto para `rendaMensal` no objeto `rawData`. Finalmente, garantimos que a renderização na UI utilize o valor já corretamente mapeado e formatado.
+
+---
+
+**IMPLEMENTAR:**
+Plano de Correção Definitiva para a Corrupção de Dados de Renda Mensal.
+
+**CURRENT STATE:**
+O `mapProposta` em `/client/src/pages/credito/analise.tsx` falha em extrair o valor de `rendaMensal`. Consequentemente, a função `PropostaMapper.formatMoney` utiliza um fallback incorreto de `5000`, resultando na exibição errada.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O `PropostaMapper.formatMoney` **NÃO DEVE** conter mais nenhum valor de fallback numérico. Se o valor for nulo ou indefinido, ele deve retornar 'N/A'.
+2.  A função `mapProposta` deve ser corrigida para extrair com sucesso o valor numérico de `rendaMensal` do objeto `rawData` da API.
+3.  Na tela de análise, uma proposta com `rendaMensal` de `300000` deve ser exibida como **"R$ 300.000,00"**.
+4.  A correção do `prazo` e de outros campos deve ser preservada. Nenhuma regressão é aceitável.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**Passo 1: [Erradicação do Risco] Remover Fallback Perigoso**
+1.  Abra o ficheiro `/client/src/mappers/proposta.mapper.ts`.
+2.  Localize a função `this.extractValue`.
+3.  Remova o valor de fallback `5000` da chamada.
+    * **DE:**
+      ```typescript
+      this.extractValue([..., 5000])
+      ```
+    * **PARA:**
+      ```typescript
+      this.extractValue([...]) // Sem o fallback numérico
+      ```
+4.  Garanta que a função `formatMoney` retorne 'N/A' se nenhum valor válido for encontrado.
+
+**Passo 2: [Correção da Causa Raiz] Corrigir o Mapper Inline**
+1.  Abra o ficheiro `/client/src/pages/credito/analise.tsx`.
+2.  Localize a definição da constante `propostaMapeada` e a função `mapProposta`.
+3.  Modifique a linha que define `rendaMensal` para que ela **NÃO** chame mais o formatador diretamente. O objetivo agora é apenas extrair o valor numérico bruto.
+    * **DE:**
+      ```typescript
+      rendaMensal: PropostaMapper.formatMoney(clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda),
+      ```
+    * **PARA (extração do valor numérico):**
+      ```typescript
+      rendaMensal: clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda || 0,
+      ```
+4.  Localize a linha na seção de renderização da UI onde `rendaMensal` é exibido.
+5.  Aplique o formatador correto **neste ponto**, garantindo que o valor correto seja formatado.
+    * **DE:**
+      ```jsx
+      {propostaMapeada.cliente.rendaMensal}
+      ```
+    * **PARA:**
+      ```jsx
+      {formatAsCurrency(propostaMapeada.cliente.rendaMensal)}
+      ```
+
+**Passo 3: [Validação] Verificação Final de Integridade**
+1.  Execute `get_latest_lsp_diagnostics`. O resultado **DEVE** ser zero erros.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os ficheiros e funções exatas afetadas.
+2.  Garantir importações e tipos corretos.
+3.  Executar `get_latest_lsp_diagnostics` e corrigir **TODOS** os erros.
+4.  **Declarar Nível de Confiança (0-100%)** na implementação.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  Realizar teste funcional completo, confirmando que `rendaMensal`, `prazo` e `taxaJuros` são exibidos corretamente

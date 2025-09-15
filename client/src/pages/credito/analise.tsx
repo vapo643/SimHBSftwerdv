@@ -216,9 +216,7 @@ const AnaliseManualPage: React.FC = () => {
           clienteData.dataNascimento ||
           rawData.cliente_data_nascimento ||
           'N/A',
-        rendaMensal: PropostaMapper.formatMoney(
-          clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda
-        ),
+        rendaMensal: clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda || 0,
         rg: clienteData.rg || rawData.cliente_rg || rawData.clienteRg || 'N/A',
         orgaoEmissor:
           clienteData.orgao_emissor ||
@@ -315,7 +313,7 @@ const AnaliseManualPage: React.FC = () => {
                 {safeRender(propostaMapeada.cliente.dataNascimento)}
               </p>
               <p>
-                <strong>Renda Mensal:</strong> {propostaMapeada.cliente.rendaMensal}
+                <strong>Renda Mensal:</strong> {formatAsCurrency(propostaMapeada.cliente.rendaMensal)}
               </p>
               <p>
                 <strong>RG:</strong> {safeRender(propostaMapeada.cliente.rg)}
