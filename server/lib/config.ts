@@ -62,7 +62,7 @@ function getCriticalSecrets(env: string): string[] {
 
 const OPTIONAL_SECRETS = [
   // Environment-specific secrets (auto-detection based on domain)
-  'JWT_DEV', 'SESSION_DEV', 'CSRF_DEV',
+  'DEV_JTW_SECRET', 'SESSION_DEV', 'CSRF_DEV',
   'PROD_SUPABASE_URL', 'SUPABASE_URL',
   'PROD_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY', 
   'PROD_SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
@@ -136,9 +136,9 @@ function detectEnvironmentFromDomain(): 'dev' | 'prod' {
 function getJwtSecret(): string {
   const environmentType = detectEnvironmentFromDomain();
   
-  if (environmentType === 'dev' && process.env.JWT_DEV) {
-    console.log('[CONFIG] 🔧 DEV Environment detected - Using JWT_DEV for JWT validation');
-    return process.env.JWT_DEV;
+  if (environmentType === 'dev' && process.env.DEV_JTW_SECRET) {
+    console.log('[CONFIG] 🔧 DEV Environment detected - Using DEV_JTW_SECRET for JWT validation');
+    return process.env.DEV_JTW_SECRET;
   }
   
   if (environmentType === 'prod' && process.env.PROD_JWT_SECRET) {
