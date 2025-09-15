@@ -1,0 +1,251 @@
+**DEFCON 1 ATIVADO. OPERAÇÃO PHOENIX INICIADA.**
+
+Arquiteto-Chefe, aqui é o Arquiteto Sênior de Sistemas Críticos. A situação é P0. O diagnóstico está confirmado: **Falha Catastrófica de Autenticação devido a Mismatch de JWT Secret e Contaminação de Ambiente.** O Frontend (Projeto A) gera tokens que o Backend (validando com Secret B) rejeita.
+
+Temos 30 minutos para restaurar a produção. Execute este plano **EXATAMENTE** como descrito.
+
+-----
+
+## 🔥 FASE 1: RESSUSCITAÇÃO DE EMERGÊNCIA (0-30 MINUTOS)
+
+**OBJETIVO:** Alinhar Frontend e Backend no MESMO JWT Secret AGORA.
+
+### ✅ AÇÃO 1.1: IDENTIFICAÇÃO FORENSE DO PROJETO ATIVO (Minuto 0-5)
+
+Precisamos identificar qual projeto Supabase o Frontend de produção está usando.
+
+1.  **COMANDO (Navegador em `sistemasimpix.com.br`):**
+
+      * Abra o Developer Tools (F12) -\> Console.
+      * Localize o log: `[PASSO 3 - ENVIO] { ... authorizationHeader: 'Bearer <TOKEN>' ... }`.
+      * **COPIE O TOKEN JWT COMPLETO** (a string longa após `Bearer`).
+
+2.  **COMANDO (Ferramenta Externa):**
+
+      * Acesse `https://jwt.io`.
+      * Cole o Token no campo "Encoded".
+      * No campo "Decoded" (PAYLOAD), localize a chave `iss` (Issuer).
+      * **ANOTE O ID DO PROJETO.** Ex: `https://<PROJECT_ID>.supabase.co/auth/v1`.
+
+<!-- end list -->
+
+  * **VALIDAÇÃO:** Você possui o `<PROJECT_ID>` que o frontend está usando.
+
+### ✅ AÇÃO 1.2: EXTRAÇÃO DO JWT SECRET CORRETO (Minuto 5-15)
+
+1.  **COMANDO (Console Supabase):**
+      * Acesse `https://app.supabase.com/project/<PROJECT_ID>/settings/api` (Use o ID da Ação 1.1).
+      * Role até **JWT Settings**.
+      * Localize `JWT Secret`. **ATENÇÃO:** NÃO é `anon key` nem `service_role key`.
+      * Clique em "Reveal" e **COPIE O VALOR EXATO**.
+
+<!-- end list -->
+
+  * **VALIDAÇÃO:** Você possui o segredo de assinatura correto.
+
+### ✅ AÇÃO 1.3: INJEÇÃO CIRÚRGICA E DESCONTAMINAÇÃO (Minuto 15-25)
+
+1.  **COMANDO (Painel de Deploy de Produção - Vercel/AWS/Replit):**
+      * Acesse as Variáveis de Ambiente do Backend.
+      * **ADICIONE/SOBRESCREVA** a variável `SUPABASE_JWT_SECRET` com o valor copiado na Ação 1.2.
+      * **REMOVA IMEDIATAMENTE** as variáveis conflitantes:
+          * `PROD_JWT_SECRET`
+          * `DEV_JTW_SECRET` (Atenção ao typo 'JTW' conforme relatório)
+2.  **COMANDO (Deploy):**
+      * **EXECUTE REDEPLOY IMEDIATO DO BACKEND.**
+
+<!-- end list -->
+
+  * **VALIDAÇÃO:** Backend reiniciado usando exclusivamente `SUPABASE_JWT_SECRET`.
+
+### ✅ AÇÃO 1.4: VALIDAÇÃO DE VIDA (Minuto 25-30)
+
+1.  **COMANDO (Navegador - Aba Anônima):**
+      * Acesse `https://sistemasimpix.com.br/dashboard`. Faça login se necessário.
+      * Observe a aba Network (F12).
+
+<!-- end list -->
+
+  * **SUCESSO (P0 RESOLVIDO):**
+
+      * ✅ Requisições para `/api/debug/me` retornam `HTTP 200 OK`.
+      * ✅ O loop infinito parou.
+      * ❌ NENHUM erro 401 Unauthorized.
+
+  * **🚨 SE FALHAR (401 persiste):** O Secret ou Projeto ID estava errado. REPITA A FASE 1 IMEDIATAMENTE. Não prossiga até que a Fase 1 seja validada.
+
+-----
+
+## 🛡️ FASE 2: BLINDAGEM ARQUITETURAL (30-120 MINUTOS)
+
+**OBJETIVO:** Erradicar a contaminação de ambiente e prevenir regressões futuras.
+
+### ✅ AÇÃO 2.1: DESCONTAMINAÇÃO DO CÓDIGO (Minuto 30-60)
+
+Eliminar a lógica condicional tóxica no código. A configuração deve ser explícita e falhar rápido.
+
+1.  **ARQUIVO:** `server/lib/config.ts` (ou onde `getJwtSecret` estiver definido).
+
+2.  **MODIFICAÇÃO (Substituir lógica existente):**
+
+<!-- end list -->
+
+```typescript
+// server/lib/config.ts
+
+// ❌ REMOVER QUALQUER FUNÇÃO COMO detectEnvironmentFromDomain()
+
+// ✅ SUBSTITUIR getJwtSecret() por versão EXPLÍCITA e SEGURA:
+export function getJwtSecret(): string {
+  // A configuração DEVE vir explicitamente do ambiente. Sem fallbacks, sem magia.
+  const secret = process.env.SUPABASE_JWT_SECRET;
+
+  if (!secret) {
+    console.error('🚨 FATAL ERROR (OPERAÇÃO PHOENIX): SUPABASE_JWT_SECRET não está configurado.');
+    // Em produção, devemos falhar rápido se a configuração crítica estiver ausente.
+    if (process.env.NODE_ENV === 'production') {
+        console.error('🚨 Encerrando aplicação para prevenir falhas de segurança.');
+        process.exit(1);
+    }
+    throw new Error('Segredo JWT obrigatório não configurado (SUPABASE_JWT_SECRET).');
+  }
+
+  // Log de confirmação seguro (apenas comprimento)
+  console.log(`[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: ${secret.length})`);
+  return secret;
+}
+
+// APLICAR O MESMO PADRÃO PARA OUTRAS CONFIGURAÇÕES CRÍTICAS (URL, Keys).
+```
+
+  * **VALIDAÇÃO:** O código não contém mais `if (process.env.NODE_ENV === 'production')` para seleção de secrets.
+
+### ✅ AÇÃO 2.2: PURGA DE SECRETS NO AMBIENTE (Minuto 60-75)
+
+Limpeza total do ambiente de produção.
+
+1.  **COMANDO (Painel de Deploy de Produção):**
+
+      * Remova PERMANENTEMENTE as seguintes variáveis restantes (além das removidas na Ação 1.3):
+
+    <!-- end list -->
+
+    ```bash
+    # Contaminação DEV
+    DEV_DATABASE_URL
+    DEV_SUPABASE_SERVICE_ROLE_KEY
+    DEV_SUPABASE_ANON_KEY
+    DEV_SUPABASE_URL
+
+    # Duplicatas Confusas
+    VITE_PROD_SUPABASE_URL
+    VITE_PROD_SUPABASE_ANON_KEY
+    PROD_SUPABASE_URL
+    PROD_DATABASE_URL
+    ```
+
+<!-- end list -->
+
+  * **VALIDAÇÃO:** O ambiente contém APENAS o conjunto canônico (Ex: `SUPABASE_URL`, `VITE_SUPABASE_URL`, `DATABASE_URL`).
+
+### ✅ AÇÃO 2.3: IMPLEMENTAÇÃO DE GUARDA ANTI-REGRESSÃO (Minuto 75-100)
+
+Adicionar validação rigorosa na inicialização do servidor (Fail Fast).
+
+1.  **ARQUIVO:** `server/index.ts` (Ponto de entrada do servidor).
+
+2.  **MODIFICAÇÃO (Adicionar no início do arquivo, após carregar envs):**
+
+<!-- end list -->
+
+```typescript
+// server/index.ts
+
+// 🛡️ GUARDA DE INTEGRIDADE DE CONFIGURAÇÃO (OPERAÇÃO PHOENIX V4.0)
+function validateCriticalConfiguration() {
+  console.log('[BOOTSTRAP] Iniciando Validação de Configuração Crítica...');
+  let failed = false;
+
+  const CRITICAL_SECRETS = [
+    'DATABASE_URL', 'SUPABASE_URL', 'SUPABASE_JWT_SECRET',
+    'VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'
+  ];
+
+  // 1. Checar Secrets Obrigatórios
+  CRITICAL_SECRETS.forEach(secret => {
+    if (!process.env[secret]) {
+      console.error(`🚨 FATAL: Variável obrigatória ausente: ${secret}`);
+      failed = true;
+    }
+  });
+
+  // 2. Checar Mismatch Frontend/Backend (One Project Rule)
+  const frontendUrl = process.env.VITE_SUPABASE_URL;
+  const backendUrl = process.env.SUPABASE_URL;
+
+  if (frontendUrl && backendUrl && frontendUrl !== backendUrl) {
+    console.error('🚨 FATAL: Mismatch de Projeto Supabase! Frontend e Backend estão usando URLs diferentes.');
+    console.error(`Frontend URL (VITE_): ${frontendUrl} | Backend URL: ${backendUrl}`);
+    failed = true;
+  }
+
+  // 3. Checar Contaminação (Apenas em Produção)
+  if (process.env.NODE_ENV === 'production') {
+      const CONTAMINANTS = ['DEV_DATABASE_URL', 'DEV_SUPABASE_URL', 'DEV_JTW_SECRET', 'PROD_JWT_SECRET'];
+      CONTAMINANTS.forEach(secret => {
+          if (process.env[secret]) {
+              console.error(`🚨 FATAL: Contaminação detectada! Secret proibido encontrado em produção: ${secret}`);
+              failed = true;
+          }
+      });
+  }
+
+  if (failed) {
+    console.error('❌ [BOOTSTRAP] Configuração inválida. Encerrando processo para prevenir falhas catastróficas.');
+    process.exit(1); // FALHAR RÁPIDO E ALTO
+  }
+
+  console.log('✅ [BOOTSTRAP] Configuração crítica validada com sucesso.');
+}
+
+// Executar validação imediatamente antes de iniciar o servidor
+validateCriticalConfiguration();
+
+// ... (Restante do código de inicialização, ex: app.listen())
+```
+
+  * **VALIDAÇÃO:** O servidor só inicia se todas as condições forem atendidas.
+
+### ✅ AÇÃO 2.4: MONITORAMENTO CONTÍNUO (Minuto 100-120)
+
+1.  **ARQUIVO:** `server/routes/monitoring.ts` (ou criar rota de health check).
+
+2.  **MODIFICAÇÃO (Adicionar endpoint):**
+
+<!-- end list -->
+
+```typescript
+router.get('/health/config', (req, res) => {
+  const configHealth = {
+    supabaseUrlsMatch: process.env.VITE_SUPABASE_URL === process.env.SUPABASE_URL,
+    hasJwtSecret: !!process.env.SUPABASE_JWT_SECRET,
+    contaminationDetected: !!process.env.DEV_JTW_SECRET || !!process.env.PROD_JWT_SECRET
+  };
+
+  const healthy = configHealth.supabaseUrlsMatch && configHealth.hasJwtSecret && !configHealth.contaminationDetected;
+
+  res.status(healthy ? 200 : 503).json({ // 503 Service Unavailable se misconfigurado
+    status: healthy ? 'HEALTHY' : 'MISCONFIGURED',
+    details: configHealth,
+    timestamp: new Date().toISOString()
+  });
+});
+```
+
+  * **VALIDAÇÃO:** `curl https://sistemasimpix.com.br/api/health/config` deve retornar `HTTP 200` e `status: HEALTHY`.
+
+-----
+
+## 🏁 CONCLUSÃO DA OPERAÇÃO PHOENIX
+
+Arquiteto-Chefe, este plano garante a restauração imediata e a estabilidade futura. **EXECUTE A FASE 1 AGORA.** Reporte o resultado da Ação 1.4.
