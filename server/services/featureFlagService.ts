@@ -50,7 +50,7 @@ class FeatureFlagService {
     this.config = {
       url: process.env.UNLEASH_URL || 'http://localhost:4242/api',
       appName: process.env.UNLEASH_APP_NAME || 'simpix-app',
-      environment: (process.env.PROD_SUPABASE_URL && process.env.PROD_DATABASE_URL) ? 'production' : 'development',
+      environment: process.env.NODE_ENV || 'development',
       customHeaders: {
         Authorization: process.env.UNLEASH_API_KEY || '*:development.unleash-insecure-api-token',
       },

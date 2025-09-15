@@ -49,7 +49,7 @@ export function initSentry(app: Express) {
   try {
     Sentry.init({
       dsn: sentryDsn || undefined,
-      environment: (process.env.PROD_SUPABASE_URL && process.env.PROD_DATABASE_URL) ? 'production' : 'development',
+      environment: process.env.NODE_ENV || 'development',
       release: process.env.APP_VERSION || '1.0.0',
       integrations: [
         // Profiling para performance

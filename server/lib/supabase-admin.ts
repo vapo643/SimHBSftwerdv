@@ -1,10 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Create Supabase admin client - HARDENED para produção
+// Create Supabase admin client - OPUS PROTOCOL canonical variables only
 function getSupabaseAdminCredentials() {
-  // Carrega exclusivamente as variáveis de ambiente de PRODUÇÃO.
-  const supabaseUrl = process.env.PROD_SUPABASE_URL;
-  const supabaseServiceKey = process.env.PROD_SUPABASE_SERVICE_ROLE_KEY;
+  // OPUS PROTOCOL: Canonical variables only
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   return { supabaseUrl, supabaseServiceKey };
 }
@@ -13,9 +13,9 @@ const { supabaseUrl, supabaseServiceKey } = getSupabaseAdminCredentials();
 
 // Validação explícita com mensagem de erro informativa.
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('--- ERRO CRÍTICO DE CONFIGURAÇÃO ADMIN CLIENT ---');
-  console.error('As variáveis de ambiente de produção (PROD_SUPABASE_URL, PROD_SUPABASE_SERVICE_ROLE_KEY) não estão configuradas.');
-  console.error('O cliente Admin do Supabase será desativado.');
+  console.error('--- ERRO CRÍTICO DE CONFIGURAÇÃO ---');
+  console.error('As variáveis canônicas (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) não estão configuradas.');
+  console.error('As operações de Admin do Supabase serão desativadas.');
   console.error('--- FIM DO ERRO ---');
 }
 
