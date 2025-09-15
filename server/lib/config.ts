@@ -61,7 +61,8 @@ function getCriticalSecrets(env: string): string[] {
 }
 
 const OPTIONAL_SECRETS = [
-  // Environment-specific Supabase configs (prioritize PROD_ prefixed)
+  // Environment-specific secrets (auto-detection based on domain)
+  'JWT_DEV', 'SESSION_DEV', 'CSRF_DEV',
   'PROD_SUPABASE_URL', 'SUPABASE_URL',
   'PROD_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY', 
   'PROD_SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
@@ -117,14 +118,39 @@ function generateSecureSecret(name: string): string {
   return fallback;
 }
 
-// Funções específicas para cada tipo de secret com validação por ambiente
+// Função para detectar ambiente baseado no domínio/URL
+function detectEnvironmentFromDomain(): 'dev' | 'prod' {
+  // Se temos variáveis específicas, usamos elas para detectar
+  const host = process.env.HOST || process.env.REPL_SLUG || 'localhost';
+  const isDevelopment = 
+    host.includes('localhost') ||
+    host.includes('127.0.0.1') ||
+    host.includes('.replit.dev') ||
+    host.includes('replit-') ||
+    process.env.REPLIT_DEV_DOMAIN;
+    
+  return isDevelopment ? 'dev' : 'prod';
+}
+
+// Funções específicas para cada tipo de secret com detecção automática de ambiente
 function getJwtSecret(): string {
+  const environmentType = detectEnvironmentFromDomain();
+  
+  if (environmentType === 'dev' && process.env.JWT_DEV) {
+    console.log('[CONFIG] 🔧 DEV Environment detected - Using JWT_DEV for JWT validation');
+    return process.env.JWT_DEV;
+  }
+  
+  if (environmentType === 'prod' && process.env.PROD_JWT_SECRET) {
+    console.log('[CONFIG] 🏭 PROD Environment detected - Using PROD_JWT_SECRET for JWT validation');
+    return process.env.PROD_JWT_SECRET;
+  }
+  
+  // Fallback para a lógica anterior se não temos os novos secrets
   const env = process.env.NODE_ENV || 'development';
   
-  // STRATEGIC: Use PROD_ secrets even in development per user configuration
-  // O usuário quer usar os segredos de produção para testes de desenvolvimento
   if (process.env.PROD_JWT_SECRET) {
-    console.log('[CONFIG] Using PROD_JWT_SECRET for JWT validation');
+    console.log('[CONFIG] 🔄 Fallback - Using PROD_JWT_SECRET for JWT validation');
     return process.env.PROD_JWT_SECRET;
   }
   
@@ -141,6 +167,19 @@ function getJwtSecret(): string {
 }
 
 function getSessionSecret(): string {
+  const environmentType = detectEnvironmentFromDomain();
+  
+  if (environmentType === 'dev' && process.env.SESSION_DEV) {
+    console.log('[CONFIG] 🔧 DEV Environment - Using SESSION_DEV');
+    return process.env.SESSION_DEV;
+  }
+  
+  if (environmentType === 'prod' && process.env.PROD_SESSION_SECRET) {
+    console.log('[CONFIG] 🏭 PROD Environment - Using PROD_SESSION_SECRET');
+    return process.env.PROD_SESSION_SECRET;
+  }
+  
+  // Fallback para a lógica anterior
   const env = process.env.NODE_ENV || 'development';
   
   switch (env) {
@@ -156,6 +195,19 @@ function getSessionSecret(): string {
 }
 
 function getCsrfSecret(): string {
+  const environmentType = detectEnvironmentFromDomain();
+  
+  if (environmentType === 'dev' && process.env.CSRF_DEV) {
+    console.log('[CONFIG] 🔧 DEV Environment - Using CSRF_DEV');
+    return process.env.CSRF_DEV;
+  }
+  
+  if (environmentType === 'prod' && process.env.PROD_CSRF_SECRET) {
+    console.log('[CONFIG] 🏭 PROD Environment - Using PROD_CSRF_SECRET');
+    return process.env.PROD_CSRF_SECRET;
+  }
+  
+  // Fallback para a lógica anterior
   const env = process.env.NODE_ENV || 'development';
   
   switch (env) {
