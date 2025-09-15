@@ -100,8 +100,8 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       supabaseAnonKey: process.env.DEV_SUPABASE_ANON_KEY!,
       supabaseServiceKey: process.env.DEV_SUPABASE_SERVICE_ROLE_KEY!,
 
-      // Security (usando secrets específicos de desenvolvimento)
-      jwtSecret: process.env.DEV_JTW_SECRET || 'dev-jwt-secret-change-in-production',
+      // Security (usando secret unificado)
+      jwtSecret: process.env.SUPABASE_JWT_SECRET || 'dev-jwt-secret-change-in-production',
       csrfSecret: process.env.CSRF_SECRET || 'dev-csrf-secret-change-in-production',
       sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-production',
 
@@ -176,7 +176,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       supabaseServiceKey: process.env.PROD_SUPABASE_SERVICE_ROLE_KEY!,
 
       // Security (production keys - MUST be strong)
-      jwtSecret: process.env.PROD_JWT_SECRET!,
+      jwtSecret: process.env.SUPABASE_JWT_SECRET!,
       csrfSecret: process.env.PROD_CSRF_SECRET!,
       sessionSecret: process.env.PROD_SESSION_SECRET!,
 

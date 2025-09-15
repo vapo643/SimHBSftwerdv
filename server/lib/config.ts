@@ -52,7 +52,7 @@ export interface AppConfig {
 function getCriticalSecrets(env: string): string[] {
   switch (env) {
     case 'production':
-      return ['PROD_DATABASE_URL', 'PROD_JWT_SECRET', 'PROD_SESSION_SECRET', 'PROD_CSRF_SECRET'];
+      return ['PROD_DATABASE_URL', 'SUPABASE_JWT_SECRET', 'PROD_SESSION_SECRET', 'PROD_CSRF_SECRET'];
     case 'staging':
       return ['STAGING_DATABASE_URL', 'STAGING_JWT_SECRET', 'STAGING_SESSION_SECRET', 'STAGING_CSRF_SECRET'];
     default:
@@ -61,8 +61,8 @@ function getCriticalSecrets(env: string): string[] {
 }
 
 const OPTIONAL_SECRETS = [
-  // Environment-specific secrets (auto-detection based on domain)
-  'DEV_JTW_SECRET', 'SESSION_DEV', 'CSRF_DEV',
+  // Session and CSRF secrets
+  'SESSION_DEV', 'CSRF_DEV',
   'PROD_SUPABASE_URL', 'SUPABASE_URL',
   'PROD_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY', 
   'PROD_SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
@@ -132,38 +132,14 @@ function detectEnvironmentFromDomain(): 'dev' | 'prod' {
   return isDevelopment ? 'dev' : 'prod';
 }
 
-// Funções específicas para cada tipo de secret com detecção automática de ambiente
+// Função simplificada para leitura do segredo JWT
 function getJwtSecret(): string {
-  const environmentType = detectEnvironmentFromDomain();
-  
-  if (environmentType === 'dev' && process.env.DEV_JTW_SECRET) {
-    console.log('[CONFIG] 🔧 DEV Environment detected - Using DEV_JTW_SECRET for JWT validation');
-    return process.env.DEV_JTW_SECRET;
+  const secret = process.env.SUPABASE_JWT_SECRET;
+  if (!secret) {
+    console.error('[CONFIG] 🚨 CRITICAL: SUPABASE_JWT_SECRET não está definido!');
+    throw new Error('Segredo JWT não configurado.');
   }
-  
-  if (environmentType === 'prod' && process.env.PROD_JWT_SECRET) {
-    console.log('[CONFIG] 🏭 PROD Environment detected - Using PROD_JWT_SECRET for JWT validation');
-    return process.env.PROD_JWT_SECRET;
-  }
-  
-  // Fallback para a lógica anterior se não temos os novos secrets
-  const env = process.env.NODE_ENV || 'development';
-  
-  if (process.env.PROD_JWT_SECRET) {
-    console.log('[CONFIG] 🔄 Fallback - Using PROD_JWT_SECRET for JWT validation');
-    return process.env.PROD_JWT_SECRET;
-  }
-  
-  switch (env) {
-    case 'production':
-      return process.env.PROD_JWT_SECRET || (() => {
-        throw new Error('PROD_JWT_SECRET is required in production environment!');
-      })();
-    case 'staging':
-      return process.env.STAGING_JWT_SECRET || generateSecureSecret('STAGING_JWT_SECRET');
-    default:
-      return process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET');
-  }
+  return secret;
 }
 
 function getSessionSecret(): string {
