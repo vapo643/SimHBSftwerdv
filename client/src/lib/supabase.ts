@@ -48,4 +48,10 @@ export const createClientSupabaseClient = () => {
 };
 
 // Lazy export the singleton client instance for React components
-export const getSupabase = () => createClientSupabaseClient();
+export const getSupabase = () => {
+  console.log('[DIAGNOSTICO SUPABASE FE] Inicializando cliente com:', {
+    URL: import.meta.env.VITE_SUPABASE_URL,
+    ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY
+  });
+  return createClientSupabaseClient();
+};

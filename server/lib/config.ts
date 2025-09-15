@@ -136,6 +136,14 @@ function detectEnvironmentFromDomain(): 'dev' | 'prod' {
 
 // Função para leitura do segredo JWT com isolamento de ambiente (SEGURANÇA)
 function getJwtSecret(): string {
+  console.log('[DIAGNOSTICO JWT] Tentando obter segredo. Valores atuais:', {
+    NODE_ENV: process.env.NODE_ENV,
+    DOMAIN: process.env.REPL_SLUG ? `${process.env.REPL_SLUG}.replit.dev` : 'localhost',
+    DEV_JTW_SECRET_EXISTS: !!process.env.DEV_JTW_SECRET,
+    PROD_JWT_SECRET_EXISTS: !!process.env.PROD_JWT_SECRET,
+    SUPABASE_JWT_SECRET_EXISTS: !!process.env.SUPABASE_JWT_SECRET
+  });
+  
   const environmentType = detectEnvironmentFromDomain();
   
   if (environmentType === 'dev' && process.env.DEV_JTW_SECRET) {
