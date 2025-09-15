@@ -1,0 +1,100 @@
+2025-09-15 09:32:40.39
+78f3a383
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 09:32:40.39
+78f3a383
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/origination/context
+2025-09-15 09:32:40.57
+78f3a383
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 09:32:40.57
+78f3a383
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 09:32:40.76
+78f3a383
+User
+[JWT DEBUG] Falha na validação. Erro completo: {
+2025-09-15 09:32:40.76
+78f3a383
+User
+message: 'Auth session missing!',
+2025-09-15 09:32:40.76
+78f3a383
+User
+mode: 'SUPABASE',
+2025-09-15 09:32:40.76
+78f3a383
+User
+fullError: '{\n' +
+2025-09-15 09:32:40.76
+78f3a383
+User
+' "__isAuthError": true,\n' +
+2025-09-15 09:32:40.76
+78f3a383
+User
+' "name": "AuthSessionMissingError",\n' +
+2025-09-15 09:32:40.76
+78f3a383
+User
+' "status": 400\n' +
+2025-09-15 09:32:40.76
+78f3a383
+User
+'}'
+2025-09-15 09:32:40.76
+78f3a383
+User
+}
+2025-09-15 09:32:40.76
+78f3a383
+User
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+2025-09-15 09:32:40.76
+78f3a383
+User
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/origination/context
+2025-09-15 09:32:45.43
+78f3a383
+User
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 09:32:45.43
+78f3a383
+User
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 09:32:45.95
+78f3a383
+User
+[JWT DEBUG] Falha na validação. Erro completo: {
+2025-09-15 09:32:45.95
+78f3a383
+User
+message: 'Auth session missing!',
+2025-09-15 09:32:45.95
+78f3a383
+User
+mode: 'SUPABASE',
+2025-09-15 09:32:45.95
+78f3a383
+User
+fullError: '{\n' +
+2025-09-15 09:32:45.95
+78f3a383
+User
+' "__isAuthError": true,\n' +
+2025-09-15 09:32:45.95
+78f3a383
+User
+' "name": "AuthSessionMissingError",\n' +
+2025-09-15 09:32:45.95
+78f3a383
+User
+' "status": 400\n' +
+2025-09-15 09:32:45.95
+78f3a383
+User
+'}'

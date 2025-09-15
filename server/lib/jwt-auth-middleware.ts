@@ -460,30 +460,12 @@ export async function jwtAuthMiddleware(
     let error: any = null;
     let profileFromCache: any = null;
 
-    // CORREÇÃO CRÍTICA: Sempre usar validação JWT local em desenvolvimento
-    // O auto-detect estava causando falhas "Auth session missing!" em produção
+    // CORREÇÃO DEFINITIVA: SEMPRE usar JWT local - Supabase desabilitado
+    // Configuração explicita para evitar problemas de "Auth session missing!"
     let tokenType: 'supabase' | 'local' = 'local';
+    const forceLocalJWT = true; // SEMPRE forçar JWT local
     
-    // Só usar Supabase se explicitamente configurado E em produção
-    const forceLocalJWT = process.env.FORCE_LOCAL_JWT === 'true' || process.env.NODE_ENV === 'development';
-    
-    if (!forceLocalJWT) {
-      try {
-        const tokenParts = token.split('.');
-        if (tokenParts.length === 3) {
-          const header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
-          // Supabase tokens have 'kid' (Key ID) in header
-          if (header.kid) {
-            tokenType = 'supabase';
-          }
-        }
-      } catch (e) {
-        // If header parsing fails, default to local
-        tokenType = 'local';
-      }
-    }
-
-    console.log('[JWT DEBUG] Token type:', tokenType, '(forceLocal:', forceLocalJWT, ')');
+    console.log('[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment');
 
     // P0.1 OPTIMIZATION: Use cached entry with profile data
     if (cachedEntry) {
@@ -510,99 +492,11 @@ export async function jwtAuthMiddleware(
         error = { message: semaphoreError.message };
         data = null;
       }
-    } else if (tokenType === 'supabase') {
-      // Create semaphore entry for this token validation with timeout
-      const validationPromise = (async () => {
-        try {
-          console.log('[JWT DEBUG] Using Supabase token validation with timeout');
-          const { createServerSupabaseAdminClient } = await import('./supabase');
-          const supabase = createServerSupabaseAdminClient();
-
-          // Add timeout to prevent hanging validation
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Token validation timeout')), VALIDATION_TIMEOUT_MS)
-          );
-
-          const supabaseResult = (await Promise.race([
-            supabase.auth.getUser(token),
-            timeoutPromise,
-          ])) as any;
-
-          const result = {
-            userId: supabaseResult.data?.user?.id,
-            userEmail: supabaseResult.data?.user?.email || '',
-            data: supabaseResult.data,
-            error: supabaseResult.error,
-          };
-
-          // P0.1 OPTIMIZATION: Cache with profile data to eliminate DB query
-          if (!supabaseResult.error && supabaseResult.data?.user) {
-            try {
-              // Fetch profile data once for cache
-              const { db } = await import('./supabase');
-              if (!db) {
-                console.warn('[JWT AUTH] Database not available for profile caching');
-              } else {
-                const { profiles } = await import('@shared/schema');
-                const { eq } = await import('drizzle-orm');
-
-                const profileResult = await db
-                  .select({
-                    role: profiles.role,
-                    fullName: profiles.fullName,
-                    lojaId: profiles.lojaId,
-                  })
-                  .from(profiles)
-                  .where(eq(profiles.id, result.userId!))
-                  .limit(1);
-
-                const profileData = profileResult.length ? profileResult[0] : null;
-
-                const cacheEntry: TokenCacheEntry = {
-                  userId: result.userId!,
-                  userEmail: result.userEmail,
-                  profile: profileData || undefined,
-                  timestamp: Date.now(),
-                };
-                const redis = await getRedisClientLazy();
-                if (redis && redis.status === 'ready') {
-                  await redis.setex(
-                    `token:${token}`,
-                    CACHE_TTL_SECONDS,
-                    JSON.stringify(cacheEntry)
-                  );
-                  console.log('[JWT DEBUG] Token cached in Redis with profile data');
-                } else {
-                  console.error('[REDIS OFFLINE] Token caching skipped - graceful degradation');
-                }
-              }
-            } catch (redisError) {
-              console.warn('[JWT DEBUG] Failed to cache token in Redis:', redisError);
-              // Continue without cache - not critical
-            }
-          }
-
-          return result;
-        } catch (supabaseError: any) {
-          console.error('[JWT DEBUG] Supabase validation failed:', supabaseError.message);
-          return {
-            userId: undefined,
-            userEmail: '',
-            data: null,
-            error: { message: supabaseError.message },
-          };
-        } finally {
-          validationSemaphore.delete(token);
-        }
-      })();
-
-      validationSemaphore.set(token, validationPromise);
-      const result = await validationPromise;
-
-      userId = result.userId;
-      userEmail = result.userEmail;
-      data = result.data;
-      error = result.error;
+    } else if (false) { // Supabase branch permanently disabled
+      // BRANCH DISABLED - SEMPRE usar JWT local agora
+      console.log('[JWT DEBUG] ERROR: Supabase branch should never execute!');
+      error = { message: 'Internal error: Supabase validation disabled' };
+      data = null;
     } else {
       // Use local JWT validation for local tokens
       try {
