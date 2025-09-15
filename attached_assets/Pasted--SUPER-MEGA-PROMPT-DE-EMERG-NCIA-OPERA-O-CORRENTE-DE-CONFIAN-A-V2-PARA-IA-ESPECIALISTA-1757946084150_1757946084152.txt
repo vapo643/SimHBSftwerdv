@@ -1,0 +1,143 @@
+# 🚨 SUPER MEGA PROMPT DE EMERGÊNCIA - OPERAÇÃO CORRENTE DE CONFIANÇA V2 🚨
+
+**PARA: IA ESPECIALISTA EM ARQUITETURA E RESOLUÇÃO DE CRISES (DEEP THINK)**
+**DE: ARQUITETO-CHEFE DO PROJETO SIMPIX**
+**ASSUNTO: SOLICITAÇÃO DE ANÁLISE DE CAUSA RAIZ E PLANO DE CORREÇÃO DEFINITIVO PARA FALHA CATASTRÓFICA DE CONTAMINAÇÃO DE AMBIENTE**
+
+---
+
+### **1. CONTEXTO CRÍTICO E IMPACTO NO NEGÓCIO**
+
+O sistema Simpix está num estado de **FALHA CATASTRÓFICA TOTAL**, resultando num "apagão" completo que paralisa todas as operações. Nenhuma tela carrega, e nenhum dado é exibido tanto no ambiente de **Produção** (`sistemasimpix.com.br`) quanto no de **Desenvolvimento** (Preview do Replit). Esta falha bloqueia 100% da funcionalidade para todos os usuários e impede qualquer avanço no desenvolvimento.
+
+Este é um **incidente recorrente**. Já enfrentámos variantes deste problema, que se manifesta como um loop de autenticação infinito. As tentativas anteriores de correção, focadas na sincronização de segredos JWT, falharam, provando que a causa raiz é mais profunda e de natureza arquitetural. A situação é insustentável e exige uma solução definitiva.
+
+### **2. HISTÓRICO E GATILHO DA FALHA**
+
+É de importância crítica notar que esta classe de erro começou a manifestar-se **imediatamente após a implementação da separação dos ambientes de Desenvolvimento e Produção**. Antes desta separação, com uma única base de dados e um único conjunto de segredos, o sistema era estável. Isto prova que a falha reside na nossa estratégia de gestão de múltiplos ambientes.
+
+A hipótese central do Arquiteto-Chefe é que a nossa metodologia atual é a causa direta da crise: **a prática de manter segredos de DEV no ambiente de PROD (e vice-versa) está a criar uma "contaminação de ambiente"**. O código tenta ser "inteligente" ao detetar em qual ambiente está a ser executado, mas esta lógica parece estar a falhar espetacularmente, levando a um cenário onde o frontend e o backend operam com configurações de ambientes diferentes, tornando a validação de tokens JWT impossível.
+
+### **3. EVIDÊNCIAS IRREFUTÁVEIS (PROVAS DA FALHA)**
+
+#### **3.1. Logs do Console do Navegador (O Sintoma)**
+
+Os seguintes logs são consistentes em ambos os ambientes e demonstram o loop de autenticação:
+
+```log
+// 1. Frontend obtém um token com sucesso
+[AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 783}
+🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-15T14:07:02.000Z
+
+// 2. Frontend envia o token para o backend
+[PASSO 3 - ENVIO] {url: '[https://sistemasimpix.com.br/api/debug/me](https://sistemasimpix.com.br/api/debug/me)', authorizationHeader: 'Bearer ey...AM', ...}
+
+// 3. Backend REJEITA o token, retornando 401
+api/debug/me:1 Failed to load resource: the server responded with a status of 401 ()
+
+// 4. Backend retorna a mensagem de erro que confirma a falha de validação
+[API Client] Raw JSON response from [https://sistemasimpix.com.br/api/debug/me](https://sistemasimpix.com.br/api/debug/me) : {message: 'Token inválido ou expirado'}
+
+// 5. O ciclo recomeça, com o Token Manager a invalidar e a tentar obter um novo token, apenas para falhar novamente.
+🗑️ [TOKEN MANAGER] Token invalidated
+🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+Análise: Isto prova que o problema não é a geração do token (a Supabase está a fornecê-lo), mas a sua validação pelo nosso backend.
+
+3.2. Logs do Deploy (A Causa do Apagão em Produção)
+Atualmente, o ambiente de produção está ainda pior, num estado de crash loop:
+
+Snippet de código
+
+Error: Critical secrets missing in production: SUPABASE_JWT_SECRET
+at loadConfig (file:///home/runner/workspace/dist/index.js:4724:15)
+at server/lib/config.ts (file:///home/runner/workspace/dist/index.js:4847:14)
+
+Node.js v20.19.3
+command finished with error [npm run start]: exit status 1
+crash loop detected
+Análise: O deploy de Produção está a falhar porque uma refatoração anterior instruiu o código a procurar por SUPABASE_JWT_SECRET, mas esta variável nunca foi criada nos segredos de produção, causando uma falha fatal na inicialização.
+
+3.3. Configuração de Segredos (A Cena do Crime)
+A seguir, a lista de nomes de variáveis de ambiente presentes, que expõe a contaminação cruzada.
+
+Segredos presentes no Ambiente de Produção (Deploy):
+
+PROD_JWT_SECRET
+
+PROD_SUPABASE_URL
+
+PROD_DATABASE_URL
+
+VITE_PROD_SUPABASE_URL
+
+VITE_PROD_SUPABASE_ANON_KEY
+
+DEV_JTW_SECRET (Contaminação!)
+
+DEV_DATABASE_URL (Contaminação!)
+
+DEV_SUPABASE_URL (Contaminação!)
+
+Segredos presentes no Ambiente de Desenvolvimento (Preview):
+
+DEV_JTW_SECRET (com erro de digitação)
+
+DEV_DATABASE_URL
+
+DEV_SUPABASE_URL
+
+VITE_SUPABASE_URL
+
+VITE_SUPABASE_ANON_KEY
+
+PROD_JWT_SECRET (Contaminação!)
+
+PROD_SUPABASE_URL (Contaminação!)
+
+PROD_DATABASE_URL (Contaminação!)
+
+Análise: A presença de segredos de múltiplos ambientes é a raiz de todo o mal. O código está a ser forçado a fazer escolhas que deveriam ser feitas pela infraestrutura.
+
+4. MISSÃO: ARQUITETAR A SOLUÇÃO DEFINITIVA
+A sua missão é gerar um plano de ação e um "Super Mega Prompt" secundário que um Agente Executor possa usar para resolver esta crise de forma definitiva. O seu output deve ser um ficheiro Markdown único e abrangente.
+
+A solução deve ser dividida em duas frentes:
+
+FRENTE 1: PLANO DE AÇÃO ESTRATÉGICO (A CURA DEFINITIVA)
+Você deve projetar um Roadmap Arquitetural Completo para erradicar esta classe de falhas. Este roadmap deve ser o "Super Mega Prompt" a ser gerado. Ele deve instruir o Agente Executor a:
+
+Erradicar a Lógica de Deteção de Ambiente:
+
+Refatorar todo o backend, especialmente server/lib/config.ts, para remover completamente qualquer código que tente detetar o ambiente (ex: detectEnvironmentFromDomain, condicionais if/else baseadas em NODE_ENV para carregar segredos).
+
+O código deve tornar-se "agnóstico" ao ambiente. Ele deve ler um conjunto único e canónico de nomes de variáveis (ex: DATABASE_URL, SUPABASE_URL, SUPABASE_JWT_SECRET).
+
+Unificar a Configuração do Frontend:
+
+Garantir que o código do cliente Supabase (client/src/lib/supabase.ts) e toda a configuração do Vite (vite.config.ts) leiam apenas as variáveis de ambiente com prefixo VITE_ (ex: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY), conforme as boas práticas.
+
+Implementar um "Startup Health Check":
+
+Adicionar um bloco de validação na inicialização do servidor (server/index.ts) que verifica a presença de todas as variáveis de ambiente críticas. Se uma variável essencial (como SUPABASE_JWT_SECRET) estiver em falta, o servidor deve falhar imediatamente com um erro explícito e informativo e sair (process.exit(1)), prevenindo um estado de "morto-vivo".
+
+Gerar um "Manual de Configuração de Ambiente":
+
+Como parte do seu output, gerar um documento MANUAL_DE_CONFIGURACAO_DE_AMBIENTE.md que instrua o Arquiteto-Chefe sobre:
+
+A. Limpeza de Segredos: Quais segredos obsoletos devem ser removidos de cada ambiente (DEV e PROD).
+
+B. Configuração Ideal para Produção: A lista exata de nomes de variáveis de ambiente e uma descrição do valor que cada uma deve conter (ex: SUPABASE_URL deve conter a URL do Supabase de produção).
+
+C. Configuração Ideal para Desenvolvimento: A lista exata de nomes de variáveis para o ambiente de preview.
+
+FRENTE 2: PLANO DE REMEDIAÇÃO IMEDIATA (O ESTANQUE)
+Como a produção está em crash loop, você deve fornecer um hotfix de emergência como primeiro passo no seu roadmap.
+
+Instrução de Hotfix:
+
+A primeira tarefa do "Super Mega Prompt" deve ser instruir o Agente a modificar temporariamente o server/lib/config.ts para parar de procurar por SUPABASE_JWT_SECRET e voltar a ler PROD_JWT_SECRET em produção e DEV_JTW_SECRET em desenvolvimento.
+
+Justificativa: Esta é uma medida tática para estancar a crise e colocar a produção online imediatamente, uma vez que estas são as variáveis que sabemos que existem atualmente nos segredos. Esta é uma medida temporária antes da refatoração completa da Frente 1.
+
+Seu entregável final é o "Super Mega Prompt" em formato .md, contendo a contextualização da crise e o plano de batalha detalhado para o Agente Executor, começando com o hotfix e seguindo para a refatoração arquitetural completa. A sua resposta deve ser a solução que nos tirará desta crise e nos colocará num caminho de estabilidade arquitetural.
