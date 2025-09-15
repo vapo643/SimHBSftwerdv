@@ -11,6 +11,37 @@
   }
 }
 
+/* 🎨 CORREÇÃO VISUAL: Botões visíveis no tema claro em popups e dialogs */
+.light [data-radix-popper-content-wrapper] button[class*="outline"],
+.light [role="dialog"] button[class*="outline"],
+.light .bg-background button[class*="outline"],
+.light .bg-card button[class*="outline"] {
+  border: 1px solid var(--border);
+  background-color: var(--secondary);
+  color: var(--foreground);
+}
+
+.light [data-radix-popper-content-wrapper] button[class*="ghost"],
+.light [role="dialog"] button[class*="ghost"],
+.light .bg-background button[class*="ghost"],
+.light .bg-card button[class*="ghost"] {
+  color: var(--foreground);
+  background-color: transparent;
+}
+
+.light [data-radix-popper-content-wrapper] button[class*="ghost"]:hover,
+.light [role="dialog"] button[class*="ghost"]:hover,
+.light .bg-background button[class*="ghost"]:hover,
+.light .bg-card button[class*="ghost"]:hover {
+  background-color: var(--muted);
+}
+
+/* Garantir visibilidade de botões icon em superfícies brancas */
+.light button[class*="h-10 w-10"]:hover,
+.light button[class*="icon"]:hover {
+  background-color: var(--muted);
+}
+
 /* Custom Modern Scrollbar Design - Adaptive Theme */
 ::-webkit-scrollbar {
   width: 8px;
