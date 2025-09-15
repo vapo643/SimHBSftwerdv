@@ -62,6 +62,8 @@ function getCriticalSecrets(env: string): string[] {
 const OPTIONAL_SECRETS = [
   // Supabase environment variables - CANONICAL ONLY
   'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
+  // JWT secrets - environment specific
+  'SUPABASE_JWT_SECRET', 'SUPABASE_DEV_JWT_SECRET',
   // External integrations
   'SENTRY_DSN',
   'CLICKSIGN_API_KEY',
@@ -117,23 +119,30 @@ function generateSecureSecret(name: string): string {
 
 // REMOVIDA: Função detectEnvironmentFromDomain - lógica de detecção eliminada
 
-// HOTFIX EMERGENCIAL: Função simplificada para usar APENAS SUPABASE_JWT_SECRET
+// OPÇÃO A: Função ambiente-específica para JWT secrets
 function getJwtSecret(): string {
-  const secret = process.env.SUPABASE_JWT_SECRET;
+  const env = process.env.NODE_ENV || 'development';
+  
+  // Use environment-specific JWT secrets
+  const secret = env === 'production' 
+    ? process.env.SUPABASE_JWT_SECRET
+    : process.env.SUPABASE_DEV_JWT_SECRET;
+  
+  const secretName = env === 'production' ? 'SUPABASE_JWT_SECRET' : 'SUPABASE_DEV_JWT_SECRET';
   
   if (!secret) {
-    console.error('[CONFIG] 🚨 FATAL: SUPABASE_JWT_SECRET não configurado');
-    console.error('Configure em: Settings → Environment Variables → SUPABASE_JWT_SECRET');
+    console.error(`[CONFIG] 🚨 FATAL: ${secretName} não configurado para ambiente ${env}`);
+    console.error(`Configure em: Settings → Environment Variables → ${secretName}`);
     process.exit(1);
   }
   
   // Validação de formato
   if (secret.length < 20) {
-    console.error('[CONFIG] 🚨 FATAL: SUPABASE_JWT_SECRET inválido (muito curto)');
+    console.error(`[CONFIG] 🚨 FATAL: ${secretName} inválido (muito curto)`);
     process.exit(1);
   }
   
-  console.log('[CONFIG] ✅ SUPABASE_JWT_SECRET carregado com sucesso');
+  console.log(`[CONFIG] ✅ ${secretName} carregado com sucesso para ambiente ${env}`);
   return secret;
 }
 

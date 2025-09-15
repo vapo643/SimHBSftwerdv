@@ -95,7 +95,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
 
       // Security (OPUS PROTOCOL: canonical variables only)
-      jwtSecret: process.env.SUPABASE_JWT_SECRET || 'dev-jwt-secret-change-in-production',
+      jwtSecret: process.env.SUPABASE_DEV_JWT_SECRET || 'dev-jwt-secret-change-in-production',
       csrfSecret: process.env.CSRF_SECRET || 'dev-csrf-secret-change-in-production',
       sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-production',
 
