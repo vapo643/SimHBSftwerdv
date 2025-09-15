@@ -52,16 +52,10 @@ export interface EnvironmentConfig {
  * Get configuration for current environment
  */
 export function getEnvironmentConfig(): EnvironmentConfig {
-  // 🎯 DETECÇÃO AUTOMÁTICA DE AMBIENTE BASEADA EM CREDENCIAIS
-  // Se as credenciais PROD_* existem, usar produção automaticamente
-  const hasProdCredentials = !!
-    (process.env.PROD_SUPABASE_URL && 
-     process.env.PROD_SUPABASE_SERVICE_ROLE_KEY && 
-     process.env.PROD_DATABASE_URL);
+  // OPUS PROTOCOL: Environment detection based on NODE_ENV only
+  const env = process.env.NODE_ENV || 'development';
   
-  const env = hasProdCredentials ? 'production' : (process.env.NODE_ENV || 'development');
-  
-  console.log(`🔍 [ENV DETECTION] Produção detectada: ${hasProdCredentials}, Ambiente final: ${env}`);
+  console.log(`🔍 [ENV DETECTION] Ambiente: ${env} (NODE_ENV only)`);
 
   // Base configuration (shared across environments)
   const baseConfig: Partial<EnvironmentConfig> = {
@@ -95,13 +89,13 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       databaseUrl: databaseUrl || process.env.DATABASE_URL!,
       databasePoolSize: 5,
 
-      // Supabase (usando secrets específicos de desenvolvimento)
-      supabaseUrl: process.env.DEV_SUPABASE_URL!,
-      supabaseAnonKey: process.env.DEV_SUPABASE_ANON_KEY!,
-      supabaseServiceKey: process.env.DEV_SUPABASE_SERVICE_ROLE_KEY!,
+      // Supabase (OPUS PROTOCOL: canonical variables only)
+      supabaseUrl: process.env.SUPABASE_URL!,
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY!,
+      supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
 
-      // Security (usando secrets específicos de desenvolvimento para isolamento)
-      jwtSecret: process.env.DEV_JTW_SECRET || 'dev-jwt-secret-change-in-production',
+      // Security (OPUS PROTOCOL: canonical variables only)
+      jwtSecret: process.env.SUPABASE_JWT_SECRET || 'dev-jwt-secret-change-in-production',
       csrfSecret: process.env.CSRF_SECRET || 'dev-csrf-secret-change-in-production',
       sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-production',
 
@@ -166,29 +160,29 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       ...baseConfig,
       name: 'production',
 
-      // Database
-      databaseUrl: process.env.PROD_DATABASE_URL!,
+      // Database (OPUS PROTOCOL: canonical variables only)
+      databaseUrl: process.env.DATABASE_URL!,
       databasePoolSize: 20,
 
-      // Supabase
-      supabaseUrl: process.env.PROD_SUPABASE_URL!,
-      supabaseAnonKey: process.env.PROD_SUPABASE_ANON_KEY!,
-      supabaseServiceKey: process.env.PROD_SUPABASE_SERVICE_ROLE_KEY!,
+      // Supabase (OPUS PROTOCOL: canonical variables only)
+      supabaseUrl: process.env.SUPABASE_URL!,
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY!,
+      supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
 
-      // Security (production keys - MUST be strong e ISOLADOS)
-      jwtSecret: process.env.PROD_JWT_SECRET!,
-      csrfSecret: process.env.PROD_CSRF_SECRET!,
-      sessionSecret: process.env.PROD_SESSION_SECRET!,
+      // Security (OPUS PROTOCOL: canonical variables only)
+      jwtSecret: process.env.SUPABASE_JWT_SECRET!,
+      csrfSecret: process.env.CSRF_SECRET!,
+      sessionSecret: process.env.SESSION_SECRET!,
 
       // Rate Limiting (strict)
       rateLimitMaxRequests: 20,
 
-      // CORS (only production domain)
-      corsOrigins: [process.env.PROD_FRONTEND_URL!],
+      // CORS (OPUS PROTOCOL: canonical variables only)
+      corsOrigins: [process.env.FRONTEND_URL!],
 
       // Monitoring
       enableSecurityMonitoring: true,
-      securityAlertEmail: process.env.PROD_ALERT_EMAIL!,
+      securityAlertEmail: process.env.ALERT_EMAIL!,
 
       // Feature Flags
       enableHoneypots: true,

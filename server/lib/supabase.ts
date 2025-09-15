@@ -3,41 +3,21 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '@shared/schema';
 
-// Helper function to get environment-specific Supabase credentials
-function getSupabaseCredentials() {
-  const isProd = process.env.NODE_ENV === 'production';
-  
-  const supabaseUrl = isProd 
-    ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '')
-    : (process.env.DEV_SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '');
-    
-  const supabaseAnonKey = isProd
-    ? (process.env.PROD_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '')
-    : (process.env.DEV_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '');
-    
-  const databaseUrl = isProd
-    ? (process.env.PROD_DATABASE_URL || process.env.DATABASE_URL || '')
-    : (process.env.DATABASE_URL || '');
-
-  return { supabaseUrl, supabaseAnonKey, databaseUrl };
-}
-
-const { supabaseUrl, supabaseAnonKey, databaseUrl } = getSupabaseCredentials();
+// OPUS PROTOCOL: Simplified canonical credentials only
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+const databaseUrl = process.env.DATABASE_URL || '';
 
 // Graceful handling for missing Supabase credentials
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('⚠️ Supabase environment variables not configured. Some features may be limited.');
   console.warn(`   Missing: ${!supabaseUrl ? 'SUPABASE_URL ' : ''}${!supabaseAnonKey ? 'SUPABASE_ANON_KEY' : ''}`);
-  if (process.env.NODE_ENV === 'production') {
-    console.warn('ℹ️  Configure PROD_SUPABASE_URL and PROD_SUPABASE_ANON_KEY in deployment secrets');
-  }
+  console.warn('ℹ️  Configure SUPABASE_URL and SUPABASE_ANON_KEY in deployment secrets');
 }
 
 if (!databaseUrl) {
   console.warn('⚠️ Database URL not configured. Using fallback configuration.');
-  if (process.env.NODE_ENV === 'production') {
-    console.warn('ℹ️  Configure PROD_DATABASE_URL in deployment secrets for full functionality');
-  }
+  console.warn('ℹ️  Configure DATABASE_URL in deployment secrets for full functionality');
 }
 
 // Server-side Supabase client - properly isolated from client-side singleton
@@ -46,22 +26,22 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-// FUNÇÃO HARDENED para operações Admin - Foco exclusivo em produção:
+// OPUS PROTOCOL: Admin client using canonical variables only
 export const createServerSupabaseAdminClient = () => {
-  // Carrega exclusivamente as variáveis de ambiente de PRODUÇÃO.
-  const url = process.env.PROD_SUPABASE_URL;
-  const serviceKey = process.env.PROD_SUPABASE_SERVICE_ROLE_KEY;
+  // Use canonical environment variables
+  const url = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  // Validação explícita com mensagem de erro informativa.
+  // Validation with informative error message
   if (!serviceKey || !url) {
     console.error('--- ERRO CRÍTICO DE CONFIGURAÇÃO ---');
-    console.error('As variáveis de ambiente de produção (PROD_SUPABASE_URL, PROD_SUPABASE_SERVICE_ROLE_KEY) não estão configuradas ou não estão acessíveis.');
+    console.error('As variáveis canônicas (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) não estão configuradas.');
     console.error('As operações de Admin do Supabase serão desativadas.');
     console.error('--- FIM DO ERRO ---');
     return null as any; 
   }
 
-  // Retorna o cliente Admin configurado com as credenciais de PRODUÇÃO.
+  // Return admin client configured with canonical credentials
   return createClient(url, serviceKey, {
     auth: {
       persistSession: false,

@@ -60,7 +60,7 @@ function getCriticalSecrets(env: string): string[] {
 }
 
 const OPTIONAL_SECRETS = [
-  // Supabase environment variables
+  // Supabase environment variables - CANONICAL ONLY
   'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
   // External integrations
   'SENTRY_DSN',
@@ -70,11 +70,7 @@ const OPTIONAL_SECRETS = [
   'INTER_CLIENT_SECRET',
   'INTER_CERTIFICATE',
   'INTER_WEBHOOK_SECRET',
-  // Legacy environment-specific variables (mantidas para compatibilidade)
-  'DEV_JTW_SECRET', 'PROD_JWT_SECRET',
-  'SESSION_DEV', 'CSRF_DEV',
-  'PROD_SUPABASE_URL', 'PROD_SUPABASE_ANON_KEY', 'PROD_SUPABASE_SERVICE_ROLE_KEY',
-  'DEV_SUPABASE_URL', 'DEV_SUPABASE_ANON_KEY', 'DEV_SUPABASE_SERVICE_ROLE_KEY',
+  // OPUS PROTOCOL: Legacy DEV_*/PROD_* variables REMOVED for contamination cleanup
 ] as const;
 
 // Validação não-bloqueante de secrets adaptada por ambiente
@@ -142,43 +138,33 @@ function getJwtSecret(): string {
 }
 
 function getSessionSecret(): string {
-  const isProduction = process.env.NODE_ENV === 'production';
+  // OPUS PROTOCOL: Canonical variables only
+  const secret = process.env.SESSION_SECRET;
   
-  if (isProduction) {
-    const prodSecret = process.env.PROD_SESSION_SECRET;
-    if (!prodSecret) {
-      throw new Error('PROD_SESSION_SECRET é obrigatório em produção!');
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SESSION_SECRET é obrigatório em produção!');
     }
-    console.log('[CONFIG] ✅ Session secret de produção carregado: PROD_SESSION_SECRET');
-    return prodSecret;
-  } else {
-    const devSecret = process.env.SESSION_SECRET;
-    if (!devSecret) {
-      return generateSecureSecret('SESSION_SECRET');
-    }
-    console.log('[CONFIG] ✅ Session secret de desenvolvimento carregado: SESSION_SECRET');
-    return devSecret;
+    return generateSecureSecret('SESSION_SECRET');
   }
+  
+  console.log('[CONFIG] ✅ Session secret carregado: SESSION_SECRET');
+  return secret;
 }
 
 function getCsrfSecret(): string {
-  const isProduction = process.env.NODE_ENV === 'production';
+  // OPUS PROTOCOL: Canonical variables only
+  const secret = process.env.CSRF_SECRET;
   
-  if (isProduction) {
-    const prodSecret = process.env.PROD_CSRF_SECRET;
-    if (!prodSecret) {
-      throw new Error('PROD_CSRF_SECRET é obrigatório em produção!');
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('CSRF_SECRET é obrigatório em produção!');
     }
-    console.log('[CONFIG] ✅ CSRF secret de produção carregado: PROD_CSRF_SECRET');
-    return prodSecret;
-  } else {
-    const devSecret = process.env.CSRF_SECRET;
-    if (!devSecret) {
-      return generateSecureSecret('CSRF_SECRET');
-    }
-    console.log('[CONFIG] ✅ CSRF secret de desenvolvimento carregado: CSRF_SECRET');
-    return devSecret;
+    return generateSecureSecret('CSRF_SECRET');
   }
+  
+  console.log('[CONFIG] ✅ CSRF secret carregado: CSRF_SECRET');
+  return secret;
 }
 
 
@@ -212,15 +198,9 @@ export function loadConfig(): AppConfig {
         url: process.env.DATABASE_URL || null,
       },
       supabase: {
-        url: process.env.NODE_ENV === 'production' 
-          ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL || null)
-          : (process.env.SUPABASE_URL || null),
-        anonKey: process.env.NODE_ENV === 'production'
-          ? (process.env.PROD_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || null)
-          : (process.env.SUPABASE_ANON_KEY || null),
-        serviceKey: process.env.NODE_ENV === 'production'
-          ? (process.env.PROD_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || null)
-          : (process.env.SUPABASE_SERVICE_ROLE_KEY || null),
+        url: process.env.SUPABASE_URL || null,
+        anonKey: process.env.SUPABASE_ANON_KEY || null,
+        serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || null,
       },
       security: {
         enableRateLimit: process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL,

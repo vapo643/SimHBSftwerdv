@@ -4,19 +4,13 @@ let clientSupabaseInstance: SupabaseClient | null = null;
 
 // Função para criar o cliente Supabase para o lado do servidor (Express.js)
 export const createServerSupabaseClient = () => {
-  const isProd = process.env.NODE_ENV === 'production';
-  const supabaseUrl = isProd
-    ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL || '')
-    : (process.env.SUPABASE_URL || '');
-  const supabaseAnonKey = isProd
-    ? (process.env.PROD_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '')
-    : (process.env.SUPABASE_ANON_KEY || '');
+  // OPUS PROTOCOL: Use canonical variables only
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('⚠️ Supabase server credentials not configured. Server-side operations will be limited.');
-    if (isProd) {
-      console.warn('ℹ️  Configure PROD_SUPABASE_URL and PROD_SUPABASE_ANON_KEY for full functionality');
-    }
+    console.warn('ℹ️  Configure SUPABASE_URL and SUPABASE_ANON_KEY for full functionality');
     return null as any;
   }
 
@@ -31,12 +25,12 @@ export const createClientSupabaseClient = () => {
 
   // Check if we're in a browser environment before accessing import.meta.env
   if (typeof window !== 'undefined') {
-    // Support both standard and production-prefixed environment variables
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_PROD_SUPABASE_URL || '';
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_PROD_SUPABASE_ANON_KEY || '';
+    // OPUS PROTOCOL: Use canonical VITE variables only
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.warn('⚠️ Supabase client credentials not configured. Configure VITE_SUPABASE_* ou VITE_PROD_SUPABASE_* variables.');
+      console.warn('⚠️ Supabase client credentials not configured. Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY variables.');
       return null as any;
     }
 
