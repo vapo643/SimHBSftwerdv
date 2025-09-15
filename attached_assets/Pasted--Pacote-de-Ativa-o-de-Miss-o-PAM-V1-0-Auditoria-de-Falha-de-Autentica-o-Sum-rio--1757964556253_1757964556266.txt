@@ -1,0 +1,45 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - Auditoria de Falha de Autenticação**
+
+* **Sumário da Missão:** Rastrear o fluxo de validação de JWT no backend para identificar o mecanismo de fallback utilizado quando o Redis está offline e confirmar como as variáveis de ambiente (`secrets`) são carregadas nesse cenário.
+* **Intenção Estratégica:** Isolar a causa raiz da falha de `invalid signature` para permitir uma correção cirúrgica na configuração de ambiente, restaurando a estabilidade da autenticação em produção.
+* **Modelo Mental (Como se Encaixa):** Um middleware de autenticação (provavelmente `jwt-auth-middleware.ts`) intercepta as requisições. Ele primeiro tenta validar o token JWT usando um serviço que depende do Redis. Se o Redis falhar, um bloco `catch` ou lógica de fallback é acionado, recorrendo a uma validação local com uma `JWT_SECRET`. A nossa investigação foca-se em auditar este caminho de falha.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** O Agente pode tentar "corrigir" o código.
+    * **Contramedida:** A missão é explicitamente de **auditoria e extração de evidências**. O prompt proíbe modificações.
+
+---
+
+**[DIRETIVA DE DIVULGAÇÃO TOTAL (DDT) V1.0 - ANTI-OMISSÃO]**
+
+* Você está operando sob a Doutrina de Divulgação Total. Apresente o código-fonte **completo** dos ficheiros e funções relevantes. Não resuma. A sua missão é revelar a realidade total do fluxo de autenticação.
+
+---
+
+**IMPLEMENTAR (Plano de Auditoria Forense):**
+
+**CURRENT STATE:**
+O backend está a registar `[REDIS OFFLINE]` seguido de `[JWT DEBUG] Local JWT verification failed: invalid signature`. O frontend recebe respostas `401 Unauthorized`.
+
+**EXPECTED (Estado Final da Auditoria):**
+Um relatório técnico detalhado contendo:
+1.  O caminho completo para o ficheiro do middleware de autenticação JWT.
+2.  O trecho de código **exato** (`snippet`) que contém a lógica `try/catch` ou o if/else que trata da falha de conexão com o Redis.
+3.  O trecho de código **exato** que realiza a validação JWT de fallback (local).
+4.  A linha de código específica que carrega a `JWT_SECRET` a partir das variáveis de ambiente (`process.env`) para esta validação de fallback.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  **Ponto de Partida:** Comece a análise no ficheiro `/server/lib/jwt-auth-middleware.ts`. Este é o principal suspeito.
+2.  **Rastreamento do Erro:** Localize a lógica que interage com o Redis (provavelmente dentro de uma função de verificação de token).
+3.  **Identificação do Fallback:** Encontre o caminho de execução do código que é acionado quando a conexão com o Redis falha.
+4.  **Extração de Evidências:** Apresente os caminhos e os blocos de código exatos, conforme solicitado no "Estado Final da Auditoria". **NÃO MODIFIQUE NENHUM CÓDIGO.**
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK (MODO AUDITORIA):**
+1.  Mapear ficheiros e funções exatas afetadas pela análise.
+2.  Garantir que todos os caminhos de importação citados estejam corretos.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está limpo antes da análise.
+4.  **Declarar Nível de Confiança (0-100%)** de que os ficheiros identificados são os corretos.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO) durante a análise.
+6.  Realizar uma verificação de sanidade para confirmar que a lógica de fallback é de facto a causa da mensagem `invalid signature`.
+7.  **Documentar Decisões Técnicas** tomadas durante a busca.
