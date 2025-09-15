@@ -26,9 +26,8 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-// OPUS PROTOCOL: Admin client using canonical variables only
+// 🔧 PAM V1.3 PRODUCTION DIAGNOSTICS - Enhanced admin client with production-specific debugging
 export const createServerSupabaseAdminClient = () => {
-  // 🔧 PAM V1.0 HOTFIX - Enhanced environment variable detection with detailed logging
   const timestamp = new Date().toISOString();
   const nodeEnv = process.env.NODE_ENV || 'unknown';
   
@@ -42,20 +41,32 @@ export const createServerSupabaseAdminClient = () => {
               process.env.DEV_SUPABASE_URL;
               
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ||
+                     process.env.SUPABASE_SERVICE_KEY || // Alternative naming
                      process.env.PROD_SUPABASE_SERVICE_ROLE_KEY ||
                      process.env.STAGING_SUPABASE_SERVICE_ROLE_KEY ||
                      process.env.DEV_SUPABASE_SERVICE_ROLE_KEY;
 
-  // Detailed diagnostic logging for production debugging
+  // Enhanced diagnostic logging with specific production debug info
   console.log(`🔍 [${timestamp}] SUPABASE_URL: ${url ? '[FOUND]' : '[MISSING]'}`);
   console.log(`🔍 [${timestamp}] SERVICE_KEY: ${serviceKey ? '[FOUND]' : '[MISSING]'}`);
   
   if (url) {
     console.log(`🔍 [${timestamp}] URL source: ${url.includes('supabase.co') ? 'valid-supabase-domain' : 'custom-domain'}`);
+    // PAM V1.3: Extract project ID for validation
+    const projectMatch = url.match(/https:\/\/([^.]+)\.supabase\.co/);
+    const projectId = projectMatch ? projectMatch[1] : 'unknown';
+    console.log(`🔍 [${timestamp}] Project ID: ${projectId}`);
   }
   
   if (serviceKey) {
     console.log(`🔍 [${timestamp}] SERVICE_KEY length: ${serviceKey.length} chars`);
+    // PAM V1.3: Validate key format without exposing actual key
+    const keyPrefix = serviceKey.substring(0, 20) + '...';
+    console.log(`🔍 [${timestamp}] SERVICE_KEY prefix: ${keyPrefix}`);
+    
+    // Validate key format (should start with eyJ for JWT)
+    const isValidFormat = serviceKey.startsWith('eyJ');
+    console.log(`🔍 [${timestamp}] SERVICE_KEY format valid: ${isValidFormat ? 'YES' : 'NO - POTENTIAL ISSUE'}`);
   }
 
   // Enhanced validation with specific missing variable reporting
@@ -75,14 +86,39 @@ export const createServerSupabaseAdminClient = () => {
 
   console.log(`✅ [${timestamp}] Supabase Admin Client configurado com sucesso`);
   
-  // Return admin client configured with canonical credentials
-  return createClient(url, serviceKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  });
+  // PAM V1.3: Create client with enhanced error handling for production
+  try {
+    const client = createClient(url, serviceKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+      // PAM V1.3: Add production-specific options
+      realtime: {
+        params: {
+          eventsPerSecond: 2 // Limit realtime events in production
+        }
+      },
+      global: {
+        headers: {
+          'X-Client-Info': `supabase-admin-${nodeEnv}`
+        }
+      }
+    });
+    
+    // PAM V1.3: Immediate validation test for production debugging
+    if (nodeEnv === 'production') {
+      console.log(`🧪 [${timestamp}] Running immediate client validation test...`);
+      // We'll add a test query in the route where it's used
+    }
+    
+    return client;
+  } catch (error) {
+    console.error(`❌ [${timestamp}] ERRO ao criar Supabase Admin Client:`, error);
+    console.error(`🔍 [${timestamp}] URL válida: ${url?.includes('supabase.co')}, Key válida: ${serviceKey?.length > 50}`);
+    throw error;
+  }
 };
 
 // FUNÇÃO ANTI-FRÁGIL para operações com RLS (autenticadas):

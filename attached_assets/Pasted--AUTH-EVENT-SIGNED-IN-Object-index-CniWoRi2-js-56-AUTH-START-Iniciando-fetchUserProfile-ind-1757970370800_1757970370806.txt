@@ -1,0 +1,115 @@
+🔐 [AUTH EVENT] SIGNED_IN Object
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+index-CniWoRi2.js:56 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+index-CniWoRi2.js:56 🔐 [AUTH EVENT] INITIAL_SESSION Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-15T21:58:59.000Z
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+context:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/origination/context : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 Erro ao carregar contexto: ApiError: Perfil do usuário não encontrado
+    at Eu (index-CniWoRi2.js:107:40749)
+    at async Ze (index-CniWoRi2.js:107:42759)
+    at async queryFn (index-CniWoRi2.js:679:21212)
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+/api/events:1  Failed to load resource: the server responded with a status of 401 ()Understand this error
+index-CniWoRi2.js:56 [SSE] ❌ Connection error: Event
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+/api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+/api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+/api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 DEBUG - First 3 proposals values: Array(0)
+index-CniWoRi2.js:56 [SSE] 🔌 Connection closed
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+context:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/origination/context : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 Erro ao carregar contexto: ApiError: Perfil do usuário não encontrado
+    at Eu (index-CniWoRi2.js:107:40749)
+    at async Ze (index-CniWoRi2.js:107:42759)
+    at async queryFn (index-CniWoRi2.js:679:21212)
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+index-CniWoRi2.js:56 🔍 [IDLE TIMER] Tab became hidden, timer continues
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+index-CniWoRi2.js:56 🔐 [AUTH EVENT] SIGNED_IN Object
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+context:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/origination/context : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 Erro ao carregar contexto: ApiError: Perfil do usuário não encontrado
+    at Eu (index-CniWoRi2.js:107:40749)
+    at async Ze (index-CniWoRi2.js:107:42759)
+    at async queryFn (index-CniWoRi2.js:679:21212)
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-15T21:58:59.000Z', hasActiveRefresh: false}
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Ui6WY-nM0IpJgbjqTQ_m6aV0Pwpwv1oDLeED7gO282c', hasToken: true, isFormData: false}
+index-CniWoRi2.js:56 🔍 [IDLE TIMER] Tab became hidden, timer continues
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-15T21:58:59.000Z', hasActiveRefresh: false}
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/origination/context', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Ui6WY-nM0IpJgbjqTQ_m6aV0Pwpwv1oDLeED7gO282c', hasToken: true, isFormData: false}
+index-CniWoRi2.js:56 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 783}
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-15T21:58:59.000Z', hasActiveRefresh: false}
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Ui6WY-nM0IpJgbjqTQ_m6aV0Pwpwv1oDLeED7gO282c', hasToken: true, isFormData: false}
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-15T18:05:59.000-03:00'}
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-15T18:05:59.000-03:00'}
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
