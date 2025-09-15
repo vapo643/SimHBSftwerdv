@@ -151,7 +151,7 @@ export function createServerSupabaseClient(accessToken?: string) {
 // Temporary: Use lazy connection to prevent server crash
 let dbClient;
 
-if (databaseUrl && databaseUrl.includes('supabase.com')) {
+if (databaseUrl && databaseUrl.includes('supabase.co')) {
   console.log('✅ Database: Configuring Supabase connection...');
 
   // Use transaction pooler port and SSL
@@ -184,7 +184,9 @@ if (databaseUrl && databaseUrl.includes('supabase.com')) {
   );
 } else if (databaseUrl) {
   // MISSION 3: Local/non-Supabase PostgreSQL with optimized pooling
+  // CRITICAL FIX: Add SSL requirement for external PostgreSQL connections
   dbClient = postgres(databaseUrl, {
+    ssl: databaseUrl.includes('postgresql://') && !databaseUrl.includes('localhost') ? 'require' : false, // SSL for external connections
     max: 20, // Consistent pool size across environments
     idle_timeout: 30, // 30s idle timeout
     connect_timeout: 10, // 10s connection timeout

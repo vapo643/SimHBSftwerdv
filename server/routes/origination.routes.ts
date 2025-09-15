@@ -65,61 +65,64 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
     const { createServerSupabaseAdminClient, db } = await import('../lib/supabase');
     const supabase = createServerSupabaseAdminClient();
     
-    // PAM V1.3: Validate client creation success
+    // PAM V1.3: Validate client creation success but DO NOT fail early - allow Drizzle fallback
     if (!supabase) {
-      console.error('[ORIGINATION-001] ERRO CRÍTICO: Supabase admin client não pôde ser criado');
-      return res.status(500).json({ 
-        message: 'Erro de configuração do sistema. Contate o administrador.',
-        code: 'SUPABASE_CLIENT_CREATION_FAILED'
-      });
+      console.warn('[ORIGINATION-001] WARNING: Supabase admin client não pôde ser criado - continuando com fallback Drizzle');
     }
 
     console.log(`[ORIGINATION-002] Iniciando busca de perfil para userId: ${userId}`);
     
-    // PAM V1.3: Test client connectivity before main query
-    try {
-      const { data: testData, error: testError } = await supabase
-        .from('profiles')
-        .select('count')
-        .limit(1);
-        
-      if (testError) {
-        console.error('[ORIGINATION-003] Teste de conectividade falhou:', testError);
-        // Continue with fallback instead of failing immediately
-      } else {
-        console.log('[ORIGINATION-004] Teste de conectividade bem-sucedido');
+    // PAM V1.3: Test client connectivity before main query - only if supabase client exists
+    if (supabase) {
+      try {
+        const { data: testData, error: testError } = await supabase
+          .from('profiles')
+          .select('count')
+          .limit(1);
+          
+        if (testError) {
+          console.error('[ORIGINATION-003] Teste de conectividade falhou:', testError);
+          // Continue with fallback instead of failing immediately
+        } else {
+          console.log('[ORIGINATION-004] Teste de conectividade bem-sucedido');
+        }
+      } catch (connectivityError) {
+        console.error('[ORIGINATION-005] Erro de conectividade:', connectivityError);
       }
-    } catch (connectivityError) {
-      console.error('[ORIGINATION-005] Erro de conectividade:', connectivityError);
     }
 
     // PAM V1.3: Primary profile fetch with enhanced error handling
     let profileData = null;
     let profileError = null;
     
-    try {
-      const result = await supabase
-        .from('profiles')
-        .select('id, full_name, loja_id')
-        .eq('id', userId)
-        .single();
+    if (supabase) {
+      try {
+        const result = await supabase
+          .from('profiles')
+          .select('id, full_name, loja_id')
+          .eq('id', userId)
+          .single();
+          
+        profileData = result.data;
+        profileError = result.error;
         
-      profileData = result.data;
-      profileError = result.error;
-      
-      console.log(`[ORIGINATION-006] Query result - Data: ${profileData ? 'FOUND' : 'NULL'}, Error: ${profileError ? 'YES' : 'NO'}`);
-      
-      if (profileError) {
-        console.error('[ORIGINATION-007] Profile fetch error details:', {
-          message: profileError.message,
-          details: profileError.details,
-          hint: profileError.hint,
-          code: profileError.code
-        });
+        console.log(`[ORIGINATION-006] Query result - Data: ${profileData ? 'FOUND' : 'NULL'}, Error: ${profileError ? 'YES' : 'NO'}`);
+        
+        if (profileError) {
+          console.error('[ORIGINATION-007] Profile fetch error details:', {
+            message: profileError.message,
+            details: profileError.details,
+            hint: profileError.hint,
+            code: profileError.code
+          });
+        }
+      } catch (queryError) {
+        console.error('[ORIGINATION-008] Query execution error:', queryError);
+        profileError = { message: 'Query execution failed', details: queryError };
       }
-    } catch (queryError) {
-      console.error('[ORIGINATION-008] Query execution error:', queryError);
-      profileError = { message: 'Query execution failed', details: queryError };
+    } else {
+      console.log('[ORIGINATION-006] Supabase client indisponível - pulando para fallback Drizzle');
+      profileError = { message: 'Supabase client not available' };
     }
 
     // PAM V1.3: Fallback to Drizzle if Supabase fails (production-specific)
@@ -197,31 +200,36 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       let lojaData = null;
       let lojaError = null;
       
-      try {
-        const result = await supabase
-          .from('lojas')
-          .select(
-            `
-            id,
-            nome_loja,
-            parceiro_id,
-            parceiros (
+      if (supabase) {
+        try {
+          const result = await supabase
+            .from('lojas')
+            .select(
+              `
               id,
-              razao_social,
-              cnpj
+              nome_loja,
+              parceiro_id,
+              parceiros (
+                id,
+                razao_social,
+                cnpj
+              )
+            `
             )
-          `
-          )
-          .eq('id', profileData.loja_id)
-          .single();
+            .eq('id', profileData.loja_id)
+            .single();
+            
+          lojaData = result.data;
+          lojaError = result.error;
           
-        lojaData = result.data;
-        lojaError = result.error;
-        
-        console.log(`[ORIGINATION-014] Loja query - Data: ${lojaData ? 'FOUND' : 'NULL'}, Error: ${lojaError ? 'YES' : 'NO'}`);
-      } catch (lojaQueryError) {
-        console.error('[ORIGINATION-015] Loja query execution error:', lojaQueryError);
-        lojaError = { message: 'Loja query execution failed', details: lojaQueryError };
+          console.log(`[ORIGINATION-014] Loja query - Data: ${lojaData ? 'FOUND' : 'NULL'}, Error: ${lojaError ? 'YES' : 'NO'}`);
+        } catch (lojaQueryError) {
+          console.error('[ORIGINATION-015] Loja query execution error:', lojaQueryError);
+          lojaError = { message: 'Loja query execution failed', details: lojaQueryError };
+        }
+      } else {
+        console.log('[ORIGINATION-014] Supabase client indisponível - pulando para fallback Drizzle para loja');
+        lojaError = { message: 'Supabase client not available for loja query' };
       }
       
       // PAM V1.3: Fallback to Drizzle for loja data if needed
@@ -298,11 +306,59 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       parceiroId = null; // No partner filtering for global admin
     }
 
-    // 2. Fetch all active products
-    const produtosAtivos = await db.select().from(produtos).where(eq(produtos.isActive, true));
+    // CRITICAL FIX: Protect DB queries with fallback for null db
+    let produtosAtivos = [];
+    let produtosComTabelas = [];
+    
+    if (!db) {
+      console.warn('[ORIGINATION-020] Database connection unavailable - returning minimal context');
+      // Return minimal context when all DB connections fail
+      const context: OriginationContext = {
+        atendente: {
+          id: userProfile.id,
+          nome: userProfile.nome,
+          loja: userProfile.loja_id ? {
+            id: userProfile.loja_id,
+            nome: userProfile.nome_loja,
+            parceiro: {
+              id: userProfile.parceiro_id,
+              razaoSocial: userProfile.razao_social,
+              cnpj: userProfile.cnpj,
+            },
+          } : null,
+        },
+        produtos: [], // Empty products array when DB unavailable
+        documentosObrigatorios: [
+          'Documento de Identidade (RG ou CNH)',
+          'CPF',
+          'Comprovante de Residência',
+          'Comprovante de Renda',
+          'Extrato Bancário (últimos 3 meses)',
+        ],
+        limites: {
+          valorMinimo: 1000,
+          valorMaximo: 50000,
+          prazoMinimo: 6,
+          prazoMaximo: 48,
+        },
+      };
+      
+      console.log('[ORIGINATION-021] Retornando contexto mínimo devido à indisponibilidade do banco de dados');
+      return res.json(context);
+    }
+    
+    try {
+      // 2. Fetch all active products
+      produtosAtivos = await db.select().from(produtos).where(eq(produtos.isActive, true));
+      console.log(`[ORIGINATION-022] Encontrados ${produtosAtivos.length} produtos ativos`);
+    } catch (dbError) {
+      console.error('[ORIGINATION-023] Erro ao buscar produtos do banco:', dbError);
+      produtosAtivos = []; // Fallback to empty array
+    }
 
-    // 3. For each product, fetch available commercial tables
-    const produtosComTabelas = await Promise.all(
+    // 3. For each product, fetch available commercial tables with protection
+    try {
+      produtosComTabelas = await Promise.all(
       produtosAtivos.map(async (produto) => {
         // Gerar chave de cache única e determinística
         const cacheKey = `tabelas-comerciais:produtoId:${produto.id}:parceiroId:${parceiroId}`;
@@ -342,64 +398,39 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
         if (parceiroId === null) {
           // PAM V1.0: ADMINISTRADOR - fetch ALL tables for this product (personalized + general)
-          const todasTabelas = await db
-            .select({
-              id: tabelasComerciais.id,
-              nomeTabela: tabelasComerciais.nomeTabela,
-              taxaJuros: tabelasComerciais.taxaJuros,
-              prazos: tabelasComerciais.prazos,
-              comissao: tabelasComerciais.comissao,
-              parceiroId: tabelasComerciais.parceiroId,
-            })
-            .from(tabelasComerciais)
-            .innerJoin(
-              produtoTabelaComercial,
-              eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
-            )
-            .where(eq(produtoTabelaComercial.produtoId, produto.id));
+          try {
+            const todasTabelas = await db
+              .select({
+                id: tabelasComerciais.id,
+                nomeTabela: tabelasComerciais.nomeTabela,
+                taxaJuros: tabelasComerciais.taxaJuros,
+                prazos: tabelasComerciais.prazos,
+                comissao: tabelasComerciais.comissao,
+                parceiroId: tabelasComerciais.parceiroId,
+              })
+              .from(tabelasComerciais)
+              .innerJoin(
+                produtoTabelaComercial,
+                eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
+              )
+              .where(eq(produtoTabelaComercial.produtoId, produto.id));
 
-          tabelasDisponiveis = todasTabelas.map((t) => ({
-            id: t.id,
-            nomeTabela: t.nomeTabela,
-            taxaJuros: t.taxaJuros,
-            prazos: t.prazos,
-            comissao: t.comissao,
-            tipo: t.parceiroId ? ('personalizada' as const) : ('geral' as const),
-          }));
+            tabelasDisponiveis = todasTabelas.map((t) => ({
+              id: t.id,
+              nomeTabela: t.nomeTabela,
+              taxaJuros: t.taxaJuros,
+              prazos: t.prazos,
+              comissao: t.comissao,
+              tipo: t.parceiroId ? ('personalizada' as const) : ('geral' as const),
+            }));
+          } catch (tabelasError) {
+            console.error('[ORIGINATION-024] Erro ao buscar tabelas administrativas:', tabelasError);
+            tabelasDisponiveis = []; // Fallback to empty array
+          }
         } else {
           // Standard flow: fetch personalized tables for this partner first
-          const tabelasPersonalizadas = await db
-            .select({
-              id: tabelasComerciais.id,
-              nomeTabela: tabelasComerciais.nomeTabela,
-              taxaJuros: tabelasComerciais.taxaJuros,
-              prazos: tabelasComerciais.prazos,
-              comissao: tabelasComerciais.comissao,
-            })
-            .from(tabelasComerciais)
-            .innerJoin(
-              produtoTabelaComercial,
-              eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
-            )
-            .where(
-              and(
-                eq(produtoTabelaComercial.produtoId, produto.id),
-                eq(tabelasComerciais.parceiroId, parceiroId)
-              )
-            );
-
-          tabelasDisponiveis = tabelasPersonalizadas.map((t) => ({
-            id: t.id,
-            nomeTabela: t.nomeTabela,
-            taxaJuros: t.taxaJuros,
-            prazos: t.prazos,
-            comissao: t.comissao,
-            tipo: 'personalizada' as const,
-          }));
-
-          // If no personalized tables, fetch general tables using N:N relationship
-          if (tabelasPersonalizadas.length === 0) {
-            const tabelasGerais = await db
+          try {
+            const tabelasPersonalizadas = await db
               .select({
                 id: tabelasComerciais.id,
                 nomeTabela: tabelasComerciais.nomeTabela,
@@ -415,18 +446,58 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
               .where(
                 and(
                   eq(produtoTabelaComercial.produtoId, produto.id),
-                  isNull(tabelasComerciais.parceiroId)
+                  eq(tabelasComerciais.parceiroId, parceiroId)
                 )
               );
 
-            tabelasDisponiveis = tabelasGerais.map((t) => ({
+            tabelasDisponiveis = tabelasPersonalizadas.map((t) => ({
               id: t.id,
               nomeTabela: t.nomeTabela,
               taxaJuros: t.taxaJuros,
               prazos: t.prazos,
               comissao: t.comissao,
-              tipo: 'geral' as 'personalizada' | 'geral',
+              tipo: 'personalizada' as const,
             }));
+
+            // If no personalized tables, fetch general tables using N:N relationship
+            if (tabelasPersonalizadas.length === 0) {
+              try {
+                const tabelasGerais = await db
+                  .select({
+                    id: tabelasComerciais.id,
+                    nomeTabela: tabelasComerciais.nomeTabela,
+                    taxaJuros: tabelasComerciais.taxaJuros,
+                    prazos: tabelasComerciais.prazos,
+                    comissao: tabelasComerciais.comissao,
+                  })
+                  .from(tabelasComerciais)
+                  .innerJoin(
+                    produtoTabelaComercial,
+                    eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
+                  )
+                  .where(
+                    and(
+                      eq(produtoTabelaComercial.produtoId, produto.id),
+                      isNull(tabelasComerciais.parceiroId)
+                    )
+                  );
+
+                tabelasDisponiveis = tabelasGerais.map((t) => ({
+                  id: t.id,
+                  nomeTabela: t.nomeTabela,
+                  taxaJuros: t.taxaJuros,
+                  prazos: t.prazos,
+                  comissao: t.comissao,
+                  tipo: 'geral' as 'personalizada' | 'geral',
+                }));
+              } catch (tabelasGeraisError) {
+                console.error('[ORIGINATION-025] Erro ao buscar tabelas gerais:', tabelasGeraisError);
+                tabelasDisponiveis = []; // Fallback to empty array
+              }
+            }
+          } catch (tabelasPersonalizadasError) {
+            console.error('[ORIGINATION-026] Erro ao buscar tabelas personalizadas:', tabelasPersonalizadasError);
+            tabelasDisponiveis = []; // Fallback to empty array
           }
         }
 
@@ -442,6 +513,17 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
         };
       })
     );
+    } catch (produtosComTabelasError) {
+      console.error('[ORIGINATION-027] Erro ao processar produtos com tabelas:', produtosComTabelasError);
+      // Fallback: Create minimal product list without tables
+      produtosComTabelas = produtosAtivos.map(produto => ({
+        id: produto.id,
+        nome: produto.nomeProduto,
+        tacValor: produto.tacValor || '0',
+        tacTipo: produto.tacTipo || 'fixo',
+        tabelasDisponiveis: [], // Empty tables when query fails
+      }));
+    }
 
     // 4. Build the orchestrated response
     const context: OriginationContext = {
