@@ -1,0 +1,30 @@
+index-DCcUDTC4.js:56 🔐 [AUTH EVENT] SIGNED_IN Object
+index-DCcUDTC4.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-DCcUDTC4.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-DCcUDTC4.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+index-DCcUDTC4.js:56 DEBUG - First 3 proposals values: Array(0)
+index-DCcUDTC4.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-DCcUDTC4.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+index-DCcUDTC4.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-DCcUDTC4.js:56 [API Client] After dual-key transformation: Object
+index-DCcUDTC4.js:56 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+index-DCcUDTC4.js:56 DEBUG - First 3 proposals values: Array(0)
+index-DCcUDTC4.js:56 🔐 [AUTH EVENT] INITIAL_SESSION Object
+index-DCcUDTC4.js:56 DEBUG - First 3 proposals values: Array(0)
+index-DCcUDTC4.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-15T18:28:52.000Z
+index-DCcUDTC4.js:56 [PASSO 3 - ENVIO] Object
+index-DCcUDTC4.js:56 [PASSO 3 - ENVIO] Object
+index-DCcUDTC4.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-DCcUDTC4.js:56 [API Client] After dual-key transformation: Object
+index-DCcUDTC4.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-DCcUDTC4.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+index-DCcUDTC4.js:56 DEBUG - First 3 proposals values: Array(0)
+index-DCcUDTC4.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-DCcUDTC4.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-DCcUDTC4.js:56 [PASSO 3 - ENVIO] Object
+index-DCcUDTC4.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas : Object
+index-DCcUDTC4.js:56 [API Client] After dual-key transformation: Object
+index-DCcUDTC4.js:56 DEBUG - First 3 proposals values: Array(3)
