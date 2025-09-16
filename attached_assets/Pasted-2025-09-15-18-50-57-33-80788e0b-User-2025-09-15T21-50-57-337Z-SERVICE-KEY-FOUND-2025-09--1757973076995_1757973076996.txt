@@ -1,0 +1,164 @@
+2025-09-15 18:50:57.33
+80788e0b
+User
+🔍 [2025-09-15T21:50:57.337Z] SERVICE_KEY: [FOUND]
+2025-09-15 18:50:57.33
+80788e0b
+User
+🔍 [2025-09-15T21:50:57.337Z] URL source: valid-supabase-domain
+2025-09-15 18:50:57.33
+80788e0b
+User
+🔍 [2025-09-15T21:50:57.337Z] Project ID: dvglgxrvhmtsixaabxha
+2025-09-15 18:50:57.33
+80788e0b
+User
+🔍 [2025-09-15T21:50:57.337Z] SERVICE_KEY length: 219 chars
+2025-09-15 18:50:57.33
+80788e0b
+User
+🔍 [2025-09-15T21:50:57.337Z] SERVICE_KEY prefix: eyJhbGciOiJIUzI1NiIs...
+2025-09-15 18:50:57.33
+80788e0b
+User
+🔍 [2025-09-15T21:50:57.337Z] SERVICE_KEY format valid: YES
+2025-09-15 18:50:57.33
+80788e0b
+User
+✅ [2025-09-15T21:50:57.337Z] Supabase Admin Client configurado com sucesso
+2025-09-15 18:50:57.33
+80788e0b
+User
+🧪 [2025-09-15T21:50:57.337Z] Running immediate client validation test...
+2025-09-15 18:50:57.34
+80788e0b
+User
+{"correlationId":"qtkw61qxw","environment":"production","level":"info","message":"✅ [FORMALIZATION] Supabase client initialized","service":"simpix-api","step":"SUPABASE_INIT","timestamp":"2025-09-15 21:50:57","version":"1.0.0"}
+2025-09-15 18:50:57.34
+80788e0b
+User
+{"correlationId":"qtkw61qxw","environment":"production","level":"info","message":"🔐 [FORMALIZATION] No additional filter (ADMIN/ANALISTA)","service":"simpix-api","step":"QUERY_FILTER","timestamp":"2025-09-15 21:50:57","userRole":"ADMINISTRADOR","version":"1.0.0"}
+2025-09-15 18:50:57.36
+80788e0b
+User
+{"correlationId":"qtkw61qxw","environment":"production","hasError":true,"level":"info","message":"✅ [FORMALIZATION] Database query executed","queryDuration":30,"resultCount":0,"service":"simpix-api","step":"QUERY_EXECUTED","timestamp":"2025-09-15 21:50:57","version":"1.0.0"}
+2025-09-15 18:50:57.37
+80788e0b
+User
+{"environment":"production","error":{},"level":"error","message":"❌ [FORMALIZATION] Supabase query returned error","service":"simpix-api","timestamp":"2025-09-15 21:50:57","version":"1.0.0"}
+2025-09-15 18:50:57.37
+80788e0b
+User
+{"correlationId":"0d6f52cc-b502-41b5-ac13-3a40051ce337","duration":1033,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":166,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-15 21:50:57","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 18:50:57.37
+80788e0b
+User
+{"correlationId":"0d6f52cc-b502-41b5-ac13-3a40051ce337","duration":1033,"environment":"production","level":"warn","message":"⚠️ Slow request detected","service":"simpix-api","threshold":1000,"timestamp":"2025-09-15 21:50:57","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 18:50:57.37
+80788e0b
+User
+{"correlationId":"0d6f52cc-b502-41b5-ac13-3a40051ce337","duration":1033,"environment":"production","error":"{\"message\":\"Erro na consulta de propostas de formalização\",\"error\":\"SUPABASE_QUERY_ERROR\",\"details\":\"Invalid API key\",\"correlationId\":\"qtkw61qxw\"}","level":"error","message":"❌ Request error","method":"GET","service":"simpix-api","statusCode":500,"timestamp":"2025-09-15 21:50:57","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 18:50:57.37
+80788e0b
+User
+[PERFORMANCE] ⚠️ SLOW GET /api/propostas/formalizacao {
+2025-09-15 18:50:57.37
+80788e0b
+User
+correlationId: 'perf-1757973056338-jubm72c2r',
+2025-09-15 18:50:57.37
+80788e0b
+User
+duration: 1032,
+2025-09-15 18:50:57.37
+80788e0b
+User
+memoryDeltaMB: 0,
+2025-09-15 18:50:57.37
+80788e0b
+User
+statusCode: 500,
+2025-09-15 18:50:57.37
+80788e0b
+User
+isCritical: false,
+2025-09-15 18:50:57.37
+80788e0b
+User
+threshold: 1000
+2025-09-15 18:50:57.37
+80788e0b
+User
+}
+2025-09-15 18:50:57.37
+80788e0b
+User
+[PERFORMANCE] ⚠️ SLOW GET /api/propostas/formalizacao {
+2025-09-15 18:50:57.37
+80788e0b
+User
+correlationId: 'perf-1757973056338-y0k9ipdt1',
+2025-09-15 18:50:57.37
+80788e0b
+User
+duration: 1032,
+2025-09-15 18:50:57.37
+80788e0b
+User
+memoryDeltaMB: 0,
+2025-09-15 18:50:57.37
+80788e0b
+User
+statusCode: 500,
+2025-09-15 18:50:57.37
+80788e0b
+User
+isCritical: false,
+2025-09-15 18:50:57.37
+80788e0b
+User
+threshold: 1000
+2025-09-15 18:50:57.37
+80788e0b
+User
+}
+2025-09-15 18:51:03.14
+b905e9d6
+User
+[CIRCUIT BREAKER] 🧹 Limpeza: 1 entradas removidas
+2025-09-15 18:51:07.77
+b905e9d6
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 18:51:07.77
+b905e9d6
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 18:51:07.77
+b905e9d6
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 18:51:07.77
+b905e9d6
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 18:51:07.76
+80788e0b
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 18:51:07.76
+80788e0b
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 18:51:07.76
+80788e0b
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 18:51:07.76
+80788e0b
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+
+Wrap
+
+Colors
