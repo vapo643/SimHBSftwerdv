@@ -187,6 +187,18 @@ const AnaliseManualPage: React.FC = () => {
 
   // Mapper inline para dados da API com estrutura aninhada
   const mapProposta = (rawData: any) => {
+    // 🔍 DEBUG TEMPORÁRIO: Ver quais campos estão chegando
+    console.log('🔍 [DEBUG] Email campos disponíveis:', { 
+      emailCliente: rawData.emailCliente,
+      clienteEmail: rawData.clienteEmail, 
+      cliente_email: rawData.cliente_email
+    });
+    console.log('🔍 [DEBUG] Telefone campos disponíveis:', { 
+      telefoneCliente: rawData.telefoneCliente,
+      clienteTelefone: rawData.clienteTelefone, 
+      cliente_telefone: rawData.cliente_telefone
+    });
+
     // Parse client data if it's a JSON string
     let clienteData = rawData.cliente_data || rawData.clienteData || {};
     if (typeof clienteData === 'string') {
