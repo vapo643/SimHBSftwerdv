@@ -1,0 +1,74 @@
+### **PACOTE DE ATIVAÇÃO DE MISSÃO (PAM) V1.0 - CORREÇÃO CRÍTICA DE VITE HMR**
+
+* **Nível de Crise:** MÁXIMO
+* **Ferramenta Alocada:** High Power (Claude Opus)
+* **Sumário da Missão:** Executar uma correção cirúrgica no ficheiro `vite.config.ts` para injetar a configuração de servidor HMR (Hot Module Replacement) correta, resolvendo a falha de conexão WebSocket que está a causar a falha total de renderização do frontend ("tela branca").
+
+* **Intenção Estratégica:** Restaurar a funcionalidade da camada de apresentação (UI) para que possamos retomar a "Operação de Reconciliação Sistêmica" e resolver os problemas de dados subjacentes. A estabilização do frontend é a nossa prioridade tática imediata.
+
+---
+
+**[DIRETIVA DE EXECUÇÃO CIRÚRGICA (PEC)]**
+
+* Você está a operar sob o protocolo PEC. A sua solução deve ser minimamente invasiva. Modifique **APENAS** o ficheiro `vite.config.ts`. Não altere nenhum outro ficheiro ou configuração.
+
+---
+
+**IMPLEMENTAR:**
+Plano de Remediação da Configuração do Servidor de Desenvolvimento Vite.
+
+**CURRENT STATE:**
+O ficheiro `vite.config.ts` não possui a configuração `server.hmr` necessária para ambientes de proxy como o Replit. Isto faz com que o cliente Vite no navegador tente conectar-se a `localhost:5173` via WebSocket, o que falha, resultando numa "tela branca" e na paralisia total do frontend.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O frontend deve ser renderizado com sucesso, eliminando a "tela branca".
+2.  Os erros de conexão WebSocket no console do navegador devem desaparecer.
+3.  O ficheiro `vite.config.ts` deve ser atualizado para incluir a configuração HMR correta.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**Passo 1: [Localização e Modificação]**
+1.  Abra o ficheiro `vite.config.ts`.
+2.  Localize o objeto de configuração `server`.
+3.  Dentro do objeto `server`, adicione a seguinte propriedade `hmr` **exatamente** como mostrado abaixo, garantindo que as outras propriedades como `fs` permaneçam intactas:
+
+    ```typescript
+    // No ficheiro vite.config.ts
+
+    // ... outras configurações ...
+    server: {
+      fs: {
+        strict: true,
+        deny: ['**/.*'],
+      },
+      // INÍCIO DO CÓDIGO A SER ADICIONADO
+      hmr: {
+        clientPort: 443,
+        host: '0.0.0.0',
+      },
+      // FIM DO CÓDIGO A SER ADICIONADO
+    },
+    // ... resto da configuração ...
+    ```
+
+**Passo 2: [Validação de Integridade]**
+1.  Execute `get_latest_lsp_diagnostics`. O resultado **DEVE** ser zero erros. Corrija quaisquer erros de sintaxe introduzidos antes de concluir.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas]
+* **VALIDAÇÃO PENDENTE:** [O Executor Humano irá validar o carregamento do frontend após a sua execução.]
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato afetado (`vite.config.ts`).
+2.  Garantir que a sintaxe do objeto `server` permanece válida.
+3.  Executar `get_latest_lsp_diagnostics` e corrigir **TODOS** os erros.
+4.  **Declarar Nível de Confiança (0-100%)** na implementação.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  Realizar um teste funcional reiniciando o servidor de desenvolvimento e solicitando a validação do Executor Humano.
+7.  **Documentar Decisões Técnicas** (ex: "Injetada configuração HMR específica para o Vite operar corretamente por trás de um ambiente de proxy como o Replit.").
