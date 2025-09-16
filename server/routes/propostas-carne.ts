@@ -321,7 +321,7 @@ router.get('/:id/historico', jwtAuthMiddleware, async (req, res) => {
     const proposta = propostaResult[0];
     console.log(`[PROPOSTA HISTÓRICO] Proposta encontrada: ${proposta.clienteNome}`);
     
-    // 2. Buscar logs de auditoria com dados dos usuários
+    // 2. Buscar logs de auditoria com dados dos usuários (mais recentes primeiro)
     const logsResult = await db
       .select({
         id: propostaLogs.id,
@@ -337,17 +337,34 @@ router.get('/:id/historico', jwtAuthMiddleware, async (req, res) => {
       .from(propostaLogs)
       .leftJoin(profiles, eq(propostaLogs.autorId, profiles.id))
       .where(eq(propostaLogs.propostaId, id))
-      .orderBy(asc(propostaLogs.createdAt));
+      .orderBy(desc(propostaLogs.createdAt))
+      .limit(200);
 
     console.log(`[PROPOSTA HISTÓRICO] Encontrados ${logsResult.length} logs de auditoria`);
     
-    // 3. Determinar o primeiro autor (criador da proposta)
-    const primeiroAutor = logsResult.length > 0 ? logsResult[0].usuarioNome || null : null;
+    // 3. Determinar o primeiro autor (criador da proposta) - buscar o mais ANTIGO log
+    let primeiroAutor = null;
+    if (logsResult.length > 0) {
+      // Buscar o primeiro log (mais antigo) para identificar o criador real
+      const primeiroLogResult = await db
+        .select({
+          usuarioNome: profiles.fullName,
+        })
+        .from(propostaLogs)
+        .leftJoin(profiles, eq(propostaLogs.autorId, profiles.id))
+        .where(eq(propostaLogs.propostaId, id))
+        .orderBy(asc(propostaLogs.createdAt)) // ASC para pegar o mais antigo (criador)
+        .limit(1);
+        
+      primeiroAutor = primeiroLogResult.length > 0 ? primeiroLogResult[0].usuarioNome : null;
+    }
     
     // 4. Transformar logs para formato esperado pelo frontend
     const transformedLogs = logsResult.map(log => ({
       id: log.id,
+      // ✅ CORREÇÃO: Garantir ambos os formatos para máxima compatibilidade
       created_at: log.createdAt?.toISOString() || new Date().toISOString(),
+      createdAt: log.createdAt?.toISOString() || new Date().toISOString(), // Frontend espera camelCase
       status_novo: log.statusNovo,
       status_anterior: log.statusAnterior || null,
       observacao: log.observacao || null,

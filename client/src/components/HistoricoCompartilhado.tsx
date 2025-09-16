@@ -87,16 +87,16 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
                 Proposta Criada
               </p>
               <p className="text-xs text-gray-400">
-                {auditLogs?.propostaCriada?.data
-                  ? new Date(auditLogs.propostaCriada.data).toLocaleString('pt-BR')
-                  : proposta?.createdAt
-                    ? new Date(proposta.createdAt).toLocaleString('pt-BR')
-                    : 'Data não disponível'}
+                {(auditLogs?.propostaCriada?.data || proposta?.createdAt || proposta?.created_at)
+                  ? new Date(auditLogs?.propostaCriada?.data || proposta?.createdAt || proposta?.created_at || new Date()).toLocaleString('pt-BR')
+                  : 'Data não disponível'}
               </p>
               <p className="mt-1 text-sm text-gray-300">
                 {auditLogs?.propostaCriada?.por
                   ? `Proposta criada por ${auditLogs.propostaCriada.por}`
-                  : `Proposta criada pelo atendente da loja ${proposta?.loja?.nomeLoja || proposta?.loja?.nome_loja || 'N/A'}`}
+                  : proposta?.nomeLoja || proposta?.loja?.nomeLoja || proposta?.loja?.nome_loja
+                    ? `Proposta criada pelo atendente da loja ${proposta.nomeLoja || proposta.loja?.nomeLoja || proposta.loja?.nome_loja}`
+                    : 'Proposta criada pelo sistema'}
               </p>
             </div>
           </div>
@@ -242,7 +242,8 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
           ) : (
             <div className="py-4 text-center text-gray-400">
               <MessageCircle className="mx-auto mb-2 h-8 w-8 opacity-50" />
-              <p>Nenhuma comunicação registrada ainda</p>
+              <p>Nenhuma ação adicional registrada</p>
+              <p className="mt-1 text-xs text-gray-500">As próximas movimentações aparecerão automaticamente aqui</p>
             </div>
           )}
         </div>
