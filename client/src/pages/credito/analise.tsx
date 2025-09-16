@@ -143,6 +143,7 @@ const AnaliseManualPage: React.FC = () => {
       // Invalidar múltiplas queries para sincronização completa
       queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
       queryClient.invalidateQueries({ queryKey: ['proposta_logs', propostaId] });
+      queryClient.invalidateQueries({ queryKey: ['proposta_historico', propostaId] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/observacoes`] });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
@@ -287,6 +288,7 @@ const AnaliseManualPage: React.FC = () => {
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
     queryClient.invalidateQueries({ queryKey: ['proposta_logs', propostaId] });
+    queryClient.invalidateQueries({ queryKey: ['proposta_historico', propostaId] });
     queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
     queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/observacoes`] });
   };
