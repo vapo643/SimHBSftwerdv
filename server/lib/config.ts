@@ -121,17 +121,18 @@ function generateSecureSecret(name: string): string {
 
 // OPERAÇÃO PHOENIX: Função JWT EXPLÍCITA e SEGURA
 function getJwtSecret(): string {
-  // OPERAÇÃO PHOENIX: JWT Secret opcional para Supabase auth
+  // A configuração DEVE vir explicitamente do ambiente. Sem fallbacks, sem magia.
   const secret = process.env.SUPABASE_JWT_SECRET;
 
   if (!secret) {
-    console.warn('⚠️ SUPABASE_JWT_SECRET não configurado - usando Supabase auth em vez de JWT local');
-    console.log('ℹ️  Configure SUPABASE_JWT_SECRET apenas se necessário para validação local');
-    // Retornar um fallback para desenvolvimento quando não há secret configurado
-    if (process.env.NODE_ENV !== 'production') {
-      return generateSecureSecret('JWT_SECRET');
+    console.error('🚨 FATAL ERROR (OPERAÇÃO PHOENIX): SUPABASE_JWT_SECRET não está configurado.');
+    console.error('Configure em: Settings → Environment Variables → SUPABASE_JWT_SECRET');
+    // Em produção, devemos falhar rápido se a configuração crítica estiver ausente.
+    if (process.env.NODE_ENV === 'production') {
+        console.error('🚨 Encerrando aplicação para prevenir falhas de segurança.');
+        process.exit(1);
     }
-    throw new Error('SUPABASE_JWT_SECRET obrigatório em produção para JWT local');
+    throw new Error('Segredo JWT obrigatório não configurado (SUPABASE_JWT_SECRET).');
   }
 
   // Validação de formato
@@ -283,54 +284,6 @@ export function isAppOperational(): boolean {
   return config.database.url !== null || config.nodeEnv === 'development';
 }
 
-// VERIFICAÇÃO DE COMPATIBILIDADE SUPABASE URL/CHAVE
-export function validateSupabaseConfig(): void {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    log('⚠️ Supabase config incomplete - skipping compatibility check');
-    return;
-  }
-
-  try {
-    // Extrair project ref da URL
-    const urlMatch = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/);
-    if (!urlMatch) {
-      log(`🚨 SUPABASE URL format invalid: ${supabaseUrl}`);
-      return;
-    }
-    const urlProjectRef = urlMatch[1];
-
-    // Decodificar chave anon para extrair project ref
-    const payload = supabaseAnonKey.split('.')[1];
-    if (!payload) {
-      log('🚨 SUPABASE ANON KEY format invalid');
-      return;
-    }
-    
-    const decoded = JSON.parse(Buffer.from(payload, 'base64').toString());
-    const keyProjectRef = decoded.ref;
-
-    // Verificar compatibilidade
-    if (urlProjectRef !== keyProjectRef) {
-      log('🚨 SUPABASE CONFIG MISMATCH DETECTED!');
-      log(`   URL project ref: ${urlProjectRef}`);
-      log(`   Key project ref: ${keyProjectRef}`);
-      log('   ⚡ ACTION REQUIRED: Fix VITE_SUPABASE_URL to match the project ref from ANON_KEY');
-      
-      if (process.env.NODE_ENV === 'development') {
-        log(`   💡 SUGGESTED FIX: VITE_SUPABASE_URL=https://${keyProjectRef}.supabase.co`);
-      }
-    } else {
-      log('✅ Supabase URL/Key compatibility verified');
-      log(`   Project ref: ${urlProjectRef}`);
-    }
-  } catch (error) {
-    log(`⚠️ Could not validate Supabase config compatibility: ${error}`);
-  }
-}
-
 // Export das funções para uso externo
 export { getJwtSecret, getSessionSecret, getCsrfSecret };
 
@@ -344,7 +297,4 @@ export function logConfigStatus(): void {
   log(
     `  - Security: Rate Limit ${config.security.enableRateLimit ? '✅' : '❌'}, Helmet ${config.security.enableHelmet ? '✅' : '❌'}`
   );
-  
-  // Executar verificação de compatibilidade Supabase
-  validateSupabaseConfig();
 }
