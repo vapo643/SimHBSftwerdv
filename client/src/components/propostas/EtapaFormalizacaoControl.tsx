@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/apiClient';
 import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { queryKeys } from '@/hooks/queries/queryKeys';
 
 interface EtapaFormalizacaoControlProps {
   propostaId: string;
@@ -44,8 +45,8 @@ export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> =
       });
 
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId, 'formalizacao'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.proposta.formalizacao(propostaId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.propostas.formalizacao() });
 
       if (onUpdate) {
         onUpdate();

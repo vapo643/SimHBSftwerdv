@@ -13,6 +13,50 @@
 import { getSupabase } from './supabase';
 
 /**
+ * Type guard to detect envelope response format
+ * Checks if payload follows the {success: boolean, data?: any, error?: string, message?: string} pattern
+ */
+function isEnvelope(payload: any): payload is { success: boolean; data?: any; error?: string; message?: string } {
+  return payload && 
+         typeof payload === 'object' && 
+         'success' in payload && 
+         typeof payload.success === 'boolean';
+}
+
+/**
+ * Centralized envelope unwrapping function with robust type guards
+ * Eliminates architectural fragmentation by handling all envelope patterns consistently
+ * 
+ * @param payload - Raw API response payload
+ * @returns Normalized data or throws ApiError for failed responses
+ */
+function normalizeApiData<T>(payload: any): T {
+  // Type guard: Check if this is an envelope response
+  if (isEnvelope(payload)) {
+    // Success envelope: extract data
+    if (payload.success === true) {
+      return payload.data as T;
+    }
+    
+    // Error envelope: throw ApiError with backend message
+    if (payload.success === false) {
+      const errorMessage = payload.error || payload.message || 'Backend error occurred';
+      throw new ApiError(
+        errorMessage,
+        400, // Default to 400 for backend validation errors
+        'Backend Error',
+        undefined,
+        ApiErrorCode.VALIDATION_ERROR,
+        payload // Include full error payload for debugging
+      );
+    }
+  }
+  
+  // Direct response: return as-is (for non-envelope APIs)
+  return payload as T;
+}
+
+/**
  * Transform snake_case keys to camelCase while preserving original keys (dual-key mode)
  * This ensures compatibility with both backend (snake_case) and frontend (camelCase) conventions
  */
@@ -694,32 +738,86 @@ export const robustApiClient = {
 };
 
 /**
- * Convenience methods for common HTTP operations
+ * Convenience methods for common HTTP operations with centralized envelope unwrapping
+ * All methods apply normalizeApiData() after response parsing and dual-key transformation
  */
 export const api = {
-  get: <T = any>(url: string, options: Omit<ApiClientOptions, 'method'> = {}) =>
-    apiClient<T>(url, { ...options, method: 'GET' }),
+  get: async <T = any>(url: string, options: Omit<ApiClientOptions, 'method'> = {}): Promise<T> => {
+    const response = await apiClient<T>(url, { ...options, method: 'GET' });
+    
+    // For blob responses, return directly (no envelope processing)
+    if (options.responseType === 'blob' || options.responseType === 'text') {
+      return response as T;
+    }
+    
+    // For JSON responses, extract data and apply normalization
+    const responseData = (response as ApiResponse<T>).data;
+    return normalizeApiData<T>(responseData);
+  },
 
-  post: <T = any>(
+  post: async <T = any>(
     url: string,
     body?: unknown,
     options: Omit<ApiClientOptions, 'method' | 'body'> = {}
-  ) => apiClient<T>(url, { ...options, method: 'POST', body }),
+  ): Promise<T> => {
+    const response = await apiClient<T>(url, { ...options, method: 'POST', body });
+    
+    // For blob responses, return directly (no envelope processing)
+    if (options.responseType === 'blob' || options.responseType === 'text') {
+      return response as T;
+    }
+    
+    // For JSON responses, extract data and apply normalization
+    const responseData = (response as ApiResponse<T>).data;
+    return normalizeApiData<T>(responseData);
+  },
 
-  put: <T = any>(
+  put: async <T = any>(
     url: string,
     body?: unknown,
     options: Omit<ApiClientOptions, 'method' | 'body'> = {}
-  ) => apiClient<T>(url, { ...options, method: 'PUT', body }),
+  ): Promise<T> => {
+    const response = await apiClient<T>(url, { ...options, method: 'PUT', body });
+    
+    // For blob responses, return directly (no envelope processing)
+    if (options.responseType === 'blob' || options.responseType === 'text') {
+      return response as T;
+    }
+    
+    // For JSON responses, extract data and apply normalization
+    const responseData = (response as ApiResponse<T>).data;
+    return normalizeApiData<T>(responseData);
+  },
 
-  patch: <T = any>(
+  patch: async <T = any>(
     url: string,
     body?: unknown,
     options: Omit<ApiClientOptions, 'method' | 'body'> = {}
-  ) => apiClient<T>(url, { ...options, method: 'PATCH', body }),
+  ): Promise<T> => {
+    const response = await apiClient<T>(url, { ...options, method: 'PATCH', body });
+    
+    // For blob responses, return directly (no envelope processing)
+    if (options.responseType === 'blob' || options.responseType === 'text') {
+      return response as T;
+    }
+    
+    // For JSON responses, extract data and apply normalization
+    const responseData = (response as ApiResponse<T>).data;
+    return normalizeApiData<T>(responseData);
+  },
 
-  delete: <T = any>(url: string, options: Omit<ApiClientOptions, 'method'> = {}) =>
-    apiClient<T>(url, { ...options, method: 'DELETE' }),
+  delete: async <T = any>(url: string, options: Omit<ApiClientOptions, 'method'> = {}): Promise<T> => {
+    const response = await apiClient<T>(url, { ...options, method: 'DELETE' });
+    
+    // For blob responses, return directly (no envelope processing)
+    if (options.responseType === 'blob' || options.responseType === 'text') {
+      return response as T;
+    }
+    
+    // For JSON responses, extract data and apply normalization
+    const responseData = (response as ApiResponse<T>).data;
+    return normalizeApiData<T>(responseData);
+  },
 };
 
 export default apiClient;

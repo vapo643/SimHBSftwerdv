@@ -11,6 +11,7 @@ import {
   Send,
 } from 'lucide-react';
 import { api } from '@/lib/apiClient';
+import { queryKeys } from '@/hooks/queries/queryKeys';
 
 interface HistoricoCompartilhadoProps {
   propostaId: string;
@@ -20,11 +21,10 @@ interface HistoricoCompartilhadoProps {
 const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propostaId }) => {
   // Query para buscar dados da proposta - APENAS reativa (sem polling)
   const { data: proposta, isLoading } = useQuery({
-    queryKey: [`/api/propostas/${propostaId}`],
+    queryKey: queryKeys.proposta.all(propostaId),
     queryFn: async () => {
-      const response = await api.get(`/api/propostas/${propostaId}`);
-      // Handle envelope response format {success: true, data: {...}}
-      return response.data.success !== undefined ? response.data.data : response.data;
+      // API methods now return normalized data directly (envelope unwrapping handled centrally)
+      return await api.get(`/api/propostas/${propostaId}`);
     },
     enabled: !!propostaId,
     refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
@@ -34,12 +34,11 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
 
   // Query para buscar logs de auditoria - APENAS reativa (sem polling)
   const { data: auditLogs } = useQuery({
-    queryKey: ['proposta_historico', propostaId],
+    queryKey: queryKeys.proposta.historico(propostaId),
     queryFn: async () => {
       try {
-        const response = await api.get(`/api/propostas/${propostaId}/historico`);
-        // Handle envelope response format {success: true, data: {...}}
-        return response.data.success !== undefined ? response.data.data : response.data;
+        // API methods now return normalized data directly (envelope unwrapping handled centrally)
+        return await api.get(`/api/propostas/${propostaId}/historico`);
       } catch (error) {
         console.warn('Erro ao buscar logs de auditoria:', error);
         return { logs: [], propostaCriada: null, total: 0 };

@@ -16,34 +16,17 @@ export async function apiRequest(
 ): Promise<unknown> {
   const { method, body, responseType = 'json' } = options;
 
-  // PAM V1.0 - FASE 1: Suporte a blob responses para downloads de PDF
-  if (responseType === 'blob') {
-    // Para blob responses, usar apiClient com responseType blob
-    if (method === 'GET') {
-      const blob = (await api.get(url, { responseType: 'blob' })) as Blob;
-      return blob;
-    } else {
-      throw new Error(`Blob responseType not supported for method: ${method}`);
-    }
-  }
-
-  // Use the new api client methods for JSON responses
+  // API methods now return normalized data directly (envelope unwrapping handled centrally)
   if (method === 'GET') {
-    const response = await api.get(url);
-    return response.data;
+    return await api.get(url, { responseType });
   } else if (method === 'POST') {
-    const response = await api.post(url, body);
-    return response.data;
+    return await api.post(url, body, { responseType });
   } else if (method === 'PUT') {
-    const response = await api.put(url, body);
-    return response.data;
+    return await api.put(url, body, { responseType });
   } else if (method === 'PATCH') {
-    // PAM V1.0 - HOTFIX: Adicionar suporte para PATCH
-    const response = await api.patch(url, body);
-    return response.data;
+    return await api.patch(url, body, { responseType });
   } else if (method === 'DELETE') {
-    const response = await api.delete(url);
-    return response.data;
+    return await api.delete(url, { responseType });
   }
 
   throw new Error(`Unsupported method: ${method}`);
@@ -56,8 +39,8 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
     try {
       // Convert queryKey array to URL string
       const url = queryKey.join('/') as string;
-      const response = await api.get(url);
-      return response.data;
+      // API methods now return normalized data directly (envelope unwrapping handled centrally)
+      return await api.get<T>(url);
     } catch (error: any) {
       if (unauthorizedBehavior === 'returnNull' && error.message?.includes('401')) {
         return null;

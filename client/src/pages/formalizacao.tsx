@@ -44,6 +44,7 @@ import { robustApiClient } from '@/lib/apiClient';
 import { useToast } from '@/hooks/use-toast';
 import RefreshButton from '@/components/RefreshButton';
 import { useAuth } from '@/contexts/AuthContext';
+import { queryKeys } from '@/hooks/queries/queryKeys';
 import { EtapaFormalizacaoControl } from '@/components/propostas/EtapaFormalizacaoControl';
 import { DocumentViewer } from '@/components/DocumentViewer';
 import { CCBViewer } from '@/components/CCBViewer';
@@ -171,7 +172,7 @@ function FormalizacaoList() {
 
         if (data.type === 'PROPOSAL_SIGNED' && data.proposalId) {
           // Invalidate formalizacao queries to refresh data
-          queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+          queryClient.invalidateQueries({ queryKey: queryKeys.propostas.formalizacao() });
           console.log('[SSE] 🔄 Proposta atualizada em tempo real:', data.proposalId);
         }
       } catch (error) {
@@ -218,7 +219,7 @@ function FormalizacaoList() {
     isLoading,
     error,
   } = useQuery<Proposta[]>({
-    queryKey: ['/api/propostas/formalizacao'],
+    queryKey: queryKeys.propostas.formalizacao(),
     queryFn: async () => {
       console.log('Fazendo requisição para /api/propostas/formalizacao');
       const response = await apiRequest('/api/propostas/formalizacao');
@@ -320,7 +321,7 @@ function FormalizacaoList() {
   }
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+    queryClient.invalidateQueries({ queryKey: queryKeys.propostas.formalizacao() });
   };
 
   const getTitle = () => {
@@ -591,7 +592,7 @@ export default function Formalizacao() {
     isLoading,
     refetch,
   } = useQuery<Proposta>({
-    queryKey: ['/api/propostas', propostaId, 'formalizacao'],
+    queryKey: queryKeys.proposta.formalizacao(propostaId || ''),
     queryFn: async (): Promise<Proposta> => {
       const response = (await apiRequest(`/api/propostas/${propostaId}/formalizacao`)) as Proposta;
       return response;
@@ -663,7 +664,7 @@ export default function Formalizacao() {
 
   // Query para buscar boletos gerados - OTIMIZADA (após proposta carregar)
   const { data: collectionsData } = useQuery<any[]>({
-    queryKey: ['/api/inter/collections', propostaId],
+    queryKey: queryKeys.inter.collections(propostaId || ''),
     queryFn: async (): Promise<any[]> => {
       if (!propostaId) return [];
       console.log(`[INTER QUERY] Buscando boletos para proposta: ${propostaId}`);
@@ -755,12 +756,14 @@ export default function Formalizacao() {
         title: 'Sucesso',
         description: 'Formalização atualizada com sucesso',
       });
-      queryClient.invalidateQueries({
-        queryKey: ['/api/propostas', propostaId],
-      });
+      if (propostaId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.proposta.all(propostaId),
+        });
+      }
       // Also invalidate the formalization list
       queryClient.invalidateQueries({
-        queryKey: ['/api/propostas/formalizacao'],
+        queryKey: queryKeys.propostas.formalizacao(),
       });
     },
     onError: (error) => {
@@ -801,8 +804,12 @@ export default function Formalizacao() {
     },
     
     onMutate: async () => {
+      if (!propostaId) {
+        throw new Error('ID da proposta não encontrado');
+      }
+      
       // Cancela queries em andamento para evitar race conditions
-      await queryClient.cancelQueries({ queryKey: ['/api/propostas', propostaId] });
+      await queryClient.cancelQueries({ queryKey: queryKeys.proposta.all(propostaId) });
       
       // Snapshot do estado anterior para rollback
       const previousProposta = queryClient.getQueryData(['/api/propostas', propostaId]);
@@ -821,7 +828,7 @@ export default function Formalizacao() {
       console.error('❌ [MUTATION] marcarComoConcluida failed:', error);
       
       // Rollback em caso de erro
-      if (context?.previousProposta) {
+      if (context?.previousProposta && propostaId) {
         queryClient.setQueryData(['/api/propostas', propostaId], context.previousProposta);
       }
       
@@ -837,13 +844,13 @@ export default function Formalizacao() {
       console.log('🎉 [MUTATION] marcarComoConcluida succeeded');
       
       // Invalida TODAS as queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/inter/collections', propostaId] });
-      
-      // Força refetch imediato
-      queryClient.refetchQueries({ queryKey: ['/api/propostas', propostaId] });
+      if (propostaId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.proposta.all(propostaId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.inter.collections(propostaId) });
+        queryClient.refetchQueries({ queryKey: queryKeys.proposta.all(propostaId) });
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.propostas.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.propostas.formalizacao() });
       
       toast({
         title: 'Sucesso',
@@ -853,7 +860,9 @@ export default function Formalizacao() {
     
     onSettled: () => {
       // Sempre refetch após mutation (sucesso ou erro)
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
+      if (propostaId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.proposta.all(propostaId) });
+      }
     }
   });
 
@@ -895,8 +904,10 @@ export default function Formalizacao() {
       setClickSignData(data);
       
       // Invalida e refetch
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/clicksign/status', propostaId] });
+      if (propostaId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.proposta.all(propostaId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.clicksign.status(propostaId) });
+      }
       
       toast({
         title: 'Sucesso',
@@ -1014,8 +1025,8 @@ export default function Formalizacao() {
         console.log('🚀 [FRONTEND-FIX] Iniciando invalidação de cache após ClickSign');
         
         // 🎯 SOLUÇÃO 1: Invalidar cache específica (mais robusta que refetch)
-        await queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
-        await queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.proposta.all(propostaId) });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.propostas.all });
         
         // 🎯 SOLUÇÃO 2: Forçar atualização imediata do estado local
         queryClient.setQueryData(['/api/propostas', propostaId], (oldData: any) => {
@@ -1068,7 +1079,7 @@ export default function Formalizacao() {
 
   // Carregar status ClickSign na inicialização - OTIMIZADA (após proposta carregar)
   const { data: initialClickSignData } = useQuery({
-    queryKey: ['/api/clicksign/status', propostaId],
+    queryKey: queryKeys.clicksign.status(propostaId || ''),
     queryFn: () => checkClickSignStatus(propostaId!),
     enabled:
       !!propostaId &&
@@ -1114,7 +1125,7 @@ export default function Formalizacao() {
 
             // Atualizar dados da proposta (sempre necessário)
             queryClient.invalidateQueries({
-              queryKey: ['/api/propostas', propostaId, 'formalizacao'],
+              queryKey: queryKeys.proposta.formalizacao(propostaId),
             });
 
             // 🎯 CORREÇÃO: Só invalidar ClickSign se status realmente mudou
@@ -1124,7 +1135,7 @@ export default function Formalizacao() {
             if (oldData?.status !== newData?.status && newData?.status === 'ASSINATURA_CONCLUIDA') {
               console.log('🔄 [REALTIME] Contrato foi assinado, atualizando timeline');
               queryClient.invalidateQueries({
-                queryKey: ['/api/clicksign/status', propostaId],
+                queryKey: queryKeys.clicksign.status(propostaId),
               });
             }
 
@@ -1135,7 +1146,7 @@ export default function Formalizacao() {
             ) {
               console.log('🔄 [REALTIME] Atualizando boletos Inter devido a mudança relevante');
               queryClient.invalidateQueries({
-                queryKey: ['/api/inter/collections', propostaId],
+                queryKey: queryKeys.inter.collections(propostaId),
               });
             }
 
@@ -1842,12 +1853,10 @@ export default function Formalizacao() {
                                           await Promise.all([
                                             refetch(), // Recarregar dados da proposta para atualizar timeline
                                             queryClient.invalidateQueries({
-                                              queryKey: ['/api/inter/collections', proposta.id],
+                                              queryKey: queryKeys.inter.collections(proposta.id),
                                             }),
                                             queryClient.invalidateQueries({
-                                              queryKey: [
-                                                `/api/propostas/${proposta.id}/formalizacao`,
-                                              ],
+                                              queryKey: queryKeys.proposta.formalizacao(proposta.id),
                                             }),
                                           ]);
                                         } catch (error: any) {
@@ -1870,7 +1879,7 @@ export default function Formalizacao() {
 
                                             // Recarregar para mostrar os boletos existentes
                                             queryClient.invalidateQueries({
-                                              queryKey: ['/api/inter/collections', proposta.id],
+                                              queryKey: queryKeys.inter.collections(proposta.id),
                                             });
                                           } else {
                                             toast({

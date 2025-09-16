@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
+import { queryKeys } from '@/hooks/queries/queryKeys';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,7 +46,7 @@ export default function FilaAnalise() {
   const [ordenacao, setOrdenacao] = useState('data_desc');
 
   const { data: propostas, isLoading } = useQuery<Proposta[]>({
-    queryKey: ['/api/propostas/analise'],
+    queryKey: queryKeys.propostas.analise(),
   });
 
   const getStatusBadge = (status: string) => {

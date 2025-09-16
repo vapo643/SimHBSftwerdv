@@ -42,6 +42,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { FeatureFlagExample } from '@/components/FeatureFlagExample';
 import { useFeatureFlag } from '@/contexts/FeatureFlagContext';
+import { queryKeys } from '@/hooks/queries/queryKeys';
 
 // UX-011: Sistema semântico de cores fortes e proeminentes
 const getStatusColor = (status: string) => {
@@ -278,7 +279,7 @@ const Dashboard: React.FC = () => {
     isError,
     refetch,
   } = useQuery<{ success: boolean; data: any[]; total: number }>({
-    queryKey: ['/api/propostas'],
+    queryKey: queryKeys.propostas.all,
     enabled: !!user && user?.role !== 'ANALISTA', // Only fetch when user is authenticated and not ANALISTA
   });
 

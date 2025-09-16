@@ -55,7 +55,64 @@ export const queryKeys = {
     detail: (id: string | number) => [...queryKeys.products.details(), id] as const,
   },
 
-  // Proposals query keys
+  // Proposals query keys - Enhanced with all patterns used across the app
+  propostas: {
+    all: ['propostas'] as const,
+    lists: () => [...queryKeys.propostas.all, 'list'] as const,
+    list: (filters?: Record<string, unknown>) =>
+      [...queryKeys.propostas.lists(), { filters }] as const,
+    byStatus: (status: string) => [...queryKeys.propostas.all, 'byStatus', status] as const,
+    formalizacao: () => [...queryKeys.propostas.all, 'formalizacao'] as const,
+    analise: () => [...queryKeys.propostas.all, 'analise'] as const,
+    aguardandoAceite: () => [...queryKeys.propostas.all, 'aguardando-aceite'] as const,
+  },
+
+  // Individual proposal query keys
+  proposta: {
+    all: (id: string | number) => ['proposta', id] as const,
+    historico: (id: string | number) => ['proposta', 'historico', id] as const,
+    formalizacao: (id: string | number) => ['proposta', id, 'formalizacao'] as const,
+    observacoes: (id: string | number) => ['proposta', id, 'observacoes'] as const,
+    logs: (id: string | number) => ['proposta', 'logs', id] as const,
+  },
+
+  // External integrations
+  inter: {
+    all: ['inter'] as const,
+    collections: (id: string | number) => ['inter', 'collections', id] as const,
+  },
+
+  clicksign: {
+    all: ['clicksign'] as const,
+    status: (id: string | number) => ['clicksign', 'status', id] as const,
+  },
+
+  // Financial operations
+  pagamentos: {
+    all: ['pagamentos'] as const,
+    lists: () => [...queryKeys.pagamentos.all, 'list'] as const,
+  },
+
+  cobrancas: {
+    all: ['cobrancas'] as const,
+    lists: () => [...queryKeys.cobrancas.all, 'list'] as const,
+    kpis: () => [...queryKeys.cobrancas.all, 'kpis'] as const,
+    solicitacoes: () => [...queryKeys.cobrancas.all, 'solicitacoes'] as const,
+    ficha: (id: string | number) => ['cobrancas', 'ficha', id] as const,
+    interSumario: () => [...queryKeys.cobrancas.all, 'inter-sumario'] as const,
+  },
+
+  // Security and monitoring
+  security: {
+    all: ['security'] as const,
+    metrics: () => [...queryKeys.security.all, 'metrics'] as const,
+    vulnerabilities: () => [...queryKeys.security.all, 'vulnerabilities'] as const,
+    anomalies: () => [...queryKeys.security.all, 'anomalies'] as const,
+    dependencyScan: () => [...queryKeys.security.all, 'dependency-scan'] as const,
+    semgrepFindings: () => [...queryKeys.security.all, 'semgrep-findings'] as const,
+  },
+
+  // Legacy support (for backwards compatibility)
   proposals: {
     all: ['proposals'] as const,
     lists: () => [...queryKeys.proposals.all, 'list'] as const,
@@ -97,4 +154,37 @@ export const invalidationPatterns = {
 
   // When system metadata changes
   onSystemChange: [queryKeys.system.all],
+
+  // When a proposta is created/updated/deleted
+  onPropostaChange: [
+    queryKeys.propostas.all,
+    queryKeys.pagamentos.all, // Propostas might affect payments
+    queryKeys.cobrancas.all, // Propostas might affect collections
+  ],
+
+  // When proposta status changes
+  onPropostaStatusChange: (id: string | number) => [
+    queryKeys.proposta.all(id),
+    queryKeys.proposta.historico(id),
+    queryKeys.proposta.logs(id),
+    queryKeys.propostas.all,
+    queryKeys.propostas.formalizacao(),
+    queryKeys.propostas.analise(),
+  ],
+
+  // When formalizacao process changes
+  onFormalizacaoChange: (id: string | number) => [
+    queryKeys.proposta.all(id),
+    queryKeys.proposta.formalizacao(id),
+    queryKeys.propostas.formalizacao(),
+    queryKeys.clicksign.status(id),
+    queryKeys.inter.collections(id),
+  ],
+
+  // When financial operations change
+  onPaymentChange: [
+    queryKeys.pagamentos.all,
+    queryKeys.cobrancas.all,
+    queryKeys.cobrancas.kpis(),
+  ],
 } as const;

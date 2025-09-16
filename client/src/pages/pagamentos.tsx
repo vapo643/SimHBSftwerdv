@@ -31,6 +31,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import RefreshButton from '@/components/RefreshButton';
+import { queryKeys } from '@/hooks/queries/queryKeys';
 import {
   Clock,
   DollarSign,
@@ -144,7 +145,7 @@ export default function Pagamentos() {
   const queryClient = useQueryClient();
 
   const { data: paymentPropostas, isLoading } = useQuery<Pagamento[]>({
-    queryKey: ['/api/pagamentos'],
+    queryKey: queryKeys.pagamentos.all,
     queryFn: async () => {
       const response = await apiRequest('/api/pagamentos');
       return response as Pagamento[];
@@ -177,7 +178,7 @@ export default function Pagamentos() {
         title: 'Pagamento processado com sucesso!',
         description: "O status da proposta foi atualizado para 'pago'.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pagamentos.all });
       setIsPaymentDialogOpen(false);
       setSelectedProposta(null);
       form.reset();
@@ -209,7 +210,7 @@ export default function Pagamentos() {
         title: 'Lote processado com sucesso!',
         description: `${selectedPropostas.length} pagamentos foram processados.`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pagamentos.all });
       setSelectedPropostas([]);
     },
     onError: (error) => {

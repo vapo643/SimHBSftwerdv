@@ -21,6 +21,7 @@ import {
 import { useState } from 'react';
 // Remove formatCurrency from utils import
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryKeys } from '@/hooks/queries/queryKeys';
 
 interface PropostaAceite {
   id: string;
@@ -56,7 +57,7 @@ export default function AceiteAtendente() {
   };
 
   const { data: propostas, isLoading } = useQuery<PropostaAceite[]>({
-    queryKey: ['/api/propostas/aguardando-aceite'],
+    queryKey: queryKeys.propostas.aguardandoAceite(),
     queryFn: async () => {
       const response = await apiRequest('/api/propostas?status=aguardando_aceite_atendente');
       return response as PropostaAceite[];
@@ -79,7 +80,7 @@ export default function AceiteAtendente() {
       });
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas/aguardando-aceite'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.propostas.aguardandoAceite() });
       toast({
         title: variables.status === 'aceito_atendente' ? 'Proposta aceita' : 'Proposta cancelada',
         description:

@@ -25,6 +25,7 @@ import RefreshButton from '@/components/RefreshButton';
 
 import { api } from '@/lib/apiClient';
 import { PropostaMapper } from '@/mappers/proposta.mapper';
+import { queryKeys } from '@/hooks/queries/queryKeys';
 // Removido temporariamente para resolver problema do Vite
 
 // 🔧 Formatadores específicos para diferentes tipos de dados
@@ -51,11 +52,8 @@ const safeRender = (value: any): string => {
 const fetchProposta = async (id: string | undefined): Promise<any> => {
   if (!id) throw new Error('ID da proposta não fornecido.');
   try {
-    const response = await api.get(`/api/propostas/${id}`);
-
-    // Usar dados diretamente sem mapper temporariamente
-    const data = response.data.success !== undefined ? response.data.data : response.data;
-
+    // API methods now return normalized data directly (envelope unwrapping handled centrally)
+    const data = await api.get(`/api/propostas/${id}`);
     return data;
   } catch (error) {
     console.error('[Análise] Erro ao carregar proposta:', error);
@@ -122,7 +120,7 @@ const AnaliseManualPage: React.FC = () => {
     isLoading,
     isError,
   } = useQuery<any>({
-    queryKey: ['proposta', propostaId],
+    queryKey: queryKeys.proposta.all(propostaId || ''),
     queryFn: () => fetchProposta(propostaId),
     enabled: !!propostaId,
     refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
@@ -140,13 +138,15 @@ const AnaliseManualPage: React.FC = () => {
     mutationFn: updatePropostaStatus,
     onSuccess: () => {
       toast({ title: 'Sucesso!', description: 'O status da proposta foi atualizado.' });
-      // Invalidar múltiplas queries para sincronização completa
-      queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
-      queryClient.invalidateQueries({ queryKey: ['proposta_logs', propostaId] });
-      queryClient.invalidateQueries({ queryKey: ['proposta_historico', propostaId] });
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/observacoes`] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+      // Invalidar múltiplas queries para sincronização completa usando query keys padronizados
+      if (propostaId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.proposta.all(propostaId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.proposta.logs(propostaId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.proposta.historico(propostaId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.proposta.observacoes(propostaId) });
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.propostas.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.propostas.analise() });
     },
     onError: (error: Error) => {
       toast({ title: 'Erro!', description: error.message, variant: 'destructive' });
