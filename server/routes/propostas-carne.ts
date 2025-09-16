@@ -3,6 +3,7 @@ import { db } from '../lib/supabase.js';
 import { propostas } from '@shared/schema.js';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { desc, eq } from 'drizzle-orm';
+import { lojas, parceiros, produtos } from '@shared/schema.js';
 
 const router = Router();
 
@@ -21,10 +22,22 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
         status: propostas.status,
         valor: propostas.valor,
         prazo: propostas.prazo,
+        valorTac: propostas.valorTac,
+        valorIof: propostas.valorIof,
+        taxaJuros: propostas.taxaJuros,
+        lojaId: propostas.lojaId,
+        produtoId: propostas.produtoId,
         createdAt: propostas.createdAt,
         updatedAt: propostas.updatedAt,
+        // Campos das tabelas relacionadas
+        lojaNome: lojas.nomeLoja,
+        produtoNome: produtos.nomeProduto,
+        parceiroNome: parceiros.razaoSocial,
       })
-      .from(propostas);
+      .from(propostas)
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+      .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id));
 
     // FILTRO CRÍTICO: Fila de Análise = apenas propostas "em_analise"
     if (queue === 'analysis') {
