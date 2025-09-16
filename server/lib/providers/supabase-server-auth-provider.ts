@@ -3,11 +3,11 @@
  * Implementação específica do Supabase para autenticação no servidor
  */
 
-import { createServerSupabaseClient } from '../../../client/src/lib/supabase';
+import { createServerSupabaseAdminClient } from '../supabase';
 import { ServerAuthProvider, ServerUser, TokenValidationResult } from '../auth-types';
 
 export class SupabaseServerAuthProvider implements ServerAuthProvider {
-  private supabase = createServerSupabaseClient();
+  private supabase = createServerSupabaseAdminClient();
 
   /**
    * Converte usuário do Supabase para nossa interface padronizada

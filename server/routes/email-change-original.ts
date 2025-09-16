@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
-import { createServerSupabaseClient } from '../../client/src/lib/supabase';
+import { createServerSupabaseAdminClient } from '../lib/supabase';
 import { storage } from '../storage';
 import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger';
 import { randomBytes } from 'crypto';
@@ -64,7 +64,7 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
     }
 
     // Verify user's password
-    const supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseAdminClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: currentEmail || '',
       password,
@@ -174,7 +174,7 @@ router.post('/verify-email-change', async (req, res) => {
       });
     }
 
-    const supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseAdminClient();
 
     // Update user's email in auth
     const { error: updateAuthError } = await supabase.auth.admin.updateUserById(tokenData.userId, {

@@ -1,7 +1,7 @@
 import type { Express, NextFunction, Response, Request } from 'express';
 import { createServer, type Server } from 'http';
 import { storage } from './storage';
-import { createServerSupabaseClient } from '../client/src/lib/supabase';
+import { createServerSupabaseAdminClient } from './lib/supabase';
 import { jwtAuthMiddleware } from './lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../shared/types/express';
 import { db } from './lib/supabase';
