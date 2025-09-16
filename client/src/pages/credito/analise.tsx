@@ -214,21 +214,21 @@ const AnaliseManualPage: React.FC = () => {
         dataNascimento:
           clienteData.data_nascimento ||
           clienteData.dataNascimento ||
-          rawData.cliente_data_nascimento ||
+          rawData.clienteDataNascimento ||
           'N/A',
         rendaMensal: clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda || 0,
         rg: clienteData.rg || rawData.cliente_rg || rawData.clienteRg || 'N/A',
         orgaoEmissor:
           clienteData.orgao_emissor ||
           clienteData.orgaoEmissor ||
-          rawData.cliente_orgao_emissor ||
+          rawData.clienteOrgaoEmissor ||
           'N/A',
         estadoCivil:
           clienteData.estado_civil ||
           clienteData.estadoCivil ||
-          rawData.cliente_estado_civil ||
+          rawData.clienteEstadoCivil ||
           'N/A',
-        nacionalidade: clienteData.nacionalidade || rawData.cliente_nacionalidade || 'N/A',
+        nacionalidade: clienteData.nacionalidade || rawData.clienteNacionalidade || 'N/A',
         cep: clienteData.cep || rawData.cliente_cep || rawData.clienteCep || 'N/A',
         endereco:
           clienteData.endereco || rawData.cliente_endereco || rawData.clienteEndereco || 'N/A',
