@@ -1,0 +1,54 @@
+5.77
+🔍 [2025-09-16T02:31:05.774Z] SERVICE_KEY: [FOUND]
+2025-09-15 23:31:05.77
+🔍 [2025-09-16T02:31:05.774Z] URL source: valid-supabase-domain
+2025-09-15 23:31:05.77
+🔍 [2025-09-16T02:31:05.774Z] Project ID: dvglgxrvhmtsixaabxha
+2025-09-15 23:31:05.77
+🔍 [2025-09-16T02:31:05.774Z] SERVICE_KEY length: 219 chars
+2025-09-15 23:31:05.77
+🔍 [2025-09-16T02:31:05.774Z] SERVICE_KEY prefix: eyJhbGciOiJIUzI1NiIs...
+2025-09-15 23:31:05.77
+🔍 [2025-09-16T02:31:05.774Z] SERVICE_KEY format valid: YES
+2025-09-15 23:31:05.77
+✅ [2025-09-16T02:31:05.774Z] Supabase Admin Client configurado com sucesso
+2025-09-15 23:31:05.77
+🧪 [2025-09-16T02:31:05.774Z] Running immediate client validation test...
+2025-09-15 23:31:05.77
+✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...
+2025-09-15 23:31:05.77
+📡 [FORMALIZATION_EXEC] Executing Supabase query...
+2025-09-15 23:31:05.80
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+2025-09-15 23:31:05.80
+message: 'Invalid API key',
+2025-09-15 23:31:05.80
+hint: 'Double check your Supabase `anon` or `service_role` API key.'
+2025-09-15 23:31:05.80
+}
+2025-09-15 23:31:05.80
+{"correlationId":"29a80571-3362-4728-a261-9cdc772bc231","duration":330,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":152,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-16 02:31:05","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 23:31:05.80
+{"correlationId":"29a80571-3362-4728-a261-9cdc772bc231","duration":330,"environment":"production","error":"{\"message\":\"Erro ao buscar propostas de formalização\",\"error\":\"QUERY_ERROR\",\"details\":\"Invalid API key\",\"correlationId\":\"qx827dogf\"}","level":"error","message":"❌ Request error","method":"GET","service":"simpix-api","statusCode":500,"timestamp":"2025-09-16 02:31:05","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 23:31:10.79
+{"correlationId":"e0b443e0-07f1-4278-9e9b-4761e56c7c06","environment":"production","ip":"34.30.242.206","level":"info","message":"📥 Request received","method":"GET","path":"/api/propostas/formalizacao","query":{},"referrer":"https://sistemasimpix.com.br/formalizacao","service":"simpix-api","timestamp":"2025-09-16 02:31:10","url":"/api/propostas/formalizacao","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-15 23:31:10.80
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+2025-09-15 23:31:10.80
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+2025-09-15 23:31:10.80
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+2025-09-15 23:31:10.80
+✅✅✅ [FORMALIZATION_MATCH] Original URL: /api/propostas/formalizacao
+2025-09-15 23:31:10.80
+✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...
+2025-09-15 23:31:10.80
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+2025-09-15 23:31:10.80
+[JWT DEBUG] Rota acessada: /api/propostas/formalizacao
+2025-09-15 23:31:10.80
+[JWT DEBUG] Método: GET
+2025-09-15 23:31:10.80
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+2025-09-15 23:31:10.80
+[JWT DEBUG] Origin: undefined
