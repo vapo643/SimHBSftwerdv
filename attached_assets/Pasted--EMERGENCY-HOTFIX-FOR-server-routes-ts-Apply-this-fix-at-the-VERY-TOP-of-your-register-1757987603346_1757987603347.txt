@@ -1,0 +1,195 @@
+// === EMERGENCY HOTFIX FOR server/routes.ts ===
+// Apply this fix at the VERY TOP of your registerRoutes function
+// This ensures the formalization route is registered FIRST and catches the request
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // ... existing security middleware setup ...
+  
+  // =========================================================
+  // 🚨 EMERGENCY FIX - PRIORITY ROUTE REGISTRATION
+  // =========================================================
+  // These routes MUST be registered BEFORE any other /api/propostas routes
+  
+  console.log('🚨 [EMERGENCY_FIX] Registering priority routes at', new Date().toISOString());
+  
+  // 1. FORMALIZATION ROUTE - ABSOLUTE FIRST PRIORITY
+  app.get('/api/propostas/formalizacao',
+    // Debug middleware to PROVE this route matches
+    (req, res, next) => {
+      console.log('✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao');
+      console.log('✅✅✅ [FORMALIZATION_MATCH] Original URL:', req.originalUrl);
+      console.log('✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...');
+      next();
+    },
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      const correlationId = Math.random().toString(36).substr(2, 9);
+      
+      console.log('🎯 [FORMALIZATION_EXEC] Handler executing with correlation:', correlationId);
+      
+      try {
+        // CRITICAL: Validate auth first
+        if (!req.user?.id) {
+          console.log('❌ [FORMALIZATION_EXEC] No authenticated user');
+          return res.status(401).json({
+            message: 'Não autenticado',
+            error: 'NO_AUTH',
+            correlationId
+          });
+        }
+        
+        console.log('🔧 [FORMALIZATION_EXEC] Loading Supabase module...');
+        
+        // CRITICAL FIX: Use the correct server-side Supabase client
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
+        
+        console.log('✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...');
+        
+        // Build the query with proper filters
+        let query = supabase
+          .from('proposals')
+          .select(`
+            id,
+            codigo_identificacao,
+            nome_cliente,
+            cpf_cnpj,
+            valor_emprestimo,
+            numero_parcelas,
+            status,
+            observacao_status,
+            created_at,
+            updated_at,
+            convenio_id,
+            loja_id,
+            convenios!convenio_id (
+              id,
+              nome,
+              codigo
+            ),
+            lojas!loja_id (
+              id,
+              nome
+            )
+          `)
+          .in('status', ['aprovada', 'pendente_formalizacao', 'em_formalizacao']);
+        
+        // Apply role-based filtering
+        if (req.user.role === 'loja' && req.user.loja_id) {
+          console.log('🔒 [FORMALIZATION_EXEC] Applying store filter:', req.user.loja_id);
+          query = query.eq('loja_id', req.user.loja_id);
+        }
+        
+        query = query.order('updated_at', { ascending: false });
+        
+        console.log('📡 [FORMALIZATION_EXEC] Executing Supabase query...');
+        
+        const { data, error } = await query;
+        
+        if (error) {
+          console.error('❌ [FORMALIZATION_EXEC] Supabase query error:', error);
+          return res.status(500).json({
+            message: 'Erro ao buscar propostas de formalização',
+            error: 'QUERY_ERROR',
+            details: error.message,
+            correlationId
+          });
+        }
+        
+        console.log('✅ [FORMALIZATION_EXEC] Query successful, found', data?.length || 0, 'proposals');
+        
+        return res.json({
+          success: true,
+          data: data || [],
+          count: data?.length || 0,
+          correlationId
+        });
+        
+      } catch (error) {
+        console.error('💥 [FORMALIZATION_EXEC] Unexpected error:', error);
+        return res.status(500).json({
+          message: 'Erro interno ao processar requisição',
+          error: 'INTERNAL_ERROR',
+          details: error instanceof Error ? error.message : 'Unknown error',
+          correlationId
+        });
+      }
+    }
+  );
+  
+  console.log('✅ [EMERGENCY_FIX] Priority formalization route registered');
+  
+  // 2. OTHER SPECIFIC ROUTES (add any other /api/propostas/xxx routes here)
+  // app.get('/api/propostas/analise', ...)
+  // app.get('/api/propostas/dashboard', ...)
+  
+  // =========================================================
+  // 🚫 ROUTE GUARD - PREVENT GENERIC ROUTES FROM CATCHING SPECIFIC PATHS
+  // =========================================================
+  
+  // This middleware runs for ALL /api/propostas/* requests
+  app.use('/api/propostas/*', (req, res, next) => {
+    const path = req.path.replace('/api/propostas/', '');
+    
+    // List of known specific endpoints that should NEVER match generic :id
+    const protectedPaths = ['formalizacao', 'analise', 'dashboard', 'export', 'import'];
+    
+    if (protectedPaths.includes(path)) {
+      console.log('🛡️ [ROUTE_GUARD] Protected path detected:', path);
+      console.log('🛡️ [ROUTE_GUARD] If you see this, the specific route was NOT matched above!');
+      console.log('🛡️ [ROUTE_GUARD] This indicates a route registration problem');
+      
+      // Return explicit error to help debug
+      return res.status(500).json({
+        message: `Route configuration error: ${path} endpoint not properly registered`,
+        error: 'ROUTE_CONFIG_ERROR',
+        path: req.path,
+        hint: 'Specific route handler was not matched - check route registration order'
+      });
+    }
+    
+    next();
+  });
+  
+  // =========================================================
+  // NOW REGISTER GENERIC ROUTES (with strict UUID validation)
+  // =========================================================
+  
+  const UUID_PATTERN = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+  
+  // Generic GET by ID - MUST have valid UUID
+  app.get(`/api/propostas/:id(${UUID_PATTERN})`,
+    (req, res, next) => {
+      console.log('📍 [GENERIC_GET] Matched proposal by ID:', req.params.id);
+      next();
+    },
+    jwtAuthMiddleware,
+    // ... your existing handler
+  );
+  
+  // Generic PUT by ID - MUST have valid UUID  
+  app.put(`/api/propostas/:id(${UUID_PATTERN})`,
+    (req, res, next) => {
+      console.log('📍 [GENERIC_PUT] Matched proposal update by ID:', req.params.id);
+      next();
+    },
+    jwtAuthMiddleware,
+    // ... your existing handler
+  );
+  
+  // Generic DELETE by ID - MUST have valid UUID
+  app.delete(`/api/propostas/:id(${UUID_PATTERN})`,
+    (req, res, next) => {
+      console.log('📍 [GENERIC_DELETE] Matched proposal delete by ID:', req.params.id);
+      next();
+    },
+    jwtAuthMiddleware,
+    // ... your existing handler
+  );
+  
+  // =========================================================
+  // CONTINUE WITH REST OF ROUTE REGISTRATION
+  // =========================================================
+  
+  // ... rest of your existing routes ...
+}

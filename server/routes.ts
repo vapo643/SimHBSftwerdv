@@ -123,6 +123,150 @@ function parseUserAgent(userAgent: string): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // =========================================================
+  // 🚨 EMERGENCY HOTFIX - CLAUDE OPUS SOLUTION
+  // =========================================================
+  // CRITICAL: Register /api/propostas/formalizacao FIRST before ANY other route
+  console.log('🚨 [EMERGENCY_HOTFIX] Claude Opus solution - registering priority routes at', new Date().toISOString());
+  
+  // 1. FORMALIZATION ROUTE - ABSOLUTE FIRST PRIORITY
+  app.get('/api/propostas/formalizacao',
+    // Debug middleware to PROVE this route matches
+    (req, res, next) => {
+      console.log('✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao');
+      console.log('✅✅✅ [FORMALIZATION_MATCH] Original URL:', req.originalUrl);
+      console.log('✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...');
+      next();
+    },
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      const correlationId = Math.random().toString(36).substr(2, 9);
+      
+      console.log('🎯 [FORMALIZATION_EXEC] Handler executing with correlation:', correlationId);
+      
+      try {
+        // CRITICAL: Validate auth first
+        if (!req.user?.id) {
+          console.log('❌ [FORMALIZATION_EXEC] No authenticated user');
+          return res.status(401).json({
+            message: 'Não autenticado',
+            error: 'NO_AUTH',
+            correlationId
+          });
+        }
+        
+        console.log('🔧 [FORMALIZATION_EXEC] Loading Supabase module...');
+        
+        // CRITICAL FIX: Use the correct server-side Supabase client
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
+        
+        console.log('✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...');
+        
+        // Build the query with proper filters
+        let query = supabase
+          .from('propostas')
+          .select(`
+            id,
+            codigo_identificacao,
+            nome_cliente,
+            cpf_cnpj,
+            valor_emprestimo,
+            numero_parcelas,
+            status,
+            observacao_status,
+            created_at,
+            updated_at,
+            convenio_id,
+            loja_id,
+            convenios!convenio_id (
+              id,
+              nome,
+              codigo
+            ),
+            lojas!loja_id (
+              id,
+              nome
+            )
+          `)
+          .in('status', ['aprovado', 'aceito_atendente', 'documentos_enviados', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_PENDENTE', 'ASSINATURA_CONCLUIDA']);
+        
+        // Apply role-based filtering
+        if (req.user.role === 'ATENDENTE' && req.user.id) {
+          console.log('🔒 [FORMALIZATION_EXEC] Applying ATENDENTE filter:', req.user.id);
+          query = query.eq('user_id', req.user.id);
+        } else if (req.user.role === 'GERENTE' && req.user.loja_id) {
+          console.log('🔒 [FORMALIZATION_EXEC] Applying GERENTE filter:', req.user.loja_id);
+          query = query.eq('loja_id', req.user.loja_id);
+        }
+        
+        query = query.order('updated_at', { ascending: false });
+        
+        console.log('📡 [FORMALIZATION_EXEC] Executing Supabase query...');
+        
+        const { data, error } = await query;
+        
+        if (error) {
+          console.error('❌ [FORMALIZATION_EXEC] Supabase query error:', error);
+          return res.status(500).json({
+            message: 'Erro ao buscar propostas de formalização',
+            error: 'QUERY_ERROR',
+            details: error.message,
+            correlationId
+          });
+        }
+        
+        console.log('✅ [FORMALIZATION_EXEC] Query successful, found', data?.length || 0, 'proposals');
+        
+        return res.json({
+          success: true,
+          data: data || [],
+          count: data?.length || 0,
+          correlationId
+        });
+        
+      } catch (error) {
+        console.error('💥 [FORMALIZATION_EXEC] Unexpected error:', error);
+        return res.status(500).json({
+          message: 'Erro interno ao processar requisição',
+          error: 'INTERNAL_ERROR',
+          details: error instanceof Error ? error.message : 'Unknown error',
+          correlationId
+        });
+      }
+    }
+  );
+  
+  console.log('✅ [EMERGENCY_HOTFIX] Priority formalization route registered');
+  
+  // =========================================================
+  // 🚫 ROUTE GUARD - PREVENT GENERIC ROUTES FROM CATCHING SPECIFIC PATHS
+  // =========================================================
+  
+  // This middleware runs for ALL /api/propostas/* requests
+  app.use('/api/propostas/*', (req, res, next) => {
+    const path = req.path.replace('/api/propostas/', '');
+    
+    // List of known specific endpoints that should NEVER match generic :id
+    const protectedPaths = ['formalizacao', 'analise', 'dashboard', 'export', 'import'];
+    
+    if (protectedPaths.includes(path)) {
+      console.log('🛡️ [ROUTE_GUARD] Protected path detected:', path);
+      console.log('🛡️ [ROUTE_GUARD] If you see this, the specific route was NOT matched above!');
+      console.log('🛡️ [ROUTE_GUARD] This indicates a route registration problem');
+      
+      // Return explicit error to help debug
+      return res.status(500).json({
+        message: `Route configuration error: ${path} endpoint not properly registered`,
+        error: 'ROUTE_CONFIG_ERROR',
+        path: req.path,
+        hint: 'Specific route handler was not matched - check route registration order'
+      });
+    }
+    
+    next();
+  });
+
   // Performance monitoring middleware - PAM V4.0 (applied to all routes)
   app.use(performanceMonitor);
 
@@ -668,303 +812,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // 🎯 SPECIFIC ROUTES (must come before generic :id routes)
   
-  // FORMALIZATION endpoint - MOVED TO TOP to prevent route shadowing
-  app.get(
-    '/api/propostas/formalizacao',
-    jwtAuthMiddleware as any,
-    async (req: AuthenticatedRequest, res) => {
-      const startTime = Date.now();
-      const correlationId = Math.random().toString(36).substr(2, 9);
-      
-      logInfo('🚀 [FORMALIZATION] Route accessed', {
-        correlationId,
-        url: req.url,
-        path: req.path,
-        method: req.method,
-        userAgent: req.get('User-Agent'),
-        ip: req.ip
-      });
-
-      try {
-        // 🔍 ETAPA 1: Validação de Autenticação
-        const userId = req.user?.id;
-        const userRole = req.user?.role;
-        const userLojaId = req.user?.loja_id;
-
-        if (!userId || !userRole) {
-          logError('❌ [FORMALIZATION] Authentication validation failed', {
-            correlationId,
-            userId,
-            userRole,
-            userLojaId,
-            step: 'AUTH_VALIDATION'
-          });
-          return res.status(401).json({ 
-            message: 'Usuário não autenticado corretamente',
-            error: 'AUTHENTICATION_FAILED',
-            correlationId 
-          });
-        }
-
-        logInfo('✅ [FORMALIZATION] Authentication validated', {
-          correlationId,
-          userId,
-          userRole,
-          userLojaId,
-          step: 'AUTH_VALIDATED'
-        });
-
-        // 🔍 ETAPA 2: Inicialização do Supabase Client
-        let supabase;
-        try {
-          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-          supabase = createServerSupabaseAdminClient();
-          
-          logInfo('✅ [FORMALIZATION] Supabase client initialized', {
-            correlationId,
-            step: 'SUPABASE_INIT'
-          });
-        } catch (supabaseError) {
-          logError('❌ [FORMALIZATION] Supabase client initialization failed', {
-            correlationId,
-            error: supabaseError instanceof Error ? supabaseError.message : String(supabaseError),
-            step: 'SUPABASE_INIT_FAILED'
-          });
-          return res.status(500).json({
-            message: 'Erro na inicialização da conexão com banco de dados',
-            error: 'DATABASE_CONNECTION_FAILED',
-            correlationId
-          });
-        }
-
-        // 🔍 ETAPA 3: Configuração da Query
-        const formalizationStatuses = [
-          'aprovado',
-          'aceito_atendente',
-          'documentos_enviados',
-          'CCB_GERADA',
-          'AGUARDANDO_ASSINATURA',
-          'ASSINATURA_PENDENTE',
-          'ASSINATURA_CONCLUIDA',
-          'PAGAMENTO_PENDENTE',
-          'PAGAMENTO_PARCIAL',
-          'contratos_preparados',
-          'contratos_assinados'
-        ];
-
-        let query = supabase
-          .from('propostas')
-          .select('*')
-          .in('status', formalizationStatuses);
-
-        // Apply role-based filtering
-        if (userRole === 'ATENDENTE') {
-          query = query.eq('user_id', userId);
-          logInfo('🔐 [FORMALIZATION] ATENDENTE filter applied', {
-            correlationId,
-            filter: `user_id = ${userId}`,
-            step: 'QUERY_FILTER'
-          });
-        } else if (userRole === 'GERENTE') {
-          query = query.eq('loja_id', userLojaId);
-          logInfo('🔐 [FORMALIZATION] GERENTE filter applied', {
-            correlationId,
-            filter: `loja_id = ${userLojaId}`,
-            step: 'QUERY_FILTER'
-          });
-        } else {
-          logInfo('🔐 [FORMALIZATION] No additional filter (ADMIN/ANALISTA)', {
-            correlationId,
-            userRole,
-            step: 'QUERY_FILTER'
-          });
-        }
-
-        // 🔍 ETAPA 4: Execução da Query com Timeout
-        let rawPropostas, error;
-        const queryStartTime = Date.now();
-        
-        try {
-          const result = await Promise.race([
-            query.order('created_at', { ascending: false }),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Query timeout after 30 seconds')), 30000)
-            )
-          ]) as any;
-          
-          rawPropostas = result.data;
-          error = result.error;
-          
-          logInfo('✅ [FORMALIZATION] Database query executed', {
-            correlationId,
-            queryDuration: Date.now() - queryStartTime,
-            resultCount: rawPropostas?.length || 0,
-            hasError: !!error,
-            step: 'QUERY_EXECUTED'
-          });
-          
-        } catch (queryError) {
-          logError('❌ [FORMALIZATION] Database query failed', {
-            correlationId,
-            error: queryError instanceof Error ? queryError.message : String(queryError),
-            queryDuration: Date.now() - queryStartTime,
-            step: 'QUERY_FAILED'
-          });
-          
-          return res.status(500).json({
-            message: 'Timeout ou erro na consulta ao banco de dados',
-            error: 'DATABASE_QUERY_FAILED',
-            correlationId
-          });
-        }
-
-        if (error) {
-          logError('❌ [FORMALIZATION] Supabase query returned error', {
-            correlationId,
-            error: error.message || String(error),
-            code: error.code || 'UNKNOWN',
-            step: 'QUERY_ERROR'
-          });
-          
-          return res.status(500).json({ 
-            message: 'Erro na consulta de propostas de formalização',
-            error: 'SUPABASE_QUERY_ERROR',
-            details: error.message,
-            correlationId
-          });
-        }
-
-        if (!rawPropostas || rawPropostas.length === 0) {
-          logInfo('ℹ️ [FORMALIZATION] No proposals found', {
-            correlationId,
-            userId,
-            userRole,
-            userLojaId,
-            statusesSearched: formalizationStatuses,
-            step: 'NO_RESULTS'
-          });
-          
-          return res.json([]);
-        }
-
-        // 🔍 ETAPA 5: Processamento e Parsing dos Dados
-        let formalizacaoPropostas;
-        try {
-          formalizacaoPropostas = rawPropostas.map((proposta, index) => {
-            let clienteData = null;
-            let condicoesData = null;
-
-            // Parse cliente_data com tratamento robusto
-            try {
-              if (typeof proposta.cliente_data === 'string') {
-                clienteData = JSON.parse(proposta.cliente_data);
-              } else if (typeof proposta.cliente_data === 'object') {
-                clienteData = proposta.cliente_data || {};
-              } else {
-                clienteData = {};
-              }
-            } catch (parseError) {
-              logError('⚠️ [FORMALIZATION] Error parsing cliente_data', {
-                correlationId,
-                propostaId: proposta.id,
-                index,
-                parseError: parseError instanceof Error ? parseError.message : String(parseError),
-                step: 'PARSE_CLIENTE_DATA'
-              });
-              clienteData = {};
-            }
-
-            // Parse condicoes_data com tratamento robusto
-            try {
-              if (typeof proposta.condicoes_data === 'string') {
-                condicoesData = JSON.parse(proposta.condicoes_data);
-              } else if (typeof proposta.condicoes_data === 'object') {
-                condicoesData = proposta.condicoes_data || {};
-              } else {
-                condicoesData = {};
-              }
-            } catch (parseError) {
-              logError('⚠️ [FORMALIZATION] Error parsing condicoes_data', {
-                correlationId,
-                propostaId: proposta.id,
-                index,
-                parseError: parseError instanceof Error ? parseError.message : String(parseError),
-                step: 'PARSE_CONDICOES_DATA'
-              });
-              condicoesData = {};
-            }
-
-            return {
-              ...proposta,
-              cliente_data: clienteData,
-              condicoes_data: condicoesData,
-              documentos_adicionais: proposta.documentos_adicionais,
-              contrato_gerado: proposta.contrato_gerado,
-              contrato_assinado: proposta.contrato_assinado,
-              data_aprovacao: proposta.data_aprovacao,
-              data_assinatura: proposta.data_assinatura,
-              data_pagamento: proposta.data_pagamento,
-              observacoes_formalizacao: proposta.observacoes_formalizacao,
-              interBoletoGerado: proposta.inter_boleto_gerado,
-              interBoletoGeradoEm: proposta.inter_boleto_gerado_em,
-            };
-          });
-
-          logInfo('✅ [FORMALIZATION] Data processing completed', {
-            correlationId,
-            processedCount: formalizacaoPropostas.length,
-            originalCount: rawPropostas.length,
-            step: 'DATA_PROCESSED'
-          });
-
-        } catch (processingError) {
-          logError('❌ [FORMALIZATION] Error processing proposal data', {
-            correlationId,
-            error: processingError instanceof Error ? processingError.message : String(processingError),
-            step: 'DATA_PROCESSING_FAILED'
-          });
-          
-          return res.status(500).json({
-            message: 'Erro no processamento dos dados das propostas',
-            error: 'DATA_PROCESSING_ERROR',
-            correlationId
-          });
-        }
-
-        // 🔍 ETAPA 6: Resposta Final
-        const totalDuration = Date.now() - startTime;
-        
-        logInfo('🎉 [FORMALIZATION] Request completed successfully', {
-          correlationId,
-          proposalCount: formalizacaoPropostas.length,
-          totalDuration,
-          userId,
-          userRole,
-          timestamp: getBrasiliaTimestamp(),
-          step: 'SUCCESS'
-        });
-
-        res.json(formalizacaoPropostas);
-        
-      } catch (globalError) {
-        const totalDuration = Date.now() - startTime;
-        
-        logError('💥 [FORMALIZATION] Unexpected error in formalization route', {
-          correlationId,
-          error: globalError instanceof Error ? globalError.message : String(globalError),
-          stack: globalError instanceof Error ? globalError.stack : undefined,
-          totalDuration,
-          step: 'GLOBAL_ERROR'
-        });
-        
-        res.status(500).json({
-          message: 'Erro interno na consulta de propostas de formalização',
-          error: 'INTERNAL_SERVER_ERROR',
-          correlationId
-        });
-      }
-    }
-  );
 
   // 🎯 VISUAL-FIX-001.1: New endpoint for analysis proposals (filtered by status)
   app.get(

@@ -1,0 +1,145 @@
+Processo de pensamento1 min, 1 sThis is a critical production issue with a Next.js/React + Express + Supabase application. The /api/propostas/formalizacao route is returning a 500 error with "Invalid API key" message in production only.
+Let me analyze the evidence systematically:
+Critical Evidence Analysis:
+
+The route's debug logs aren't appearing - This is the smoking gun. The route handler has extensive logging that should show:
+
+🚀 [FORMALIZATION] Route accessed
+✅ [FORMALIZATION] Authentication validated
+✅ [FORMALIZATION] Supabase client initialized
+
+None of these appear in production logs, meaning the route handler isn't being executed at all.
+Different Supabase Project IDs:
+
+Development: fkfmirnnredvhocnhost
+Production: dvglgxrvhmtsixaabxha
+
+This is normal - different environments often use different Supabase projects.
+The error message structure suggests a different handler is catching the request:
+
+json   {
+     "message": "Erro na consulta de propostas de formalização",
+     "error": "SUPABASE_QUERY_ERROR", 
+     "details": "Invalid API key",
+     "correlationId": "oxblpm3gt"
+   }
+This doesn't match the error format in the shown route implementation.
+
+Other routes work fine - /api/debug/me and /api/features work, so auth and general server setup are OK.
+
+Root Cause Analysis:
+Based on the evidence, I believe the issue is route shadowing - another handler is intercepting the request before it reaches the correct handler. Here's why:
+
+The route handler code shown would produce extensive logs, but none appear
+The error message format doesn't match the handler's error format
+The correlation ID indicates some handler is executing
+The "Invalid API key" error suggests a Supabase operation is being attempted
+
+I suspect a routing conflict is preventing the correct handler from processing the request. Potential causes include an overly broad route matcher or an incorrectly configured middleware that's intercepting the /api/propostas/formalizacao endpoint. The deployment might have introduced unexpected routing behavior that's blocking the intended route handler.Looking at this production issue, I can see the critical problem immediately from the evidence you've provided. Let me walk you through what's happening and provide a definitive solution.
+🔍 Root Cause Diagnosis
+The smoking gun in your evidence is this: your route's debug logs never appear in production. When a request hits /api/propostas/formalizacao, your carefully instrumented route handler with all those [FORMALIZATION] logs should execute, but it doesn't. This tells us definitively that your route handler is never being reached.
+Instead, a different handler is intercepting the request and trying to process "formalizacao" as if it were a proposal ID, which then fails with the Supabase error.
+🎯 The Exact Problem
+Looking at your route structure, here's what's happening:
+
+In production, there's likely an older route pattern /api/propostas/:id (without UUID regex constraint) that's registered BEFORE your /api/propostas/formalizacao route
+Express matches routes in registration order, so it hits /api/propostas/:id first
+It treats "formalizacao" as an :id parameter
+That handler tries to query Supabase for a proposal with ID "formalizacao"
+The query fails (either due to invalid UUID format or API key issues)
+It returns the generic error you're seeing
+
+🛠️ Definitive Solution
+Here's a multi-layered approach to fix this once and for all:Emergency Fix: Route Registration Diagnostic & SolutionCódigo // STEP 1: IMMEDIATE DIAGNOSTIC
+// Add this BEFORE any route registrations in server/routes.ts
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // === CRITICAL DIAGNOSTIC LOGGING ===
+  // This will show us EXACTLY what routes Pondered immediate emergency solution for the problem.Now let me provide the immediate emergency fix that should be deployed right away to solve the problem:Now, let me give you an immediate emergency fix that you can deploy RIGHT NOW to solve this:EMERGENCY HOTFIX - Deploy This ImmediatelyCódigo // === EMERGENCY HOTFIX FOR server/routes.ts ===
+// Apply this fix at the VERY TOP of your registerRoutes function
+// This ensures the formalization route is registered FIRST and catches the request
+
+export async function registerRoutes(app: Express)Strategized comprehensive solution for production issue.The user wants a comprehensive solution to their production issue. Let me provide clear action steps and ensure they understand exactly what to do.🚀 Immediate Action Plan
+Based on my analysis, here's exactly what you need to do to fix this issue immediately:
+Step 1: Deploy the Emergency Hotfix (5 minutes)
+The critical issue is that your /api/propostas/formalizacao route is being intercepted by another handler before it can execute. The emergency hotfix I've provided above ensures your specific route gets registered first and includes protective measures to prevent this from happening.
+The key changes you need to make:
+
+Move the formalization route to the very beginning of your registerRoutes function - it must be registered before ANY other /api/propostas routes
+Add the debug middleware that will prove the route is matching
+Implement the route guard that will catch any misrouted requests
+Enforce strict UUID patterns on all generic routes
+
+Step 2: Verify the Fix is Working (2 minutes)
+After deploying, you'll see these logs if it's working:
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+🎯 [FORMALIZATION_EXEC] Handler executing with correlation: abc123
+✅ [FORMALIZATION_EXEC] Query successful, found X proposals
+If you see the route guard message instead:
+🛡️ [ROUTE_GUARD] Protected path detected: formalizacao
+This means the specific route still isn't being matched, and you have a deployment issue.
+Step 3: Check for Hidden Route Conflicts
+The reason your route isn't executing is likely one of these scenarios:
+Scenario A: Deployment Didn't Include Your Changes
+Your logs show no [FORMALIZATION] messages at all, which suggests the new code might not be deployed. To verify:
+
+Add a console.log at server startup: console.log('BUILD VERSION: 2025-09-16-HOTFIX');
+Check if this appears in production logs after deployment
+If not, you have a deployment pipeline issue
+
+Scenario B: External Router Interference
+Check if you have any code like this that might be intercepting:
+typescriptapp.use('/api/propostas', proposalRouter);  // This would intercept ALL /api/propostas/* routes
+These router mounts can override specific route registrations.
+Scenario C: Middleware Short-Circuit
+Some middleware might be terminating the request before it reaches your handler. Check for any middleware that might be doing:
+typescriptif (req.path.includes('formalizacao')) {
+  // Old handler code
+  return res.status(500).json({...});
+}
+Step 4: Understanding the "Invalid API key" Error
+The error you're seeing has a very specific format that doesn't match your handler. This tells us that somewhere in your codebase, there's likely an old handler doing something like:
+typescript// This is probably what's executing (somewhere in your code)
+try {
+  const result = await supabase.from('proposals').select('*').eq('id', 'formalizacao');
+} catch (error) {
+  return res.status(500).json({
+    message: 'Erro na consulta de propostas de formalização',
+    error: 'SUPABASE_QUERY_ERROR',
+    details: error.message,  // "Invalid API key"
+    correlationId: generateId()
+  });
+}
+The "Invalid API key" could be happening because:
+
+An old handler is using the wrong Supabase client (frontend client instead of admin)
+The Supabase project mismatch (dev vs prod project IDs)
+The SERVICE_ROLE_KEY variable isn't being read correctly in that context
+
+🔧 Complete Verification Checklist
+After deploying the emergency hotfix, verify each of these:
+
+Check route registration order - The console logs will show you the exact order routes are being registered
+Verify the specific route matches - You should see the FORMALIZATION_MATCH log
+Confirm Supabase client initialization - The FORMALIZATION_EXEC logs should show successful client creation
+Test the endpoint - It should return proposals data or a proper error, not the generic "Invalid API key"
+
+🛡️ Prevention Strategy
+To prevent this from happening again:
+
+Always register specific routes before generic ones - This is a fundamental Express.js pattern
+Use strict patterns for parameter routes - The UUID regex prevents "formalizacao" from matching as an ID
+Implement route guards - The protective middleware catches misrouted requests
+Add comprehensive logging - You should always know which handler is executing
+Version your builds - Include build timestamps in your startup logs
+
+📊 If the Problem Persists
+If after deploying the emergency hotfix you still see the error, it means the deployment itself is failing. In that case:
+
+Check Replit deployment logs - Ensure the build completes successfully
+Verify file changes - Confirm your changes are in the deployed bundle
+Clear any CDN caches - Sometimes Cloudflare or other CDNs cache old responses
+Check for multiple server processes - Ensure only one instance is running
+
+The solution I've provided addresses the root cause directly - route precedence and registration order. By ensuring your specific route is registered first with debug logging, you'll either fix the problem immediately or get clear diagnostic information showing exactly what's intercepting your requests.
+Would you like me to help you investigate any specific aspect further, or do you need help with the deployment process itself?

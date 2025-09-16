@@ -1,0 +1,180 @@
+// STEP 1: IMMEDIATE DIAGNOSTIC
+// Add this BEFORE any route registrations in server/routes.ts
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // === CRITICAL DIAGNOSTIC LOGGING ===
+  // This will show us EXACTLY what routes are registered and in what order
+  console.log('🔍 [ROUTE_REGISTRATION] Starting route registration...');
+  console.log('🔍 [ROUTE_REGISTRATION] Current time:', new Date().toISOString());
+  console.log('🔍 [ROUTE_REGISTRATION] Node ENV:', process.env.NODE_ENV);
+  
+  // Track all routes being registered
+  const routeRegistry: string[] = [];
+  
+  // Intercept app.get, app.post, etc to log registrations
+  const originalGet = app.get.bind(app);
+  const originalPost = app.post.bind(app);
+  const originalPut = app.put.bind(app);
+  const originalDelete = app.delete.bind(app);
+  const originalUse = app.use.bind(app);
+  
+  app.get = function(path: any, ...args: any[]) {
+    if (typeof path === 'string') {
+      console.log(`📍 [ROUTE_REG] GET ${path}`);
+      routeRegistry.push(`GET ${path}`);
+    }
+    return originalGet(path, ...args);
+  };
+  
+  app.post = function(path: any, ...args: any[]) {
+    if (typeof path === 'string') {
+      console.log(`📍 [ROUTE_REG] POST ${path}`);
+      routeRegistry.push(`POST ${path}`);
+    }
+    return originalPost(path, ...args);
+  };
+  
+  app.use = function(path: any, ...args: any[]) {
+    if (typeof path === 'string') {
+      console.log(`📍 [ROUTE_REG] USE ${path} (router mount)`);
+      routeRegistry.push(`USE ${path}`);
+    }
+    return originalUse(path, ...args);
+  };
+  
+  // === STEP 2: CRITICAL FIX - REGISTER SPECIFIC ROUTES FIRST ===
+  // These MUST come before any generic :id routes
+  
+  // 🚨 FORMALIZATION ROUTE - MUST BE FIRST
+  console.log('🎯 [CRITICAL] Registering /api/propostas/formalizacao route...');
+  
+  app.get(
+    '/api/propostas/formalizacao',
+    // Add a pre-handler to GUARANTEE we see this route is hit
+    (req: any, res: any, next: any) => {
+      console.log('🚀🚀🚀 [FORMALIZATION_PREHOOK] Route definitely matched!');
+      console.log('🚀🚀🚀 [FORMALIZATION_PREHOOK] URL:', req.url);
+      console.log('🚀🚀🚀 [FORMALIZATION_PREHOOK] Path:', req.path);
+      console.log('🚀🚀🚀 [FORMALIZATION_PREHOOK] Method:', req.method);
+      next();
+    },
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      const startTime = Date.now();
+      const correlationId = Math.random().toString(36).substr(2, 9);
+      
+      // ENHANCED LOGGING TO PROVE THIS EXECUTES
+      console.log('🚀🚀🚀 [FORMALIZATION_HANDLER] === MAIN HANDLER EXECUTING ===');
+      console.log('🚀🚀🚀 [FORMALIZATION_HANDLER] Correlation ID:', correlationId);
+      console.log('🚀🚀🚀 [FORMALIZATION_HANDLER] User:', req.user?.email);
+      
+      logInfo('🚀 [FORMALIZATION] Route accessed', {
+        correlationId,
+        url: req.url,
+        path: req.path,
+        method: req.method,
+        userAgent: req.get('User-Agent'),
+        ip: req.ip,
+        timestamp: new Date().toISOString()
+      });
+
+      try {
+        // Your existing handler logic here...
+        // Make sure to include all the Supabase initialization and query logic
+        
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        const userLojaId = req.user?.loja_id;
+
+        if (!userId || !userRole) {
+          console.log('❌ [FORMALIZATION_HANDLER] Auth validation failed');
+          logError('❌ [FORMALIZATION] Authentication validation failed', {
+            correlationId,
+            userId,
+            userRole,
+            userLojaId,
+            step: 'AUTH_VALIDATION'
+          });
+          return res.status(401).json({ 
+            message: 'Usuário não autenticado corretamente',
+            error: 'AUTHENTICATION_FAILED',
+            correlationId 
+          });
+        }
+
+        console.log('✅ [FORMALIZATION_HANDLER] Auth validated, initializing Supabase...');
+        
+        // Continue with rest of implementation...
+        
+      } catch (error) {
+        console.error('❌ [FORMALIZATION_HANDLER] Error:', error);
+        return res.status(500).json({
+          message: 'Erro no processamento',
+          error: 'INTERNAL_ERROR',
+          correlationId
+        });
+      }
+    }
+  );
+  
+  console.log('✅ [CRITICAL] /api/propostas/formalizacao route registered');
+  
+  // Register other specific routes
+  app.get('/api/propostas/analise', jwtAuthMiddleware, ...);
+  
+  // === STEP 3: INTERCEPT ANY PROBLEMATIC GENERIC ROUTES ===
+  
+  // Before registering generic :id routes, add a guard
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  
+  // Generic proposal routes - MUST use strict UUID pattern
+  app.get(
+    '/api/propostas/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+    (req: any, res: any, next: any) => {
+      console.log('📌 [GENERIC_ROUTE] Matched /api/propostas/:id with ID:', req.params.id);
+      
+      // Extra safety check
+      if (!UUID_REGEX.test(req.params.id)) {
+        console.log('❌ [GENERIC_ROUTE] Invalid UUID format, rejecting');
+        return res.status(400).json({
+          message: 'ID de proposta inválido',
+          error: 'INVALID_PROPOSAL_ID'
+        });
+      }
+      
+      next();
+    },
+    jwtAuthMiddleware,
+    // ... rest of handler
+  );
+  
+  // === STEP 4: CATCH-ALL DIAGNOSTIC ===
+  // Add this AFTER all proposal routes to catch any misrouted requests
+  app.all('/api/propostas/*', (req, res, next) => {
+    console.log('⚠️ [CATCH_ALL] Unmatched proposal route:', req.path);
+    console.log('⚠️ [CATCH_ALL] Method:', req.method);
+    console.log('⚠️ [CATCH_ALL] This should not happen for /api/propostas/formalizacao');
+    
+    // Let it continue to 404 handler
+    next();
+  });
+  
+  // === STEP 5: END OF REGISTRATION DIAGNOSTIC ===
+  // At the very end of registerRoutes function
+  console.log('📊 [ROUTE_REGISTRATION] Complete route registry:');
+  routeRegistry.forEach((route, index) => {
+    console.log(`  ${index + 1}. ${route}`);
+  });
+  
+  // Also log Express internal routes
+  console.log('📊 [EXPRESS_ROUTES] All registered routes:');
+  app._router.stack.forEach((r: any) => {
+    if (r.route && r.route.path) {
+      console.log(`  ${r.route.stack[0].method?.toUpperCase() || 'ALL'} ${r.route.path}`);
+    } else if (r.name === 'router' && r.regexp) {
+      console.log(`  ROUTER: ${r.regexp}`);
+    }
+  });
+  
+  return server;
+}
