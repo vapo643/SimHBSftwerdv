@@ -40,7 +40,7 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
       // Convert queryKey array to URL string
       const url = queryKey.join('/') as string;
       // API methods now return normalized data directly (envelope unwrapping handled centrally)
-      return await api.get<T>(url);
+      return await api.get(url);
     } catch (error: any) {
       if (unauthorizedBehavior === 'returnNull' && error.message?.includes('401')) {
         return null;
