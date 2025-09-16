@@ -28,7 +28,7 @@ export interface Proposal {
   id: string;
   clienteNome: string;
   status: string;
-  clicksignDocumentId?: string;
+  clicksignDocumentKey?: string;
   clicksignEnvelopeId?: string;
   nossoNumero?: string;
 }
@@ -72,7 +72,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         id: row.id as string,
         clienteNome: row.cliente_nome as string,
         status: row.status as string,
-        clicksignDocumentId: row.clicksign_document_key as string | undefined,
+        clicksignDocumentKey: row.clicksign_document_key as string | undefined,
         clicksignEnvelopeId: row.clicksign_envelope_id as string | undefined,
       };
     } catch (error: any) {
@@ -146,7 +146,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
     updates: {
       assinaturaEletronicaConcluida?: boolean;
       dataAssinatura?: string;
-      clicksignDocumentId?: string;
+      clicksignDocumentKey?: string;
       caminhoCcbAssinado?: string;
     }
   ): Promise<void> {
@@ -156,7 +156,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         SET 
           assinatura_eletronica_concluida = ${updates.assinaturaEletronicaConcluida ?? false},
           data_assinatura = ${updates.dataAssinatura || null},
-          clicksign_document_key = COALESCE(${updates.clicksignDocumentId || null}, clicksign_document_key),
+          clicksign_document_key = COALESCE(${updates.clicksignDocumentKey || null}, clicksign_document_key),
           caminho_ccb_assinado = COALESCE(${updates.caminhoCcbAssinado || null}, caminho_ccb_assinado),
           updated_at = NOW()
         WHERE id = ${propostaId}

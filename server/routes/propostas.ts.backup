@@ -193,7 +193,7 @@ export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) =
     if (proposta.clicksignDocumentKey) {
       console.log(`[CCB] Usando ClickSign como fallback: ${proposta.clicksignDocumentKey}`);
       return res.json({
-        clicksignDocumentId: proposta.clicksignDocumentKey,
+        clicksignDocumentKey: proposta.clicksignDocumentKey,
         nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
         status: "assinado",
         dataAssinatura: proposta.dataAprovacao,

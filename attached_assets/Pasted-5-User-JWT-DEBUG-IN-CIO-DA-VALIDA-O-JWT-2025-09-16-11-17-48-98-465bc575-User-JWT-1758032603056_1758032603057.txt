@@ -1,0 +1,115 @@
+5
+User
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+2025-09-16 11:17:48.98
+465bc575
+User
+[JWT DEBUG] Rota acessada: /api/propostas
+2025-09-16 11:17:48.98
+465bc575
+User
+[JWT DEBUG] Método: GET
+2025-09-16 11:17:48.98
+465bc575
+User
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+2025-09-16 11:17:48.98
+465bc575
+User
+[JWT DEBUG] Origin: undefined
+2025-09-16 11:17:48.98
+465bc575
+User
+[JWT DEBUG] Referer: https://sistemasimpix.com.br/dashboard
+2025-09-16 11:17:48.98
+465bc575
+User
+[JWT DEBUG] Header Auth presente: true
+2025-09-16 11:17:48.98
+465bc575
+User
+[JWT DEBUG] Header começa com Bearer: true
+2025-09-16 11:17:48.98
+465bc575
+User
+[REDIS MANAGER] 🚀 Redis ATIVADO - Alta demanda detectada: {
+2025-09-16 11:17:48.98
+465bc575
+User
+slowRequests: 12,
+2025-09-16 11:17:48.98
+465bc575
+User
+criticalBreaches: 0,
+2025-09-16 11:17:48.98
+465bc575
+User
+proposalRequests: 0,
+2025-09-16 11:17:48.98
+465bc575
+User
+reason: 'SLOW_REQUESTS'
+2025-09-16 11:17:48.98
+465bc575
+User
+}
+2025-09-16 11:17:48.98
+465bc575
+User
+[REDIS MANAGER] 🔗 Using REDIS_URL for connection
+2025-09-16 11:17:48.98
+465bc575
+User
+[REDIS MANAGER] 📍 Parsed Redis config: {
+2025-09-16 11:17:48.98
+465bc575
+User
+host: 'redis-15502.crce181.sa-east-1-2.ec2.redns.redis-cloud.com',
+2025-09-16 11:17:48.98
+465bc575
+User
+port: 15502,
+2025-09-16 11:17:48.98
+465bc575
+User
+username: 'default',
+2025-09-16 11:17:48.98
+465bc575
+User
+hasPassword: true,
+2025-09-16 11:17:48.98
+465bc575
+User
+db: 0
+2025-09-16 11:17:48.98
+465bc575
+User
+}
+2025-09-16 11:17:48.98
+465bc575
+User
+[REDIS MANAGER] 📡 Modo produção: conexão sem TLS (padrão seguro)
+2025-09-16 11:17:49.14
+465bc575
+User
+[REDIS MANAGER] ✅ Conexão TCP estabelecida
+2025-09-16 11:17:49.28
+465bc575
+User
+[REDIS MANAGER] 🚀 Cliente Redis pronto
+2025-09-16 11:17:49.42
+465bc575
+User
+[REDIS MANAGER] 🎯 Singleton Redis conectado com sucesso
+2025-09-16 11:17:49.84
+465bc575
+User
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+2025-09-16 11:17:49.84
+465bc575
+User
+[JWT DEBUG] Using local JWT validation
+2025-09-16 11:17:49.85
+465bc575
+User
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)

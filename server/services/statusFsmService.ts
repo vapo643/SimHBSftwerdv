@@ -421,7 +421,7 @@ export class StatusFSMService {
 
     if (toStatus === 'ASSINATURA_CONCLUIDA') {
       // Valida se existe documento na ClickSign
-      if (!metadata?.clicksignDocumentId && !proposta.clicksignDocumentId) {
+      if (!metadata?.clicksignDocumentKey && !proposta.clicksignDocumentKey) {
         throw new Error('Documento não encontrado na ClickSign');
       }
     }
