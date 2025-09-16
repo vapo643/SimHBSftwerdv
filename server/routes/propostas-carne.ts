@@ -78,8 +78,48 @@ router.get('/:id', jwtAuthMiddleware, async (req, res) => {
     console.log('[PROPOSTA INDIVIDUAL] Buscando detalhes da proposta:', id);
     
     const propostaResult = await db
-      .select()
+      .select({
+        // Campos principais da proposta
+        id: propostas.id,
+        numeroProposta: propostas.numeroProposta,
+        clienteNome: propostas.clienteNome,
+        status: propostas.status,
+        valor: propostas.valor,
+        prazo: propostas.prazo,
+        valorTac: propostas.valorTac,
+        valorIof: propostas.valorIof,
+        taxaJuros: propostas.taxaJuros,
+        lojaId: propostas.lojaId,
+        produtoId: propostas.produtoId,
+        createdAt: propostas.createdAt,
+        updatedAt: propostas.updatedAt,
+        // Campos das tabelas relacionadas para exibir nomes
+        lojaNome: lojas.nomeLoja,
+        produtoNome: produtos.nomeProduto,
+        parceiroNome: parceiros.razaoSocial,
+        // Campos restantes da proposta
+        clienteCpf: propostas.clienteCpf,
+        clienteEmail: propostas.clienteEmail,
+        clienteTelefone: propostas.clienteTelefone,
+        finalidade: propostas.finalidade,
+        garantia: propostas.garantia,
+        valorTotalFinanciado: propostas.valorTotalFinanciado,
+        valorLiquidoLiberado: propostas.valorLiquidoLiberado,
+        jurosModalidade: propostas.jurosModalidade,
+        periodicidadeCapitalizacao: propostas.periodicidadeCapitalizacao,
+        taxaJurosAnual: propostas.taxaJurosAnual,
+        pracaPagamento: propostas.pracaPagamento,
+        formaPagamento: propostas.formaPagamento,
+        analistaId: propostas.analistaId,
+        dataAnalise: propostas.dataAnalise,
+        motivoPendencia: propostas.motivoPendencia,
+        valorAprovado: propostas.valorAprovado,
+        observacoes: propostas.observacoes,
+      })
       .from(propostas)
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+      .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
       .where(eq(propostas.id, id))
       .limit(1);
 
@@ -94,6 +134,7 @@ router.get('/:id', jwtAuthMiddleware, async (req, res) => {
 
     const proposta = propostaResult[0];
     console.log(`[PROPOSTA INDIVIDUAL] Proposta encontrada: ${proposta.clienteNome} - Status: ${proposta.status}`);
+    console.log(`[PROPOSTA INDIVIDUAL] Dados relacionados: Loja="${proposta.lojaNome}", Produto="${proposta.produtoNome}", Parceiro="${proposta.parceiroNome}"`);
     
     res.json({
       success: true,
