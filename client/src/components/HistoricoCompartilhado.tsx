@@ -23,7 +23,8 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
     queryKey: [`/api/propostas/${propostaId}`],
     queryFn: async () => {
       const response = await api.get(`/api/propostas/${propostaId}`);
-      return response.data;
+      // Handle envelope response format {success: true, data: {...}}
+      return response.data.success !== undefined ? response.data.data : response.data;
     },
     enabled: !!propostaId,
     refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
@@ -37,7 +38,8 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
     queryFn: async () => {
       try {
         const response = await api.get(`/api/propostas/${propostaId}/historico`);
-        return response.data;
+        // Handle envelope response format {success: true, data: {...}}
+        return response.data.success !== undefined ? response.data.data : response.data;
       } catch (error) {
         console.warn('Erro ao buscar logs de auditoria:', error);
         return { logs: [], propostaCriada: null, total: 0 };
