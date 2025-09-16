@@ -662,10 +662,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // MOVED TO server/routes/propostas/core.ts - PUT /api/propostas/:id/status
-
-  // 🔧 CORREÇÃO CRÍTICA: Mover endpoint específico ANTES da rota genérica /:id
-  // New endpoint for formalization proposals (filtered by status) - VERSÃO ROBUSTA
+  // ========================================
+  // 🔧 PROPOSTAS ROUTES - SPECIFIC ROUTES FIRST TO PREVENT SHADOWING
+  // ========================================
+  
+  // 🎯 SPECIFIC ROUTES (must come before generic :id routes)
+  
+  // FORMALIZATION endpoint - MOVED TO TOP to prevent route shadowing
   app.get(
     '/api/propostas/formalizacao',
     jwtAuthMiddleware as any,
@@ -1356,9 +1359,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // PUT /api/propostas/:id - Atualizar dados da proposta (para correções)
+  // 🔧 GENERIC ROUTES (with UUID restrictions to prevent route shadowing)
+  
+  // PUT /api/propostas/:id - Atualizar dados da proposta (para correções)  
+  // 🔧 UUID RESTRICTION: Only accept valid UUIDs to prevent route shadowing
   app.put(
-    '/api/propostas/:id',
+    '/api/propostas/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res, next) => {
       try {
@@ -1459,63 +1465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // MOVED TO server/routes/propostas/core.ts - POST /api/propostas
 
-  // Busca uma proposta individual pelo ID (Rota DDD Canônica)
-  app.get(
-    '/api/propostas/:id',
-    jwtAuthMiddleware as any,
-    async (req: AuthenticatedRequest, res, next) => {
-      try {
-        const { ProposalController } = await import(
-          './modules/proposal/presentation/proposalController'
-        );
-        const proposalController = new ProposalController();
-
-        // Log para auditoria do fluxo de dados
-        console.log(`[DDD ROUTE] Rota GET /api/propostas/:id acessada para o ID: ${req.params.id}`);
-
-        return proposalController.getById(req, res, next);
-      } catch (error) {
-        console.error('GET /api/propostas/:id error:', error);
-        next(error);
-      }
-    }
-  );
-
-  // PUT /api/propostas/:id - Atualizar dados da proposta (para correções)
-  app.put(
-    '/api/propostas/:id',
-    jwtAuthMiddleware as any,
-    async (req: AuthenticatedRequest, res, next) => {
-      try {
-        const { ProposalController } = await import(
-          './modules/proposal/presentation/proposalController'
-        );
-        const proposalController = new ProposalController();
-        return proposalController.update(req, res, next);
-      } catch (error) {
-        console.error('PUT /api/propostas/:id error:', error);
-        next(error);
-      }
-    }
-  );
-
-  // PUT /api/propostas/:id/resubmit - Reenviar proposta pendente para análise
-  app.put(
-    '/api/propostas/:id/resubmit',
-    jwtAuthMiddleware as any,
-    async (req: AuthenticatedRequest, res, next) => {
-      try {
-        const { ProposalController } = await import(
-          './modules/proposal/presentation/proposalController'
-        );
-        const proposalController = new ProposalController();
-        return proposalController.resubmitFromPending(req, res, next);
-      } catch (error) {
-        console.error('PUT /api/propostas/:id/resubmit error:', error);
-        next(error);
-      }
-    }
-  );
+  // 🗑️ REMOVED DUPLICATE ROUTES - These are duplicates of routes above
 
   // MOVED TO server/routes/propostas/core.ts - POST /api/propostas
 
@@ -1778,7 +1728,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Document routes for proposals - REATIVADO PAM V1.0
-  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
+  // 🔧 UUID RESTRICTION: Only accept valid UUIDs to prevent route shadowing
+  app.get('/api/propostas/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/documents', jwtAuthMiddleware as any, getPropostaDocuments);
   app.post(
     "/api/propostas/:id/documents",
     jwtAuthMiddleware as any,
@@ -4024,28 +3975,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
   const proposalController = new ProposalController();
 
-  // Main proposal routes using DDD controller
-  app.get('/api/propostas', jwtAuthMiddleware as any, async (req: any, res: any, next: any) => {
-    try {
-      await proposalController.list(req, res, next);
-    } catch (error) {
-      next(error);
-    }
-  });
-  app.get('/api/propostas/:id', jwtAuthMiddleware as any, async (req: any, res: any, next: any) => {
-    try {
-      await proposalController.getById(req, res, next);
-    } catch (error) {
-      next(error);
-    }
-  });
-  app.post('/api/propostas', jwtAuthMiddleware as any, async (req: any, res: any, next: any) => {
-    try {
-      await proposalController.create(req, res, next);
-    } catch (error) {
-      next(error);
-    }
-  });
+  // 🗑️ REMOVED DUPLICATE DDD CONTROLLER ROUTES 
+  // These routes are already defined earlier in the file with proper UUID restrictions
+  // Removing to prevent route shadowing of specific routes like /formalizacao
 
   // 🚀 Register GERENCIAR STATUS route (BEFORE legacy routes)
   app.use('/api/propostas', propostasPatchRoutes);
