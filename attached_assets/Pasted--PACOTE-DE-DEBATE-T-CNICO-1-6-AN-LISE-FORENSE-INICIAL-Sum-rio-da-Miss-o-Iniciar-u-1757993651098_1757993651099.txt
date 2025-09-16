@@ -1,0 +1,46 @@
+### **PACOTE DE DEBATE TÉCNICO (1/6) - ANÁLISE FORENSE INICIAL**
+
+* **Sumário da Missão:** Iniciar um debate técnico profundo para diagnosticar uma falha crítica e persistente de `500 Internal Server Error` na rota `/api/propostas/formalizacao`, que está a causar um loop infinito no frontend.
+
+* **Intenção Estratégica:** As nossas tentativas anteriores de correção falharam. Devemos abandonar todas as hipóteses prévias e começar uma nova análise forense do zero, baseada puramente na evidência bruta dos logs de produção, para construir uma nova e mais precisa teoria da falha.
+
+---
+
+**[DIRETIVA DE DIVULGAÇÃO TOTAL (DDT) V1.0 - ANTI-OMISSÃO]**
+
+* Você está operando sob a Doutrina de Divulgação Total. A sua análise deve considerar **TODAS** as linhas de log fornecidas, sem exceção. Não resuma. A sua missão é correlacionar todos os sintomas para formar uma hipótese coesa.
+
+---
+
+**EVIDÊNCIA BRUTA (ESTADO ATUAL):**
+
+**Sintoma 1: Erro de Frontend (Console do Navegador)**
+O frontend tenta repetidamente fazer uma requisição para `/api/propostas/formalizacao` e recebe consistentemente um erro `500`. Isto aciona um loop infinito de retentativas, e a UI exibe "Erro ao buscar propostas de formalização".
+
+```log
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+api/propostas/formalizacao:1 Failed to load resource: the server responded with a status of 500 ()
+index-CniWoRi2.js:56 Erro na query de formalização: ApiError: Erro ao buscar propostas de formalização
+... (este padrão repete-se indefinidamente) ...
+Sintoma 2: Logs de Backend (Deploy)
+Os logs do backend mostram uma sequência de eventos mais complexa e contraditória:
+
+Degradação de Serviço: O Redis está offline ([REDIS OFFLINE]).
+
+Autenticação Bem-Sucedida: O JWT do usuário é validado com sucesso ([PHOENIX DEBUG] ✅ JWT verification SUCCESS).
+
+Consulta ao Banco: Uma query é executada para buscar o perfil do usuário (select "role", "full_name", "loja_id" from "profiles").
+
+Criação do Cliente Supabase: O cliente Supabase parece ser criado com sucesso (✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...).
+
+Erro Crítico do Supabase: Imediatamente a seguir, um log de erro do Supabase indica code: 'PGRST200'. Importante: PGRST200 é um código de erro do PostgREST que significa "The requested resource does not exist" (O recurso solicitado não existe).
+
+Erro de Conexão Adicional: Um erro ECONNREFUSED para http://localhost:4242 indica que o serviço de feature flags (Unleash) também está a falhar.
+
+PERGUNTA ESTRATÉGICA (Sua Missão para Esta Interação):
+
+Com base exclusivamente na evidência de log fornecida, formule uma hipótese inicial para a causa raiz. A sua análise DEVE obrigatoriamente explicar a seguinte contradição fundamental:
+
+Por que o frontend recebe um erro 500 (Erro Interno do Servidor), quando o log do backend aponta para um erro PGRST200 (Recurso Não Encontrado) do Supabase e múltiplas outras falhas de serviço (Redis, Unleash)?
+
+Apresente a sua hipótese como uma sequência lógica de eventos, começando pela falha inicial até ao sintoma final no frontend.
