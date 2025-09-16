@@ -35,9 +35,9 @@ const formatAsCurrency = (value: any): string => {
 };
 
 const formatAsPercent = (value: any): string => {
-  if (value === null || value === undefined) return 'N/A';
+  if (value === null || value === undefined || value === '') return 'N/A';
   const numValue = Number(value);
-  if (isNaN(numValue)) return String(value);
+  if (isNaN(numValue)) return 'N/A'; // 🔧 BLINDAGEM: Nunca retorna "NaN" literal
   return `${numValue.toFixed(2).replace('.', ',')}%`;
 };
 
@@ -207,11 +207,11 @@ const AnaliseManualPage: React.FC = () => {
       numeroProposta: rawData.numero_proposta || rawData.numeroProposta,
       status: rawData.status || 'N/A',
       cliente: {
-        // ✅ CORRIGIDO: Usar nomes corretos da API transformada (priorizar campos da API individual)
-        nome: rawData.clienteNome || rawData.cliente_nome || clienteData.nome || 'N/A',
-        cpf: rawData.clienteCpf || rawData.cliente_cpf || clienteData.cpf || 'N/A',
-        email: rawData.clienteEmail || rawData.cliente_email || clienteData.email || 'N/A',
-        telefone: rawData.clienteTelefone || rawData.cliente_telefone || clienteData.telefone || 'N/A',
+        // 🛡️ BLINDAGEM ANTI-REGRESSÃO: Múltiplas convenções de nomenclatura suportadas
+        nome: rawData.nomeCliente || rawData.clienteNome || rawData.cliente_nome || clienteData.nome || 'N/A',
+        cpf: rawData.cpfCliente || rawData.clienteCpf || rawData.cliente_cpf || clienteData.cpf || 'N/A',
+        email: rawData.emailCliente || rawData.clienteEmail || rawData.cliente_email || clienteData.email || 'N/A',
+        telefone: rawData.telefoneCliente || rawData.clienteTelefone || rawData.cliente_telefone || clienteData.telefone || 'N/A',
         dataNascimento:
           rawData.clienteDataNascimento ||
           rawData.cliente_data_nascimento ||
