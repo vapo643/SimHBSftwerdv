@@ -1,0 +1,52 @@
+ [AUTH EVENT] SIGNED_IN Object
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+index-CniWoRi2.js:56 🔐 [AUTH EVENT] INITIAL_SESSION Object
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-16T03:09:18.000Z
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+api/events:1  Failed to load resource: the server responded with a status of 401 ()Understand this error
+index-CniWoRi2.js:56 [SSE] ❌ Connection error: Event
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-16T03:09:18.000Z', hasActiveRefresh: false}
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token

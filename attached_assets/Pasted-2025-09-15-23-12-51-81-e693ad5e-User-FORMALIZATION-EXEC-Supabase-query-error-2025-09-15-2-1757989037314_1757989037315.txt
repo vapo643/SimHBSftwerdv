@@ -1,0 +1,144 @@
+2025-09-15 23:12:51.81
+e693ad5e
+User
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+2025-09-15 23:12:51.81
+e693ad5e
+User
+message: 'Invalid API key',
+2025-09-15 23:12:51.81
+e693ad5e
+User
+hint: 'Double check your Supabase `anon` or `service_role` API key.'
+2025-09-15 23:12:51.81
+e693ad5e
+User
+}
+2025-09-15 23:12:51.81
+e693ad5e
+User
+{"correlationId":"07b7cea9-3652-4a7f-830c-7bb1b3c6a805","duration":378,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":152,"service":"simpix-api","statusCode":500,"timestamp":"2025-09-16 02:12:51","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 23:12:51.81
+e693ad5e
+User
+{"correlationId":"07b7cea9-3652-4a7f-830c-7bb1b3c6a805","duration":378,"environment":"production","error":"{\"message\":\"Erro ao buscar propostas de formalização\",\"error\":\"QUERY_ERROR\",\"details\":\"Invalid API key\",\"correlationId\":\"7ukczgk0q\"}","level":"error","message":"❌ Request error","method":"GET","service":"simpix-api","statusCode":500,"timestamp":"2025-09-16 02:12:51","url":"/api/propostas/formalizacao","version":"1.0.0"}
+2025-09-15 23:12:59.71
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:12:59.71
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:12:59.71
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:12:59.90
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:13:02.51
+84266b5f
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:13:02.51
+84266b5f
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:13:18.71
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:13:18.80
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:13:18.80
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:13:18.80
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:13:20.80
+84266b5f
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:13:20.80
+84266b5f
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:13:37.01
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:13:37.01
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:13:37.01
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:13:37.01
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:13:39.10
+84266b5f
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:13:39.10
+84266b5f
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:13:57.40
+84266b5f
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:13:57.40
+84266b5f
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:14:02.91
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:14:02.91
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:14:02.91
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:14:02.91
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:14:15.90
+84266b5f
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:14:15.90
+84266b5f
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:14:21.11
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:14:21.11
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-09-15 23:14:21.11
+e693ad5e
+User
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n at ClientRequest.emit (node:events:524:28)\n at emitErrorEvent (node:_http_client:101:11)\n at Socket.socketErrorListener (node:_http_client:504:5)\n at Socket.emit (node:events:524:28)\n at emitErrorNT (node:internal/streams/destroy:169:8)\n at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+2025-09-15 23:14:21.11
+e693ad5e
+User
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}

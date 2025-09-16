@@ -1,0 +1,160 @@
+DEEPTHINK PROTOCOL ACTIVATED. P0 ANALYSIS INITIATED.
+
+CASE FILE: SIMPIX-P0-FORMALIZACAO-500
+STATUS: CRITICAL (PRODUCTION IMPAIRED)
+OBJECTIVE: DEFINITIVE ROOT CAUSE ANALYSIS AND RESOLUTION.
+
+Arquiteto Chefe, analisei o dossiê forense. O incidente P0 na rota GET /api/propostas/formalizacao apresentando HTTP 500 com "Invalid API key" em produção, enquanto o desenvolvimento funciona, é um caso clássico, porém complexo, de falha de roteamento e configuração de ambiente.
+
+A análise forense das evidências aponta para um diagnóstico claro.
+
+1. DIAGNÓSTICO DEFINITIVO DA CAUSA RAIZ
+O problema é uma combinação fatal de Route Shadowing (Interceptação de Rota) e Contaminação do Cliente Supabase.
+
+A Evidência Crucial: Logs Ausentes
+A prova definitiva de que o handler correto (Linha ~670 em server/routes.ts) não está sendo executado é a ausência dos logs implementados:
+
+Bash
+
+# Logs ESPERADOS que NÃO APARECEM em produção:
+🚀 [FORMALIZATION] Route accessed
+✅ [FORMALIZATION] Authentication validated
+Isso significa que a requisição está sendo interceptada antes de chegar ao handler desejado.
+
+Causa Raiz 1: Route Shadowing (O Interceptador)
+Uma rota genérica está capturando a requisição. Provavelmente, uma rota como GET /api/propostas/:id (sem restrição de Regex para UUID) ou um router externo montado em /api/propostas está capturando a string "formalizacao" como parâmetro.
+
+Causa Raiz 2: Contaminação do Cliente Supabase (A Causa do Erro 500)
+O handler que está interceptando a chamada (Causa 1) está causando o erro "Invalid API key". Isso ocorre porque ele está inicializando o cliente Supabase incorretamente, provavelmente usando a importação contaminada identificada na Tentativa 1:
+
+TypeScript
+
+// Importação Problemática (Provavelmente usada pelo Interceptador)
+import { createServerSupabaseClient } from '../client/src/lib/supabase'; // ❌ ERRADO!
+Este import utiliza a configuração do FRONTEND, que usa a ANON KEY (pública). Quando o backend tenta realizar operações privilegiadas com a ANON KEY, o Supabase rejeita a operação com "Invalid API key".
+
+Reconstrução do Cenário da Falha
+Requisição: GET /api/propostas/formalizacao.
+
+Interceptação (Causa 1): Uma rota genérica captura a requisição.
+
+Execução Contaminada (Causa 2): O handler genérico usa o cliente Supabase do Frontend (ANON KEY).
+
+Falha: O Supabase rejeita a operação devido à chave inválida/insuficiente.
+
+Resultado: HTTP 500. O handler correto nunca é executado.
+
+2. PLANO DE CORREÇÃO DEFINITIVO (OPERAÇÃO ANTI-SHADOW)
+Precisamos identificar o handler impostor, corrigir sua configuração e garantir a precedência correta das rotas.
+
+FASE 1: Auditoria e Erradicação de Imports Incorretos (Resolver Causa 2)
+AÇÃO 1.1: Auditoria Global de Imports (Busca e Destruição)
+
+Execute este comando na raiz do projeto para identificar TODOS os arquivos no backend que usam o cliente do frontend.
+
+Bash
+
+grep -r "from '../client/src/lib/supabase'" server/
+AÇÃO 1.2: Correção Mandatória de Imports
+
+Para CADA arquivo listado pelo comando acima (exceto se já corrigido na Tentativa 1), realize a substituição:
+
+TypeScript
+
+// ❌ REMOVER (Importação do Frontend - USA ANON KEY)
+// import { createServerSupabaseClient } from '../client/src/lib/supabase';
+
+// ✅ SUBSTITUIR POR (Importação do Backend - USA SERVICE ROLE KEY)
+// Ajuste o caminho relativo '../../' conforme necessário para apontar para server/lib/supabase.ts
+import { createServerSupabaseAdminClient } from '../../lib/supabase';
+Validação: Após a correção, o comando grep da Ação 1.1 não deve retornar resultados.
+
+FASE 2: Correção do Route Shadowing (Resolver Causa 1)
+AÇÃO 2.1: Implementação de Regex Restritivo em server/routes.ts
+
+Para impedir que rotas genéricas capturem endpoints específicos, devemos forçá-las a aceitar apenas UUIDs válidos.
+
+MODIFIQUE server/routes.ts:
+
+TypeScript
+
+// server/routes.ts
+
+// Definir a expressão regular estrita para UUID v4
+const UUID_REGEX = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
+
+// ... (Dentro da função registerRoutes)
+
+// ✅ 1. GARANTIR PRECEDÊNCIA: ROTAS ESPECÍFICAS DEVEM VIR PRIMEIRO
+app.get('/api/propostas/formalizacao', jwtAuthMiddleware as any, handlerFormalizacao);
+app.get('/api/propostas/analise', jwtAuthMiddleware as any, handlerAnalise);
+// ... outras rotas específicas
+
+// ✅ 2. APLICAR RESTRIÇÃO NAS ROTAS GENÉRICAS (DEVEM VIR DEPOIS)
+// Localize e substitua TODAS as rotas /api/propostas/:id por estas versões restritas:
+app.get(`/api/propostas/:id(${UUID_REGEX})`, jwtAuthMiddleware as any, handlerGetById);
+app.put(`/api/propostas/:id(${UUID_REGEX})`, jwtAuthMiddleware as any, handlerUpdate);
+app.patch(`/api/propostas/:id(${UUID_REGEX})`, jwtAuthMiddleware as any, handlerPatch);
+AÇÃO 2.2: Auditoria de Routers Externos
+
+Revise server/routes.ts para garantir que nenhum router externo seja montado de forma abrangente ANTES das rotas específicas.
+
+Se encontrar app.use('/api/propostas', someRouter);, mova-o para DEPOIS das definições de app.get('/api/propostas/formalizacao', ...) .
+
+FASE 3: Verificação da Configuração do Supabase (Prevenção)
+AÇÃO 3.1: Simplificar server/lib/supabase.ts
+
+Remover fallbacks complexos para garantir clareza e evitar contaminação futura.
+
+MODIFIQUE server/lib/supabase.ts (createServerSupabaseAdminClient):
+
+TypeScript
+
+// server/lib/supabase.ts
+
+export const createServerSupabaseAdminClient = () => {
+  // ... (Logging existente)
+
+  // CONFIGURAÇÃO EXPLÍCITA - REMOVER FALLBACKS (PROD_*, DEV_*, VITE_*)
+  const url = process.env.SUPABASE_URL;
+  // Usar APENAS a variável canônica SUPABASE_SERVICE_ROLE_KEY
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceKey) {
+      console.error(`🚨 FATAL: SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurado. Fallbacks removidos.`);
+      throw new Error("Configuração de Banco de Dados Ausente.");
+  }
+
+  // ... (Logging detalhado existente para verificar Project ID e Key format)
+
+  // Retorna cliente Supabase
+  return createClient(url, serviceKey, {
+    auth: { persistSession: false }
+  });
+};
+FASE 4: Deploy e Validação em Produção
+AÇÃO 4.1: Deploy e Monitoramento de Logs
+
+Faça o deploy das alterações das Fases 1, 2 e 3.
+
+Acesse https://sistemasimpix.com.br/api/propostas/formalizacao.
+
+Monitore os logs do servidor de produção.
+
+Validação Crítica (Logs):
+
+Bash
+
+# ✅ SUCESSO ESPERADO (Prova de que o handler correto foi executado e configurado):
+🚀 [FORMALIZATION] Route accessed
+✅ [FORMALIZATION] Authentication validated
+🔍 SUPABASE_ADMIN_CLIENT_DEBUG - Environment: production
+🔍 Project ID: dvglgxrvhmtsixaabxha  (Deve ser o ID de produção)
+✅ [FORMALIZATION] Supabase client initialized
+Validação Crítica (Resposta):
+
+A API deve retornar HTTP 200 OK com os dados.
+
+A tela de formalização no frontend deve carregar corretamente.
+
+AÇÃO IMEDIATA: Arquiteto-Chefe, execute a Ação 1.1 (grep) imediatamente e reporte os resultados para iniciarmos a erradicação da Causa 2, enquanto prepara as modificações das Fases 1 e 3.
