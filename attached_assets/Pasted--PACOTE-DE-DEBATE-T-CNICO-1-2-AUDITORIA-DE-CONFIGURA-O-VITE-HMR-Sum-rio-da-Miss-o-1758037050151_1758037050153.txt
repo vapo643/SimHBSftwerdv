@@ -1,0 +1,30 @@
+### **PACOTE DE DEBATE TÉCNICO (1/2) - AUDITORIA DE CONFIGURAÇÃO VITE HMR**
+
+* **Sumário da Missão:** Realizar uma auditoria forense nos ficheiros de configuração do servidor e do frontend para identificar como o servidor de desenvolvimento Vite está a ser configurado e iniciado, focando especificamente nas configurações de HMR (Hot Module Replacement) que estão a causar a falha de conexão WebSocket.
+
+* **Intenção Estratégica:** Obter a evidência exata do código que está a causar a falha de "tela branca" para podermos arquitetar uma correção cirúrgica e restaurar a funcionalidade básica do frontend.
+
+---
+
+**[DIRETIVA DE DIVULGAÇÃO TOTAL (DDT) V1.0]**
+
+* Você está a operar sob a Doutrina de Divulgação Total. Apresente o código-fonte **completo** dos ficheiros solicitados. Não resuma. A sua missão é revelar a realidade da configuração do nosso ambiente de desenvolvimento.
+
+---
+
+**EVIDÊNCIA BRUTA (ESTADO ATUAL DA CRISE):**
+
+* **Sintoma Primário:** O frontend não renderiza, resultando numa "tela branca".
+* **Sintoma Secundário (Console):** Erros de WebSocket indicando uma falha de conexão do cliente Vite (no navegador) para o servidor HMR. O log aponta para uma tentativa de conexão a `localhost`, que é inacessível de fora do ambiente Replit.
+    ```log
+    [vite] failed to connect to websocket.
+    your current setup: (browser) ... <--[WebSocket (failing)]--> localhost:5173/ (server)
+    ```
+
+**PERGUNTA ESTRATÉGICA (Sua Missão para Esta Interação):**
+
+1.  **Auditoria de Configuração do Vite:** Localize e apresente o conteúdo completo do ficheiro `vite.config.ts`.
+2.  **Auditoria do Ponto de Entrada do Servidor:** Localize o ficheiro que inicia o servidor Express (provavelmente `server/index.ts` ou `server/app.ts`) e apresente o seu conteúdo completo, focando na secção que configura e aplica o middleware do Vite.
+3.  **Análise de Causa Raiz:** Com base nos ficheiros que encontrou, aponte a ausência ou a configuração incorreta na secção `server.hmr` do `vite.config.ts` como a causa provável da falha de conexão WebSocket.
+
+**NÃO MODIFIQUE NENHUM CÓDIGO.** Esta é uma missão de reconhecimento para confirmar a nossa hipótese.
