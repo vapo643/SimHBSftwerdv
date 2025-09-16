@@ -367,8 +367,13 @@ router.get('/:id/historico', jwtAuthMiddleware, async (req, res) => {
       createdAt: log.createdAt?.toISOString() || new Date().toISOString(), // Frontend espera camelCase
       status_novo: log.statusNovo,
       status_anterior: log.statusAnterior || null,
+      statusNovo: log.statusNovo, // camelCase também
+      statusAnterior: log.statusAnterior || null, // camelCase também
       observacao: log.observacao || null,
-      usuario_nome: log.usuarioNome || 'Usuário não identificado',
+      detalhes: log.observacao || null, // Alias para detalhes
+      usuario_nome: log.usuarioNome || 'Usuário não identificado', // snake_case
+      usuarioNome: log.usuarioNome || 'Usuário não identificado', // camelCase para frontend
+      descricao: `Status alterado de ${log.statusAnterior || 'inicial'} para ${log.statusNovo}`, // Campo esperado pelo frontend
       profiles: {
         role: log.usuarioRole || 'user'
       }

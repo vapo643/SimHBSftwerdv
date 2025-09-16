@@ -46,6 +46,18 @@ export async function updateStatusWithContext(
   console.log(`[DUPLA-ESCRITA] 📊 Contexto: ${contexto}, Novo Status: ${novoStatus}`);
 
   try {
+    // Verificar se db está disponível
+    if (!db) {
+      return {
+        success: false,
+        statusLegado: '',
+        statusContextual: '',
+        contexto,
+        timestamp: new Date(),
+        error: 'Database connection not available',
+      };
+    }
+
     // Executar em transação atômica
     const result = await db.transaction(async (tx: any) => {
       console.log(`[DUPLA-ESCRITA] 🔄 Transação iniciada`);
@@ -187,6 +199,12 @@ export async function getStatusByContext(
   contexto: StatusContexto
 ): Promise<string | null> {
   try {
+    // Verificar se db está disponível
+    if (!db) {
+      console.error(`[STATUS-CONTEXT] ❌ Database connection not available`);
+      return null;
+    }
+
     // Primeiro tenta buscar da nova tabela
     const [statusContextual] = await db
       .select({ status: statusContextuais.status })
@@ -224,6 +242,12 @@ export async function validateStatusConsistency(
   propostaId: string
 ): Promise<{ isConsistent: boolean; details: any }> {
   try {
+    // Verificar se db está disponível
+    if (!db) {
+      console.error(`[CONSISTÊNCIA] ❌ Database connection not available`);
+      return { isConsistent: false, details: { error: 'Database unavailable' } };
+    }
+
     const [proposta] = await db
       .select({ status: propostas.status })
       .from(propostas)
