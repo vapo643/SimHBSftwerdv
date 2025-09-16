@@ -56,9 +56,9 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
   async findProposalByClickSignDocument(documentKey: string): Promise<Proposal | null> {
     try {
       const result = await db.execute(sql`
-        SELECT id, cliente_nome, status, clicksign_document_key, clicksign_envelope_id
+        SELECT id, cliente_nome, status, clicksign_document_id, clicksign_envelope_id
         FROM propostas 
-        WHERE clicksign_document_key = ${documentKey}
+        WHERE clicksign_document_id = ${documentKey}
            OR clicksign_envelope_id = ${documentKey}
         LIMIT 1
       `);
@@ -72,7 +72,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         id: row.id as string,
         clienteNome: row.cliente_nome as string,
         status: row.status as string,
-        clicksignDocumentId: row.clicksign_document_key as string | undefined,
+        clicksignDocumentId: row.clicksign_document_id as string | undefined,
         clicksignEnvelopeId: row.clicksign_envelope_id as string | undefined,
       };
     } catch (error: any) {
@@ -156,7 +156,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         SET 
           assinatura_eletronica_concluida = ${updates.assinaturaEletronicaConcluida ?? false},
           data_assinatura = ${updates.dataAssinatura || null},
-          clicksign_document_key = COALESCE(${updates.clicksignDocumentId || null}, clicksign_document_key),
+          clicksign_document_id = COALESCE(${updates.clicksignDocumentId || null}, clicksign_document_id),
           caminho_ccb_assinado = COALESCE(${updates.caminhoCcbAssinado || null}, caminho_ccb_assinado),
           updated_at = NOW()
         WHERE id = ${propostaId}

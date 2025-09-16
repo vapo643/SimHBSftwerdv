@@ -158,82 +158,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        console.log('🔧 [FORMALIZATION_EXEC] Loading adaptive query system...');
+        console.log('🔧 [FORMALIZATION_EXEC] Loading Supabase module...');
         
-        let result;
+        // CRITICAL FIX: Use the correct server-side Supabase client
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
         
-        try {
-          // ADAPTIVE QUERY: Use the schema-aware query builder with fallback
-          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-          const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
-          
-          const supabase = createServerSupabaseAdminClient();
-          const queryBuilder = await getAdaptiveQueryBuilder();
-          
-          console.log('✅ [FORMALIZATION_EXEC] Adaptive query system initialized, executing formalization query...');
-          
-          // Build adaptive query with role-based filters
-          const filters = {
-            status: ['aprovado', 'aceito_atendente', 'documentos_enviados', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_PENDENTE', 'ASSINATURA_CONCLUIDA'],
-            userId: req.user.id,
-            lojaId: req.user.loja_id,
-            role: req.user.role
-          };
-          
-          console.log('🔒 [FORMALIZATION_EXEC] Query filters:', { 
-            role: req.user.role, 
-            userId: req.user.id, 
-            lojaId: req.user.loja_id 
+        console.log('✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...');
+        
+        // Build the query with proper filters
+        let query = supabase
+          .from('propostas')
+          .select(`
+            id,
+            codigo_identificacao,
+            nome_cliente,
+            cpf_cnpj,
+            valor_emprestimo,
+            numero_parcelas,
+            status,
+            observacao_status,
+            created_at,
+            updated_at,
+            loja_id,
+            lojas!loja_id (
+              id,
+              nome
+            )
+          `)
+          .in('status', ['aprovado', 'aceito_atendente', 'documentos_enviados', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_PENDENTE', 'ASSINATURA_CONCLUIDA']);
+        
+        // Apply role-based filtering
+        if (req.user.role === 'ATENDENTE' && req.user.id) {
+          console.log('🔒 [FORMALIZATION_EXEC] Applying ATENDENTE filter:', req.user.id);
+          query = query.eq('user_id', req.user.id);
+        } else if (req.user.role === 'GERENTE' && req.user.loja_id) {
+          console.log('🔒 [FORMALIZATION_EXEC] Applying GERENTE filter:', req.user.loja_id);
+          query = query.eq('loja_id', req.user.loja_id);
+        }
+        
+        query = query.order('updated_at', { ascending: false });
+        
+        console.log('📡 [FORMALIZATION_EXEC] Executing Supabase query...');
+        
+        const { data, error } = await query;
+        
+        if (error) {
+          console.error('❌ [FORMALIZATION_EXEC] Supabase query error:', error);
+          return res.status(500).json({
+            message: 'Erro ao buscar propostas de formalização',
+            error: 'QUERY_ERROR',
+            details: error.message,
+            correlationId
           });
-          
-          result = await queryBuilder.buildFormalizacaoQuery(supabase, filters);
-          
-        } catch (adaptiveError) {
-          console.warn('⚠️ [FORMALIZATION_EXEC] Adaptive query system failed, using fallback:', adaptiveError);
-          
-          // FALLBACK: Use traditional query as last resort
-          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-          const supabase = createServerSupabaseAdminClient();
-          
-          const fallbackStatuses = ['aprovado', 'aceito_atendente', 'documentos_enviados', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_PENDENTE', 'ASSINATURA_CONCLUIDA'];
-          
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('propostas')
-            .select('id, status')
-            .in('status', fallbackStatuses)
-            .limit(100);
-            
-          if (fallbackError) {
-            throw new Error(`Adaptive query failed and fallback also failed: ${fallbackError.message}`);
-          }
-          
-          result = {
-            data: fallbackData || [],
-            warnings: ['Adaptive query system unavailable - using minimal fallback'],
-            fallbacksUsed: ['emergency_fallback']
-          };
         }
         
-        // Log any fallbacks or warnings for monitoring
-        if (result.fallbacksUsed.length > 0) {
-          console.warn('⚠️ [FORMALIZATION_EXEC] Schema fallbacks activated:', result.fallbacksUsed);
-        }
-        if (result.warnings.length > 0) {
-          console.warn('⚠️ [FORMALIZATION_EXEC] Query warnings:', result.warnings);
-        }
-        
-        console.log('✅ [FORMALIZATION_EXEC] Adaptive query successful, found', result.data.length, 'proposals');
+        console.log('✅ [FORMALIZATION_EXEC] Query successful, found', data?.length || 0, 'proposals');
         
         return res.json({
           success: true,
-          data: result.data,
-          count: result.data.length,
-          correlationId,
-          // Include metadata for debugging
-          metadata: {
-            fallbacksUsed: result.fallbacksUsed,
-            warnings: result.warnings
-          }
+          data: data || [],
+          count: data?.length || 0,
+          correlationId
         });
         
       } catch (error) {
@@ -830,161 +816,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
-        let result;
-        
-        try {
-          // ADAPTIVE QUERY: Use schema-aware query system for analysis queue with fallback
-          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-          const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
-          
-          const supabase = createServerSupabaseAdminClient();
-          const queryBuilder = await getAdaptiveQueryBuilder();
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
 
-          // Analysis statuses - Apenas propostas que precisam de análise
-          const analysisStatuses = [
-            'EM_ANALISE',
-            'AGUARDANDO_ANALISE',
-            // Status legados para compatibilidade
-            'em_analise',
-            'aguardando_analise',
-          ];
+        // Analysis statuses - Apenas propostas que precisam de análise
+        const analysisStatuses = [
+          'EM_ANALISE',
+          'AGUARDANDO_ANALISE',
+          // Status legados para compatibilidade
+          'em_analise',
+          'aguardando_analise',
+        ];
 
-          const userId = req.user?.id;
-          const userRole = req.user?.role;
-          const userLojaId = req.user?.loja_id;
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        const userLojaId = req.user?.loja_id;
 
+        console.log(
+          `🔐 [ANALYSIS] Querying for user ${userId} with role ${userRole} from loja ${userLojaId}`
+        );
+
+        // Build query based on user role
+        let query = supabase.from('propostas').select('*').in('status', analysisStatuses);
+
+        // Apply role-based filtering
+        if (userRole === 'ATENDENTE') {
+          // ATENDENTE sees only proposals they created
+          query = query.eq('user_id', userId);
+          console.log(`🔐 [ANALYSIS] ATENDENTE filter: user_id = ${userId}`);
+        } else if (userRole === 'GERENTE') {
+          // GERENTE sees all proposals from their store
+          query = query.eq('loja_id', userLojaId);
+          console.log(`🔐 [ANALYSIS] GERENTE filter: loja_id = ${userLojaId}`);
+        }
+        // For ANALISTA and ADMINISTRADOR, no additional filtering (see all analysis proposals)
+
+        const { data: rawPropostas, error } = await query.order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('🚨 [ANALYSIS] Supabase error:', error);
+          return res.status(500).json({ message: 'Erro ao consultar propostas de análise' });
+        }
+
+        if (!rawPropostas || rawPropostas.length === 0) {
           console.log(
-            `🔐 [ANALYSIS] Adaptive query for user ${userId} with role ${userRole} from loja ${userLojaId}`
+            `🔐 [ANALYSIS] No analysis proposals found for user ${userId} with role ${userRole}`
           );
+          return res.json([]);
+        }
 
-          // Build adaptive query with filters
-          const filters = {
-            status: analysisStatuses,
-            userId: userId,
-            lojaId: userLojaId,
-            role: userRole
-          };
+        console.log(
+          `🔐 [ANALYSIS] Found ${rawPropostas.length} analysis proposals for user ${userId}`
+        );
+        console.log('🔐 [ANALYSIS] First proposal:', rawPropostas[0]?.id, rawPropostas[0]?.status);
 
-          result = await queryBuilder.buildAnaliseQuery(supabase, filters);
-          
-        } catch (adaptiveError) {
-          console.warn('⚠️ [ANALYSIS] Adaptive query system failed, using fallback:', adaptiveError);
-          
-          // FALLBACK: Use traditional query
-          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-          const supabase = createServerSupabaseAdminClient();
-          
-          const fallbackStatuses = ['EM_ANALISE', 'AGUARDANDO_ANALISE', 'em_analise', 'aguardando_analise'];
-          
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('propostas')
-            .select('id, status')
-            .in('status', fallbackStatuses)
-            .limit(100);
-            
-          if (fallbackError) {
-            throw new Error(`Adaptive query failed and fallback also failed: ${fallbackError.message}`);
+        // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
+        const analisePropostas = rawPropostas.map((proposta) => {
+          let clienteData = null;
+          let condicoesData = null;
+
+          // Parse cliente_data se for string
+          if (typeof proposta.cliente_data === 'string') {
+            try {
+              clienteData = JSON.parse(proposta.cliente_data);
+            } catch (e) {
+              console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
+              clienteData = {};
+            }
+          } else {
+            clienteData = proposta.cliente_data || {};
           }
-          
-          result = {
-            data: fallbackData || [],
-            warnings: ['Adaptive query system unavailable - using minimal fallback'],
-            fallbacksUsed: ['emergency_fallback']
+
+          // Parse condicoes_data se for string
+          if (typeof proposta.condicoes_data === 'string') {
+            try {
+              condicoesData = JSON.parse(proposta.condicoes_data);
+            } catch (e) {
+              console.warn(
+                `Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`,
+                e
+              );
+              condicoesData = {};
+            }
+          } else {
+            condicoesData = proposta.condicoes_data || {};
+          }
+
+          return {
+            ...proposta,
+            cliente_data: clienteData,
+            condicoes_data: condicoesData,
+            // Map database fields to frontend format
+            documentos_adicionais: proposta.documentos_adicionais,
+            observacoes_analise: proposta.observacoes_analise,
+            data_analise: proposta.data_analise,
+            analista_id: proposta.analista_id,
           };
-        }
-
-        // Log schema fallbacks for monitoring
-        if (result.fallbacksUsed.length > 0) {
-          console.warn('⚠️ [ANALYSIS] Schema fallbacks activated:', result.fallbacksUsed);
-        }
-        if (result.warnings.length > 0) {
-          console.warn('⚠️ [ANALYSIS] Query warnings:', result.warnings);
-        }
+        });
 
         console.log(
-          `✅ [ANALYSIS] Adaptive query found ${result.data.length} analysis proposals for user ${userId}`
+          `[${getBrasiliaTimestamp()}] Retornando ${analisePropostas.length} propostas em análise via RLS`
         );
-
-        // Return processed data (the adaptive query builder already handles JSONB parsing)
-        console.log(
-          `[${getBrasiliaTimestamp()}] Retornando ${result.data.length} propostas em análise via adaptive query`
-        );
-        res.json(result.data);
+        res.json(analisePropostas);
       } catch (error) {
         console.error('Erro ao buscar propostas de análise:', error);
         res.status(500).json({
           message: 'Erro ao buscar propostas de análise',
         });
-      }
-    }
-  );
-
-  // 🚨 CORREÇÃO CRÍTICA: Handler genérico para /api/propostas com query parameters
-  // Frontend estava falhando porque não existe rota principal para /api/propostas
-  app.get(
-    '/api/propostas',
-    jwtAuthMiddleware as any,
-    async (req: AuthenticatedRequest, res) => {
-      try {
-        // ✅ DISTINCTIVE LOG: Prove this route is matched
-        console.log(`🎯 [PROPOSTAS-HOTFIX] MATCHED /api/propostas generic handler - URL: ${req.originalUrl}`);
-        
-        const { queue } = req.query;
-        
-        console.log(`🔍 [PROPOSTAS] Query parameters:`, req.query);
-        
-        // Se o frontend está pedindo queue=analysis, usar adaptive query system
-        if (queue === 'analysis') {
-          console.log(`🔄 [PROPOSTAS] Using adaptive query for queue=analysis`);
-          
-          // ADAPTIVE QUERY: Use same system as dedicated analysis endpoint
-          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-          const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
-          
-          const supabase = createServerSupabaseAdminClient();
-          const queryBuilder = await getAdaptiveQueryBuilder();
-
-          // Analysis statuses - consistent with dedicated endpoint
-          const analysisStatuses = [
-            'EM_ANALISE',
-            'AGUARDANDO_ANALISE',
-            'em_analise',
-            'aguardando_analise',
-          ];
-
-          const userId = req.user?.id;
-          const userRole = req.user?.role;
-          const userLojaId = req.user?.loja_id;
-
-          console.log(`🔍 [PROPOSTAS] Adaptive analysis query for user ${userId}, role ${userRole}`);
-
-          // Build adaptive query with filters
-          const filters = {
-            status: analysisStatuses,
-            userId: userId,
-            lojaId: userLojaId,
-            role: userRole
-          };
-
-          const result = await queryBuilder.buildAnaliseQuery(supabase, filters);
-
-          // Log schema adaptations for monitoring
-          if (result.fallbacksUsed.length > 0) {
-            console.warn('⚠️ [PROPOSTAS] Generic handler fallbacks:', result.fallbacksUsed);
-          }
-
-          console.log(`✅ [PROPOSTAS] Adaptive query returning ${result.data.length} analysis proposals as ARRAY`);
-          return res.json(result.data); // ⚠️ CRITICAL: Return array directly, not { data: array }
-        }
-        
-        // For other query parameters or no parameters, return empty array
-        console.log(`🔍 [PROPOSTAS] No specific handler for query:`, req.query);
-        return res.json([]); // Return empty array to prevent frontend crashes
-        
-      } catch (error) {
-        console.error('🚨 [PROPOSTAS] Generic handler error:', error);
-        // CRITICAL: Always return array to prevent frontend crash
-        return res.json([]); 
       }
     }
   );
@@ -3251,108 +3189,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Dashboard stats - ADAPTIVE QUERY SYSTEM (PAM V4.0)
+  // Dashboard stats - OPTIMIZED FOR PERFORMANCE (PAM V4.0)
   app.get('/api/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     const startTime = performance.now();
     try {
-      let result;
-      
-      try {
-        // ADAPTIVE QUERY: Use schema-aware dashboard queries with fallback
-        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
-        
-        const supabase = createServerSupabaseAdminClient();
-        const queryBuilder = await getAdaptiveQueryBuilder();
+      // Import optimizer
+      const { getDashboardStatsOptimized } = await import('./utils/database-optimizer.js');
 
-        console.log('📊 [DASHBOARD] Using adaptive query system for dashboard stats');
-
-        // Build adaptive dashboard query with role-based filtering
-        const filters = {
-          userId: req.user?.id,
-          lojaId: req.user?.loja_id,
-          role: req.user?.role
-        };
-
-        result = await queryBuilder.buildDashboardQuery(supabase, filters);
-        
-      } catch (adaptiveError) {
-        console.warn('⚠️ [DASHBOARD] Adaptive query system failed, using fallback:', adaptiveError);
-        
-        // FALLBACK: Use basic counting query
-        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const supabase = createServerSupabaseAdminClient();
-        
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('propostas')
-          .select('id, status')
-          .limit(1000);
-          
-        if (fallbackError) {
-          console.error('💥 [DASHBOARD] Both adaptive and fallback queries failed:', fallbackError);
-          result = {
-            data: [],
-            warnings: ['Dashboard completely unavailable'],
-            fallbacksUsed: ['total_failure']
-          };
-        } else {
-          // Manual aggregation of fallback data
-          const statusCounts = new Map<string, number>();
-          (fallbackData || []).forEach((prop: any) => {
-            const status = prop.status || 'unknown';
-            statusCounts.set(status, (statusCounts.get(status) || 0) + 1);
-          });
-          
-          const statusBreakdown = Array.from(statusCounts.entries()).map(([status, count]) => ({
-            status,
-            count,
-            percentage: fallbackData ? Math.round((count / fallbackData.length) * 100) : 0
-          }));
-          
-          result = {
-            data: statusBreakdown,
-            warnings: ['Adaptive query system unavailable'],
-            fallbacksUsed: ['emergency_fallback']
-          };
-        }
-      }
-
-      // Log schema adaptations for monitoring
-      if (result.fallbacksUsed.length > 0) {
-        console.warn('⚠️ [DASHBOARD] Schema fallbacks activated:', result.fallbacksUsed);
-      }
-      if (result.warnings.length > 0) {
-        console.warn('⚠️ [DASHBOARD] Dashboard warnings:', result.warnings);
-      }
+      // Use optimized query instead of loading all data
+      const stats = await getDashboardStatsOptimized();
 
       const duration = performance.now() - startTime;
-      console.log(`✅ [DASHBOARD] Adaptive stats completed in ${Math.round(duration)}ms`);
+      console.log(`[PERFORMANCE] Dashboard stats completed in ${Math.round(duration)}ms`);
 
-      // Return structured dashboard data
-      res.json({
-        success: true,
-        data: result.data,
-        metadata: {
-          fallbacksUsed: result.fallbacksUsed,
-          warnings: result.warnings,
-          queryDuration: Math.round(duration)
-        }
-      });
+      res.json(stats);
     } catch (error) {
       const duration = performance.now() - startTime;
-      console.error(`❌ [DASHBOARD] Adaptive stats failed in ${Math.round(duration)}ms:`, error);
-      
-      // Return empty but structured response to prevent frontend crash
-      res.json({
-        success: false,
-        data: [],
-        metadata: {
-          fallbacksUsed: ['total_failure'],
-          warnings: ['Dashboard temporarily unavailable'],
-          queryDuration: Math.round(duration),
-          error: error instanceof Error ? error.message : 'Unknown error'
-        }
-      });
+      console.error(`[PERFORMANCE] Dashboard stats failed in ${Math.round(duration)}ms:`, error);
+      res.status(500).json({ message: 'Failed to fetch stats' });
     }
   });
 

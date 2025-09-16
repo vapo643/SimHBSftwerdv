@@ -83,7 +83,7 @@ export class CCBSyncService {
       const pendingProposals = await db.execute(sql`
         SELECT 
           p.id,
-          p.clicksign_document_key,
+          p.clicksign_document_id,
           p.clicksign_envelope_id,
           p.cliente_nome,
           p.data_aprovacao,
@@ -93,7 +93,7 @@ export class CCBSyncService {
         FROM propostas p
         WHERE 
           -- Has ClickSign document
-          (p.clicksign_document_key IS NOT NULL OR p.clicksign_envelope_id IS NOT NULL)
+          (p.clicksign_document_id IS NOT NULL OR p.clicksign_envelope_id IS NOT NULL)
           -- CCB was generated
           AND p.ccb_gerado = true
           -- But no signed file stored
@@ -119,7 +119,7 @@ export class CCBSyncService {
       // Process in batch
       const processingTasks = proposals.map((proposal: any) => ({
         id: proposal.id as string,
-        documentKey: (proposal.clicksign_document_key || proposal.clicksign_envelope_id) as string,
+        documentKey: (proposal.clicksign_document_id || proposal.clicksign_envelope_id) as string,
       }));
 
       const results = await documentProcessingService.processBatch(

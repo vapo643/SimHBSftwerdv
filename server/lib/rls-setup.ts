@@ -13,10 +13,6 @@ export async function setRLSContext(userId: string, lojaId: number) {
   try {
     console.log(`[RLS DEBUG] 🔧 Setting RLS context: userId=${userId}, lojaId=${lojaId}`);
 
-    if (!db) {
-      throw new Error('Database connection not available');
-    }
-
     // Set the current user's loja_id in the database session
     // This will be used by the get_current_user_loja_id() function
     const setCommand = `SET app.current_user_loja_id = '${lojaId}';`;
@@ -131,10 +127,6 @@ export async function rlsAuthMiddleware(
     // Production environment: Use Supabase validation
     const supabaseClient = supabase;
 
-    if (!supabaseClient) {
-      return res.status(500).json({ message: 'Supabase client not available' });
-    }
-
     // Get user from Supabase
     const {
       data: { user },
@@ -147,10 +139,6 @@ export async function rlsAuthMiddleware(
 
     // Get user's loja_id from database (using profiles table)
     console.log(`[RLS DEBUG] 🔍 Querying profiles for user: ${user.id}`);
-
-    if (!db) {
-      return res.status(500).json({ message: 'Database connection not available' });
-    }
 
     const userRecord = await db
       .select({

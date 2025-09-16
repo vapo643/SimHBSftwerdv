@@ -38,7 +38,7 @@ export class DocumentProcessingService {
           id,
           cliente_nome,
           clicksign_envelope_id,
-          clicksign_document_key,
+          clicksign_document_id,
           ccb_gerado,
           caminho_ccb_assinado,
           status
@@ -56,7 +56,7 @@ export class DocumentProcessingService {
 
       const proposal = proposalResult[0];
       const clickSignDocId =
-        documentKey || proposal.clicksign_document_key || proposal.clicksign_envelope_id;
+        documentKey || proposal.clicksign_document_id || proposal.clicksign_envelope_id;
 
       if (!clickSignDocId) {
         console.warn(
