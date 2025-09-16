@@ -33,14 +33,14 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
 
   // Query para buscar logs de auditoria - APENAS reativa (sem polling)
   const { data: auditLogs } = useQuery({
-    queryKey: [`/api/propostas/${propostaId}/observacoes`],
+    queryKey: ['proposta_historico', propostaId],
     queryFn: async () => {
       try {
-        const response = await api.get(`/api/propostas/${propostaId}/observacoes`);
+        const response = await api.get(`/api/propostas/${propostaId}/historico`);
         return response.data;
       } catch (error) {
         console.warn('Erro ao buscar logs de auditoria:', error);
-        return { logs: [] };
+        return { logs: [], propostaCriada: null, total: 0 };
       }
     },
     enabled: !!propostaId,
@@ -87,12 +87,16 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
                 Proposta Criada
               </p>
               <p className="text-xs text-gray-400">
-                {proposta?.created_at
-                  ? new Date(proposta.created_at).toLocaleString('pt-BR')
-                  : 'Data não disponível'}
+                {auditLogs?.propostaCriada?.data
+                  ? new Date(auditLogs.propostaCriada.data).toLocaleString('pt-BR')
+                  : proposta?.createdAt
+                    ? new Date(proposta.createdAt).toLocaleString('pt-BR')
+                    : 'Data não disponível'}
               </p>
               <p className="mt-1 text-sm text-gray-300">
-                Proposta criada pelo atendente da loja {proposta?.loja?.nome_loja || 'N/A'}
+                {auditLogs?.propostaCriada?.por
+                  ? `Proposta criada por ${auditLogs.propostaCriada.por}`
+                  : `Proposta criada pelo atendente da loja ${proposta?.loja?.nomeLoja || proposta?.loja?.nome_loja || 'N/A'}`}
               </p>
             </div>
           </div>
@@ -103,26 +107,33 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
               (
                 log: {
                   id?: string;
-                  created_at: string;
+                  createdAt: string;
+                  data?: string;
                   descricao: string;
+                  usuarioNome?: string;
                   usuario_nome?: string;
                   tipo?: string;
                   detalhes?: string;
                   observacao?: string;
+                  statusNovo?: string;
+                  statusAnterior?: string;
                   status_novo?: string;
                   status_anterior?: string;
                   profiles?: { role?: string };
+                  usuario?: { role?: string };
                 },
                 index: number
               ) => {
-                const isPendency = log.status_novo === 'pendenciado';
+                const statusNovo = log.statusNovo || log.status_novo;
+                const statusAnterior = log.statusAnterior || log.status_anterior;
+                const isPendency = statusNovo === 'pendenciado';
                 const isResubmit =
-                  log.status_novo === 'aguardando_analise' && log.status_anterior === 'pendenciado';
-                const isApproval = log.status_novo === 'aprovado';
-                const isRejection = log.status_novo === 'rejeitado';
+                  statusNovo === 'aguardando_analise' && statusAnterior === 'pendenciado';
+                const isApproval = statusNovo === 'aprovado';
+                const isRejection = statusNovo === 'rejeitado';
 
                 // Verificar autoria baseada no role do perfil do autor
-                const autorRole = log.profiles?.role;
+                const autorRole = log.profiles?.role || log.usuario?.role;
                 const isAtendente = autorRole === 'ATENDENTE';
                 const isAnalista = autorRole === 'ANALISTA';
 
@@ -179,8 +190,8 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
                                 : 'Status alterado'}
                       </p>
                       <p className="text-xs text-gray-400">
-                        {log.created_at
-                          ? new Date(log.created_at).toLocaleString('pt-BR')
+                        {(log.createdAt || log.data)
+                          ? new Date(log.createdAt || log.data || new Date()).toLocaleString('pt-BR')
                           : 'Data não disponível'}
                       </p>
 

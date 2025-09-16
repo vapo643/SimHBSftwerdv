@@ -28,6 +28,10 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
    * Find all observacoes for a specific proposta
    */
   async findByPropostaId(propostaId: string): Promise<Observacao[]> {
+    if (!db) {
+      throw new Error('Database connection not available');
+    }
+    
     try {
       const data = await db
         .select({
@@ -56,6 +60,10 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
     observacao: string,
     usuarioId: string
   ): Promise<Observacao> {
+    if (!db) {
+      throw new Error('Database connection not available');
+    }
+    
     try {
       const [data] = await db
         .insert(observacoesCobranca)
@@ -82,6 +90,10 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
    * Get observacoes with pagination
    */
   async findPaginated(page: number = 1, limit: number = 10, filters?: Record<string, any>) {
+    if (!db) {
+      throw new Error('Database connection not available');
+    }
+    
     const offset = (page - 1) * limit;
 
     const result = await db
@@ -108,6 +120,10 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
    * Soft delete an observacao
    */
   async softDelete(id: number, usuarioId: string): Promise<void> {
+    if (!db) {
+      throw new Error('Database connection not available');
+    }
+    
     await db
       .update(observacoesCobranca)
       .set({

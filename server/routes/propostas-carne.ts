@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { db } from '../lib/supabase.js';
-import { propostas } from '@shared/schema.js';
+import { propostas, propostaLogs, profiles } from '@shared/schema.js';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, asc } from 'drizzle-orm';
 import { lojas, parceiros, produtos } from '@shared/schema.js';
 
 const router = Router();
@@ -274,6 +274,108 @@ router.get('/:id', jwtAuthMiddleware, async (req, res) => {
     });
   } catch (error: any) {
     console.error('[PROPOSTA INDIVIDUAL] Erro ao buscar proposta:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+// GET /api/propostas/:id/historico - Busca histórico de auditoria da proposta
+router.get('/:id/historico', jwtAuthMiddleware, async (req, res) => {
+  try {
+    // ✅ DB GUARD: Prevent runtime 500s if db not initialized
+    if (!db) {
+      return res.status(503).json({ 
+        success: false, 
+        error: 'Database unavailable',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    const { id } = req.params;
+    
+    console.log('[PROPOSTA HISTÓRICO] Buscando histórico da proposta:', id);
+    
+    // 1. Buscar dados de criação da proposta
+    const propostaResult = await db
+      .select({
+        id: propostas.id,
+        clienteNome: propostas.clienteNome,
+        createdAt: propostas.createdAt,
+      })
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+
+    if (propostaResult.length === 0) {
+      console.log('[PROPOSTA HISTÓRICO] Proposta não encontrada:', id);
+      return res.status(404).json({
+        success: false,
+        error: 'Proposta não encontrada',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    const proposta = propostaResult[0];
+    console.log(`[PROPOSTA HISTÓRICO] Proposta encontrada: ${proposta.clienteNome}`);
+    
+    // 2. Buscar logs de auditoria com dados dos usuários
+    const logsResult = await db
+      .select({
+        id: propostaLogs.id,
+        statusAnterior: propostaLogs.statusAnterior,
+        statusNovo: propostaLogs.statusNovo,
+        observacao: propostaLogs.observacao,
+        createdAt: propostaLogs.createdAt,
+        autorId: propostaLogs.autorId,
+        // Dados do usuário (profiles)
+        usuarioNome: profiles.fullName,
+        usuarioRole: profiles.role,
+      })
+      .from(propostaLogs)
+      .leftJoin(profiles, eq(propostaLogs.autorId, profiles.id))
+      .where(eq(propostaLogs.propostaId, id))
+      .orderBy(asc(propostaLogs.createdAt));
+
+    console.log(`[PROPOSTA HISTÓRICO] Encontrados ${logsResult.length} logs de auditoria`);
+    
+    // 3. Determinar o primeiro autor (criador da proposta)
+    const primeiroAutor = logsResult.length > 0 ? logsResult[0].usuarioNome || null : null;
+    
+    // 4. Transformar logs para formato esperado pelo frontend
+    const transformedLogs = logsResult.map(log => ({
+      id: log.id,
+      created_at: log.createdAt?.toISOString() || new Date().toISOString(),
+      status_novo: log.statusNovo,
+      status_anterior: log.statusAnterior || null,
+      observacao: log.observacao || null,
+      usuario_nome: log.usuarioNome || 'Usuário não identificado',
+      profiles: {
+        role: log.usuarioRole || 'user'
+      }
+    }));
+    
+    // 5. Estruturar resposta final
+    const historicoData = {
+      propostaCriada: {
+        data: proposta.createdAt?.toISOString() || new Date().toISOString(),
+        por: primeiroAutor
+      },
+      logs: transformedLogs,
+      total: transformedLogs.length
+    };
+    
+    console.log(`[PROPOSTA HISTÓRICO] Histórico compilado - Criada em: ${historicoData.propostaCriada.data}, Total logs: ${historicoData.total}`);
+    
+    res.json({
+      success: true,
+      data: historicoData,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error('[PROPOSTA HISTÓRICO] Erro ao buscar histórico:', error);
     res.status(500).json({ 
       success: false, 
       error: error.message,
