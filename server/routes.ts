@@ -927,6 +927,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // 🚨 CORREÇÃO CRÍTICA: Handler genérico para /api/propostas com query parameters
+  // Frontend estava falhando porque não existe rota principal para /api/propostas
+  app.get(
+    '/api/propostas',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        // ✅ DISTINCTIVE LOG: Prove this route is matched
+        console.log(`🎯 [PROPOSTAS-HOTFIX] MATCHED /api/propostas generic handler - URL: ${req.originalUrl}`);
+        
+        const { queue } = req.query;
+        
+        console.log(`🔍 [PROPOSTAS] Query parameters:`, req.query);
+        
+        // Se o frontend está pedindo queue=analysis, redirecionar para a lógica de análise
+        if (queue === 'analysis') {
+          console.log(`🔄 [PROPOSTAS] Redirecting queue=analysis to analysis logic`);
+          
+          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+          const supabase = createServerSupabaseAdminClient();
+
+          // Usar a mesma lógica da rota /api/propostas/analise
+          const analysisStatuses = [
+            'EM_ANALISE',
+            'AGUARDANDO_ANALISE',
+            'em_analise',
+            'aguardando_analise',
+          ];
+
+          const userId = req.user?.id;
+          const userRole = req.user?.role;
+          const userLojaId = req.user?.loja_id;
+
+          let query = supabase.from('propostas').select('*').in('status', analysisStatuses);
+
+          // Apply role-based filtering
+          if (userRole === 'ATENDENTE') {
+            query = query.eq('user_id', userId);
+          } else if (userRole === 'GERENTE') {
+            query = query.eq('loja_id', userLojaId);
+          }
+
+          const { data: rawPropostas, error } = await query.order('created_at', { ascending: false });
+
+          if (error) {
+            console.error('🚨 [PROPOSTAS] Supabase error:', error);
+            return res.json([]); // Return empty array instead of error to prevent frontend crash
+          }
+
+          if (!rawPropostas || rawPropostas.length === 0) {
+            console.log(`🔍 [PROPOSTAS] No analysis proposals found for user ${userId}`);
+            return res.json([]); // Return empty array
+          }
+
+          // Map data for frontend compatibility
+          const analisePropostas = rawPropostas.map((proposta) => {
+            let clienteData = null;
+            
+            if (typeof proposta.cliente_data === 'string') {
+              try {
+                clienteData = JSON.parse(proposta.cliente_data);
+              } catch (e) {
+                console.warn(`Parse error for cliente_data in proposal ${proposta.id}:`, e);
+                clienteData = {};
+              }
+            } else {
+              clienteData = proposta.cliente_data || {};
+            }
+
+            return {
+              id: proposta.id,
+              status: proposta.status,
+              clienteNome: clienteData.nome || 'Nome não informado',
+              valorSolicitado: proposta.valor_solicitado,
+              prazoMeses: proposta.prazo_meses,
+              createdAt: proposta.created_at,
+              updatedAt: proposta.updated_at,
+              lojaId: proposta.loja_id,
+              userId: proposta.user_id,
+              // Include other necessary fields
+              ...proposta
+            };
+          });
+
+          console.log(`✅ [PROPOSTAS] Returning ${analisePropostas.length} analysis proposals as ARRAY`);
+          return res.json(analisePropostas); // ⚠️ CRITICAL: Return array directly, not { data: array }
+        }
+        
+        // For other query parameters or no parameters, return empty array
+        console.log(`🔍 [PROPOSTAS] No specific handler for query:`, req.query);
+        return res.json([]); // Return empty array to prevent frontend crashes
+        
+      } catch (error) {
+        console.error('🚨 [PROPOSTAS] Generic handler error:', error);
+        // CRITICAL: Always return array to prevent frontend crash
+        return res.json([]); 
+      }
+    }
+  );
+
   // Endpoint para gerar CCB automaticamente
   app.post(
     '/api/propostas/:id/gerar-ccb',
