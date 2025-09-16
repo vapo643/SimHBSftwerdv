@@ -156,6 +156,12 @@ async function probeTable(supabase: any, tableName: string): Promise<TableCapabi
       }
     }
 
+    // CRITICAL: Final safety check - ensure we always have at least 'id'
+    if (columns.length === 0) {
+      logInfo(`🔧 [DB_CAPABILITIES] No columns detected for '${tableName}', using safe fallback: ['id']`);
+      columns = ['id'];
+    }
+
     logInfo(`✅ [DB_CAPABILITIES] Table '${tableName}' found with ${columns.length} columns`);
     
     return {
@@ -227,7 +233,19 @@ export function hasColumn(capabilities: DatabaseCapabilities, tableName: keyof D
 export function getSafeColumns(capabilities: DatabaseCapabilities, tableName: keyof DatabaseCapabilities, desiredColumns: string[]): string[] {
   const table = capabilities[tableName];
   if (typeof table === 'object' && 'columns' in table && table.exists) {
-    return desiredColumns.filter(col => table.columns.includes(col));
+    const filteredColumns = desiredColumns.filter(col => table.columns.includes(col));
+    // CRITICAL: Always return at least ['id'] even if table exists but no desired columns found
+    if (filteredColumns.length === 0) {
+      // Try to use 'id' if it exists in table columns, otherwise use first available column
+      if (table.columns.includes('id')) {
+        return ['id'];
+      } else if (table.columns.length > 0) {
+        return [table.columns[0]]; // Use first available column as fallback
+      } else {
+        return ['id']; // Ultimate fallback even if table.columns is somehow empty
+      }
+    }
+    return filteredColumns;
   }
   return ['id']; // Always try to include id as minimum
 }

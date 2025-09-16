@@ -45,7 +45,7 @@ export class AdaptiveQueryBuilder {
     ];
 
     // Get columns that actually exist
-    const safeColumns = getSafeColumns(caps, 'propostas', idealColumns);
+    let safeColumns = getSafeColumns(caps, 'propostas', idealColumns);
     const missingColumns = idealColumns.filter(col => !safeColumns.includes(col));
 
     if (missingColumns.length > 0) {
@@ -53,7 +53,15 @@ export class AdaptiveQueryBuilder {
       fallbacks.push('column_fallback');
     }
 
-    // Build base query
+    // CRITICAL: Ensure we never have empty select clause
+    if (safeColumns.length === 0) {
+      logWarn('🚨 [ADAPTIVE_QUERY] No safe columns found for formalization, using minimal fallback');
+      safeColumns = ['id']; // Ultimate fallback
+      fallbacks.push('columns_completely_unknown');
+      warnings.push('Using minimal column selection due to schema detection failure');
+    }
+
+    // Build base query with guaranteed non-empty select
     let query = supabase.from('propostas').select(safeColumns.join(', '));
 
     // Add status filters for formalization
@@ -85,7 +93,20 @@ export class AdaptiveQueryBuilder {
       }
     }
 
-    query = query.order('updated_at', { ascending: false });
+    // CRITICAL: Add defensive ordering - check column availability first
+    if (hasColumn(caps, 'propostas', 'updated_at')) {
+      query = query.order('updated_at', { ascending: false });
+    } else if (hasColumn(caps, 'propostas', 'created_at')) {
+      query = query.order('created_at', { ascending: false });
+      fallbacks.push('order_fallback_created_at');
+    } else if (hasColumn(caps, 'propostas', 'id')) {
+      query = query.order('id', { ascending: false });
+      fallbacks.push('order_fallback_id');
+    } else {
+      // No ordering if no safe columns available
+      fallbacks.push('no_ordering_available');
+      warnings.push('No safe ordering column found - results may be unpredictable');
+    }
 
     try {
       const { data, error } = await query;
@@ -137,7 +158,7 @@ export class AdaptiveQueryBuilder {
       'cliente_data', 'condicoes_data'
     ];
 
-    const safeColumns = getSafeColumns(caps, 'propostas', analysisColumns);
+    let safeColumns = getSafeColumns(caps, 'propostas', analysisColumns);
     const missingColumns = analysisColumns.filter(col => !safeColumns.includes(col));
 
     if (missingColumns.length > 0) {
@@ -145,7 +166,15 @@ export class AdaptiveQueryBuilder {
       fallbacks.push('analysis_columns_limited');
     }
 
-    // Build query
+    // CRITICAL: Ensure we never have empty select clause
+    if (safeColumns.length === 0) {
+      logWarn('🚨 [ADAPTIVE_QUERY] No safe columns found for analysis, using minimal fallback');
+      safeColumns = ['id']; // Ultimate fallback
+      fallbacks.push('columns_completely_unknown');
+      warnings.push('Using minimal column selection due to schema detection failure');
+    }
+
+    // Build query with guaranteed non-empty select
     let query = supabase.from('propostas').select(safeColumns.join(', '));
 
     // Analysis statuses
@@ -175,7 +204,20 @@ export class AdaptiveQueryBuilder {
       }
     }
 
-    query = query.order('created_at', { ascending: false });
+    // CRITICAL: Add defensive ordering - check column availability first
+    if (hasColumn(caps, 'propostas', 'created_at')) {
+      query = query.order('created_at', { ascending: false });
+    } else if (hasColumn(caps, 'propostas', 'updated_at')) {
+      query = query.order('updated_at', { ascending: false });
+      fallbacks.push('order_fallback_updated_at');
+    } else if (hasColumn(caps, 'propostas', 'id')) {
+      query = query.order('id', { ascending: false });
+      fallbacks.push('order_fallback_id');
+    } else {
+      // No ordering if no safe columns available
+      fallbacks.push('no_ordering_available');
+      warnings.push('No safe ordering column found - results may be unpredictable');
+    }
 
     try {
       const { data, error } = await query;
@@ -217,6 +259,17 @@ export class AdaptiveQueryBuilder {
     try {
       // Attempt to get status counts
       const basicColumns = getSafeColumns(caps, 'propostas', ['id', 'status', 'created_at']);
+      
+      // CRITICAL: Ensure we never have empty select clause
+      if (basicColumns.length === 0) {
+        logWarn('🚨 [ADAPTIVE_QUERY] No safe columns found for dashboard, using minimal fallback');
+        fallbacks.push('dashboard_columns_unknown');
+        return {
+          data: [],
+          warnings: ['Dashboard temporarily unavailable - schema detection failed'],
+          fallbacksUsed: fallbacks
+        };
+      }
       
       let query = supabase.from('propostas').select(basicColumns.join(', '));
 
@@ -267,7 +320,26 @@ export class AdaptiveQueryBuilder {
 
     try {
       // Try the absolute minimum: just id and status
-      let query = supabase.from('propostas').select('id, status');
+      // CRITICAL: Verify basic columns exist before building query
+      const caps = this.capabilities;
+      const absoluteMinimal = ['id'];
+      
+      // Try to add status if it exists
+      if (caps && hasColumn(caps, 'propostas', 'status')) {
+        absoluteMinimal.push('status');
+      }
+      
+      if (absoluteMinimal.length === 0) {
+        // This should never happen but guard against it
+        logWarn('🚨 [ADAPTIVE_QUERY] Cannot even determine id column - complete failure');
+        return {
+          data: [],
+          warnings: ['Complete database introspection failure'],
+          fallbacksUsed: ['introspection_failure']
+        };
+      }
+      
+      let query = supabase.from('propostas').select(absoluteMinimal.join(', '));
       
       if (statuses.length > 0) {
         query = query.in('status', statuses);
@@ -318,6 +390,13 @@ export class AdaptiveQueryBuilder {
 
       // Fetch loja data
       const lojaColumns = getSafeColumns(caps, 'lojas', ['id', 'nome', 'nome_loja']);
+      
+      // CRITICAL: Ensure we never have empty select clause
+      if (lojaColumns.length === 0) {
+        logWarn('⚠️ [ADAPTIVE_QUERY] No safe loja columns found, skipping enrichment');
+        return propostas;
+      }
+      
       const { data: lojas } = await supabase
         .from('lojas')
         .select(lojaColumns.join(', '))

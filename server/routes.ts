@@ -160,30 +160,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log('🔧 [FORMALIZATION_EXEC] Loading adaptive query system...');
         
-        // ADAPTIVE QUERY: Use the schema-aware query builder
-        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
+        let result;
         
-        const supabase = createServerSupabaseAdminClient();
-        const queryBuilder = await getAdaptiveQueryBuilder();
-        
-        console.log('✅ [FORMALIZATION_EXEC] Adaptive query system initialized, executing formalization query...');
-        
-        // Build adaptive query with role-based filters
-        const filters = {
-          status: ['aprovado', 'aceito_atendente', 'documentos_enviados', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_PENDENTE', 'ASSINATURA_CONCLUIDA'],
-          userId: req.user.id,
-          lojaId: req.user.loja_id,
-          role: req.user.role
-        };
-        
-        console.log('🔒 [FORMALIZATION_EXEC] Query filters:', { 
-          role: req.user.role, 
-          userId: req.user.id, 
-          lojaId: req.user.loja_id 
-        });
-        
-        const result = await queryBuilder.buildFormalizacaoQuery(supabase, filters);
+        try {
+          // ADAPTIVE QUERY: Use the schema-aware query builder with fallback
+          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+          const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
+          
+          const supabase = createServerSupabaseAdminClient();
+          const queryBuilder = await getAdaptiveQueryBuilder();
+          
+          console.log('✅ [FORMALIZATION_EXEC] Adaptive query system initialized, executing formalization query...');
+          
+          // Build adaptive query with role-based filters
+          const filters = {
+            status: ['aprovado', 'aceito_atendente', 'documentos_enviados', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_PENDENTE', 'ASSINATURA_CONCLUIDA'],
+            userId: req.user.id,
+            lojaId: req.user.loja_id,
+            role: req.user.role
+          };
+          
+          console.log('🔒 [FORMALIZATION_EXEC] Query filters:', { 
+            role: req.user.role, 
+            userId: req.user.id, 
+            lojaId: req.user.loja_id 
+          });
+          
+          result = await queryBuilder.buildFormalizacaoQuery(supabase, filters);
+          
+        } catch (adaptiveError) {
+          console.warn('⚠️ [FORMALIZATION_EXEC] Adaptive query system failed, using fallback:', adaptiveError);
+          
+          // FALLBACK: Use traditional query as last resort
+          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+          const supabase = createServerSupabaseAdminClient();
+          
+          const fallbackStatuses = ['aprovado', 'aceito_atendente', 'documentos_enviados', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_PENDENTE', 'ASSINATURA_CONCLUIDA'];
+          
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('propostas')
+            .select('id, status')
+            .in('status', fallbackStatuses)
+            .limit(100);
+            
+          if (fallbackError) {
+            throw new Error(`Adaptive query failed and fallback also failed: ${fallbackError.message}`);
+          }
+          
+          result = {
+            data: fallbackData || [],
+            warnings: ['Adaptive query system unavailable - using minimal fallback'],
+            fallbacksUsed: ['emergency_fallback']
+          };
+        }
         
         // Log any fallbacks or warnings for monitoring
         if (result.fallbacksUsed.length > 0) {
@@ -801,39 +830,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
-        // ADAPTIVE QUERY: Use schema-aware query system for analysis queue
-        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
+        let result;
         
-        const supabase = createServerSupabaseAdminClient();
-        const queryBuilder = await getAdaptiveQueryBuilder();
+        try {
+          // ADAPTIVE QUERY: Use schema-aware query system for analysis queue with fallback
+          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+          const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
+          
+          const supabase = createServerSupabaseAdminClient();
+          const queryBuilder = await getAdaptiveQueryBuilder();
 
-        // Analysis statuses - Apenas propostas que precisam de análise
-        const analysisStatuses = [
-          'EM_ANALISE',
-          'AGUARDANDO_ANALISE',
-          // Status legados para compatibilidade
-          'em_analise',
-          'aguardando_analise',
-        ];
+          // Analysis statuses - Apenas propostas que precisam de análise
+          const analysisStatuses = [
+            'EM_ANALISE',
+            'AGUARDANDO_ANALISE',
+            // Status legados para compatibilidade
+            'em_analise',
+            'aguardando_analise',
+          ];
 
-        const userId = req.user?.id;
-        const userRole = req.user?.role;
-        const userLojaId = req.user?.loja_id;
+          const userId = req.user?.id;
+          const userRole = req.user?.role;
+          const userLojaId = req.user?.loja_id;
 
-        console.log(
-          `🔐 [ANALYSIS] Adaptive query for user ${userId} with role ${userRole} from loja ${userLojaId}`
-        );
+          console.log(
+            `🔐 [ANALYSIS] Adaptive query for user ${userId} with role ${userRole} from loja ${userLojaId}`
+          );
 
-        // Build adaptive query with filters
-        const filters = {
-          status: analysisStatuses,
-          userId: userId,
-          lojaId: userLojaId,
-          role: userRole
-        };
+          // Build adaptive query with filters
+          const filters = {
+            status: analysisStatuses,
+            userId: userId,
+            lojaId: userLojaId,
+            role: userRole
+          };
 
-        const result = await queryBuilder.buildAnaliseQuery(supabase, filters);
+          result = await queryBuilder.buildAnaliseQuery(supabase, filters);
+          
+        } catch (adaptiveError) {
+          console.warn('⚠️ [ANALYSIS] Adaptive query system failed, using fallback:', adaptiveError);
+          
+          // FALLBACK: Use traditional query
+          const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+          const supabase = createServerSupabaseAdminClient();
+          
+          const fallbackStatuses = ['EM_ANALISE', 'AGUARDANDO_ANALISE', 'em_analise', 'aguardando_analise'];
+          
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('propostas')
+            .select('id, status')
+            .in('status', fallbackStatuses)
+            .limit(100);
+            
+          if (fallbackError) {
+            throw new Error(`Adaptive query failed and fallback also failed: ${fallbackError.message}`);
+          }
+          
+          result = {
+            data: fallbackData || [],
+            warnings: ['Adaptive query system unavailable - using minimal fallback'],
+            fallbacksUsed: ['emergency_fallback']
+          };
+        }
 
         // Log schema fallbacks for monitoring
         if (result.fallbacksUsed.length > 0) {
@@ -3197,23 +3255,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     const startTime = performance.now();
     try {
-      // ADAPTIVE QUERY: Use schema-aware dashboard queries
-      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
+      let result;
       
-      const supabase = createServerSupabaseAdminClient();
-      const queryBuilder = await getAdaptiveQueryBuilder();
+      try {
+        // ADAPTIVE QUERY: Use schema-aware dashboard queries with fallback
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const { getAdaptiveQueryBuilder } = await import('./services/adaptiveQuery');
+        
+        const supabase = createServerSupabaseAdminClient();
+        const queryBuilder = await getAdaptiveQueryBuilder();
 
-      console.log('📊 [DASHBOARD] Using adaptive query system for dashboard stats');
+        console.log('📊 [DASHBOARD] Using adaptive query system for dashboard stats');
 
-      // Build adaptive dashboard query with role-based filtering
-      const filters = {
-        userId: req.user?.id,
-        lojaId: req.user?.loja_id,
-        role: req.user?.role
-      };
+        // Build adaptive dashboard query with role-based filtering
+        const filters = {
+          userId: req.user?.id,
+          lojaId: req.user?.loja_id,
+          role: req.user?.role
+        };
 
-      const result = await queryBuilder.buildDashboardQuery(supabase, filters);
+        result = await queryBuilder.buildDashboardQuery(supabase, filters);
+        
+      } catch (adaptiveError) {
+        console.warn('⚠️ [DASHBOARD] Adaptive query system failed, using fallback:', adaptiveError);
+        
+        // FALLBACK: Use basic counting query
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
+        
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('propostas')
+          .select('id, status')
+          .limit(1000);
+          
+        if (fallbackError) {
+          console.error('💥 [DASHBOARD] Both adaptive and fallback queries failed:', fallbackError);
+          result = {
+            data: [],
+            warnings: ['Dashboard completely unavailable'],
+            fallbacksUsed: ['total_failure']
+          };
+        } else {
+          // Manual aggregation of fallback data
+          const statusCounts = new Map<string, number>();
+          (fallbackData || []).forEach((prop: any) => {
+            const status = prop.status || 'unknown';
+            statusCounts.set(status, (statusCounts.get(status) || 0) + 1);
+          });
+          
+          const statusBreakdown = Array.from(statusCounts.entries()).map(([status, count]) => ({
+            status,
+            count,
+            percentage: fallbackData ? Math.round((count / fallbackData.length) * 100) : 0
+          }));
+          
+          result = {
+            data: statusBreakdown,
+            warnings: ['Adaptive query system unavailable'],
+            fallbacksUsed: ['emergency_fallback']
+          };
+        }
+      }
 
       // Log schema adaptations for monitoring
       if (result.fallbacksUsed.length > 0) {
