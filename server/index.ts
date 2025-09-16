@@ -173,16 +173,9 @@ try {
   }
 
   // Setup Vite or static serving based on environment
-  const currentEnv = app.get('env');
-  const nodeEnv = process.env.NODE_ENV;
-  log(`🔍 Environment detection: app.get('env')='${currentEnv}', NODE_ENV='${nodeEnv}'`);
-  
-  if (nodeEnv === 'development' || currentEnv === 'development') {
-    log('🎨 [DEV] Initializing Vite development server...');
+  if (app.get('env') === 'development') {
     await setupVite(app, server);
-    log('✅ [DEV] Vite development server initialized successfully');
   } else {
-    log('📦 [PROD] Serving static files...');
     serveStatic(app);
   }
 

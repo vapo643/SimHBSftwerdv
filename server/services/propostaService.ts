@@ -28,7 +28,7 @@ export interface PropostaToggleStatusResponse {
 
 export interface CcbAssinadaResponse {
   url?: string;
-  clicksignDocumentKey?: string;
+  clicksignDocumentId?: string;
   nome: string;
   status: string;
   dataAssinatura?: string | null;
@@ -180,7 +180,7 @@ export class PropostaService {
     if (proposta.clicksignDocumentKey) {
       console.log(`[CCB] Usando ClickSign como fallback: ${proposta.clicksignDocumentKey}`);
       return {
-        clicksignDocumentKey: proposta.clicksignDocumentKey,
+        clicksignDocumentId: proposta.clicksignDocumentKey,
         nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
         status: 'assinado',
         dataAssinatura: proposta.dataAprovacao,

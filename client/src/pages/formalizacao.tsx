@@ -224,22 +224,13 @@ function FormalizacaoList() {
       const response = await apiRequest('/api/propostas/formalizacao');
       console.log('Resposta do endpoint formalizacao:', response);
 
-      // CORREÇÃO CRÍTICA: A API retorna {success, data, count}, não um array direto
-      const rawData = Array.isArray(response) ? response : (response as any)?.data || [];
-      
       // PARSING DEFENSIVO: Garantir que dados JSONB sejam objetos
-      const propostsWithParsedData = rawData.map((proposta: any) => ({
+      const propostsWithParsedData = (response as any[]).map((proposta: any) => ({
         ...proposta,
         cliente_data: parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id),
         condicoes_data: parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id),
       }));
 
-      console.log('🔍 [PAM V1.0 FIXO] API Response Structure:', { 
-        isArray: Array.isArray(response),
-        hasDataField: !!(response as any)?.data,
-        dataLength: rawData.length,
-        firstItem: rawData[0] 
-      });
       console.log('Propostas com dados parseados:', propostsWithParsedData);
       return propostsWithParsedData;
     },

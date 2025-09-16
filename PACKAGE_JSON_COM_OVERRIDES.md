@@ -1,3 +1,8 @@
+# 🔧 PACKAGE.JSON COM RESOLUÇÃO DE CONFLITOS
+
+**Cole este package.json COMPLETO (com overrides para resolver conflitos OpenTelemetry):**
+
+```json
 {
   "name": "rest-express",
   "version": "1.0.0",
@@ -179,3 +184,13 @@
     "bufferutil": "^4.0.8"
   }
 }
+```
+
+## 🎯 MUDANÇA PRINCIPAL:
+```json
+"overrides": {
+  "@opentelemetry/api": "1.9.0"
+}
+```
+
+**⚡ ISSO FORÇA TODAS as dependências OpenTelemetry a usar a mesma versão, eliminando conflitos!**

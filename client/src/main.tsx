@@ -1,9 +1,34 @@
 import { createRoot } from 'react-dom/client';
+import * as Sentry from '@sentry/react';
+import App from './App';
 import './index.css';
-// Dynamic imports for better performance
+import ErrorBoundary from './components/ErrorBoundary';
 
-// Sentry integration temporarily removed to fix frontend rendering
-// TODO: Re-implement with production-only dynamic import
+// Initialize Sentry for frontend error tracking
+if (import.meta.env.VITE_SENTRY_DSN && import.meta.env.MODE === 'production') {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    environment: import.meta.env.MODE || 'development',
+    tracesSampleRate: import.meta.env.MODE === 'production' ? 0.1 : 1.0,
+    beforeSend(event) {
+      // Remove sensitive data from frontend errors
+      if (event.user) {
+        delete event.user.email;
+        delete event.user.ip_address;
+      }
+      return event;
+    },
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
+    ],
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  });
+}
 
 // Global error handling for unhandled promise rejections
 window.addEventListener('unhandledrejection', (event) => {
@@ -39,62 +64,32 @@ window.addEventListener('error', (event) => {
   }
 });
 
-// Dynamic loading initialized below
+// Wrap App with Sentry Error Boundary
+const SentryApp =
+  import.meta.env.VITE_SENTRY_DSN && import.meta.env.MODE === 'production'
+    ? Sentry.withErrorBoundary(App, {
+        fallback: ({ error, resetError }) => (
+          <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="text-center p-8 max-w-md">
+              <h2 className="text-2xl font-bold text-red-600 mb-4">Oops! Algo deu errado</h2>
+              <p className="text-gray-600 mb-4">
+                Um erro inesperado aconteceu. Nossa equipe foi notificada automaticamente.
+              </p>
+              <button
+                onClick={resetError}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          </div>
+        ),
+        showDialog: false,
+      })
+    : App;
 
-// Dynamic loading for performance optimization
-async function initializeApp() {
-  const root = createRoot(document.getElementById('root')!);
-  
-  // Show loading immediately
-  root.render(
-    <div style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      height: '100vh',
-      fontFamily: 'Inter, sans-serif'
-    }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1 style={{ color: '#2563eb', marginBottom: '16px', fontSize: '2rem' }}>
-          ⚡ Simpix
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
-          Carregando sistema...
-        </p>
-      </div>
-    </div>
-  );
-
-  try {
-    // Dynamic imports - load only after first paint
-    const [{ default: App }, { default: ErrorBoundary }] = await Promise.all([
-      import('./App'),
-      import('./components/ErrorBoundary')
-    ]);
-
-    // Render full app
-    root.render(
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    );
-  } catch (error) {
-    console.error('Failed to load application:', error);
-    root.render(
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        height: '100vh',
-        fontFamily: 'Inter, sans-serif'
-      }}>
-        <div style={{ textAlign: 'center', color: '#dc2626' }}>
-          <h1>❌ Erro ao Carregar</h1>
-          <p>Falha na inicialização do sistema</p>
-        </div>
-      </div>
-    );
-  }
-}
-
-initializeApp();
+createRoot(document.getElementById('root')!).render(
+  <ErrorBoundary>
+    <SentryApp />
+  </ErrorBoundary>
+);
