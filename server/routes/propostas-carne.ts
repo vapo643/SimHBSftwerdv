@@ -57,4 +57,44 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/propostas/:id - Busca proposta individual (detalhes)
+router.get('/:id', jwtAuthMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    console.log('[PROPOSTA INDIVIDUAL] Buscando detalhes da proposta:', id);
+    
+    const propostaResult = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+
+    if (propostaResult.length === 0) {
+      console.log('[PROPOSTA INDIVIDUAL] Proposta não encontrada:', id);
+      return res.status(404).json({
+        success: false,
+        error: 'Proposta não encontrada',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    const proposta = propostaResult[0];
+    console.log(`[PROPOSTA INDIVIDUAL] Proposta encontrada: ${proposta.clienteNome} - Status: ${proposta.status}`);
+    
+    res.json({
+      success: true,
+      data: proposta,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error('[PROPOSTA INDIVIDUAL] Erro ao buscar proposta:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 export default router;
