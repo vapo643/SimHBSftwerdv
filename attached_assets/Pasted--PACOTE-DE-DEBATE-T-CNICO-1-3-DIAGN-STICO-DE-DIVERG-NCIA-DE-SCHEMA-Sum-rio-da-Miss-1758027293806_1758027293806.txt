@@ -1,0 +1,37 @@
+### **PACOTE DE DEBATE TÉCNICO (1/3) - DIAGNÓSTICO DE DIVERGÊNCIA DE SCHEMA**
+
+* **Sumário da Missão:** Iniciar uma investigação forense de emergência para diagnosticar a divergência de schema entre o código da aplicação (a "fonte da verdade") e o banco de dados de produção, que resultou numa falha sistêmica completa ("pane geral"). A sua missão é analisar o schema ORM, compará-lo com a evidência de erro dos logs e confirmar a causa raiz.
+
+* **Intenção Estratégica:** Obter um mapa exato da incompatibilidade entre o que a aplicação espera e o que o banco de dados de produção contém, para que possamos arquitetar um script de migração SQL que reconcilie os ambientes e restaure 100% da funcionalidade do sistema.
+
+---
+
+**[DIRETIVA DE ANÁLISE DE CAUSA RAIZ (RCA) PROFUNDA]**
+
+* Você está a operar sob o protocolo RCA. A sua análise deve ir além dos sintomas e focar-se na causa fundamental, que suspeitamos ser uma falha no processo de migração de banco de dados após a separação dos ambientes de desenvolvimento e produção. Utilize todo o contexto disponível, incluindo os documentos de arquitetura (`DOSSIE_CONTEXTO_TECNICO_COMPLETO_SIMPIX_V2.md`) e as definições do projeto (`replit.md`), para informar a sua análise.
+
+---
+
+**EVIDÊNCIA BRUTA (ESTADO ATUAL DA CRISE):**
+
+**Sintoma 1: Falha Sistêmica de Leitura de Dados**
+* Nenhuma proposta ou dado do banco é carregado em nenhuma parte da aplicação.
+* O frontend exibe erros como `TypeError: g?.filter is not a function` e `DEBUG - First 3 proposals values: Array(0)`, indicando que as respostas da API não estão a retornar os arrays de dados esperados.
+
+**Sintoma 2: Erro Explícito no Backend (Logs do Deploy)**
+* A aplicação falha ao executar queries, especificamente durante o `[CCB SYNC]`, com o erro: **`PostgresError: column p.clicksign_document_id does not exist`**.
+* O próprio PostgreSQL sugere a correção: `hint: 'Perhaps you meant to reference the column "p.clicksign_document_key".'`.
+* Este erro (`code: '42703'`) confirma que o código está a referenciar uma coluna que não existe no schema do banco de dados de produção.
+
+**Sintoma 3: Contradição nos Logs de Startup**
+* Os logs de inicialização do servidor indicam que a conexão com o banco de dados foi estabelecida com sucesso (`✅ Database: Connection pool test successful`, `✅ [2025-09-16T12:31:39.511Z] Supabase Admin configuration FULLY VALIDATED`). Isto prova que as credenciais de conexão estão corretas, mas não valida a consistência do schema.
+
+**PERGUNTA ESTRATÉGICA (Sua Missão para Esta Interação):**
+
+Com base na sua compreensão da arquitetura do projeto (Drizzle ORM como a "fonte da verdade" do schema) e na evidência fornecida, execute a seguinte análise forense:
+
+1.  **Localize a Fonte da Verdade:** Encontre e apresente o código-fonte **completo** do ficheiro `shared/schema.ts`. Este ficheiro define a estrutura de dados que a aplicação **espera** que exista no banco de dados.
+2.  **Confirme a Divergência:** Dentro do `shared/schema.ts` que você encontrou, localize a definição da tabela `propostas`. Verifique se esta definição contém a coluna `clicksign_document_id` ou `clicksign_document_key`.
+3.  **Formule o Veredito da Causa Raiz:** Com base na sua análise dos pontos 1 e 2 e na evidência dos logs, escreva um veredito final e detalhado. Explique, de forma inequívoca, por que a aplicação está a falhar em todas as frentes, ligando a separação dos ambientes de banco de dados à falha de migração do schema e ao erro `column p.clicksign_document_id does not exist`.
+
+**NÃO FAÇA NENHUMA MODIFICAÇÃO NO CÓDIGO.** Esta é estritamente uma missão de reconhecimento e diagnóstico para confirmar a nossa teoria antes de agirmos.

@@ -1,0 +1,1015 @@
+EXECUTOU MAS AGORA DEU PANE GERAL NO SISTEMA NENHUMA PROPOSTA CARREGA, NENHUM DADO DO BANCO DE DADOS ESTA CARREGANDO NO SISTEMA. ISSO SÓ PASSOU A FICAR PROBLEMATICO DEPOIS QUE EU DEI DEPLOY, E SEPAREI UM DATABASE/PROJECT DE DESENVOLVIMENTO E UM DE PRODUÇÃO.. DESDE ENTAO TENHAMOS ENFRNETADO DIVERSO PROBLEMAS, E DESCONEXOES E TUDO MAIS... PEÇO QUE VOCE ENCONTRE ALGUMA ABORDAGEM EFICIENTE COM O AGENTE REPLIT, DE COMO PODEMOS RESOLVER ESSE PROBLEMA. LITERALMENTE NAO TEM 1 DADO APARECENDO DO DATABASE AGORA NO SISTEMA.                   LOGS DO DEPLOY; 2025-09-16 04:45:36.90
+
+fb48edf2
+
+User
+
+severity_local: 'ERROR',
+
+2025-09-16 04:45:36.90
+
+fb48edf2
+
+User
+
+severity: 'ERROR',
+
+2025-09-16 04:45:36.90
+
+fb48edf2
+
+User
+
+code: '42703',
+
+2025-09-16 04:45:36.90
+
+fb48edf2
+
+User
+
+hint: 'Perhaps you meant to reference the column "p.clicksign_document_key".',
+
+2025-09-16 04:45:36.90
+
+fb48edf2
+
+User
+
+position: '44',
+
+2025-09-16 04:45:36.90
+
+fb48edf2
+
+User
+
+file: 'parse_relation.c',
+
+2025-09-16 04:45:36.90
+
+fb48edf2
+
+User
+
+line: '3723',
+
+2025-09-16 04:45:36.90
+
+fb48edf2
+
+User
+
+routine: 'errorMissingColumn'
+
+2025-09-16 04:45:36.90
+
+fb48edf2
+
+User
+
+}
+
+2025-09-16 04:53:23.79
+
+fb48edf2
+
+User
+
+[Sentry] express is not instrumented. Please make sure to initialize Sentry in a separate file that you `--import` when running node, see: https://docs.sentry.io/platforms/javascript/guides/express/install/esm/.
+
+2025-09-16 05:39:36.33
+
+fb48edf2
+
+User
+
+[Sentry] express is not instrumented. Please make sure to initialize Sentry in a separate file that you `--import` when running node, see: https://docs.sentry.io/platforms/javascript/guides/express/install/esm/.
+
+2025-09-16 06:25:59.34
+
+fb48edf2
+
+User
+
+[Sentry] express is not instrumented. Please make sure to initialize Sentry in a separate file that you `--import` when running node, see: https://docs.sentry.io/platforms/javascript/guides/express/install/esm/.
+
+2025-09-16 07:36:07.19
+
+fb48edf2
+
+User
+
+[Sentry] express is not instrumented. Please make sure to initialize Sentry in a separate file that you `--import` when running node, see: https://docs.sentry.io/platforms/javascript/guides/express/install/esm/.
+
+2025-09-16 08:16:20.54
+
+fb48edf2
+
+User
+
+[Sentry] express is not instrumented. Please make sure to initialize Sentry in a separate file that you `--import` when running node, see: https://docs.sentry.io/platforms/javascript/guides/express/install/esm/.
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+[CCB SYNC] ❌ Error during fallback sync: PostgresError: column p.clicksign_document_id does not exist
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+at TLSSocket.emit (node:events:524:28)
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+at addChunk (node:internal/streams/readable:561:12)
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+at Readable.push (node:internal/streams/readable:392:5)
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+severity_local: 'ERROR',
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+severity: 'ERROR',
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+code: '42703',
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+hint: 'Perhaps you meant to reference the column "p.clicksign_document_key".',
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+position: '44',
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+file: 'parse_relation.c',
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+line: '3723',
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+routine: 'errorMissingColumn'
+
+2025-09-16 09:16:23.63
+
+fb48edf2
+
+User
+
+}
+
+2025-09-16 09:32:00.04
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Token tracking skipped - graceful degradation
+
+2025-09-16 09:32:06.87
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+
+2025-09-16 09:32:06.87
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+
+2025-09-16 09:32:07.16
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Token tracking skipped - graceful degradation
+
+2025-09-16 09:32:07.35
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+
+2025-09-16 09:32:07.35
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+
+2025-09-16 09:32:07.65
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Token tracking skipped - graceful degradation
+
+2025-09-16 09:32:23.37
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Rate limit check skipped - graceful degradation
+
+2025-09-16 09:32:23.37
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Blacklist and cache check skipped - graceful degradation
+
+2025-09-16 09:32:23.39
+
+b7bde849
+
+User
+
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.72.114.199 | endpoint=/api/events
+
+2025-09-16 09:32:23.67
+
+b7bde849
+
+User
+
+[REDIS OFFLINE] Token tracking skipped - graceful degradation                             CONSOLE NAVEGADOR DA TELA DE ANALISE; ocument already loaded, running initialization immediately
+
+content-script.js:4 Attempting to initialize AdUnit
+
+content-script.js:6 AdUnit initialized successfully
+
+index-CniWoRi2.js:56 🔐 [AUTH EVENT] TOKEN_REFRESHED Object
+
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+
+index-CniWoRi2.js:56 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+
+index-CniWoRi2.js:56 🔐 [AUTH EVENT] INITIAL_SESSION Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-16T13:31:59.000Z
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+
+index-CniWoRi2.js:56 🔐 [AUTH EVENT] SIGNED_IN Object
+
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 [PASSO 1 - LOGIN] Object
+
+index-CniWoRi2.js:56 DEBUG - First 3 proposals values: Array(0)
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 DEBUG - First 3 proposals values: Array(0)
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+
+index-CniWoRi2.js:56 DEBUG - First 3 proposals values: Array(0)
+
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+/api/events:1  Failed to load resource: the server responded with a status of 401 ()Understand this error
+
+index-CniWoRi2.js:56 [SSE] ❌ Connection error: Event
+
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+
+/api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+/api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+/api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 DEBUG - First 3 proposals values: Array(0)
+
+index-CniWoRi2.js:56 [SSE] 🔌 Connection closed
+
+/api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 🔍 [IDLE TIMER] Tab became hidden, timer continues
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 🔐 [AUTH EVENT] SIGNED_IN Object
+
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 DEBUG - First 3 proposals values: Array(0)
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 DEBUG - First 3 proposals values: Array(0)
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+
+index-CniWoRi2.js:56 🔍 [IDLE TIMER] Tab became hidden, timer continues
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas?queue=analysis : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/parceiros : Array(3)
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Array(3)
+
+index-CniWoRi2.js:56 TypeError: g?.filter is not a function
+
+    at YRe (index-CniWoRi2.js:679:31292)
+
+    at AA (index-CniWoRi2.js:38:17830)
+
+    at MA (index-CniWoRi2.js:40:3162)
+
+    at DF (index-CniWoRi2.js:40:45557)
+
+    at OF (index-CniWoRi2.js:40:40356)
+
+    at Xie (index-CniWoRi2.js:40:40282)
+
+    at Nx (index-CniWoRi2.js:40:40133)
+
+    at QA (index-CniWoRi2.js:40:36414)
+
+    at TF (index-CniWoRi2.js:40:37227)
+
+    at Hl (index-CniWoRi2.js:38:3281)
+
+    at index-CniWoRi2.js:40:34722Caused by: React ErrorBoundary TypeError: g?.filter is not a function
+
+    at YRe (index-CniWoRi2.js:679:29874)
+
+    at kr (index-CniWoRi2.js:666:12858)
+
+    at _r (index-CniWoRi2.js:83:3352)
+
+    at _be (index-CniWoRi2.js:83:4153)
+
+    at K9e
+
+    at u (index-CniWoRi2.js:107:46323)
+
+    at fY (index-CniWoRi2.js:622:51116)
+
+    at l1e (index-CniWoRi2.js:666:8809)
+
+    at s1e (index-CniWoRi2.js:666:5363)
+
+    at a1e (index-CniWoRi2.js:666:7844)
+
+    at qbe (index-CniWoRi2.js:83:35955)
+
+    at X9e
+
+    at ebe (index-CniWoRi2.js:75:3511)
+
+    at H2 (index-CniWoRi2.js:681:44575)
+
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+
+index-CniWoRi2.js:56 TypeError: g?.filter is not a function
+
+    at YRe (index-CniWoRi2.js:679:31292)
+
+    at AA (index-CniWoRi2.js:38:17830)
+
+    at DF (index-CniWoRi2.js:40:44782)
+
+    at OF (index-CniWoRi2.js:40:40356)
+
+    at Xie (index-CniWoRi2.js:40:40282)
+
+    at Nx (index-CniWoRi2.js:40:40133)
+
+    at QA (index-CniWoRi2.js:40:36414)
+
+    at CF (index-CniWoRi2.js:40:35360)
+
+    at S (index-CniWoRi2.js:25:1594)
+
+    at MessagePort.$ (index-CniWoRi2.js:25:1959)Caused by: React ErrorBoundary TypeError: g?.filter is not a function
+
+    at YRe (index-CniWoRi2.js:679:29874)
+
+    at kr (index-CniWoRi2.js:666:12858)
+
+    at _r (index-CniWoRi2.js:83:3352)
+
+    at _be (index-CniWoRi2.js:83:4153)
+
+    at K9e
+
+    at u (index-CniWoRi2.js:107:46323)
+
+    at fY (index-CniWoRi2.js:622:51116)
+
+    at l1e (index-CniWoRi2.js:666:8809)
+
+    at s1e (index-CniWoRi2.js:666:5363)
+
+    at a1e (index-CniWoRi2.js:666:7844)
+
+    at qbe (index-CniWoRi2.js:83:35955)
+
+    at X9e
+
+    at ebe (index-CniWoRi2.js:75:3511)
+
+    at H2 (index-CniWoRi2.js:681:44575)
+
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 TypeError: g?.filter is not a function
+
+    at YRe (index-CniWoRi2.js:679:31292)
+
+    at AA (index-CniWoRi2.js:38:17830)
+
+    at DF (index-CniWoRi2.js:40:44782)
+
+    at OF (index-CniWoRi2.js:40:40356)
+
+    at Xie (index-CniWoRi2.js:40:40282)
+
+    at Nx (index-CniWoRi2.js:40:40133)
+
+    at QA (index-CniWoRi2.js:40:36414)
+
+    at CF (index-CniWoRi2.js:40:35360)
+
+    at S (index-CniWoRi2.js:25:1594)
+
+    at MessagePort.$ (index-CniWoRi2.js:25:1959)Caused by: React ErrorBoundary TypeError: g?.filter is not a function
+
+    at YRe (index-CniWoRi2.js:679:29874)
+
+    at kr (index-CniWoRi2.js:666:12858)
+
+    at _r (index-CniWoRi2.js:83:3352)
+
+    at _be (index-CniWoRi2.js:83:4153)
+
+    at K9e
+
+    at u (index-CniWoRi2.js:107:46323)
+
+    at fY (index-CniWoRi2.js:622:51116)
+
+    at l1e (index-CniWoRi2.js:666:8809)
+
+    at s1e (index-CniWoRi2.js:666:5363)
+
+    at a1e (index-CniWoRi2.js:666:7844)
+
+    at qbe (index-CniWoRi2.js:83:35955)
+
+    at X9e
+
+    at ebe (index-CniWoRi2.js:75:3511)
+
+    at H2 (index-CniWoRi2.js:681:44575)
+
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 TypeError: g?.filter is not a function
+
+    at YRe (index-CniWoRi2.js:679:31292)
+
+    at AA (index-CniWoRi2.js:38:17830)
+
+    at DF (index-CniWoRi2.js:40:44782)
+
+    at OF (index-CniWoRi2.js:40:40356)
+
+    at Xie (index-CniWoRi2.js:40:40282)
+
+    at Nx (index-CniWoRi2.js:40:40133)
+
+    at QA (index-CniWoRi2.js:40:36414)
+
+    at CF (index-CniWoRi2.js:40:35360)
+
+    at S (index-CniWoRi2.js:25:1594)
+
+    at MessagePort.$ (index-CniWoRi2.js:25:1959)Caused by: React ErrorBoundary TypeError: g?.filter is not a function
+
+    at YRe (index-CniWoRi2.js:679:29874)
+
+    at kr (index-CniWoRi2.js:666:12858)
+
+    at _r (index-CniWoRi2.js:83:3352)
+
+    at _be (index-CniWoRi2.js:83:4153)
+
+    at K9e
+
+    at u (index-CniWoRi2.js:107:46323)
+
+    at fY (index-CniWoRi2.js:622:51116)
+
+    at l1e (index-CniWoRi2.js:666:8809)
+
+    at s1e (index-CniWoRi2.js:666:5363)
+
+    at a1e (index-CniWoRi2.js:666:7844)
+
+    at qbe (index-CniWoRi2.js:83:35955)
+
+    at X9e
+
+    at ebe (index-CniWoRi2.js:75:3511)
+
+    at H2 (index-CniWoRi2.js:681:44575)
+
+(anonymous) @ index-CniWoRi2.js:56Understand this error
+
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: Object
+
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] Object
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : Object
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: Object
+
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-16T09:47:13.000-03:00'}
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-16T09:47:13.000-03:00'}
+
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-16T09:47:14.000-03:00'}
+
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-16T09:47:14.000-03:00'}
+
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock                                   E O ENGRAÇADO QUE NO LOG DE DEPLOY TAMBEM DIZ QUE O DATABASE ESTA FUNCIONANDO!;  rest-express@1.0.0 start
+
+starting up user application
+
+> NODE_ENV=production node dist/index.js
+
+forwarding local port 5000 to external port 80 (mapped as 1104)
+
+2025-09-16T12:31:44Z info: Waiting for service to be ready
+
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+
+{"environment":"production","injectionMethod":"internal_fallback","level":"info","message":"[CLICKSIGN WEBHOOK SERVICE] ✅ Inicializado com UseCase MarcarAssinaturaConcluidaUseCase","service":"simpix-api","timestamp":"2025-09-16 12:31:39","useCaseInjected":true,"version":"1.0.0","webhookSecretConfigured":true}
+
+✅ Database: Connection pool configured with 20 max connections (Mission 3 optimization)
+
+[CLICKSIGN V1] Token configured: b73b3b90***
+
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+
+[QUEUE] 🚀 Job queues initialized with DLQ support
+
+🚀 [TIMING MIDDLEWARE] Middleware instance created and exported
+
+[CLICKSIGN V1] UseCase DI attached: false
+
+📊 Pool Config: idle_timeout=30s, connect_timeout=10s, prepared_statements=disabled
+
+{"environment":"production","level":"info","message":"[REALTIME SERVICE] ✅ Inicializado com heartbeat a cada 30s","service":"simpix-api","timestamp":"2025-09-16 12:31:39","version":"1.0.0"}
+
+[INTER] 🌐 API URL: https://cdpj.partners.bancointer.com.br
+
+[CLICKSIGN] 🔴 Circuit Breaker will be initialized on first use
+
+[DEV QUEUE] 📦 Created development queue: notifications
+
+[CLICKSIGN V1] Token configured: b73b3b90-c87...
+
+✅ Database: Configuring Supabase connection...
+
+[DEV QUEUE] 📦 Created development queue: pdf-processing
+
+[DEV QUEUE] 🚀 Development queues initialized with REAL worker processing
+
+✅ [BOOTSTRAP] Configuração crítica validada com sucesso.
+
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+
+[INTER] 🔴 Circuit Breakers will be initialized on first use
+
+[DEV QUEUE] 📦 Created development queue: document-processing
+
+{"environment":"production","level":"info","message":"📊 MetricsService initialized with Sentry integration","service":"simpix-api","timestamp":"2025-09-16 12:31:39","version":"1.0.0"}
+
+✅ [2025-09-16T12:31:39.511Z] Supabase Admin configuration FULLY VALIDATED
+
+12:31:39 PM [express] 🏗️ Initializing IoC Container...
+
+{"environment":"production","level":"info","message":"📊 BullMQ MetricsService module loaded","service":"simpix-api","timestamp":"2025-09-16 12:31:39","version":"1.0.0"}
+
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+
+{"environment":"production","level":"info","message":"Dead-Letter Queue Manager initialized","service":"simpix-api","timestamp":"2025-09-16 12:31:39","version":"1.0.0"}
+
+12:31:39 PM [express] ⚠️  Missing optional secrets: SUPABASE_DEV_JWT_SECRET, CLICKSIGN_API_KEY
+
+{"dsn":"https://7018ab54dbb8...","environment":"production","level":"info","message":"✅ Sentry initialized successfully","service":"simpix-api","timestamp":"2025-09-16 12:31:40","version":"1.0.0"}
+
+🚀 [TIMING MIDDLEWARE] Creating middleware instance...
+
+[BOOTSTRAP] Iniciando Validação de Configuração Crítica...
+
+12:31:40 PM [express] ✅ Supabase Admin configuration validated successfully
+
+[INTER] 🏦 Initialized in production mode
+
+🚨 [EMERGENCY_HOTFIX] Claude Opus solution - registering priority routes at 2025-09-16T12:31:40.250Z
+
+12:31:40 PM [express] 🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet
+
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+
+[DEV QUEUE] 📦 Created development queue: boleto-sync
+
+🧪 [2025-09-16T12:31:39.511Z] PREFLIGHT: Testing Supabase Admin API connection...
+
+🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos
+
+12:31:40 PM [express] 🎯 Specialized queue workers configured for lazy initialization
+
+{"environment":"production","level":"info","logging":true,"message":"📊 Observability layer initialized","sentry":true,"service":"simpix-api","timestamp":"2025-09-16 12:31:40","version":"1.0.0"}
+
+✅ [EMERGENCY_HOTFIX] Priority formalization route registered
+
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+
+12:31:39 PM [express] ✅ IoC Container initialized successfully
+
+{"endpoints":["/api/health","/api/health/live","/api/health/ready"],"environment":"production","level":"info","message":"🏥 Health check endpoints registered","service":"simpix-api","timestamp":"2025-09-16 12:31:40","version":"1.0.0"}
+
+🚨 [2025-09-16T12:31:39.511Z] STARTUP VALIDATION: PROJECT MISMATCH DETECTION ENABLED
+
+🚫 [SECURITY] Rate limiting DESABILITADO PERMANENTEMENTE por solicitação do usuário
+
+✅ [BOOTSTRAP] Arquitetura canônica aplicada - variáveis unificadas por ambiente
+
+[CONFIG] ✅ Session secret carregado: SESSION_SECRET
+
+12:31:40 PM [express] 🔒 [SECURITY] Enhanced security headers and strict CSP activated
+
+{"environment":"production","error":"Redis connection not available - using synchronous processing","level":"warn","message":"⚠️ [FormalizationWorker] Queue unavailable - async processing disabled","service":"simpix-api","timestamp":"2025-09-16 12:31:40","version":"1.0.0"}
+
+12:31:40 PM [express] ⚡ Formalization Worker initialized - Processing async events
+
+🔌 [Security WS] Event listeners configurados (aguardando implementação de EventEmitter nos scanners)
+
+12:31:39 PM [express] 🔍 Validating Supabase Admin configuration...
+
+12:31:40 PM [express]    - Workers will start when first job is processed (on-demand)
+
+12:31:40 PM [express] 🔒 [SECURITY] Input sanitization middleware activated
+
+12:31:40 PM [express]   - Database: ✅ Connected
+
+{"environment":"production","level":"warn","message":"⚠️ [FormalizationWorker] Start called but Queue unavailable - no async processing","service":"simpix-api","timestamp":"2025-09-16 12:31:40","version":"1.0.0"}
+
+12:31:40 PM [express] 🚀 Server running on port 5000
+
+✅ [EMERGENCY_HOTFIX] Priority formalization route registered
+
+12:31:40 PM [express] 🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1
+
+[CONFIG] ✅ CSRF secret carregado: CSRF_SECRET
+
+12:31:40 PM [express] 🔐 Security WebSocket initialized
+
+[SEMGREP MCP] Connected to Redis via Redis Manager
+
+12:31:39 PM [express] ✅ Configurações críticas validadas com sucesso
+
+🔧 Connection pool ready for high concurrency workload
+
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 0, proposalRequests: 0, threshold: '50 proposals/day' }
+
+12:31:40 PM [express]   - Security: Rate Limit ✅, Helmet ✅
+
+12:31:40 PM [express] 🔧 App Config Status:
+
+📊 Connection latency: 1539ms
+
+🚨 [EMERGENCY_HOTFIX] Claude Opus solution - registering priority routes at 2025-09-16T12:31:40.252Z
+
+🔍 [2025-09-16T12:31:39.511Z] KEY Project ID: unknown/failed-decode
+
+✅ Database: Connection pool test successful
+
+🔍 [2025-09-16T12:31:39.511Z] URL Project ID: dvglgxrvhmtsixaabxha
+
+[CCB SYNC] 🚀 Starting fallback polling (every 6 hours)
+
+{"environment":"production","level":"warn","message":"💡 [FormalizationWorker] Events will be processed synchronously (graceful degradation)","service":"simpix-api","timestamp":"2025-09-16 12:31:40","version":"1.0.0"}
+
+✅ [2025-09-16T12:31:39.511Z] PREFLIGHT SUCCESS: Admin API validated (604ms)
+
+12:31:40 PM [express]   - Environment: production
+
+12:31:40 PM [express] 🔒 [SECURITY] CORS protection configured - ASVS V13.2.1
+
+12:31:40 PM [express] 🔔 Sistema de Alertas Proativos inicializado - Próxima execução: 17/09/2025, 04:00:00
+
+12:31:40 PM [express] 🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours
+
+🧪 [2025-09-16T12:31:39.511Z] Running preflight API validation...
+
+12:31:40 PM [express]   - Port: 5000
+
+[CCB SYNC] ℹ️ Primary processing via webhooks, polling is safety net only
+
+12:31:40 PM [express] 🌍 Environment: production
+
+12:31:40 PM [express]   - Supabase: ✅ Connected
+
+[Sentry] express is not instrumented. Please make sure to initialize Sentry in a separate file that you `--import` when running node, see: https://docs.sentry.io/platforms/javascript/guides/express/install/esm/.
+
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: { slowRequests: 0, proposalRequests: 0, threshold: '50 proposals/day' }
+
+📊 [2025-09-16T12:31:39.511Z] Users accessible: unknown
+
+{"correlationId":"a4a29b3d-1a8a-4852-9f8b-562e416c58e5","environment":"production","ip":"127.0.0.1","level":"info","message":"📥 Request received","method":"GET","path":"/","query":{},"service":"simpix-api","timestamp":"2025-09-16 12:31:41","url":"/","userAgent":"Go-http-client/1.1","version":"1.0.0"}
+
+12:31:40 PM [express] 📦 Checking storage buckets...
+
+12:31:40 PM [express] 🔒 [SECURITY] OPTIONS preflight handling configured
+
+12:31:40 PM [express] ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable
+
+{"degraded_mode":false,"environment":"production","level":"info","message":"🔄 Aplicação iniciando com Redis lazy loading (graceful degradation)","redis_available":"on-demand-check","service":"redis-lazy","timestamp":"2025-09-16 12:31:40","version":"1.0.0"}
+
+12:31:40 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+
+2025-09-16T12:31:46Z info: Deployment successful. entre em investigação profunda como um senior junto com o agente, e exceda agora os seus limites de qualidade de prompt e contexto, seja o mais profundo possivel em seu racicionio para resolvermos o probelma, ate mesmo revisite os arquivos .md e o github do projeto que anexei,. comece a investigação!
