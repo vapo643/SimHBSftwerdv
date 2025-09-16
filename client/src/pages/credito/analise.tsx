@@ -206,34 +206,40 @@ const AnaliseManualPage: React.FC = () => {
       numeroProposta: rawData.numero_proposta || rawData.numeroProposta,
       status: rawData.status || 'N/A',
       cliente: {
-        nome: clienteData.nome || rawData.cliente_nome || rawData.clienteNome || 'N/A',
-        cpf: clienteData.cpf || rawData.cliente_cpf || rawData.clienteCpf || 'N/A',
-        email: clienteData.email || rawData.cliente_email || rawData.clienteEmail || 'N/A',
-        telefone:
-          clienteData.telefone || rawData.cliente_telefone || rawData.clienteTelefone || 'N/A',
+        // ✅ CORRIGIDO: Usar nomes corretos da API transformada (priorizar campos da API individual)
+        nome: rawData.nomeCliente || clienteData.nome || rawData.cliente_nome || rawData.clienteNome || 'N/A',
+        cpf: rawData.cpfCliente || clienteData.cpf || rawData.cliente_cpf || rawData.clienteCpf || 'N/A',
+        email: rawData.emailCliente || clienteData.email || rawData.cliente_email || rawData.clienteEmail || 'N/A',
+        telefone: rawData.telefoneCliente || clienteData.telefone || rawData.cliente_telefone || rawData.clienteTelefone || 'N/A',
         dataNascimento:
+          rawData.clienteDataNascimento ||
           clienteData.data_nascimento ||
           clienteData.dataNascimento ||
-          rawData.clienteDataNascimento ||
           'N/A',
-        rendaMensal: clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda || 0,
-        rg: clienteData.rg || rawData.cliente_rg || rawData.clienteRg || 'N/A',
+        rendaMensal: rawData.clienteRenda || clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda || 0,
+        rg: rawData.clienteRg || clienteData.rg || rawData.cliente_rg || 'N/A',
         orgaoEmissor:
+          rawData.clienteOrgaoEmissor ||
           clienteData.orgao_emissor ||
           clienteData.orgaoEmissor ||
-          rawData.clienteOrgaoEmissor ||
           'N/A',
         estadoCivil:
+          rawData.clienteEstadoCivil ||
           clienteData.estado_civil ||
           clienteData.estadoCivil ||
-          rawData.clienteEstadoCivil ||
           'N/A',
-        nacionalidade: clienteData.nacionalidade || rawData.clienteNacionalidade || 'N/A',
-        cep: clienteData.cep || rawData.cliente_cep || rawData.clienteCep || 'N/A',
+        nacionalidade: rawData.clienteNacionalidade || clienteData.nacionalidade || 'N/A',
+        cep: rawData.clienteCep || clienteData.cep || rawData.cliente_cep || 'N/A',
         endereco:
-          clienteData.endereco || rawData.cliente_endereco || rawData.clienteEndereco || 'N/A',
+          rawData.clienteEndereco ||
+          clienteData.endereco ||
+          rawData.cliente_endereco ||
+          'N/A',
         ocupacao:
-          clienteData.ocupacao || rawData.cliente_ocupacao || rawData.clienteOcupacao || 'N/A',
+          rawData.clienteOcupacao ||
+          clienteData.ocupacao ||
+          rawData.cliente_ocupacao ||
+          'N/A',
       },
       condicoes: {
         // ✍️ CORREÇÃO: Usar dados diretos da API com fallbacks mínimos para compatibilidade
@@ -253,12 +259,14 @@ const AnaliseManualPage: React.FC = () => {
       },
       produto: {
         id: rawData.produtoId || rawData.produto_id,
-        nome: produto.nomeProduto || rawData.produto_nome || rawData.produtoNome || 'N/A',
+        // ✅ CORRIGIDO: API individual retorna produtoNome diretamente
+        nome: rawData.produtoNome || produto.nomeProduto || rawData.produto_nome || 'N/A',
       },
       loja: {
         id: rawData.lojaId || rawData.loja_id,
+        // ✅ CORRIGIDO: API individual retorna loja.nomeLoja no objeto aninhado
         nome:
-          (rawData.loja && rawData.loja.nomeLoja) || rawData.loja_nome || rawData.lojaNome || 'N/A',
+          (rawData.loja && rawData.loja.nomeLoja) || rawData.lojaNome || rawData.loja_nome || 'N/A',
       },
       tabelaComercial: {
         id: rawData.tabelaComercialId || rawData.tabela_comercial_id,
