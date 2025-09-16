@@ -180,13 +180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             observacao_status,
             created_at,
             updated_at,
-            convenio_id,
             loja_id,
-            convenios!convenio_id (
-              id,
-              nome,
-              codigo
-            ),
             lojas!loja_id (
               id,
               nome

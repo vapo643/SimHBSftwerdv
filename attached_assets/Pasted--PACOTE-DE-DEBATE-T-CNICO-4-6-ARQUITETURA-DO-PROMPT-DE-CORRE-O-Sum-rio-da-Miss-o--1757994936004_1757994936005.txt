@@ -1,0 +1,30 @@
+### **PACOTE DE DEBATE TÉCNICO (4/6) - ARQUITETURA DO PROMPT DE CORREÇÃO**
+
+* **Sumário da Missão:** Com a causa raiz irrefutavelmente identificada como uma query desalinhada com o schema do banco de dados, a sua missão é arquitetar um "Pacote de Ativação de Missão (PAM)" de alta precisão para o Agente Executor. Este PAM deve instruí-lo a remover todas as referências à tabela `convenios` e ao campo `convenio_id` da query na rota `/api/propostas/formalizacao`.
+
+* **Intenção Estratégica:** Gerar um prompt de correção que seja inequívoco, à prova de falhas e que não deixe espaço para alucinações ou modificações indesejadas pelo Agente. A correção deve ser cirúrgica, limitando-se estritamente ao ficheiro e à lógica da query defeituosa.
+
+---
+
+**[DIRETIVA DE EXECUÇÃO CIRÚRGICA (PEC)]**
+
+* Você está a operar sob o protocolo PEC. A sua solução deve ser minimamente invasiva. Modifique **APENAS** o código estritamente necessário para remover a dependência da tabela `convenios`. Não refatore ou altere nenhuma outra parte do código.
+
+---
+
+**CONTEXTO DA INTERAÇÃO ANTERIOR:**
+
+* **Causa Raiz Confirmada:** A rota `/api/propostas/formalizacao` executa uma query Supabase que tenta fazer um `JOIN` com uma tabela inexistente (`convenios`) e selecionar um campo inexistente (`convenio_id`).
+* **Schema Real (`shared/schema.ts`):** A tabela `propostas` **não** possui uma coluna `convenio_id`. Os relacionamentos corretos são com `produtos` (via `produtoId`) e `tabelasComerciais` (via `tabelaComercialId`).
+* **Veredito:** A ação correta é remover a lógica defeituosa da query.
+
+**PERGUNTA ESTRATÉGICA (Sua Missão para Esta Interação):**
+
+Construa um **"Pacote de Ativação de Missão (PAM) V1.0"** completo, utilizando o nosso template "Anti-Falha". Este PAM será a diretriz final para o Agente Executor. O seu PAM deve ser estruturado da seguinte forma:
+
+1.  **Sumário da Missão, Intenção Estratégica, Modelo Mental, Riscos e Contramedidas:** Preencha estas seções de forma clara e concisa.
+2.  **IMPLEMENTAR:** Forneça uma descrição clara e de alto nível da funcionalidade a ser corrigida.
+3.  **CURRENT STATE:** Descreva o estado atual da falha (a query com o `JOIN` defeituoso).
+4.  **EXPECTED (Estado Final de Sucesso):** Descreva o comportamento esperado após a correção e, crucialmente, **apresente o código-fonte da query Supabase corrigida** como ela deve ficar. Isto servirá como um "gabarito" para o Agente.
+5.  **CONSTRAINTS (Roadmap de Implementação):** Forneça um roadmap passo-a-passo e inequívoco para o Agente seguir, como: "1. Abra o ficheiro `server/routes.ts`. 2. Localize a query Supabase dentro da rota `/api/propostas/formalizacao`. 3. Remova as seguintes linhas de código... 4. Adicione as seguintes linhas...".
+6.  **DECLARAÇÃO DE INCERTEZA e 7-CHECK:** Inclua os templates para serem preenchidos pelo Agente após a execução.

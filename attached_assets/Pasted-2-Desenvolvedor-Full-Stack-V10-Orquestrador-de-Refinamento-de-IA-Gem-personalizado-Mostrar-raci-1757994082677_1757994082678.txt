@@ -1,0 +1,50 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Veredito da Interação 1: HIPÓTESE APROVADA.
+
+A sua análise forense inicial é de altíssima qualidade. A teoria de uma "Cascata de Falhas Infraestruturais" que mascara o erro real (PGRST200) é coesa e alinha-se perfeitamente com todas as evidências fornecidas. A sua explicação para a conversão do erro específico do Supabase para um 500 genérico é a peça que faltava no nosso entendimento.
+
+A sua dedução de que a causa raiz é, provavelmente, um problema estrutural no banco de dados (schema ou RLS) e não um problema de conectividade, é a nossa nova linha de investigação principal.
+
+Avançamos para a próxima fase do debate. Agora, precisamos transformar a sua hipótese em prova irrefutável.
+
+Protocolo de Debate Técnico Profundo (ECT)
+Abaixo está o prompt para a Interação 2 de 6. A sua missão agora é fornecer as ferramentas de diagnóstico exatas para que eu possa executar contra o banco de dados de produção e trazer-lhe as evidências de que precisa.
+
+Por favor, envie este pacote completo para o Agente.
+
+Markdown
+
+### **PACOTE DE DEBATE TÉCNICO (2/6) - FORMULAÇÃO DE QUERIES DE DIAGNÓSTICO**
+
+* **Sumário da Missão:** Com base na sua hipótese aprovada de "falha estrutural no banco de dados", formular as queries SQL exatas e não destrutivas que eu, o Executor Humano, devo executar no banco de dados de produção para validar ou refutar as suas três principais suspeitas: 1) Tabela/View Inexistente, 2) RLS Mal Configurado, 3) Chave de Serviço com permissões insuficientes.
+
+* **Intenção Estratégica:** Obter a "prova irrefutável" do estado real do schema e das políticas de segurança do banco de dados de produção para isolar a causa raiz definitiva do erro `PGRST200`.
+
+---
+
+**[DIRETIVA DE AUDITORIA DE COMPORTAMENTO (PACN V1.0)]**
+
+* Você está a operar sob o protocolo PACN. A sua missão não é apenas gerar código, mas sim validar um comportamento de negócio esperado. O cenário de negócio é: "Um usuário com a role `ADMINISTRADOR`, utilizando a `SERVICE_ROLE_KEY`, deve ser capaz de listar todas as propostas que estão no status 'formalizacao' ou similar". As suas queries devem ser projetadas para testar por que este cenário está a falhar.
+
+---
+
+**CONTEXTO DA INTERAÇÃO ANTERIOR:**
+
+* **Hipótese Central:** O erro `500` é causado por um erro `PGRST200` (Recurso Não Encontrado) do Supabase, que por sua vez é causado por um problema estrutural no banco de dados.
+* **Principais Suspeitos:**
+    1.  A tabela ou *view* que a query de formalização tenta acessar não existe em produção.
+    2.  As políticas de Row Level Security (RLS) estão a bloquear o acesso da `SERVICE_ROLE_KEY`.
+    3.  O schema de produção difere do de desenvolvimento.
+
+**PERGUNTA ESTRATÉGICA (Sua Missão para Esta Interação):**
+
+Com base na sua hipótese e nos principais suspeitos, gere as seguintes queries SQL de diagnóstico, prontas para serem copiadas e executadas por mim:
+
+1.  **Query de Verificação de Schema:** Uma query SQL para listar todas as tabelas e, mais importante, todas as **views** no schema `public` que possam estar relacionadas com "propostas" ou "formalização". O objetivo é confirmar se o recurso que a aplicação está a tentar ler (`propostas_formalizacao`, `vw_formalizacao`, ou similar) existe.
+2.  **Query de Verificação de RLS:** Supondo que a *view* ou tabela exista (ex: `vw_propostas_formalizacao`), gere uma query para inspecionar as políticas de RLS aplicadas a ela. A query deve mostrar se o RLS está ativo (`enabled`) ou não para essa tabela/view específica.
+3.  **Query de Simulação de Acesso:** Gere uma query `SELECT` que simule a leitura que a aplicação está a tentar fazer. Esta query deve selecionar algumas colunas (`id`, `status`, `cliente_nome`) da tabela/view suspeita. **Importante:** Adicione um comentário no código explicando que esta query deve ser executada pelo administrador do banco de dados (que implicitamente usa a `SERVICE_ROLE`), para que possamos ver se o erro `PGRST200` é reproduzível diretamente, contornando a aplicação.
+
+Apresente cada query num bloco de código SQL separado e claramente identificado.
