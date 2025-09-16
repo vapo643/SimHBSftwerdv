@@ -1,9 +1,6 @@
 import { createRoot } from 'react-dom/client';
-// Temporarily commented to fix rendering issue
-// import * as Sentry from '@sentry/react';
-import App from './App';
 import './index.css';
-import ErrorBoundary from './components/ErrorBoundary';
+// Dynamic imports for better performance
 
 // Sentry integration temporarily removed to fix frontend rendering
 // TODO: Re-implement with production-only dynamic import
@@ -42,11 +39,62 @@ window.addEventListener('error', (event) => {
   }
 });
 
-// Simplified app without Sentry wrapper for now
-const SentryApp = App;
+// Dynamic loading initialized below
 
-createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary>
-    <App />
-  </ErrorBoundary>
-);
+// Dynamic loading for performance optimization
+async function initializeApp() {
+  const root = createRoot(document.getElementById('root')!);
+  
+  // Show loading immediately
+  root.render(
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      height: '100vh',
+      fontFamily: 'Inter, sans-serif'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <h1 style={{ color: '#2563eb', marginBottom: '16px', fontSize: '2rem' }}>
+          ⚡ Simpix
+        </h1>
+        <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
+          Carregando sistema...
+        </p>
+      </div>
+    </div>
+  );
+
+  try {
+    // Dynamic imports - load only after first paint
+    const [{ default: App }, { default: ErrorBoundary }] = await Promise.all([
+      import('./App'),
+      import('./components/ErrorBoundary')
+    ]);
+
+    // Render full app
+    root.render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error('Failed to load application:', error);
+    root.render(
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: '100vh',
+        fontFamily: 'Inter, sans-serif'
+      }}>
+        <div style={{ textAlign: 'center', color: '#dc2626' }}>
+          <h1>❌ Erro ao Carregar</h1>
+          <p>Falha na inicialização do sistema</p>
+        </div>
+      </div>
+    );
+  }
+}
+
+initializeApp();
