@@ -205,7 +205,7 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
     const proposalResult = await db.execute(sql`
       SELECT id, cliente_nome, status
       FROM propostas 
-      WHERE clicksign_document_id = ${document.key}
+      WHERE clicksign_document_key = ${document.key}
          OR clicksign_envelope_id = ${document.key}
       LIMIT 1
     `);

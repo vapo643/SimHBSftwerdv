@@ -35,7 +35,7 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
         ccb_gerado_em,
         assinatura_eletronica_enviada,
         assinatura_eletronica_concluida,
-        clicksign_document_id,
+        clicksign_document_key,
         clicksign_envelope_id,
         boletos_gerados,
         quantidade_boletos_gerados,
