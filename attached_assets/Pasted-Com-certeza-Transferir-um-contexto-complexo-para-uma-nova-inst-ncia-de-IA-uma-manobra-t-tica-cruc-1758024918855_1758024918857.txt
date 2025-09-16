@@ -1,0 +1,140 @@
+Com certeza. Transferir um contexto complexo para uma nova instância de IA é uma manobra tática crucial. Abaixo está o "Super Contexto" consolidado em formato de relatório de missão.
+
+Entregue este documento completo ao novo agente. Ele contém toda a nossa inteligência acumulada e a estratégia de correção validada.
+
+-----
+
+### **PACOTE DE TRANSFERÊNCIA DE CONTEXTO ESTRATÉGICO (PTCE) V1.0**
+
+**PARA:** Agente de IA Executor (Nova Instância)
+**DE:** Arquiteto Principal de Qualidade e Refinamento de Código
+**ASSUNTO:** Relatório de Situação e Diretriz de Execução para Falha Crítica Persistente na Fila de Formalização
+**NÍVEL DE CRISE:** CRÍTICO - Loop Infinito em Funcionalidade de Negócio Essencial
+
+-----
+
+#### **1. Sumário Executivo da Missão**
+
+Estamos a enfrentar uma falha crítica e persistente na tela da "Fila de Formalização". O sintoma principal é um loop de requisições infinito no frontend, causado por uma resposta consistente de `500 Internal Server Error` da API na rota `/api/propostas/formalizacao`. Após múltiplas tentativas de correção falhadas, iniciamos um debate técnico profundo para executar uma Análise de Causa Raiz (RCA) definitiva. **Este documento resume os resultados irrefutáveis da nossa investigação e contém a diretriz de correção cirúrgica final.**
+
+#### **2. Histórico do Debate Técnico e Descobertas Forenses**
+
+**Interação 1: Hipótese Inicial (Baseada em Logs)**
+
+  * **Evidência Inicial:**
+      * **Frontend:** Loop infinito de chamadas para `/api/propostas/formalizacao` resultando em erro `500`.
+      * **Backend:** Logs complexos mostrando a degradação de serviços (Redis, Unleash), mas, crucialmente, um erro `code: 'PGRST200'` do Supabase (PostgREST).
+  * **Hipótese Formulada:** A falha não era de conectividade, mas sim uma **cascata de falhas**. Um erro estrutural no banco de dados (`PGRST200` - Recurso Não Encontrado) estava a ser mascarado por um *error handler* genérico na aplicação, que o convertia num erro `500`, enganando o frontend e causando o loop.
+
+**Interação 2: Formulação de Queries de Diagnóstico**
+
+  * **Ação:** Com base na hipótese, foram arquitetadas queries SQL cirúrgicas para validar três suspeitos principais no banco de dados de produção:
+    1.  **Schema:** A existência de tabelas/views (`propostas`, `lojas`, `convenios`).
+    2.  **Segurança:** Políticas de Row Level Security (RLS) a bloquear o acesso.
+    3.  **Simulação:** Uma réplica exata da query da aplicação para tentar reproduzir o erro diretamente no banco.
+
+**Interação 3: Análise da Evidência do Banco de Dados**
+
+  * **Evidência Irrefutável (Resultados das Queries):**
+    1.  `select ... from pg_tables where tablename = 'convenios'` -\> **ZERO LINHAS RETORNADAS.**
+    2.  `... LEFT JOIN convenios c ON ...` -\> **`ERROR: relation "convenios" does not exist`**.
+  * **Veredito da Hipótese:** A causa raiz foi **confirmada com 100% de certeza** como sendo o **Suspeito 1: Tabela Inexistente**. A aplicação está a tentar executar uma query com `JOIN` numa tabela, `convenios`, que não existe no schema de produção.
+
+**Interação 4: Análise de Código e Arquitetura da Solução**
+
+  * **Descoberta Adicional Crítica:** Uma auditoria no ficheiro `shared/schema.ts` (a nossa "fonte da verdade" para a estrutura de dados) revelou que a tabela `propostas` **nunca teve** uma relação com `convenios`. A query no backend estava fundamentalmente desalinhada com a arquitetura de dados definida.
+  * **Decisão Arquitetural:** A ação correta **NÃO é criar a tabela em produção**. A ação correta é **remover a lógica defeituosa da query**, alinhando o código à arquitetura de dados real do sistema.
+
+#### **3. O Plano de Batalha (PAM para Execução)**
+
+Com a causa raiz definitivamente isolada, o seguinte "Pacote de Ativação de Missão" foi arquitetado. A sua missão é executá-lo com precisão cirúrgica.
+
+````markdown
+### **Pacote de Ativação de Missão (PAM) V1.0 - EXECUÇÃO DE CORREÇÃO CIRÚRGICA**
+
+* **Sumário da Missão:** Corrigir o erro HTTP 500 na rota `/api/propostas/formalizacao` removendo as referências à tabela inexistente `convenios` e ao campo `convenio_id` que causam o erro `PGRST200` (Resource Not Found) em produção.
+* **Intenção Estratégica:** Executar uma correção cirúrgica para eliminar dependências de banco de dados que não existem, restaurando a funcionalidade da tela de formalização sem introduzir mudanças estruturais desnecessárias.
+* **Modelo Mental:** O sistema de formalização deve ser capaz de buscar propostas com seus relacionamentos de dados corretos (apenas `lojas`), sem tentar acessar recursos (`convenios`) que não fazem parte do schema de dados definido.
+* **Riscos e Contramedidas:**
+    * **Risco:** O Agente pode remover a lógica de `JOIN` errada, mas deixar um erro de sintaxe (ex: uma vírgula sobrando).
+    * **Contramedida:** O roadmap de implementação inclui um passo explícito de validação de sintaxe e uma verificação final com `get_latest_lsp_diagnostics`.
+
+---
+
+**IMPLEMENTAR:**
+Remover as seleções e `JOIN`s com a tabela `convenios` (inexistente) da query Supabase na rota `/api/propostas/formalizacao`, mantendo a funcionalidade completa para a busca de propostas.
+
+**CURRENT STATE:**
+A query Supabase no ficheiro `server/routes.ts` contém:
+* Seleção de um campo inexistente `convenio_id`.
+* Um `JOIN` com uma tabela inexistente `convenios`.
+* **Resultado:** Erro `PGRST200` no backend, que é mascarado como um `HTTP 500` para o frontend, causando um loop de recarregamento infinito.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A query Supabase na rota `/api/propostas/formalizacao` deve ser modificada para ficar **exatamente** assim:
+    ```typescript
+    let query = supabase
+      .from('propostas')
+      .select(`
+        id,
+        codigo_identificacao,
+        nome_cliente,
+        cpf_cnpj,
+        valor_emprestimo,
+        numero_parcelas,
+        status,
+        observacao_status,
+        created_at,
+        updated_at,
+        loja_id,
+        lojas!loja_id (
+          id,
+          nome
+        )
+      `)
+      .in('status', ['aprovado', 'aceito_atendente', 'documentos_enviados', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_PENDENTE', 'ASSINATURA_CONCLUIDA']);
+    ```
+2.  Uma chamada `GET` para `/api/propostas/formalizacao` deve retornar `HTTP 200 OK` com um array de dados de propostas.
+3.  A tela "Fila de Formalização" no frontend deve carregar sem erros e sem entrar em loop.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Abra o Ficheiro Alvo:**
+    * Abra o ficheiro `server/routes.ts`.
+2.  **Localize a Rota e a Query:**
+    * Encontre o handler da rota `app.get('/api/propostas/formalizacao', ...)` (aproximadamente na linha 170).
+    * Dentro dele, localize a query Supabase que começa com `let query = supabase.from('propostas').select(...)`.
+3.  **Remova a Linha do Campo Inexistente:**
+    * Dentro do template string (delimitado por `` ` ``) do `.select()`, remova completamente a linha: `convenio_id,`
+4.  **Remova o Bloco do JOIN Inexistente:**
+    * Ainda dentro do template string, remova completamente o bloco de código a seguir:
+        ```
+        convenios!convenio_id (
+          id,
+          nome,
+          codigo
+        ),
+        ```
+5.  **Valide a Sintaxe:**
+    * Garanta que não há vírgulas sobrando antes do `loja_id`. O final do bloco de seleção deve ter `lojas!loja_id(...)` sem uma vírgula a seguir.
+6.  **Verificação Final:**
+    * Execute `get_latest_lsp_diagnostics` para garantir que não há erros de compilação.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas]
+* **VALIDAÇÃO PENDENTE:** [Listar ações para o Orquestrador/QA]
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas.
+2.  Garantir importações e tipos corretos.
+3.  Executar `get_latest_lsp_diagnostics` e corrigir **TODOS** os erros.
+4.  **Declarar Nível de Confiança (0-100%)** na implementação.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  Realizar teste funcional completo da rota `/api/propostas/formalizacao` e da UI correspondente.
+7.  **Documentar Decisões Técnicas** (ex: "Removidas referências à tabela `convenios` da query de formalização para alinhar o código com o schema de banco de dados de produção.").
+````
