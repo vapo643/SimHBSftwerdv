@@ -47,9 +47,6 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
     queryFn: async () => {
       const { api } = await import('@/lib/apiClient');
       const response = await api.get('/api/features', { requireAuth: false });
-      console.log('🔍 [FEATURES DEBUG] Response recebido:', response);
-      console.log('🔍 [FEATURES DEBUG] Response type:', typeof response);
-      console.log('🔍 [FEATURES DEBUG] Response keys:', response ? Object.keys(response) : 'null/undefined');
       return response;
     },
     refetchInterval: 60000, // Atualiza a cada minuto

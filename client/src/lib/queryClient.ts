@@ -33,17 +33,17 @@ export async function apiRequest(
 }
 
 type UnauthorizedBehavior = 'returnNull' | 'throw';
-export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
+export const getQueryFn = <T>(options: { on401: UnauthorizedBehavior }): QueryFunction<T> =>
   async ({ queryKey }) => {
+    const { on401: unauthorizedBehavior } = options;
     try {
       // Convert queryKey array to URL string
       const url = queryKey.join('/') as string;
       // API methods now return normalized data directly (envelope unwrapping handled centrally)
-      return await api.get(url);
+      return await api.get(url) as T;
     } catch (error: any) {
       if (unauthorizedBehavior === 'returnNull' && error.message?.includes('401')) {
-        return null;
+        return null as T;
       }
       throw error;
     }
