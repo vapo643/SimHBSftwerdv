@@ -84,6 +84,9 @@ import healthConfigRoutes from './routes/health-config';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+// DEEPTHINK FASE 2: UUID validation regex to prevent route shadowing
+const UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+
 // Admin middleware is now replaced by requireAdmin guard
 
 // Helper function to parse user agent and extract device information
@@ -1229,7 +1232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // PUT /api/propostas/:id/resubmit - Reenviar proposta pendente para análise
   app.put(
-    '/api/propostas/:id/resubmit',
+    `/api/propostas/:id(${UUID_REGEX})/resubmit`,  // DEEPTHINK FASE 2: UUID validation
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res, next) => {
       try {
@@ -1247,7 +1250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 🎯 PAM V1.0: PUT /api/propostas/:id/marcar-concluida - Orquestração manual ROBUSTA (DeepThink)
   app.put(
-    '/api/propostas/:id/marcar-concluida',
+    `/api/propostas/:id(${UUID_REGEX})/marcar-concluida`,  // DEEPTHINK FASE 2: UUID validation
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       const propostaId = req.params.id; // Mantém como string!
@@ -1508,7 +1511,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // PATCH /api/propostas/:id - Atualizar status genérico ROBUSTO (DeepThink)
   app.patch(
-    '/api/propostas/:id',
+    `/api/propostas/:id(${UUID_REGEX})`,  // DEEPTHINK FASE 2: UUID validation
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       const propostaId = req.params.id; // Mantém como string!
@@ -2118,7 +2121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Endpoint for formalization data - Using Supabase direct to avoid Drizzle orderSelectedFields error
   app.get(
-    '/api/propostas/:id/formalizacao',
+    `/api/propostas/:id(${UUID_REGEX})/formalizacao`,  // DEEPTHINK FASE 2: UUID validation
     jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -2916,7 +2919,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update proposal formalization step
   app.patch(
-    '/api/propostas/:id/etapa-formalizacao',
+    `/api/propostas/:id(${UUID_REGEX})/etapa-formalizacao`,  // DEEPTHINK FASE 2: UUID validation
     jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -3180,7 +3183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update proposal status - REDIRECTED TO DDD CONTROLLER
   app.put(
-    '/api/propostas/:id/status',
+    `/api/propostas/:id(${UUID_REGEX})/status`,  // DEEPTHINK FASE 2: UUID validation
     jwtAuthMiddleware,
     async (req: Request, res: Response, next: NextFunction) => {
       // PAM P2.3: Redirecionar para controller DDD
@@ -3686,7 +3689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/clicksign', clickSignRouter);
   
   // CORREÇÃO CRÍTICA: Alias para rota ClickSign que o frontend espera (COM AUTENTICAÇÃO)
-  app.post('/api/propostas/:id/clicksign/enviar', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
+  app.post(`/api/propostas/:id(${UUID_REGEX})/clicksign/enviar`, jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {  // DEEPTHINK FASE 2: UUID validation
     const propostaId = req.params.id;
     const userId = req.user?.id;
     

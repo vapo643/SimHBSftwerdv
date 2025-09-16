@@ -33,18 +33,9 @@ export const createServerSupabaseAdminClient = () => {
   
   console.log(`🔍 [${timestamp}] SUPABASE_ADMIN_CLIENT_DEBUG - Environment: ${nodeEnv}`);
   
-  // Multi-tier environment variable detection with fallbacks
-  const url = process.env.SUPABASE_URL || 
-              process.env.VITE_SUPABASE_URL || 
-              process.env.PROD_SUPABASE_URL ||
-              process.env.STAGING_SUPABASE_URL ||
-              process.env.DEV_SUPABASE_URL;
-              
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ||
-                     process.env.SUPABASE_SERVICE_KEY || // Alternative naming
-                     process.env.PROD_SUPABASE_SERVICE_ROLE_KEY ||
-                     process.env.STAGING_SUPABASE_SERVICE_ROLE_KEY ||
-                     process.env.DEV_SUPABASE_SERVICE_ROLE_KEY;
+  // DEEPTHINK FASE 3: Use ONLY canonical environment variables (no fallbacks)
+  const url = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   // Enhanced diagnostic logging with specific production debug info
   console.log(`🔍 [${timestamp}] SUPABASE_URL: ${url ? '[FOUND]' : '[MISSING]'}`);
