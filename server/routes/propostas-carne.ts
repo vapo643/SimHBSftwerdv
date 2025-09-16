@@ -10,11 +10,21 @@ const router = Router();
 // GET /api/propostas - Lista propostas com filtro opcional
 router.get('/', jwtAuthMiddleware, async (req, res) => {
   try {
+    // ✅ DB GUARD: Prevent runtime 500s if db not initialized
+    if (!db) {
+      return res.status(503).json({ 
+        success: false, 
+        error: 'Database unavailable',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     const { queue } = req.query;
     
     console.log('[PROPOSTAS] Parâmetros recebidos:', { queue });
     
-    let query = db
+    // ✅ FIX: Base query with JOINs - no reassignment to avoid TypeScript errors
+    const base = db
       .select({
         id: propostas.id,
         numeroProposta: propostas.numeroProposta,
@@ -29,7 +39,7 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
         produtoId: propostas.produtoId,
         createdAt: propostas.createdAt,
         updatedAt: propostas.updatedAt,
-        // Campos das tabelas relacionadas
+        // Campos das tabelas relacionadas - CRÍTICOS para frontend
         lojaNome: lojas.nomeLoja,
         produtoNome: produtos.nomeProduto,
         parceiroNome: parceiros.razaoSocial,
@@ -39,17 +49,22 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
       .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id));
 
+    // ✅ FIX: Two explicit query paths to avoid type reassignment issues
+    let propostasResult;
+
     // FILTRO CRÍTICO: Fila de Análise = apenas propostas "em_analise"
     if (queue === 'analysis') {
       console.log('[PROPOSTAS] Filtro FILA DE ANÁLISE ativo - apenas status "em_analise"');
-      query = query.where(eq(propostas.status, 'em_analise'));
+      propostasResult = await base
+        .where(eq(propostas.status, 'em_analise'))
+        .orderBy(desc(propostas.createdAt))
+        .limit(50);
     } else {
       console.log('[PROPOSTAS] Dashboard - todas as propostas');
+      propostasResult = await base
+        .orderBy(desc(propostas.createdAt))
+        .limit(50);
     }
-
-    const propostasResult = await query
-      .orderBy(desc(propostas.createdAt))
-      .limit(50);
 
     console.log(`[PROPOSTAS] Encontradas ${propostasResult.length} propostas (queue=${queue})`);
     
@@ -73,6 +88,15 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
 // GET /api/propostas/:id - Busca proposta individual (detalhes)
 router.get('/:id', jwtAuthMiddleware, async (req, res) => {
   try {
+    // ✅ DB GUARD: Prevent runtime 500s if db not initialized
+    if (!db) {
+      return res.status(503).json({ 
+        success: false, 
+        error: 'Database unavailable',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     const { id } = req.params;
     
     console.log('[PROPOSTA INDIVIDUAL] Buscando detalhes da proposta:', id);
