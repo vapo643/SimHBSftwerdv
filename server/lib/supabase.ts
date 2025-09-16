@@ -26,39 +26,162 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-// 🔧 PAM V1.3 PRODUCTION DIAGNOSTICS - Enhanced admin client with production-specific debugging
+// Utility functions for PROJECT_ID extraction and validation
+function extractProjectIdFromUrl(url: string): string | null {
+  const match = url.match(/https:\/\/([^.]+)\.supabase\.co/);
+  return match ? match[1] : null;
+}
+
+function extractProjectIdFromServiceKey(serviceKey: string): string | null {
+  try {
+    if (!serviceKey.startsWith('eyJ')) return null;
+    
+    // Decode JWT header to get project info
+    const headerB64 = serviceKey.split('.')[0];
+    const headerJson = JSON.parse(Buffer.from(headerB64, 'base64').toString('utf8'));
+    
+    // Decode JWT payload to get project info
+    const payloadB64 = serviceKey.split('.')[1];
+    const payloadJson = JSON.parse(Buffer.from(payloadB64, 'base64').toString('utf8'));
+    
+    // Extract project reference from iss (issuer) field
+    const issuer = payloadJson.iss;
+    if (issuer?.includes('supabase.co')) {
+      const projectMatch = issuer.match(/https:\/\/([^.]+)\.supabase\.co/);
+      return projectMatch ? projectMatch[1] : null;
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn(`Warning: Failed to decode SERVICE_KEY JWT:`, error);
+    return null;
+  }
+}
+
+async function runPreflightValidation(client: any, timestamp: string): Promise<boolean> {
+  try {
+    console.log(`🧪 [${timestamp}] PREFLIGHT: Testing Supabase Admin API connection...`);
+    
+    const startTime = Date.now();
+    const { data, error } = await client.auth.admin.listUsers({ page: 1, perPage: 1 });
+    const duration = Date.now() - startTime;
+    
+    if (error) {
+      console.error(`❌ [${timestamp}] PREFLIGHT FAILED: ${error.message}`);
+      console.error(`🔍 [${timestamp}] Error code: ${error.status}`);
+      
+      if (error.message?.includes('Invalid API key') || error.status === 401) {
+        console.error(`🚨 [${timestamp}] CRITICAL: URL/SERVICE_KEY MISMATCH DETECTED`);
+        console.error(`💡 [${timestamp}] SOLUTION: Ensure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are from the SAME Supabase project`);
+      }
+      
+      return false;
+    }
+    
+    console.log(`✅ [${timestamp}] PREFLIGHT SUCCESS: Admin API validated (${duration}ms)`);
+    console.log(`📊 [${timestamp}] Users accessible: ${Array.isArray(data) ? data.length : 'unknown'}`);
+    return true;
+    
+  } catch (error) {
+    console.error(`❌ [${timestamp}] PREFLIGHT EXCEPTION:`, error);
+    return false;
+  }
+}
+
+// 🚨 PAM V2.0 STARTUP VALIDATION - Validates Supabase configuration during startup
+export const validateSupabaseAdminConfiguration = async (): Promise<boolean> => {
+  const timestamp = new Date().toISOString();
+  const nodeEnv = process.env.NODE_ENV || 'unknown';
+  
+  console.log(`🚨 [${timestamp}] STARTUP VALIDATION: PROJECT MISMATCH DETECTION ENABLED`);
+  
+  const url = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  // Check if credentials are available
+  if (!url || !serviceKey) {
+    console.warn(`⚠️ [${timestamp}] STARTUP: Missing Supabase credentials - skipping validation`);
+    console.warn(`   SUPABASE_URL: ${url ? '✅' : '❌'}`);
+    console.warn(`   SUPABASE_SERVICE_ROLE_KEY: ${serviceKey ? '✅' : '❌'}`);
+    return false; // Non-fatal for development
+  }
+
+  let urlProjectId: string | null = null;
+  let keyProjectId: string | null = null;
+  
+  // Extract project IDs
+  if (url) {
+    urlProjectId = extractProjectIdFromUrl(url);
+    console.log(`🔍 [${timestamp}] URL Project ID: ${urlProjectId || 'unknown'}`);
+  }
+  
+  if (serviceKey) {
+    keyProjectId = extractProjectIdFromServiceKey(serviceKey);
+    console.log(`🔍 [${timestamp}] KEY Project ID: ${keyProjectId || 'unknown/failed-decode'}`);
+  }
+
+  // CRITICAL MISMATCH DETECTION
+  if (urlProjectId && keyProjectId && urlProjectId !== keyProjectId) {
+    console.error(`🚨🚨🚨 [${timestamp}] SUPABASE PROJECT MISMATCH DETECTED! 🚨🚨🚨`);
+    console.error(`Environment: ${nodeEnv}`);
+    console.error(`SUPABASE_URL Project:           ${urlProjectId}`);
+    console.error(`SUPABASE_SERVICE_ROLE_KEY Project: ${keyProjectId}`);
+    console.error(`🔥 CRITICAL: URL and SERVICE_KEY are from DIFFERENT Supabase projects!`);
+    console.error(`💡 SOLUTION: Update deployment secrets to use the SAME project for both variables`);
+    console.error(`🔧 Test command: node -e "console.log('URL proj:', '${urlProjectId}'); console.log('KEY proj:', '${keyProjectId}')"`);
+    console.error(`--- STARTUP ABORTED DUE TO PROJECT MISMATCH ---`);
+    
+    // FAIL FAST - Prevent server startup with mismatch
+    throw new Error(`SUPABASE PROJECT MISMATCH: URL project '${urlProjectId}' != SERVICE_KEY project '${keyProjectId}'`);
+  }
+
+  if (urlProjectId && keyProjectId) {
+    console.log(`✅ [${timestamp}] PROJECT VALIDATION: Both credentials belong to project '${urlProjectId}'`);
+  }
+
+  // Create client for preflight test
+  try {
+    const client = createClient(url, serviceKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      }
+    });
+    
+    // MANDATORY PREFLIGHT VALIDATION
+    console.log(`🧪 [${timestamp}] Running preflight API validation...`);
+    const preflightPassed = await runPreflightValidation(client, timestamp);
+    
+    if (!preflightPassed) {
+      console.error(`🚨 [${timestamp}] PREFLIGHT VALIDATION FAILED!`);
+      console.error(`💡 [${timestamp}] Most likely cause: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY from different projects`);
+      console.error(`🔧 [${timestamp}] Verify both secrets are from the same Supabase project`);
+      throw new Error('Supabase Admin Client preflight validation failed');
+    }
+    
+    console.log(`✅ [${timestamp}] Supabase Admin configuration FULLY VALIDATED`);
+    return true;
+    
+  } catch (error) {
+    console.error(`❌ [${timestamp}] Supabase validation error:`, error);
+    
+    if (urlProjectId && keyProjectId) {
+      console.error(`🔍 [${timestamp}] Debug info - URL: ${urlProjectId}, KEY: ${keyProjectId}`);
+    }
+    
+    throw error;
+  }
+};
+
+// 🔧 PAM V2.0 PRODUCTION DIAGNOSTICS - Enhanced admin client with MISMATCH DETECTION
 export const createServerSupabaseAdminClient = () => {
   const timestamp = new Date().toISOString();
   const nodeEnv = process.env.NODE_ENV || 'unknown';
   
-  console.log(`🔍 [${timestamp}] SUPABASE_ADMIN_CLIENT_DEBUG - Environment: ${nodeEnv}`);
-  
   // DEEPTHINK FASE 3: Use ONLY canonical environment variables (no fallbacks)
   const url = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  // Enhanced diagnostic logging with specific production debug info
-  console.log(`🔍 [${timestamp}] SUPABASE_URL: ${url ? '[FOUND]' : '[MISSING]'}`);
-  console.log(`🔍 [${timestamp}] SERVICE_KEY: ${serviceKey ? '[FOUND]' : '[MISSING]'}`);
-  
-  if (url) {
-    console.log(`🔍 [${timestamp}] URL source: ${url.includes('supabase.co') ? 'valid-supabase-domain' : 'custom-domain'}`);
-    // PAM V1.3: Extract project ID for validation
-    const projectMatch = url.match(/https:\/\/([^.]+)\.supabase\.co/);
-    const projectId = projectMatch ? projectMatch[1] : 'unknown';
-    console.log(`🔍 [${timestamp}] Project ID: ${projectId}`);
-  }
-  
-  if (serviceKey) {
-    console.log(`🔍 [${timestamp}] SERVICE_KEY length: ${serviceKey.length} chars`);
-    // PAM V1.3: Validate key format without exposing actual key
-    const keyPrefix = serviceKey.substring(0, 20) + '...';
-    console.log(`🔍 [${timestamp}] SERVICE_KEY prefix: ${keyPrefix}`);
-    
-    // Validate key format (should start with eyJ for JWT)
-    const isValidFormat = serviceKey.startsWith('eyJ');
-    console.log(`🔍 [${timestamp}] SERVICE_KEY format valid: ${isValidFormat ? 'YES' : 'NO - POTENTIAL ISSUE'}`);
-  }
 
   // Enhanced validation with specific missing variable reporting
   if (!serviceKey || !url) {
@@ -75,9 +198,16 @@ export const createServerSupabaseAdminClient = () => {
     return null as any; 
   }
 
-  console.log(`✅ [${timestamp}] Supabase Admin Client configurado com sucesso`);
+  // Quick project ID validation (non-blocking)
+  const urlProjectId = extractProjectIdFromUrl(url);
+  const keyProjectId = extractProjectIdFromServiceKey(serviceKey);
   
-  // PAM V1.3: Create client with enhanced error handling for production
+  if (urlProjectId && keyProjectId && urlProjectId !== keyProjectId) {
+    console.warn(`⚠️ [${timestamp}] WARNING: Detected project mismatch (URL: ${urlProjectId}, KEY: ${keyProjectId})`);
+    console.warn(`⚠️ [${timestamp}] This will cause authentication failures. Check deployment secrets.`);
+  }
+  
+  // PAM V2.0: Create client with enhanced error handling for production
   try {
     const client = createClient(url, serviceKey, {
       auth: {
@@ -85,7 +215,7 @@ export const createServerSupabaseAdminClient = () => {
         autoRefreshToken: false,
         detectSessionInUrl: false,
       },
-      // PAM V1.3: Add production-specific options
+      // PAM V2.0: Add production-specific options
       realtime: {
         params: {
           eventsPerSecond: 2 // Limit realtime events in production
@@ -93,21 +223,22 @@ export const createServerSupabaseAdminClient = () => {
       },
       global: {
         headers: {
-          'X-Client-Info': `supabase-admin-${nodeEnv}`
+          'X-Client-Info': `supabase-admin-${nodeEnv}`,
+          'X-Project-Validation': urlProjectId || 'unknown'
         }
       }
     });
     
-    // PAM V1.3: Immediate validation test for production debugging
-    if (nodeEnv === 'production') {
-      console.log(`🧪 [${timestamp}] Running immediate client validation test...`);
-      // We'll add a test query in the route where it's used
-    }
-    
     return client;
+    
   } catch (error) {
     console.error(`❌ [${timestamp}] ERRO ao criar Supabase Admin Client:`, error);
     console.error(`🔍 [${timestamp}] URL válida: ${url?.includes('supabase.co')}, Key válida: ${serviceKey?.length > 50}`);
+    
+    if (urlProjectId && keyProjectId) {
+      console.error(`🔍 [${timestamp}] Project IDs - URL: ${urlProjectId}, KEY: ${keyProjectId}`);
+    }
+    
     throw error;
   }
 };

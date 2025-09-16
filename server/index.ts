@@ -62,6 +62,28 @@ try {
 }
 
 (async () => {
+  // 🚨 PAM V2.0 SUPABASE VALIDATION - Critical Supabase secrets mismatch detection
+  try {
+    log('🔍 Validating Supabase Admin configuration...');
+    const { validateSupabaseAdminConfiguration } = await import('./lib/supabase');
+    await validateSupabaseAdminConfiguration();
+    log('✅ Supabase Admin configuration validated successfully');
+  } catch (error: any) {
+    console.error('🚨 SUPABASE CONFIGURATION ERROR:', error.message);
+    
+    if (error.message?.includes('PROJECT MISMATCH')) {
+      console.error('💡 SOLUTION: Ensure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are from the SAME Supabase project');
+      console.error('🔧 Check your deployment secrets and verify project consistency');
+    }
+    
+    if (process.env.NODE_ENV === 'production') {
+      console.error('🛑 Production server cannot start with invalid Supabase configuration.');
+      process.exit(1);
+    } else {
+      console.warn('⚠️ [DEVELOPMENT] Supabase configuration invalid - some features will be limited');
+    }
+  }
+
   const app = await createApp();
 
   // Register routes and get server instance
