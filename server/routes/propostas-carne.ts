@@ -68,10 +68,38 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
 
     console.log(`[PROPOSTAS] Encontradas ${propostasResult.length} propostas (queue=${queue})`);
     
+    // ✅ CORREÇÃO: Transformar dados para formato esperado pelo frontend
+    const transformedData = propostasResult.map(row => ({
+      id: row.id,
+      numeroProposta: row.numeroProposta,
+      nomeCliente: row.clienteNome, // Frontend espera nomeCliente
+      status: row.status,
+      valorSolicitado: row.valor, // Frontend espera valorSolicitado 
+      prazo: row.prazo,
+      valorTac: row.valorTac,
+      valorIof: row.valorIof,
+      taxaJuros: row.taxaJuros,
+      lojaId: row.lojaId,
+      produtoId: row.produtoId,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      // Frontend espera objetos aninhados
+      parceiro: row.parceiroNome ? {
+        razaoSocial: row.parceiroNome
+      } : null,
+      loja: row.lojaNome ? {
+        nomeLoja: row.lojaNome  
+      } : null,
+      // Campos extras para compatibilidade
+      produtoNome: row.produtoNome
+    }));
+    
+    console.log(`[PROPOSTAS] Dados transformados - primeiro item:`, transformedData[0]);
+    
     res.json({
       success: true,
-      data: propostasResult,
-      total: propostasResult.length,
+      data: transformedData,
+      total: transformedData.length,
       queue: queue || 'all',
       timestamp: new Date().toISOString(),
     });
@@ -175,9 +203,73 @@ router.get('/:id', jwtAuthMiddleware, async (req, res) => {
     console.log(`[PROPOSTA INDIVIDUAL] Proposta encontrada: ${proposta.clienteNome} - Status: ${proposta.status}`);
     console.log(`[PROPOSTA INDIVIDUAL] Dados relacionados: Loja="${proposta.lojaNome}", Produto="${proposta.produtoNome}", Parceiro="${proposta.parceiroNome}"`);
     
+    // ✅ CORREÇÃO: Transformar dados da proposta individual para formato esperado pelo frontend
+    const transformedProposta = {
+      id: proposta.id,
+      numeroProposta: proposta.numeroProposta,
+      nomeCliente: proposta.clienteNome, // Frontend espera nomeCliente
+      status: proposta.status,
+      valorSolicitado: proposta.valor, // Frontend espera valorSolicitado
+      prazo: proposta.prazo,
+      valorTac: proposta.valorTac,
+      valorIof: proposta.valorIof,
+      taxaJuros: proposta.taxaJuros,
+      valorTotalFinanciado: proposta.valorTotalFinanciado,
+      valorLiquidoLiberado: proposta.valorLiquidoLiberado,
+      lojaId: proposta.lojaId,
+      produtoId: proposta.produtoId,
+      createdAt: proposta.createdAt,
+      updatedAt: proposta.updatedAt,
+      
+      // Frontend espera objetos aninhados
+      parceiro: proposta.parceiroNome ? {
+        razaoSocial: proposta.parceiroNome
+      } : null,
+      loja: proposta.lojaNome ? {
+        nomeLoja: proposta.lojaNome
+      } : null,
+      
+      // Campos do cliente
+      cpfCliente: proposta.clienteCpf,
+      emailCliente: proposta.clienteEmail,
+      telefoneCliente: proposta.clienteTelefone,
+      clienteDataNascimento: proposta.clienteDataNascimento,
+      clienteRenda: proposta.clienteRenda,
+      clienteRg: proposta.clienteRg,
+      clienteOrgaoEmissor: proposta.clienteOrgaoEmissor,
+      clienteEstadoCivil: proposta.clienteEstadoCivil,
+      clienteNacionalidade: proposta.clienteNacionalidade,
+      clienteCep: proposta.clienteCep,
+      clienteEndereco: proposta.clienteEndereco,
+      clienteLogradouro: proposta.clienteLogradouro,
+      clienteNumero: proposta.clienteNumero,
+      clienteComplemento: proposta.clienteComplemento,
+      clienteBairro: proposta.clienteBairro,
+      clienteCidade: proposta.clienteCidade,
+      clienteUf: proposta.clienteUf,
+      clienteOcupacao: proposta.clienteOcupacao,
+      
+      // Campos adicionais
+      finalidade: proposta.finalidade,
+      garantia: proposta.garantia,
+      jurosModalidade: proposta.jurosModalidade,
+      periodicidadeCapitalizacao: proposta.periodicidadeCapitalizacao,
+      taxaJurosAnual: proposta.taxaJurosAnual,
+      pracaPagamento: proposta.pracaPagamento,
+      formaPagamento: proposta.formaPagamento,
+      analistaId: proposta.analistaId,
+      dataAnalise: proposta.dataAnalise,
+      motivoPendencia: proposta.motivoPendencia,
+      valorAprovado: proposta.valorAprovado,
+      observacoes: proposta.observacoes,
+      
+      // Campos extras para compatibilidade
+      produtoNome: proposta.produtoNome
+    };
+    
     res.json({
       success: true,
-      data: proposta,
+      data: transformedProposta,
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
