@@ -208,38 +208,41 @@ const AnaliseManualPage: React.FC = () => {
       status: rawData.status || 'N/A',
       cliente: {
         // ✅ CORRIGIDO: Usar nomes corretos da API transformada (priorizar campos da API individual)
-        nome: rawData.nomeCliente || clienteData.nome || rawData.cliente_nome || rawData.clienteNome || 'N/A',
-        cpf: rawData.cpfCliente || clienteData.cpf || rawData.cliente_cpf || rawData.clienteCpf || 'N/A',
-        email: rawData.emailCliente || clienteData.email || rawData.cliente_email || rawData.clienteEmail || 'N/A',
-        telefone: rawData.telefoneCliente || clienteData.telefone || rawData.cliente_telefone || rawData.clienteTelefone || 'N/A',
+        nome: rawData.clienteNome || rawData.cliente_nome || clienteData.nome || 'N/A',
+        cpf: rawData.clienteCpf || rawData.cliente_cpf || clienteData.cpf || 'N/A',
+        email: rawData.clienteEmail || rawData.cliente_email || clienteData.email || 'N/A',
+        telefone: rawData.clienteTelefone || rawData.cliente_telefone || clienteData.telefone || 'N/A',
         dataNascimento:
           rawData.clienteDataNascimento ||
+          rawData.cliente_data_nascimento ||
           clienteData.data_nascimento ||
           clienteData.dataNascimento ||
           'N/A',
-        rendaMensal: rawData.clienteRenda || clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda || 0,
-        rg: rawData.clienteRg || clienteData.rg || rawData.cliente_rg || 'N/A',
+        rendaMensal: rawData.clienteRenda || rawData.cliente_renda || clienteData.renda_mensal || clienteData.rendaMensal || 0,
+        rg: rawData.clienteRg || rawData.cliente_rg || clienteData.rg || 'N/A',
         orgaoEmissor:
           rawData.clienteOrgaoEmissor ||
+          rawData.cliente_orgao_emissor ||
           clienteData.orgao_emissor ||
           clienteData.orgaoEmissor ||
           'N/A',
         estadoCivil:
           rawData.clienteEstadoCivil ||
+          rawData.cliente_estado_civil ||
           clienteData.estado_civil ||
           clienteData.estadoCivil ||
           'N/A',
-        nacionalidade: rawData.clienteNacionalidade || clienteData.nacionalidade || 'N/A',
-        cep: rawData.clienteCep || clienteData.cep || rawData.cliente_cep || 'N/A',
+        nacionalidade: rawData.clienteNacionalidade || rawData.cliente_nacionalidade || clienteData.nacionalidade || 'N/A',
+        cep: rawData.clienteCep || rawData.cliente_cep || clienteData.cep || 'N/A',
         endereco:
           rawData.clienteEndereco ||
-          clienteData.endereco ||
           rawData.cliente_endereco ||
+          clienteData.endereco ||
           'N/A',
         ocupacao:
           rawData.clienteOcupacao ||
-          clienteData.ocupacao ||
           rawData.cliente_ocupacao ||
+          clienteData.ocupacao ||
           'N/A',
       },
       condicoes: {
@@ -256,7 +259,7 @@ const AnaliseManualPage: React.FC = () => {
         valorTotalFinanciado: formatAsCurrency(
           rawData.valorTotalFinanciado || condicoesData.valorTotalFinanciado
         ),
-        taxaJuros: formatAsPercent(rawData.taxaJuros || tabelaComercial.taxaJuros),
+        taxaJuros: formatAsPercent(rawData.taxaJuros || rawData.taxa_juros || tabelaComercial.taxaJuros),
       },
       produto: {
         id: rawData.produtoId || rawData.produto_id,
