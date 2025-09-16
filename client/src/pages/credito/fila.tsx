@@ -111,6 +111,10 @@ const FilaAnalise: React.FC = () => {
     error,
   } = useQuery<{ success: boolean; data: Proposta[]; total: number }>({
     queryKey: [queryUrl],
+    queryFn: async () => {
+      const { api } = await import('@/lib/apiClient');
+      return await api.get(queryUrl);
+    },
     enabled: !!user?.role, // Só fazer query se tiver role definido
   });
 

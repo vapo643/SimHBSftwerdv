@@ -280,6 +280,10 @@ const Dashboard: React.FC = () => {
     refetch,
   } = useQuery<{ success: boolean; data: any[]; total: number }>({
     queryKey: queryKeys.propostas.all,
+    queryFn: async () => {
+      const { api } = await import('@/lib/apiClient');
+      return await api.get('/api/propostas');
+    },
     enabled: !!user && user?.role !== 'ANALISTA', // Only fetch when user is authenticated and not ANALISTA
   });
 
