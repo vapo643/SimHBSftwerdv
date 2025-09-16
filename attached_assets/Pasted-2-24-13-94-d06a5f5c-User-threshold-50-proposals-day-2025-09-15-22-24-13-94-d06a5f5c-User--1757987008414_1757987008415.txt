@@ -1,0 +1,120 @@
+2:24:13.94
+d06a5f5c
+User
+threshold: '50 proposals/day'
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+}
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[REDIS MANAGER] 💡 Redis desabilitado - Volume baixo: {
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+slowRequests: 4,
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+proposalRequests: 10,
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+threshold: '50 proposals/day'
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+}
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[JWT DEBUG] Using local JWT validation
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[PHOENIX DEBUG] JWT_SECRET length: 88
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[PHOENIX DEBUG] Token claims (unverified): {
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+aud: 'authenticated',
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+exp: 1757988018,
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+algorithm: 'not specified'
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+}
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+email: 'ramon.barbosa@eellevepromotora.com.br',
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+role: 'authenticated'
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+}
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[JWT DEBUG] Profile not in cache, querying database
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+2025-09-15 22:24:13.94
+d06a5f5c
+User
+[PHOENIX DEBUG] JWT_SECRET length: 88
