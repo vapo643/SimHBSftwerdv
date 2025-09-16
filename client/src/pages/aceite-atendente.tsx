@@ -59,7 +59,9 @@ export default function AceiteAtendente() {
     queryKey: ['/api/propostas/aguardando-aceite'],
     queryFn: async () => {
       const response = await apiRequest('/api/propostas?status=aguardando_aceite_atendente');
-      return response as PropostaAceite[];
+      // CORREÇÃO CRÍTICA: A API retorna {success, data, count}, não um array direto
+      const rawData = Array.isArray(response) ? response : (response as any)?.data || [];
+      return rawData as PropostaAceite[];
     },
   });
 

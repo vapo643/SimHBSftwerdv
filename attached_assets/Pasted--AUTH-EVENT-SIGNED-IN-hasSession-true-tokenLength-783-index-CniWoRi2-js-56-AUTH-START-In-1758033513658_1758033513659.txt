@@ -1,0 +1,55 @@
+ [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 783}
+index-CniWoRi2.js:56 🔐 [AUTH START] Iniciando fetchUserProfile
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: false, tokenExpiry: null, hasActiveRefresh: false}
+index-CniWoRi2.js:56 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: false, tokenExpiry: null, hasActiveRefresh: true}
+index-CniWoRi2.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: false, tokenExpiry: null, hasActiveRefresh: true}
+index-CniWoRi2.js:56 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/features : {flags: {…}, context: {…}}
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+index-CniWoRi2.js:56 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+index-CniWoRi2.js:56 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 783}
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-16T15:17:41.000Z
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.NYjhxvu-WU7hGhHhlgQxS27bcqIMBl_hxBvIuNDNDVI', hasToken: true, isFormData: false}
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.NYjhxvu-WU7hGhHhlgQxS27bcqIMBl_hxBvIuNDNDVI', hasToken: true, isFormData: false}
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.NYjhxvu-WU7hGhHhlgQxS27bcqIMBl_hxBvIuNDNDVI', hasToken: true, isFormData: false}
+The deferred DOM Node could not be resolved to a valid node.Understand this warning
+formalizacao:14  GET https://sistemasimpix.com.br/api/events 401 (Unauthorized)Understand this error
+index-CniWoRi2.js:56 [SSE] ❌ Connection error: Event {isTrusted: true, type: 'error', target: EventSource, currentTarget: EventSource, eventPhase: 2, …}isTrusted: truebubbles: falsecancelBubble: falsecancelable: falsecomposed: falsecurrentTarget: EventSource {url: 'https://sistemasimpix.com.br/api/events', withCredentials: false, readyState: 2, onopen: ƒ, onmessage: ƒ, …}defaultPrevented: falseeventPhase: 0returnValue: truesrcElement: EventSource {url: 'https://sistemasimpix.com.br/api/events', withCredentials: false, readyState: 2, onopen: ƒ, onmessage: ƒ, …}target: EventSource {url: 'https://sistemasimpix.com.br/api/events', withCredentials: false, readyState: 2, onopen: ƒ, onmessage: ƒ, …}timeStamp: 4526.5type: "error"[[Prototype]]: Event
+(anonymous) @ index-CniWoRi2.js:56
+v.onerror @ index-CniWoRi2.js:680Understand this error
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-16T11:38:03.000-03:00'}
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-16T11:38:03.000-03:00'}
+index-CniWoRi2.js:56 🔐 [AUTH RESTORED] User profile loaded with valid token
+index-CniWoRi2.js:56 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+index-CniWoRi2.js:56 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : {success: true, data: Array(4), count: 4, correlationId: 'wvw45fr21', metadata: {…}}
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: {success: true, data: Array(4), count: 4, correlationId: 'wvw45fr21', metadata: {…}}
+index-CniWoRi2.js:56 Resposta do endpoint formalizacao: {success: true, data: Array(4), count: 4, correlationId: 'wvw45fr21', metadata: {…}}
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-16T15:17:41.000Z', hasActiveRefresh: false}
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.NYjhxvu-WU7hGhHhlgQxS27bcqIMBl_hxBvIuNDNDVI', hasToken: true, isFormData: false}
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : {success: true, data: Array(4), count: 4, correlationId: 'agh2zzgjg', metadata: {…}}
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: {success: true, data: Array(4), count: 4, correlationId: 'agh2zzgjg', metadata: {…}}
+index-CniWoRi2.js:56 Resposta do endpoint formalizacao: {success: true, data: Array(4), count: 4, correlationId: 'agh2zzgjg', metadata: {…}}
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-16T15:17:41.000Z', hasActiveRefresh: false}
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.NYjhxvu-WU7hGhHhlgQxS27bcqIMBl_hxBvIuNDNDVI', hasToken: true, isFormData: false}
+index-CniWoRi2.js:56 [API Client] Raw JSON response from https://sistemasimpix.com.br/api/propostas/formalizacao : {success: true, data: Array(4), count: 4, correlationId: 'mz86j930c', metadata: {…}}
+index-CniWoRi2.js:56 [API Client] After dual-key transformation: {success: true, data: Array(4), count: 4, correlationId: 'mz86j930c', metadata: {…}}
+index-CniWoRi2.js:56 Resposta do endpoint formalizacao: {success: true, data: Array(4), count: 4, correlationId: 'mz86j930c', metadata: {…}}
+index-CniWoRi2.js:56 Fazendo requisição para /api/propostas/formalizacao
+index-CniWoRi2.js:56 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-16T15:17:41.000Z', hasActiveRefresh: false}
+index-CniWoRi2.js:56 ✅ [TOKEN MANAGER] Using cached token
+index-CniWoRi2.js:56 [PASSO 3 - ENVIO] {url: 'https://sistemasimpix.com.br/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.NYjhxvu-WU7hGhHhlgQxS27bcqIMBl_hxBvIuNDNDVI', hasToken: true, isFormData: false}

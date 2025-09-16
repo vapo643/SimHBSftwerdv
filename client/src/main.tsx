@@ -1,12 +1,13 @@
 import { createRoot } from 'react-dom/client';
-import * as Sentry from '@sentry/react';
+// Temporarily commented to fix rendering issue
+// import * as Sentry from '@sentry/react';
 import App from './App';
 import './index.css';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Initialize Sentry for frontend error tracking
-if (import.meta.env.VITE_SENTRY_DSN && import.meta.env.MODE === 'production') {
-  Sentry.init({
+// Initialize Sentry for frontend error tracking - DISABLED FOR DEBUG
+if (false && import.meta.env.VITE_SENTRY_DSN && import.meta.env.MODE === 'production') {
+  // Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
     environment: import.meta.env.MODE || 'development',
     tracesSampleRate: import.meta.env.MODE === 'production' ? 0.1 : 1.0,

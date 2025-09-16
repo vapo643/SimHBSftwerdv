@@ -1,0 +1,168 @@
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+[PHOENIX DEBUG] JWT_SECRET length: 88
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+[PHOENIX DEBUG] Token claims (unverified): {
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+aud: 'authenticated',
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+exp: 1758035861,
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+algorithm: 'not specified'
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+}
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+email: 'ramon.barbosa@eellevepromotora.com.br',
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+role: 'authenticated'
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+}
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+[JWT DEBUG] Profile not in cache, querying database
+2025-09-16 11:37:28.15
+0fb7c71b
+User
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+2025-09-16 11:37:28.27
+0fb7c71b
+User
+{"correlationId":"9fc9a378-28a6-44a4-b16c-4bf75dd1b5fd","duration":230,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":628,"service":"simpix-api","statusCode":200,"timestamp":"2025-09-16 14:37:28","url":"/api/parceiros","version":"1.0.0"}
+2025-09-16 11:37:28.27
+0fb7c71b
+User
+{"correlationId":"3c218dbb-d5c7-420b-ac89-751ba3deb4a6","environment":"production","ip":"35.223.5.74","level":"info","message":"📥 Request received","method":"GET","path":"/assets/index-DZVEieC9.css","query":{},"referrer":"https://sistemasimpix.com.br/credito/fila","service":"simpix-api","timestamp":"2025-09-16 14:37:28","url":"/assets/index-DZVEieC9.css","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","version":"1.0.0"}
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+}
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+email: 'ramon.barbosa@eellevepromotora.com.br',
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+role: 'authenticated'
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+}
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+[JWT DEBUG] Profile not in cache, querying database
+2025-09-16 11:37:29.59
+0fb7c71b
+User
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+{"correlationId":"f480615c-5257-4515-aa64-583e2c7283ea","duration":1002,"environment":"production","level":"info","message":"📤 Request completed","method":"GET","responseSize":314,"service":"simpix-api","statusCode":200,"timestamp":"2025-09-16 14:37:30","url":"/api/debug/me","version":"1.0.0"}
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+{"correlationId":"f480615c-5257-4515-aa64-583e2c7283ea","duration":1002,"environment":"production","level":"warn","message":"⚠️ Slow request detected","service":"simpix-api","threshold":1000,"timestamp":"2025-09-16 14:37:30","url":"/api/debug/me","version":"1.0.0"}
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+[PERFORMANCE] ⚠️ SLOW GET /api/debug/me {
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+correlationId: 'perf-1758033449172-2mosv0jna',
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+duration: 1001,
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+memoryDeltaMB: 0,
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+statusCode: 200,
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+isCritical: false,
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+threshold: 1000
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+}
+2025-09-16 11:37:30.17
+0fb7c71b
+User
+[PERFORMANCE] ⚠️ SLOW GET /api/debug/me {
