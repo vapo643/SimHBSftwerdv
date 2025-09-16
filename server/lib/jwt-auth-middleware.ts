@@ -460,12 +460,12 @@ export async function jwtAuthMiddleware(
     let error: any = null;
     let profileFromCache: any = null;
 
-    // CORREÇÃO DEFINITIVA: SEMPRE usar JWT local - Supabase desabilitado
-    // Configuração explicita para evitar problemas de "Auth session missing!"
-    let tokenType: 'supabase' | 'local' = 'local';
-    const forceLocalJWT = true; // SEMPRE forçar JWT local
+    // CORREÇÃO: Reabilitar Supabase auth para compatibilidade com frontend
+    // Frontend usa tokens Supabase, backend deve validar via Supabase
+    let tokenType: 'supabase' | 'local' = 'supabase';
+    const forceLocalJWT = false; // Permitir Supabase auth
     
-    console.log('[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment');
+    console.log('[JWT DEBUG] Supabase auth ENABLED - validating token via Supabase');
 
     // P0.1 OPTIMIZATION: Use cached entry with profile data
     if (cachedEntry) {
@@ -492,11 +492,29 @@ export async function jwtAuthMiddleware(
         error = { message: semaphoreError.message };
         data = null;
       }
-    } else if (false) { // Supabase branch permanently disabled
-      // BRANCH DISABLED - SEMPRE usar JWT local agora
-      console.log('[JWT DEBUG] ERROR: Supabase branch should never execute!');
-      error = { message: 'Internal error: Supabase validation disabled' };
-      data = null;
+    } else if (!forceLocalJWT) { // Supabase branch re-enabled
+      // Usar validação Supabase para tokens do frontend
+      console.log('[JWT DEBUG] Using Supabase JWT validation');
+      const validationPromise = new Promise<any>(async (resolve) => {
+        try {
+          const { createServerSupabaseClient } = await import('../../client/src/lib/supabase');
+          const supabase = createServerSupabaseClient();
+          if (!supabase) {
+            resolve({ error: { message: 'Supabase client not available' }, data: null });
+            return;
+          }
+          const { data, error } = await supabase.auth.getUser(token);
+          resolve({ data, error });
+        } catch (err) {
+          resolve({ error: err, data: null });
+        }
+      });
+      
+      validationSemaphore.set(token, validationPromise);
+      const result = await validationPromise;
+      data = result.data;
+      error = result.error;
+      validationSemaphore.delete(token);
     } else {
       // Use local JWT validation for local tokens
       try {
