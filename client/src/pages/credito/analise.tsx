@@ -187,18 +187,6 @@ const AnaliseManualPage: React.FC = () => {
 
   // Mapper inline para dados da API com estrutura aninhada
   const mapProposta = (rawData: any) => {
-    // 🔍 DEBUG TEMPORÁRIO: Ver quais campos estão chegando
-    console.log('🔍 [DEBUG] Email campos disponíveis:', { 
-      emailCliente: rawData.emailCliente,
-      clienteEmail: rawData.clienteEmail, 
-      cliente_email: rawData.cliente_email
-    });
-    console.log('🔍 [DEBUG] Telefone campos disponíveis:', { 
-      telefoneCliente: rawData.telefoneCliente,
-      clienteTelefone: rawData.clienteTelefone, 
-      cliente_telefone: rawData.cliente_telefone
-    });
-
     // Parse client data if it's a JSON string
     let clienteData = rawData.cliente_data || rawData.clienteData || {};
     if (typeof clienteData === 'string') {
@@ -222,8 +210,8 @@ const AnaliseManualPage: React.FC = () => {
         // 🛡️ BLINDAGEM ANTI-REGRESSÃO: Múltiplas convenções de nomenclatura suportadas
         nome: rawData.nomeCliente || rawData.clienteNome || rawData.cliente_nome || clienteData.nome || 'N/A',
         cpf: rawData.cpfCliente || rawData.clienteCpf || rawData.cliente_cpf || clienteData.cpf || 'N/A',
-        email: rawData.emailCliente || rawData.clienteEmail || rawData.cliente_email || clienteData.email || 'N/A',
-        telefone: rawData.telefoneCliente || rawData.clienteTelefone || rawData.cliente_telefone || clienteData.telefone || 'N/A',
+        email: (rawData.emailCliente && rawData.emailCliente.trim()) || rawData.clienteEmail || rawData.cliente_email || clienteData.email || 'N/A',
+        telefone: (rawData.telefoneCliente && rawData.telefoneCliente.trim()) || rawData.clienteTelefone || rawData.cliente_telefone || clienteData.telefone || 'N/A',
         dataNascimento:
           rawData.clienteDataNascimento ||
           rawData.cliente_data_nascimento ||

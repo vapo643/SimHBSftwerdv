@@ -1,0 +1,92 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+AuthContext.tsx:190 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:101 🔐 [AUTH START] Iniciando fetchUserProfile
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:240 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:217 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:217 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+AuthContext.tsx:97 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+AuthContext.tsx:190 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:262 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-16T20:26:27.000Z
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+@tanstack_react-query.js?v=a751b20f:894 Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["/api/features"]
+fetch @ @tanstack_react-query.js?v=a751b20f:894Understand this error
+client:755 WebSocket connection to 'wss://localhost:5173/?token=UroxeI2BIMQN' failed: 
+createConnection @ client:755Understand this error
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:765Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+AuthContext.tsx:118 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:138 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+analise.tsx:191 🔍 [DEBUG] Email campos disponíveis: Object
+analise.tsx:196 🔍 [DEBUG] Telefone campos disponíveis: Object
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c/historico : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/formalizacao/360651ad-bdc4-4fb6-bb35-55405f59142c/ccb : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c/documents : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+DocumentViewer.tsx:86 [DocumentViewer] Error fetching documents: TypeError: Cannot read properties of undefined (reading 'data')
+    at fetchDocuments (DocumentViewer.tsx:75:41)
+fetchDocuments @ DocumentViewer.tsx:86Understand this error
+AuthContext.tsx:190 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:101 🔐 [AUTH START] Iniciando fetchUserProfile
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+analise.tsx:191 🔍 [DEBUG] Email campos disponíveis: Object
+analise.tsx:196 🔍 [DEBUG] Telefone campos disponíveis: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+@tanstack_react-query.js?v=a751b20f:894 Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["/api/features"]
+fetch @ @tanstack_react-query.js?v=a751b20f:894Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+AuthContext.tsx:118 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:138 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+analise.tsx:191 🔍 [DEBUG] Email campos disponíveis: Object
+analise.tsx:196 🔍 [DEBUG] Telefone campos disponíveis: Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:190 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:101 🔐 [AUTH START] Iniciando fetchUserProfile
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+analise.tsx:191 🔍 [DEBUG] Email campos disponíveis: Object
+analise.tsx:196 🔍 [DEBUG] Telefone campos disponíveis: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+@tanstack_react-query.js?v=a751b20f:894 Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["/api/features"]
+fetch @ @tanstack_react-query.js?v=a751b20f:894Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+AuthContext.tsx:118 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:138 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+analise.tsx:191 🔍 [DEBUG] Email campos disponíveis: ObjectclienteEmail: undefinedcliente_email: undefinedemailCliente: ""[[Prototype]]: Object
+analise.tsx:196 🔍 [DEBUG] Telefone campos disponíveis: ObjectclienteTelefone: undefinedcliente_telefone: undefinedtelefoneCliente: ""[[Prototype]]: Object
