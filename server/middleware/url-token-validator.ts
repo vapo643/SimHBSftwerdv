@@ -45,9 +45,19 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
     }
   }
 
-  // Check URL path for token-like segments
+  // Check URL path for token-like segments (skip file extensions)
   const pathSegments = req.path.split('/');
   for (const segment of pathSegments) {
+    // Skip file extensions and development files
+    if (segment.includes('.')) {
+      const parts = segment.split('.');
+      const extension = parts[parts.length - 1].toLowerCase();
+      // Skip common file extensions
+      if (['ts', 'tsx', 'js', 'jsx', 'css', 'scss', 'html', 'json', 'md', 'txt', 'map'].includes(extension)) {
+        continue;
+      }
+    }
+    
     if (JWT_PATTERN.test(segment)) {
       return res.status(400).json({
         error: 'Tokens não devem ser incluídos no caminho da URL',
