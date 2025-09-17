@@ -40,7 +40,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: queryKeys.proposta.all(proposalId), // 🔧 Query keys padronizadas
+    queryKey: [`/api/propostas/${proposalId}/formalizacao`], // 🔧 CORREÇÃO: Endpoint completo
     refetchInterval: (isGenerating || shouldPoll) ? 2000 : false, // 🔄 Poll até confirmar CCB presente
     select: (data: any) => {
       console.log('🔍 [CCBViewer] Raw API data:', data);
@@ -109,10 +109,9 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         variant: 'default',
       });
 
-      // 🔧 Invalidar usando padrões padronizados
-      invalidationPatterns.onFormalizacaoChange(proposalId).forEach(queryKey => {
-        queryClient.invalidateQueries({ queryKey });
-      });
+      // 🔧 Invalidar usando endpoint específico
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}/formalizacao`] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.propostas.formalizacao() });
       
       // 🚨 CORREÇÃO PRINCIPAL: NÃO parar isGenerating imediatamente
       // setIsGenerating(false); // ❌ REMOVIDO - causava race condition
@@ -155,9 +154,8 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
       });
 
       // 🔧 Invalidar usando padrões padronizados
-      invalidationPatterns.onFormalizacaoChange(proposalId).forEach(queryKey => {
-        queryClient.invalidateQueries({ queryKey });
-      });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}/formalizacao`] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.propostas.formalizacao() });
       
       // 🚨 CORREÇÃO: NÃO parar isGenerating imediatamente
       setTimeout(() => {
