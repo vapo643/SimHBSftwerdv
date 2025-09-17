@@ -272,4 +272,51 @@ export class PropostaMapper {
 
     return String(value);
   }
+
+  /**
+   * ✅ PAM V1.0 - FORMALIZATION MAPPER
+   * Mapeia dados de proposta do backend (com aliases PostgREST) 
+   * para estrutura consumida pelo frontend de formalização
+   */
+  static mapFormalizacaoProps(row: any): any {
+    // Ensure valor is a valid number
+    const valor = parseFloat(row.valor_emprestimo || row.valor || '0') || 0;
+    const prazo = parseInt(row.numero_parcelas || row.prazo || '0') || 0;
+
+    return {
+      id: row.id,
+      codigo_identificacao: row.codigo_identificacao || row.numero_proposta || '',
+      
+      // ✅ CRITICAL FIX: Normalize cliente_data structure que o frontend espera
+      cliente_data: {
+        nome: row.nome_cliente || row.cliente_nome || row.cliente_data?.nome || '',
+        cpf: row.cliente_cpf || row.cliente_data?.cpf || '',
+        cnpj: row.cliente_cnpj || row.cliente_data?.cnpj || ''
+      },
+      
+      // ✅ CRITICAL FIX: Normalize valor fields que o frontend espera
+      valor: valor,
+      valorAprovado: valor, // Set for compatibility
+      valor_emprestimo: valor,
+      
+      // ✅ CRITICAL FIX: Normalize prazo fields
+      prazo: prazo,
+      numero_parcelas: prazo,
+      
+      // Direct mappings
+      status: row.status,
+      created_at: row.created_at,
+      data_aprovacao: row.data_aprovacao || row.created_at,
+      loja_id: row.loja_id,
+      
+      // ✅ CRITICAL FIX: Normalize loja data
+      lojas: row.lojas ? {
+        id: row.lojas.id,
+        nome_loja: row.lojas.nome_loja
+      } : undefined,
+      
+      // Preserve existing JSONB fields if present
+      condicoes_data: row.condicoes_data || {}
+    };
+  }
 }

@@ -43,6 +43,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { robustApiClient } from '@/lib/apiClient';
 import { useToast } from '@/hooks/use-toast';
 import RefreshButton from '@/components/RefreshButton';
+import { PropostaMapper } from '@/mappers/proposta.mapper';
 import { useAuth } from '@/contexts/AuthContext';
 import { queryKeys } from '@/hooks/queries/queryKeys';
 import { EtapaFormalizacaoControl } from '@/components/propostas/EtapaFormalizacaoControl';
@@ -225,15 +226,16 @@ function FormalizacaoList() {
       const response = await apiRequest('/api/propostas/formalizacao');
       console.log('Resposta do endpoint formalizacao:', response);
 
-      // PARSING DEFENSIVO: Garantir que dados JSONB sejam objetos
-      const propostsWithParsedData = (response as any[]).map((proposta: any) => ({
-        ...proposta,
-        cliente_data: parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id),
-        condicoes_data: parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id),
-      }));
+      // ✅ PAM V1.0 - APLICANDO MAPPER DE NORMALIZAÇÃO
+      const normalizedPropostas = (response as any[]).map((row: any) => {
+        console.log('🔧 [MAPPER] Antes:', row);
+        const normalized = PropostaMapper.mapFormalizacaoProps(row);
+        console.log('✅ [MAPPER] Depois:', normalized);
+        return normalized;
+      });
 
-      console.log('Propostas com dados parseados:', propostsWithParsedData);
-      return propostsWithParsedData;
+      console.log('✅ [MAPPER] Propostas normalizadas:', normalizedPropostas);
+      return normalizedPropostas;
     },
   });
 
