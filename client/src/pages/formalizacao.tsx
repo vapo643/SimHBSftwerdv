@@ -912,18 +912,12 @@ export default function Formalizacao() {
         throw new Error('Proposta precisa estar com CCB gerada antes do envio');
       }
       
-      const response = await robustApiClient.request(
-        `/api/propostas/${propostaId}/clicksign/enviar`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            forceStatusUpdate: true, // Flag para forçar atualização de status
-            targetStatus: 'AGUARDANDO_ASSINATURA'
-          })
-        }
-      );
+      // ✅ CORREÇÃO: Usar endpoint que realmente integra com ClickSign
+      const response = await apiRequest(`/api/clicksign/send-ccb/${propostaId}`, {
+        method: 'POST',
+      });
       
-      return response.json();
+      return response;
     },
     
     onSuccess: (data) => {
@@ -933,11 +927,18 @@ export default function Formalizacao() {
       queryClient.setQueryData(['/api/propostas', propostaId], (old: any) => ({
         ...old,
         status: 'AGUARDANDO_ASSINATURA',
-        clicksignDocumentId: data.documentId
+        clicksignSignUrl: data.signUrl, // ✅ CAMPO CORRETO
+        clicksignDocumentKey: data.documentKey,
+        clicksignStatus: 'pending'
       }));
       
-      // Atualiza dados ClickSign locais
-      setClickSignData(data);
+      // Atualiza dados ClickSign locais com o formato correto
+      setClickSignData({
+        signUrl: data.signUrl,
+        documentKey: data.documentKey,
+        envelopeId: data.listKey, // ClickSign usa listKey como envelope
+        status: 'pending'
+      });
       
       // Invalida e refetch
       if (propostaId) {
@@ -947,7 +948,7 @@ export default function Formalizacao() {
       
       toast({
         title: 'Sucesso',
-        description: 'Documento enviado para assinatura!',
+        description: 'Documento enviado para ClickSign! Link de assinatura gerado.',
       });
     },
     
