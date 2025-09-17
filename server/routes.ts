@@ -164,15 +164,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .from('propostas')
           .select(`
             id,
-            codigo_identificacao:numero_proposta,
-            nome_cliente:cliente_nome,
+            numero_proposta,
+            cliente_nome,
             cliente_cpf,
             cliente_cnpj,
             tipo_pessoa,
-            valor_emprestimo:valor,
-            numero_parcelas:prazo,
+            valor,
+            prazo,
             status,
-            observacao_status:observacoes,
+            observacoes,
             created_at,
             loja_id,
             lojas!loja_id (

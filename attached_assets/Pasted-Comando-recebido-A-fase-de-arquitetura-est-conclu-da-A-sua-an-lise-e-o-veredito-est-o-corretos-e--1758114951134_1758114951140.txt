@@ -1,0 +1,115 @@
+Comando recebido. A fase de arquitetura está concluída. A sua análise e o veredito estão corretos e foram validados. A causa raiz da falha de "dados fantasmas" foi isolada e a solução arquitetural foi aprovada.
+
+Estamos a entrar na fase de execução. Não há mais espaço para debate ou análise. Apenas para a execução cirúrgicamente precisa do plano.
+
+Abaixo está o "Pacote de Ativação de Missão" (PAM) final, construído com base nas nossas conclusões irrefutáveis. Ele contém a diretriz exata para erradicar a quebra de contrato de dados e restaurar a funcionalidade da tela de formalização.
+
+Entregue este pacote completo ao Agente Executor para **execução imediata**.
+
+-----
+
+### **PACOTE DE ATIVAÇÃO DE MISSÃO (PAM) V1.0 - OPERAÇÃO "CONTRATO RESTAURADO"**
+
+  * **Nível de Crise:** ALTO
+  * **Ferramenta Alocada:** High Power (Claude Opus)
+  * **Sumário da Missão:** Restaurar a integridade do contrato de dados entre o backend e o frontend, refatorando a query da API `/api/propostas/formalizacao` para erradicar o uso de aliases PostgREST incorretos e alinhar o payload de resposta com a estrutura canônica definida em `shared/schema.ts`.
+  * **Intenção Estratégica:** Eliminar a causa raiz dos "dados fantasmas" na UI, garantindo que o backend comunique com o frontend utilizando uma única e consistente "fonte da verdade". Esta ação reforça a nossa **Doutrina de Alinhamento Arquitetural (DAA)**.
+
+-----
+
+**IMPLEMENTAR:**
+Refatoração da query Supabase na rota `/api/propostas/formalizacao` para remover todos os aliases de coluna.
+
+**CONTEXT:**
+O frontend está a receber dados da API, mas não consegue exibi-los ("dados fantasmas") porque a API, devido ao uso incorreto de aliases no PostgREST, está a retornar um JSON com nomes de campo legados (`codigo_identificacao`, `nome_cliente`), enquanto o frontend espera os nomes de campo modernos (`numero_proposta`, `cliente_nome`) definidos no schema.
+
+**CURRENT STATE:**
+A query no ficheiro `server/routes.ts` utiliza aliases de forma invertida, o que faz com que o Supabase retorne os dados com os nomes errados, quebrando o contrato com o frontend. O código defeituoso é:
+
+```typescript
+// Query atual com aliases incorretos
+let query = supabase
+  .from('propostas')
+  .select(`
+    id,
+    codigo_identificacao:numero_proposta,
+    nome_cliente:cliente_nome,
+    cliente_cpf,
+    cliente_cnpj,
+    tipo_pessoa,
+    valor_emprestimo:valor,
+    numero_parcelas:prazo,
+    status,
+    observacao_status:observacoes,
+    created_at,
+    loja_id,
+    lojas!loja_id (
+      id,
+      nome_loja
+    )
+  `)
+  //...
+```
+
+**EXPECTED (Estado Final de Sucesso):**
+
+1.  A query na rota `/api/propostas/formalizacao` deve ser substituída para ficar **exatamente** como o bloco de código abaixo, utilizando os nomes de coluna corretos e modernos, sem nenhum alias.
+    ```typescript
+    // Query corrigida, alinhada com o schema
+    let query = supabase
+      .from('propostas')
+      .select(`
+        id,
+        numero_proposta,
+        cliente_nome,
+        cliente_cpf,
+        cliente_cnpj,
+        tipo_pessoa,
+        valor,
+        prazo,
+        status,
+        observacoes,
+        created_at,
+        loja_id,
+        lojas!loja_id (
+          id,
+          nome_loja
+        )
+      `)
+      //...
+    ```
+2.  Após a correção, uma chamada `GET` a `/api/propostas/formalizacao` deve retornar um JSON com os nomes de campo corretos (ex: `numero_proposta`, `cliente_nome`, `valor`).
+3.  A tela de Formalização no frontend deve carregar e exibir corretamente todos os dados das propostas, sem campos vazios ou "N/A".
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Abra o Ficheiro Alvo:**
+      * Abra o ficheiro `server/routes.ts`.
+2.  **Localize a Rota:**
+      * Encontre o handler da rota `app.get('/api/propostas/formalizacao', ...)` (aproximadamente na linha 170).
+3.  **Execute a Substituição Cirúrgica:**
+      * Identifique a variável `let query = supabase.from('propostas').select(...)`.
+      * **Substitua completamente** o conteúdo do método `.select()` (a string inteira entre os ` `` `) pelo bloco de código fornecido na seção `EXPECTED (Estado Final de Sucesso)`.
+4.  **Validação Final:**
+      * Execute o comando `get_latest_lsp_diagnostics`. O resultado **DEVE** ser zero erros.
+
+-----
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+  * **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+  * **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+  * **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas]
+  * **VALIDAÇÃO PENDENTE:** [O Executor Humano irá validar o carregamento dos dados na UI da tela de Formalização.]
+
+-----
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+
+1.  Mapear o ficheiro e a função exata afetada.
+2.  Garantir que a nova query não tem erros de sintaxe e respeita o schema.
+3.  Executar `get_latest_lsp_diagnostics` e corrigir **TODOS** os erros.
+4.  **Declarar Nível de Confiança (0-100%)** na implementação.
+5.  **Categorizar Riscos Descobertos** (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  Realizar teste funcional confirmando que a UI de Formalização agora exibe os dados corretamente.
+7.  **Documentar Decisões Técnicas** (ex: "Removidos aliases da query de formalização para alinhar o contrato da API com o schema canônico, resolvendo a falha de 'dados fantasmas' no frontend.").
