@@ -1,0 +1,229 @@
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T17:19:05.871Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758132388,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T17:19:05.874Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+[2025-09-17T14:19:06.000-03:00] 🔍 INICIO - Buscando dados de formalização para proposta: ed2b393a-8bcc-4ef7-80da-419a26c79103
+[2025-09-17T14:19:06.000-03:00] 🔍 STEP 1 - Fazendo query direta no Supabase...
+[2025-09-17T14:19:06.000-03:00] 🔍 STEP 2 - Proposta encontrada: true
+[2025-09-17T14:19:06.000-03:00] 🔍 STEP 2.1 - Dados da proposta: {
+  id: 'ed2b393a-8bcc-4ef7-80da-419a26c79103',
+  status: 'AGUARDANDO_ASSINATURA',
+  tabela_comercial_id: 2,
+  produto_id: 2,
+  atendente_id: undefined
+}
+[2025-09-17T14:19:06.000-03:00] 🔍 STEP 3 - Buscando documentos...
+[2025-09-17T14:19:06.000-03:00] 🔍 STEP 4 - Documentos encontrados: 1
+[2025-09-17T14:19:06.000-03:00] 🔍 STEP 4.1 - Estrutura dos documentos: [
+  {
+    id: 10,
+    proposta_id: 'ed2b393a-8bcc-4ef7-80da-419a26c79103',
+    nome_arquivo: 'Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png',
+    url: 'documents/proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/1757536350718-Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png',
+    tamanho: 0,
+    tipo: 'image/png',
+    created_at: '2025-09-10T20:32:34.773175'
+  }
+]
+[2025-09-17T14:19:06.000-03:00] 🔍 STEP 4.2 - Gerando URLs assinadas para 1 documentos...
+🔍 [FORMALIZAÇÃO] Tentando gerar URL para documento: {
+  nome: 'Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png',
+  url: 'documents/proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/1757536350718-Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png',
+  tipo: 'image/png',
+  proposta_id: 'ed2b393a-8bcc-4ef7-80da-419a26c79103'
+}
+🔍 [FORMALIZAÇÃO] Caminho extraído para URL assinada: proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png
+[DEBUG] Gerando URL assinada para: proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/1757536350718-Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png
+[2025-09-17T14:19:07.000-03:00] ❌ Erro ao gerar URL para documento Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png: Object not found
+[2025-09-17T14:19:07.000-03:00] ❌ Caminho tentado: proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png
+[2025-09-17T14:19:07.000-03:00] 🔍 STEP 5 - Verificando tabela_comercial_id: 2
+[2025-09-17T14:19:07.000-03:00] 🔍 STEP 5.1 - Buscando tabela comercial ID: 2
+[2025-09-17T14:19:07.000-03:00] 🔍 STEP 5.2 - Resultado da consulta tabela comercial: {
+  data: {
+    taxa_juros: 1.99,
+    nome_tabela: 'Tabela Consignado Básica',
+    parceiro_id: null
+  },
+  error: undefined,
+  hasData: true
+}
+[2025-09-17T14:19:07.000-03:00] ✅ Taxa de juros encontrada: 1.99 % da tabela "Tabela Consignado Básica"
+[2025-09-17T14:19:07.000-03:00] 🔍 STEP 6 - Processando dados JSONB...
+[2025-09-17T14:19:07.000-03:00] ✅ SUCESSO - Dados de formalização retornados para proposta ed2b393a-8bcc-4ef7-80da-419a26c79103: {
+  id: 'ed2b393a-8bcc-4ef7-80da-419a26c79103',
+  status: 'AGUARDANDO_ASSINATURA',
+  ccbGerado: true,
+  dataAprovacao: null,
+  temClienteData: true,
+  temCondicoesData: false,
+  totalDocumentos: 1,
+  clienteNome: 'Gabriel Santana Jesus Santana',
+  valorEmprestimo: 'Valor não informado',
+  taxaJuros: 1.99
+}
+2025-09-17 17:19:07 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"05f5042e-61bb-4d70-8a20-7a6b1f577972","method":"GET","url":"/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103/formalizacao","statusCode":200,"duration":1998,"responseSize":6255}
+2025-09-17 17:19:07 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"05f5042e-61bb-4d70-8a20-7a6b1f577972","url":"/api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103/formalizacao","duration":1998,"threshold":1000}
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103/formalizacao {
+  correlationId: 'perf-1758129545487-y5is3ngen',
+  duration: 1998,
+  memoryDeltaMB: -2,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/ed2b393a-8bcc-4ef7-80da-419a26c79103/formalizacao {
+  correlationId: 'perf-1758129545487-eadxv2dfw',
+  duration: 1999,
+  memoryDeltaMB: -2,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+[ERROR] Erro ao gerar URL assinada para proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/1757536350718-Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png: StorageApiError: Object not found
+    at <anonymous> (/home/runner/workspace/node_modules/@supabase/storage-js/src/lib/fetch.ts:33:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  __isStorageError: true,
+  status: 400,
+  statusCode: '404'
+}
+2025-09-17 17:19:07 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4ce21c49-081b-49dd-b32c-8faab8d7319b","method":"GET","url":"/status/ed2b393a-8bcc-4ef7-80da-419a26c79103","statusCode":200,"duration":2030,"responseSize":83}
+2025-09-17 17:19:07 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4ce21c49-081b-49dd-b32c-8faab8d7319b","url":"/status/ed2b393a-8bcc-4ef7-80da-419a26c79103","duration":2030,"threshold":1000}
+[PERFORMANCE] ⚠️  SLOW GET /api/clicksign/status/ed2b393a-8bcc-4ef7-80da-419a26c79103 {
+  correlationId: 'perf-1758129545482-ycwcfh6c8',
+  duration: 2031,
+  memoryDeltaMB: -2,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/clicksign/status/ed2b393a-8bcc-4ef7-80da-419a26c79103 {
+  correlationId: 'perf-1758129545482-8xig93mgj',
+  duration: 2031,
+  memoryDeltaMB: -2,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+2025-09-17 17:19:13 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"6121e843-3de8-49ad-a8f4-79058714c026","method":"POST","url":"/api/clicksign/send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103","path":"/api/clicksign/send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103","query":{},"ip":"172.31.75.162","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/ed2b393a-8bcc-4ef7-80da-419a26c79103"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103
+[JWT DEBUG] Método: POST
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/ed2b393a-8bcc-4ef7-80da-419a26c79103
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758132388,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T17:19:13.590Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+[CLICKSIGN] Initiating CCB signature for proposal: ed2b393a-8bcc-4ef7-80da-419a26c79103
+[DEBUG] Gerando URL assinada para: proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/1757536350718-Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png
+[ERROR] Erro ao gerar URL assinada para proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/1757536350718-Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png: StorageApiError: Object not found
+    at <anonymous> (/home/runner/workspace/node_modules/@supabase/storage-js/src/lib/fetch.ts:33:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  __isStorageError: true,
+  status: 400,
+  statusCode: '404'
+}
+[CLICKSIGN] No valid ClickSign data found, proceeding with send...
+[DEBUG] Gerando URL assinada para: proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/1757536350718-Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png
+[ERROR] Erro ao gerar URL assinada para proposta-ed2b393a-8bcc-4ef7-80da-419a26c79103/1757536350718-Create a new App - Replit - Google Chrome 15_07_2025 15_48_19.png: StorageApiError: Object not found
+    at <anonymous> (/home/runner/workspace/node_modules/@supabase/storage-js/src/lib/fetch.ts:33:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  __isStorageError: true,
+  status: 400,
+  statusCode: '404'
+}
+[CLICKSIGN] ❌ Error sending CCB: SyntaxError: "[object Object]" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at <anonymous> (/home/runner/workspace/server/routes/clicksign.ts:82:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-17 17:19:18 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"6121e843-3de8-49ad-a8f4-79058714c026","method":"POST","url":"/send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103","statusCode":500,"duration":5617,"responseSize":109}
+2025-09-17 17:19:18 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"6121e843-3de8-49ad-a8f4-79058714c026","url":"/send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103","duration":5617,"threshold":1000}
+2025-09-17 17:19:18 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"6121e843-3de8-49ad-a8f4-79058714c026","method":"POST","url":"/send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103","statusCode":500,"duration":5617,"error":"{\"error\":\"Erro ao enviar CCB para ClickSign\",\"details\":\"\\\"[object Object]\\\" is not valid JSON\"}"}
+[PERFORMANCE] ⚠️  SLOW POST /api/clicksign/send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103 {
+  correlationId: 'perf-1758129553196-2g0yhykhu',
+  duration: 5584,
+  memoryDeltaMB: 4,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW POST /api/clicksign/send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103 {
+  correlationId: 'perf-1758129553196-ik8qpb576',
+  duration: 5585,
+  memoryDeltaMB: 4,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+2025-09-17 17:19:41 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"7675f4ae-7490-4231-895c-33a8d48146b2","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.75.162","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-17 17:19:41 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"7675f4ae-7490-4231-895c-33a8d48146b2","method":"GET","url":"/api/features","statusCode":200,"duration":3,"responseSize":262}

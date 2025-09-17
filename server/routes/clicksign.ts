@@ -79,7 +79,7 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: Authenticate
     const ccbBuffer = Buffer.from(await ccbResponse.arrayBuffer());
 
     // 3. Prepare and validate client data with security
-    const clienteData = JSON.parse(proposta.clienteData || '{}');
+    const clienteData = proposta.clienteData || {};
     const rawClientData = {
       name: clienteData.nomeCompleto || proposta.clienteNome,
       email: clienteData.email || proposta.clienteEmail,
