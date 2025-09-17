@@ -24,8 +24,8 @@ const JWT_PATTERN = /^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$/;
 export function urlTokenValidator(req: Request, res: Response, next: NextFunction) {
   // 🚀 EXCEÇÃO PARA SSE: EventSource não suporta headers customizados
   // Permitir tokens via query parameter APENAS para /api/events
-  if (req.path === '/api/events') {
-    console.log('[SSE SECURITY] ✅ Token permitido via URL para SSE endpoint');
+  if (req.originalUrl.startsWith('/api/events')) {
+    console.log('[SSE SECURITY] ✅ Token permitido via URL para SSE endpoint:', req.originalUrl);
     return next();
   }
 
