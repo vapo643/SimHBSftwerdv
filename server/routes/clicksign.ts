@@ -37,25 +37,33 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: Authenticate
       return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
-    // Validate proposal is approved and CCB is generated
-    if (proposta.status !== 'aprovado') {
+    // Validate proposal status allows ClickSign submission
+    const validStatuses = ['aprovado', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA'];
+    if (!validStatuses.includes(proposta.status)) {
       return res
         .status(400)
-        .json({ error: 'Proposta deve estar aprovada para envio ao ClickSign' });
+        .json({ 
+          error: `Status da proposta deve ser um dos seguintes: ${validStatuses.join(', ')}. Status atual: ${proposta.status}` 
+        });
     }
 
     if (!proposta.ccbGerado) {
       return res.status(400).json({ error: 'CCB deve estar gerado antes do envio ao ClickSign' });
     }
 
-    // Check if already sent to ClickSign
-    if (proposta.clicksignDocumentKey) {
-      return res.status(400).json({
-        error: 'CCB já foi enviado ao ClickSign',
-        clicksignStatus: proposta.clicksignStatus,
-        clicksignSignUrl: proposta.clicksignSignUrl,
+    // Check if already sent to ClickSign (allow resend if no valid sign URL)
+    if (proposta.clicksignDocumentKey && proposta.clicksignSignUrl) {
+      console.log(`[CLICKSIGN] Proposal ${propostaId} already has valid ClickSign data, returning existing`);
+      return res.json({
+        message: 'CCB já foi enviado ao ClickSign',
+        documentKey: proposta.clicksignDocumentKey,
+        signUrl: proposta.clicksignSignUrl,
+        listKey: proposta.clicksignListKey,
+        status: proposta.clicksignStatus || 'pending'
       });
     }
+    
+    console.log(`[CLICKSIGN] No valid ClickSign data found, proceeding with send...`);
 
     // 2. Get CCB file from Supabase Storage
     const ccbUrl = await storage.getCcbUrl(propostaId);
