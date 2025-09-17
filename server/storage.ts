@@ -364,6 +364,10 @@ export class DatabaseStorage implements IStorage {
         analista_id,
         data_analise,
         motivo_pendencia,
+        cliente_nome,
+        cliente_cpf,
+        cliente_email,
+        cliente_telefone,
         ccb_gerado,
         caminho_ccb,
         ccb_gerado_em,
@@ -488,6 +492,11 @@ export class DatabaseStorage implements IStorage {
       ccbDocumentoUrl: data.ccb_documento_url,
       analistaId: data.analista_id,
       dataAnalise: data.data_analise,
+      // Client Individual Fields
+      clienteNome: data.cliente_nome,
+      clienteCpf: data.cliente_cpf,
+      clienteEmail: data.cliente_email,
+      clienteTelefone: data.cliente_telefone,
       // CCB Fields
       ccbGerado: data.ccb_gerado,
       caminhoCcb: data.caminho_ccb,
