@@ -1,0 +1,290 @@
+events:1 
+ GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/events 401 (Unauthorized)
+
+formalizacao.tsx:185 [SSE] ❌ Connection error: 
+Event {isTrusted: true, type: 'error', target: EventSource, currentTarget: EventSource, eventPhase: 2, …}
+isTrusted
+: 
+true
+bubbles
+: 
+false
+cancelBubble
+: 
+false
+cancelable
+: 
+false
+composed
+: 
+false
+currentTarget
+: 
+EventSource
+onerror
+: 
+(error2) => {…}
+onmessage
+: 
+(event) => {…}
+onopen
+: 
+() => {…}
+readyState
+: 
+2
+url
+: 
+"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/events"
+withCredentials
+: 
+false
+[[Prototype]]
+: 
+EventSource
+CLOSED
+: 
+2
+CONNECTING
+: 
+0
+OPEN
+: 
+1
+close
+: 
+ƒ close()
+onerror
+: 
+(...)
+onmessage
+: 
+(...)
+onopen
+: 
+(...)
+readyState
+: 
+(...)
+url
+: 
+(...)
+withCredentials
+: 
+(...)
+constructor
+: 
+ƒ EventSource()
+Symbol(Symbol.toStringTag)
+: 
+"EventSource"
+get onerror
+: 
+ƒ onerror()
+set onerror
+: 
+ƒ onerror()
+get onmessage
+: 
+ƒ onmessage()
+set onmessage
+: 
+ƒ onmessage()
+get onopen
+: 
+ƒ onopen()
+set onopen
+: 
+ƒ onopen()
+get readyState
+: 
+ƒ readyState()
+get url
+: 
+ƒ url()
+get withCredentials
+: 
+ƒ withCredentials()
+[[Prototype]]
+: 
+EventTarget
+defaultPrevented
+: 
+false
+eventPhase
+: 
+0
+returnValue
+: 
+true
+srcElement
+: 
+EventSource
+onerror
+: 
+(error2) => {…}
+onmessage
+: 
+(event) => {…}
+onopen
+: 
+() => {…}
+readyState
+: 
+2
+url
+: 
+"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/events"
+withCredentials
+: 
+false
+[[Prototype]]
+: 
+EventSource
+target
+: 
+EventSource
+onerror
+: 
+(error2) => {…}
+onmessage
+: 
+(event) => {…}
+onopen
+: 
+() => {…}
+readyState
+: 
+2
+url
+: 
+"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/events"
+withCredentials
+: 
+false
+[[Prototype]]
+: 
+EventSource
+timeStamp
+: 
+16357.100000023842
+type
+: 
+"error"
+[[Prototype]]
+: 
+Event
+AT_TARGET
+: 
+2
+BUBBLING_PHASE
+: 
+3
+CAPTURING_PHASE
+: 
+1
+NONE
+: 
+0
+bubbles
+: 
+(...)
+cancelBubble
+: 
+(...)
+cancelable
+: 
+(...)
+composed
+: 
+(...)
+composedPath
+: 
+ƒ composedPath()
+currentTarget
+: 
+(...)
+defaultPrevented
+: 
+(...)
+eventPhase
+: 
+(...)
+initEvent
+: 
+ƒ initEvent()
+preventDefault
+: 
+ƒ preventDefault()
+returnValue
+: 
+(...)
+srcElement
+: 
+(...)
+stopImmediatePropagation
+: 
+ƒ stopImmediatePropagation()
+stopPropagation
+: 
+ƒ stopPropagation()
+target
+: 
+(...)
+timeStamp
+: 
+(...)
+type
+: 
+(...)
+constructor
+: 
+ƒ Event()
+Symbol(Symbol.toStringTag)
+: 
+"Event"
+get bubbles
+: 
+ƒ bubbles()
+get cancelBubble
+: 
+ƒ cancelBubble()
+set cancelBubble
+: 
+ƒ cancelBubble()
+get cancelable
+: 
+ƒ cancelable()
+get composed
+: 
+ƒ composed()
+get currentTarget
+: 
+ƒ currentTarget()
+get defaultPrevented
+: 
+ƒ defaultPrevented()
+get eventPhase
+: 
+ƒ eventPhase()
+get returnValue
+: 
+ƒ returnValue()
+set returnValue
+: 
+ƒ returnValue()
+get srcElement
+: 
+ƒ srcElement()
+get target
+: 
+ƒ target()
+get timeStamp
+: 
+ƒ timeStamp()
+get type
+: 
+ƒ type()
+[[Prototype]]
+: 
+Object
