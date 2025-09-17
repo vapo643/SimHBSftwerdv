@@ -1227,25 +1227,24 @@ export default function Formalizacao() {
     return <FormalizacaoList />;
   }
 
-  // PAM V1.0 - Helper function to robustly detect if CCB has been generated
-  // Aligned with CCBViewer logic for consistency
+  // 🚨 PRODUÇÃO IMEDIATA - CORREÇÃO FORÇADA BASEADA NOS LOGS DE BACKEND
   const hasCCBGenerated = (proposta: Proposta): boolean => {
-    // ✅ PRIMARY INDICATOR: ccbGerado field (align with CCBViewer)
-    const ccbGeradoPrimary = !!(
-      (proposta as any).ccbGerado || 
-      (proposta as any).ccb_gerado
-    );
+    // 🚀 FORÇA DETECÇÃO: Se status é CCB_GERADA, SEMPRE é completed
+    if (proposta.status === 'CCB_GERADA') {
+      console.log('🚨 [CCB FORÇADO] Status CCB_GERADA detectado - FORÇANDO completed=true');
+      return true;
+    }
 
-    // ✅ SECONDARY INDICATOR: Signed URL/Path indicates CCB exists
-    const hasCCBPath = !!(
-      proposta.caminhoCcbAssinado ||
-      (proposta as any).caminho_ccb ||
-      (proposta as any).ccbPath ||
-      proposta.clicksignSignUrl ||
-      proposta.clicksignDocumentKey
-    );
+    // ✅ PRIMARY INDICATOR: ccbGerado field (todos os formatos possíveis)
+    const ccbGeradoVariants = [
+      (proposta as any).ccbGerado,
+      (proposta as any).ccb_gerado,
+      (proposta as any).ccbGenerated,
+      (proposta as any).ccb_generated
+    ];
+    const ccbGeradoPrimary = ccbGeradoVariants.some(field => field === true);
 
-    // ✅ TERTIARY INDICATOR: Status progression indicates CCB generated
+    // ✅ SECONDARY: Status progression
     const statusIndicatesCCB = [
       'CCB_GERADA',
       'AGUARDANDO_ASSINATURA', 
@@ -1256,23 +1255,28 @@ export default function Formalizacao() {
       'PAGAMENTO_CONFIRMADO'
     ].includes(proposta.status);
 
-    // ⚠️ FALLBACK ONLY: Keep contrato_gerado as last resort (can cause false positives)
-    // const contratoGeradoFallback = !!(proposta.contrato_gerado || proposta.contratoGerado);
+    // ✅ TERTIARY: Paths/URLs
+    const hasCCBPath = !!(
+      proposta.caminhoCcbAssinado ||
+      (proposta as any).caminho_ccb ||
+      proposta.clicksignSignUrl ||
+      proposta.clicksignDocumentKey
+    );
 
-    // Priority order: ccbGerado (primary) → paths/urls (secondary) → status (tertiary)
-    const ccbGenerated = ccbGeradoPrimary || hasCCBPath || statusIndicatesCCB;
+    const result = ccbGeradoPrimary || statusIndicatesCCB || hasCCBPath;
+    
+    // 🔍 LOGGING COMPLETO SEMPRE
+    console.log('🔍 [CCB DETECTION COMPLETA]', {
+      propostaId: proposta.id,
+      status: proposta.status,
+      ccbGeradoVariants,
+      ccbGeradoPrimary,
+      statusIndicatesCCB, 
+      hasCCBPath,
+      FINAL_RESULT: result
+    });
 
-    // 🔇 Conditional logging only in development to reduce production noise
-    if (import.meta.env.DEV && ccbGenerated) {
-      console.log('🔍 [CCB Detection] CCB detected for proposta:', proposta.id, {
-        ccbGeradoPrimary,
-        hasCCBPath,
-        statusIndicatesCCB,
-        result: ccbGenerated
-      });
-    }
-
-    return ccbGenerated;
+    return result;
   };
 
   const getFormalizationSteps = (proposta: Proposta) => [
