@@ -526,7 +526,7 @@ export default function Formalizacao() {
   }
 
   const [clickSignData, setClickSignData] = useState<ClickSignData | null>(null);
-  const [loadingClickSign, setLoadingClickSign] = useState(false);
+  // ✅ REMOVIDO: loadingClickSign - usar enviarClickSignMutation.isPending
   const [useBiometricAuth, setUseBiometricAuth] = useState(false);
   const [interBoletoData, setInterBoletoData] = useState<{ codigoSolicitacao?: string } | null>(
     null
@@ -1756,10 +1756,10 @@ export default function Formalizacao() {
                                               setLoadingClickSign(false);
                                             }
                                           }}
-                                          disabled={loadingClickSign}
+                                          disabled={enviarClickSignMutation.isPending}
                                           className="border-yellow-600 text-yellow-400 hover:bg-yellow-600/10"
                                         >
-                                          {loadingClickSign ? (
+                                          {enviarClickSignMutation.isPending ? (
                                             <div className="flex items-center">
                                               <div className="mr-2 h-3 w-3 animate-spin rounded-full border-b-2 border-yellow-400"></div>
                                               Regenerando...
@@ -3009,10 +3009,10 @@ export default function Formalizacao() {
                                           setLoadingClickSign(false);
                                         }
                                       }}
-                                      disabled={loadingClickSign}
+                                      disabled={enviarClickSignMutation.isPending}
                                       className="border-yellow-600 text-yellow-400 hover:bg-yellow-600/10"
                                     >
-                                      {loadingClickSign ? (
+                                      {enviarClickSignMutation.isPending ? (
                                         <div className="flex items-center">
                                           <div className="mr-2 h-3 w-3 animate-spin rounded-full border-b-2 border-yellow-400"></div>
                                           Regenerando...
