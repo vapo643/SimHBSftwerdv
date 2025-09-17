@@ -1702,7 +1702,7 @@ export default function Formalizacao() {
                                           variant="outline"
                                           size="sm"
                                           onClick={async () => {
-                                            setLoadingClickSign(true);
+                                            // ✅ REMOVIDO: setLoadingClickSign - usar enviarClickSignMutation
                                             try {
                                               console.log(
                                                 '🔄 [CLICKSIGN] Regenerando link para proposta:',
@@ -1753,7 +1753,7 @@ export default function Formalizacao() {
                                                 variant: 'destructive',
                                               });
                                             } finally {
-                                              setLoadingClickSign(false);
+                                              // ✅ REMOVIDO: setLoadingClickSign - usar enviarClickSignMutation
                                             }
                                           }}
                                           disabled={enviarClickSignMutation.isPending}
@@ -2935,7 +2935,7 @@ export default function Formalizacao() {
                                       variant="outline"
                                       size="sm"
                                       onClick={async () => {
-                                        setLoadingClickSign(true);
+                                        // ✅ REMOVIDO: setLoadingClickSign - usar enviarClickSignMutation
                                         try {
                                           console.log(
                                             '🔄 [CLICKSIGN] Regenerando link (seção 2) para proposta:',
@@ -3006,7 +3006,7 @@ export default function Formalizacao() {
                                             });
                                           }
                                         } finally {
-                                          setLoadingClickSign(false);
+                                          // ✅ REMOVIDO: setLoadingClickSign - usar enviarClickSignMutation
                                         }
                                       }}
                                       disabled={enviarClickSignMutation.isPending}
