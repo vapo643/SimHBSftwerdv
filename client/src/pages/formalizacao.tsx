@@ -1227,6 +1227,54 @@ export default function Formalizacao() {
     return <FormalizacaoList />;
   }
 
+  // PAM V1.0 - Helper function to robustly detect if CCB has been generated
+  // Aligned with CCBViewer logic for consistency
+  const hasCCBGenerated = (proposta: Proposta): boolean => {
+    // ✅ PRIMARY INDICATOR: ccbGerado field (align with CCBViewer)
+    const ccbGeradoPrimary = !!(
+      (proposta as any).ccbGerado || 
+      (proposta as any).ccb_gerado
+    );
+
+    // ✅ SECONDARY INDICATOR: Signed URL/Path indicates CCB exists
+    const hasCCBPath = !!(
+      proposta.caminhoCcbAssinado ||
+      (proposta as any).caminho_ccb ||
+      (proposta as any).ccbPath ||
+      proposta.clicksignSignUrl ||
+      proposta.clicksignDocumentKey
+    );
+
+    // ✅ TERTIARY INDICATOR: Status progression indicates CCB generated
+    const statusIndicatesCCB = [
+      'CCB_GERADA',
+      'AGUARDANDO_ASSINATURA', 
+      'ASSINATURA_CONCLUIDA',
+      'BOLETOS_EMITIDOS',
+      'PAGAMENTO_PENDENTE',
+      'PAGAMENTO_PARCIAL', 
+      'PAGAMENTO_CONFIRMADO'
+    ].includes(proposta.status);
+
+    // ⚠️ FALLBACK ONLY: Keep contrato_gerado as last resort (can cause false positives)
+    // const contratoGeradoFallback = !!(proposta.contrato_gerado || proposta.contratoGerado);
+
+    // Priority order: ccbGerado (primary) → paths/urls (secondary) → status (tertiary)
+    const ccbGenerated = ccbGeradoPrimary || hasCCBPath || statusIndicatesCCB;
+
+    // 🔇 Conditional logging only in development to reduce production noise
+    if (import.meta.env.DEV && ccbGenerated) {
+      console.log('🔍 [CCB Detection] CCB detected for proposta:', proposta.id, {
+        ccbGeradoPrimary,
+        hasCCBPath,
+        statusIndicatesCCB,
+        result: ccbGenerated
+      });
+    }
+
+    return ccbGenerated;
+  };
+
   const getFormalizationSteps = (proposta: Proposta) => [
     {
       id: 1,
@@ -1242,25 +1290,9 @@ export default function Formalizacao() {
       title: 'CCB Gerada',
       description: 'Cédula de Crédito Bancário gerada automaticamente',
       icon: FileText,
-      status:
-        proposta.status === 'CCB_GERADA' ||
-        proposta.status === 'AGUARDANDO_ASSINATURA' ||
-        proposta.status === 'ASSINATURA_CONCLUIDA' ||
-        proposta.status === 'BOLETOS_EMITIDOS'
-          ? 'completed'
-          : 'current',
-      date:
-        proposta.status === 'CCB_GERADA' ||
-        proposta.status === 'AGUARDANDO_ASSINATURA' ||
-        proposta.status === 'ASSINATURA_CONCLUIDA' ||
-        proposta.status === 'BOLETOS_EMITIDOS'
-          ? formatDate(proposta.createdAt)
-          : 'Pendente',
-      completed:
-        proposta.status === 'CCB_GERADA' ||
-        proposta.status === 'AGUARDANDO_ASSINATURA' ||
-        proposta.status === 'ASSINATURA_CONCLUIDA' ||
-        proposta.status === 'BOLETOS_EMITIDOS',
+      status: hasCCBGenerated(proposta) ? 'completed' : 'current',
+      date: hasCCBGenerated(proposta) ? formatDate(proposta.createdAt) : 'Pendente',
+      completed: hasCCBGenerated(proposta),
       interactive: true,
       etapa: 'ccb_gerado' as const,
     },
