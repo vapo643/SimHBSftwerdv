@@ -86,11 +86,21 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   // 🔥 CORREÇÃO: Mutation com polling inteligente para prevenir race condition
   const generateCCBMutation = useMutation({
     mutationFn: async () => {
+      console.log('🚀 [CCBViewer] INICIANDO GERAÇÃO CCB - proposalId:', proposalId);
+      console.log('🔍 [CCBViewer] Estado antes da mutação:', { isGenerating, shouldPoll });
       setIsGenerating(true);
       setShouldPoll(true); // 🎯 Iniciar polling inteligente
-      return apiRequest(`/api/propostas/${proposalId}/gerar-ccb`, {
-        method: 'POST',
-      });
+      
+      try {
+        const result = await apiRequest(`/api/propostas/${proposalId}/gerar-ccb`, {
+          method: 'POST',
+        });
+        console.log('✅ [CCBViewer] RESPOSTA DA API GERAR CCB:', result);
+        return result;
+      } catch (error) {
+        console.error('❌ [CCBViewer] ERRO NA API GERAR CCB:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -445,7 +455,11 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
 
             {/* Botão para gerar */}
             <Button
-              onClick={() => generateCCBMutation.mutate()}
+              onClick={() => {
+                console.log('🚀 [CCBViewer] CLIQUE NO BOTÃO GERAR CCB - Debug ativado');
+                console.log('🔍 Estado atual:', { isPending: generateCCBMutation.isPending, isGenerating });
+                generateCCBMutation.mutate();
+              }}
               disabled={generateCCBMutation.isPending || isGenerating}
               className="w-full"
               data-testid="button-generate-ccb"
