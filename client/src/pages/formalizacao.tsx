@@ -1227,15 +1227,7 @@ export default function Formalizacao() {
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
-  // AGORA toda a lógica condicional pode vir aqui, APÓS todos os hooks
-
-  // 🔧 CORREÇÃO CRÍTICA: Lógica condicional APÓS todos os hooks
-  // Se não tem ID, mostrar lista de propostas
-  if (!propostaId) {
-    return <FormalizacaoList />;
-  }
-
-  // 🚨 CORREÇÃO DO CICLO DE VIDA - DETECÇÃO CONECTADA AO RENDER
+  // 🚨 CORREÇÃO DO CICLO DE VIDA - TODOS OS HOOKS ANTES DE QUALQUER RETURN
   const hasCCB = useMemo(() => {
     if (!proposta) return false;
     
@@ -1262,6 +1254,13 @@ export default function Formalizacao() {
       proposta_completa: proposta
     });
   }, [hasCCB, proposta?.id]);
+
+  // ✅ AGORA toda a lógica condicional pode vir aqui, APÓS todos os hooks
+  // 🔧 CORREÇÃO CRÍTICA: Lógica condicional APÓS todos os hooks
+  // Se não tem ID, mostrar lista de propostas
+  if (!propostaId) {
+    return <FormalizacaoList />;
+  }
 
   const getFormalizationSteps = (proposta: Proposta) => [
     {
