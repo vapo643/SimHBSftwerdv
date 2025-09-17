@@ -1,0 +1,169 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+AuthContext.tsx:190 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 783}
+AuthContext.tsx:101 🔐 [AUTH START] Iniciando fetchUserProfile
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: false, tokenExpiry: null, hasActiveRefresh: false}
+apiClient.ts:240 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: false, tokenExpiry: null, hasActiveRefresh: true}
+apiClient.ts:217 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: false, tokenExpiry: null, hasActiveRefresh: true}
+apiClient.ts:217 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+AuthContext.tsx:97 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+AuthContext.tsx:190 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 783}
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+apiClient.ts:262 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-17T13:02:17.000Z
+apiClient.ts:481 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.z7C6teB5QbWudgETDMM1TwVsmc67g-lOqdWIeEObI8Y', hasToken: true, isFormData: false}
+apiClient.ts:481 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.z7C6teB5QbWudgETDMM1TwVsmc67g-lOqdWIeEObI8Y', hasToken: true, isFormData: false}
+apiClient.ts:481 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…s3g.janeway.replit.dev/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.z7C6teB5QbWudgETDMM1TwVsmc67g-lOqdWIeEObI8Y', hasToken: true, isFormData: false}
+events:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/events 401 (Unauthorized)Understand this error
+formalizacao.tsx:184 [SSE] ❌ Connection error: Event {isTrusted: true, type: 'error', target: EventSource, currentTarget: EventSource, eventPhase: 2, …}
+eventSource.onerror @ formalizacao.tsx:184Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:533 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-17T09:28:56.000-03:00'}
+apiClient.ts:533 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-17T09:28:56.000-03:00'}
+AuthContext.tsx:118 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:138 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao 500 (Internal Server Error)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:401
+apiClient @ apiClient.ts:509
+await in apiClient
+get @ apiClient.ts:746
+apiRequest @ queryClient.ts:21
+queryFn @ formalizacao.tsx:225
+fetchFn @ @tanstack_react-query.js?v=a751b20f:852
+run @ @tanstack_react-query.js?v=a751b20f:491
+start @ @tanstack_react-query.js?v=a751b20f:533
+fetch @ @tanstack_react-query.js?v=a751b20f:891
+#executeFetch @ @tanstack_react-query.js?v=a751b20f:2047
+onSubscribe @ @tanstack_react-query.js?v=a751b20f:1923
+subscribe @ @tanstack_react-query.js?v=a751b20f:19
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:3089
+subscribeToStore @ chunk-QYFCA5BS.js?v=a751b20f:12032
+commitHookEffectListMount @ chunk-QYFCA5BS.js?v=a751b20f:16963
+commitPassiveMountOnFiber @ chunk-QYFCA5BS.js?v=a751b20f:18206
+commitPassiveMountEffects_complete @ chunk-QYFCA5BS.js?v=a751b20f:18179
+commitPassiveMountEffects_begin @ chunk-QYFCA5BS.js?v=a751b20f:18169
+commitPassiveMountEffects @ chunk-QYFCA5BS.js?v=a751b20f:18159
+flushPassiveEffectsImpl @ chunk-QYFCA5BS.js?v=a751b20f:19543
+flushPassiveEffects @ chunk-QYFCA5BS.js?v=a751b20f:19500
+performSyncWorkOnRoot @ chunk-QYFCA5BS.js?v=a751b20f:18921
+flushSyncCallbacks @ chunk-QYFCA5BS.js?v=a751b20f:9166
+commitRootImpl @ chunk-QYFCA5BS.js?v=a751b20f:19485
+commitRoot @ chunk-QYFCA5BS.js?v=a751b20f:19330
+finishConcurrentRender @ chunk-QYFCA5BS.js?v=a751b20f:18858
+performConcurrentWorkOnRoot @ chunk-QYFCA5BS.js?v=a751b20f:18768
+workLoop @ chunk-QYFCA5BS.js?v=a751b20f:197
+flushWork @ chunk-QYFCA5BS.js?v=a751b20f:176
+performWorkUntilDeadline @ chunk-QYFCA5BS.js?v=a751b20f:384Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column propostas.codigo_identificacao does not exist', correlationId: 'zs8jhw1a1'}
+apiClient.ts:533 [API Client] After dual-key transformation: {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column propostas.codigo_identificacao does not exist', correlationId: 'zs8jhw1a1'}
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-17T13:02:17.000Z', hasActiveRefresh: false}
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…s3g.janeway.replit.dev/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.z7C6teB5QbWudgETDMM1TwVsmc67g-lOqdWIeEObI8Y', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao 500 (Internal Server Error)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:401
+apiClient @ apiClient.ts:509
+await in apiClient
+get @ apiClient.ts:746
+apiRequest @ queryClient.ts:21
+queryFn @ formalizacao.tsx:225
+fetchFn @ @tanstack_react-query.js?v=a751b20f:852
+run @ @tanstack_react-query.js?v=a751b20f:491
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:511
+Promise.catch
+run @ @tanstack_react-query.js?v=a751b20f:495
+start @ @tanstack_react-query.js?v=a751b20f:533
+fetch @ @tanstack_react-query.js?v=a751b20f:891
+#executeFetch @ @tanstack_react-query.js?v=a751b20f:2047
+onSubscribe @ @tanstack_react-query.js?v=a751b20f:1923
+subscribe @ @tanstack_react-query.js?v=a751b20f:19
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:3089
+subscribeToStore @ chunk-QYFCA5BS.js?v=a751b20f:12032
+commitHookEffectListMount @ chunk-QYFCA5BS.js?v=a751b20f:16963
+commitPassiveMountOnFiber @ chunk-QYFCA5BS.js?v=a751b20f:18206
+commitPassiveMountEffects_complete @ chunk-QYFCA5BS.js?v=a751b20f:18179
+commitPassiveMountEffects_begin @ chunk-QYFCA5BS.js?v=a751b20f:18169
+commitPassiveMountEffects @ chunk-QYFCA5BS.js?v=a751b20f:18159
+flushPassiveEffectsImpl @ chunk-QYFCA5BS.js?v=a751b20f:19543
+flushPassiveEffects @ chunk-QYFCA5BS.js?v=a751b20f:19500
+performSyncWorkOnRoot @ chunk-QYFCA5BS.js?v=a751b20f:18921
+flushSyncCallbacks @ chunk-QYFCA5BS.js?v=a751b20f:9166
+commitRootImpl @ chunk-QYFCA5BS.js?v=a751b20f:19485
+commitRoot @ chunk-QYFCA5BS.js?v=a751b20f:19330
+finishConcurrentRender @ chunk-QYFCA5BS.js?v=a751b20f:18858
+performConcurrentWorkOnRoot @ chunk-QYFCA5BS.js?v=a751b20f:18768
+workLoop @ chunk-QYFCA5BS.js?v=a751b20f:197
+flushWork @ chunk-QYFCA5BS.js?v=a751b20f:176
+performWorkUntilDeadline @ chunk-QYFCA5BS.js?v=a751b20f:384Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column propostas.codigo_identificacao does not exist', correlationId: 'je8q6bt4x'}
+apiClient.ts:533 [API Client] After dual-key transformation: {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column propostas.codigo_identificacao does not exist', correlationId: 'je8q6bt4x'}
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-17T13:02:17.000Z', hasActiveRefresh: false}
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…s3g.janeway.replit.dev/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.z7C6teB5QbWudgETDMM1TwVsmc67g-lOqdWIeEObI8Y', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao 500 (Internal Server Error)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:401
+apiClient @ apiClient.ts:509
+await in apiClient
+get @ apiClient.ts:746
+apiRequest @ queryClient.ts:21
+queryFn @ formalizacao.tsx:225
+fetchFn @ @tanstack_react-query.js?v=a751b20f:852
+run @ @tanstack_react-query.js?v=a751b20f:491
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:511
+Promise.catch
+run @ @tanstack_react-query.js?v=a751b20f:495
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:511
+Promise.catch
+run @ @tanstack_react-query.js?v=a751b20f:495
+start @ @tanstack_react-query.js?v=a751b20f:533
+fetch @ @tanstack_react-query.js?v=a751b20f:891
+#executeFetch @ @tanstack_react-query.js?v=a751b20f:2047
+onSubscribe @ @tanstack_react-query.js?v=a751b20f:1923
+subscribe @ @tanstack_react-query.js?v=a751b20f:19
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:3089
+subscribeToStore @ chunk-QYFCA5BS.js?v=a751b20f:12032
+commitHookEffectListMount @ chunk-QYFCA5BS.js?v=a751b20f:16963
+commitPassiveMountOnFiber @ chunk-QYFCA5BS.js?v=a751b20f:18206
+commitPassiveMountEffects_complete @ chunk-QYFCA5BS.js?v=a751b20f:18179
+commitPassiveMountEffects_begin @ chunk-QYFCA5BS.js?v=a751b20f:18169
+commitPassiveMountEffects @ chunk-QYFCA5BS.js?v=a751b20f:18159
+flushPassiveEffectsImpl @ chunk-QYFCA5BS.js?v=a751b20f:19543
+flushPassiveEffects @ chunk-QYFCA5BS.js?v=a751b20f:19500
+performSyncWorkOnRoot @ chunk-QYFCA5BS.js?v=a751b20f:18921
+flushSyncCallbacks @ chunk-QYFCA5BS.js?v=a751b20f:9166
+commitRootImpl @ chunk-QYFCA5BS.js?v=a751b20f:19485
+commitRoot @ chunk-QYFCA5BS.js?v=a751b20f:19330
+finishConcurrentRender @ chunk-QYFCA5BS.js?v=a751b20f:18858
+performConcurrentWorkOnRoot @ chunk-QYFCA5BS.js?v=a751b20f:18768
+workLoop @ chunk-QYFCA5BS.js?v=a751b20f:197
+flushWork @ chunk-QYFCA5BS.js?v=a751b20f:176
+performWorkUntilDeadline @ chunk-QYFCA5BS.js?v=a751b20f:384Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column propostas.codigo_identificacao does not exist', correlationId: 'ewagj9duh'}
+apiClient.ts:533 [API Client] After dual-key transformation: {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column propostas.codigo_identificacao does not exist', correlationId: 'ewagj9duh'}
