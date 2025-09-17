@@ -392,9 +392,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Processamento experimental de analytics
         const summary = {
           total_propostas: analytics.length,
-          total_valor: analytics.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0),
+          total_valor: analytics.reduce((sum: number, p: any) => sum + (parseFloat(p.valor) || 0), 0),
           por_status: analytics.reduce(
-            (acc, p) => {
+            (acc: Record<string, number>, p: any) => {
               acc[p.status] = (acc[p.status] || 0) + 1;
               return acc;
             },
@@ -585,7 +585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       logError('Falha na auditoria de dados da proposta', {
-        propostaId: id,
+        propostaId: 'unknown',
         userId: req.user?.id,
         error: error instanceof Error ? error.message : String(error),
         tipoErro: 'AUDIT_ERROR'
@@ -865,7 +865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('🔐 [ANALYSIS] First proposal:', rawPropostas[0]?.id, rawPropostas[0]?.status);
 
         // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
-        const analisePropostas = rawPropostas.map((proposta) => {
+        const analisePropostas = rawPropostas.map((proposta: any) => {
           let clienteData = null;
           let condicoesData = null;
 
@@ -1277,7 +1277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Se não houve mudança (já estava concluída)
-        if (result.noChange) {
+        if ('noChange' in result && result.noChange) {
           return res.status(200).json({
             message: 'Proposta já estava concluída',
             data: result.data
@@ -1604,12 +1604,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: 'Erro ao acessar storage', error: listError.message });
       }
 
-      const documentsExists = buckets.some((bucket) => bucket.name === 'documents');
+      const documentsExists = buckets.some((bucket: any) => bucket.name === 'documents');
 
       if (documentsExists) {
         return res.json({
           message: 'Bucket documents já existe',
-          buckets: buckets.map((b) => b.name),
+          buckets: buckets.map((b: any) => b.name),
         });
       }
 
@@ -1639,7 +1639,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         message: 'Bucket documents criado com sucesso!',
         bucket: bucket,
-        allBuckets: buckets.map((b) => b.name).concat(['documents']),
+        allBuckets: buckets.map((b: any) => b.name).concat(['documents']),
       });
     } catch (error) {
       console.error('Erro no setup:', error);
@@ -1693,6 +1693,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { db } = await import('../server/lib/supabase');
         const { eq, and, isNull, desc } = await import('drizzle-orm');
         const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
+
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
 
         // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
         // P1 CORRECTION: Defensive programming para consultas vazias
@@ -1807,6 +1811,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const { desc, eq } = await import('drizzle-orm');
           const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
 
+          if (!db) {
+            throw new Error('Database connection not available');
+          }
+
           // Get all commercial tables ordered by creation date (excluding soft-deleted)
           const { isNull } = await import('drizzle-orm');
           const tabelas = await db
@@ -1818,7 +1826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // For each table, get associated products
           const result = await Promise.all(
             tabelas.map(async (tabela) => {
-              const associations = await db
+              const associations = await db!
                 .select({ produtoId: produtoTabelaComercial.produtoId })
                 .from(produtoTabelaComercial)
                 .where(eq(produtoTabelaComercial.tabelaComercialId, tabela.id));
@@ -1859,6 +1867,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { db } = await import('../server/lib/supabase');
         const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
         const { z } = await import('zod');
+
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
 
         // Updated validation schema for N:N structure
         const createTabelaSchema = z.object({
@@ -1929,6 +1941,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
         const { z } = await import('zod');
         const { eq } = await import('drizzle-orm');
+
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
 
         const tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
@@ -2017,6 +2033,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
         const { eq } = await import('drizzle-orm');
 
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
+
         const tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
           return res.status(400).json({ message: 'ID da tabela inválido' });
@@ -2082,7 +2102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Contar por status
       const statusCount =
-        metricas?.reduce((acc: Record<string, number>, proposta) => {
+        metricas?.reduce((acc: Record<string, number>, proposta: any) => {
           const status = proposta.status || 'sem_status';
           acc[status] = (acc[status] || 0) + 1;
           return acc;
@@ -2376,6 +2396,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { db } = await import('../server/lib/supabase');
       const { parceiros } = await import('../shared/schema');
 
+      if (!db) {
+        return res.status(500).json({ message: 'Database connection not available' });
+      }
+
       const { isNull } = await import('drizzle-orm');
       const allParceiros = await db.select().from(parceiros).where(isNull(parceiros.deletedAt));
       res.json(allParceiros);
@@ -2391,6 +2415,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { db } = await import('../server/lib/supabase');
       const { parceiros } = await import('../shared/schema');
       const { eq } = await import('drizzle-orm');
+
+      if (!db) {
+        return res.status(500).json({ message: 'Database connection not available' });
+      }
 
       const parceiroId = parseInt(req.params.id);
       if (isNaN(parceiroId)) {
@@ -2421,6 +2449,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { parceiros, insertParceiroSchema } = await import('../shared/schema');
         const { z } = await import('zod');
 
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
+
         const validatedData = insertParceiroSchema.parse(req.body);
         const [newParceiro] = await db.insert(parceiros).values(validatedData).returning();
 
@@ -2446,6 +2478,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { parceiros, updateParceiroSchema } = await import('../shared/schema');
         const { eq } = await import('drizzle-orm');
         const { z } = await import('zod');
+
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
 
         const parceiroId = parseInt(req.params.id);
         if (isNaN(parceiroId)) {
@@ -2484,6 +2520,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { db } = await import('../server/lib/supabase');
         const { parceiros, lojas } = await import('../shared/schema');
         const { eq, and, isNull } = await import('drizzle-orm');
+
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
 
         const parceiroId = parseInt(req.params.id);
         if (isNaN(parceiroId)) {
@@ -2658,6 +2698,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rota para simular crédito COM DADOS REAIS DO BANCO
   app.post('/api/simular', async (req, res) => {
     try {
+      const { db } = await import('../server/lib/supabase');
+      const { parceiros, tabelasComerciais } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      if (!db) {
+        return res.status(500).json({ message: 'Database connection not available' });
+      }
+
       const { valorEmprestimo, prazoMeses, parceiroId, produtoId } = req.body;
 
       // Validação de entrada
@@ -2943,6 +2991,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { propostas, propostaLogs } = await import('../shared/schema');
         const { eq } = await import('drizzle-orm');
 
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
+
         // Get the proposal first to check permissions
         const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id));
 
@@ -3083,14 +3135,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Update the proposal
-        const [updatedProposta] = await db
+        const [updatedProposta] = await db!
           .update(propostas)
           .set(updateData)
           .where(eq(propostas.id, id))
           .returning();
 
         // Create audit log
-        await db.insert(propostaLogs).values({
+        await db!.insert(propostaLogs).values({
           propostaId: id,
           autorId: req.user?.id || '',
           statusNovo: `etapa_${etapa}_${concluida ? 'concluida' : 'revertida'}`,
@@ -3230,7 +3282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res) => {
       try {
         const lojaId = parseInt(req.params.lojaId);
-        const gerenteIds = await storage.getGerentesForLoja(lojaId);
+        const gerenteIds = await storage.getGerentesForLoja(lojaId.toString());
         res.json(gerenteIds);
       } catch (error) {
         console.error('Get gerentes for loja error:', error);
@@ -3247,7 +3299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res) => {
       try {
         const validatedData = insertGerenteLojaSchema.parse(req.body);
-        const relationship = await storage.addGerenteToLoja(validatedData);
+        const relationship = await storage.addGerenteToLoja(validatedData as any);
         res.json(relationship);
       } catch (error) {
         if (error instanceof z.ZodError) {
@@ -3266,8 +3318,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const gerenteId = parseInt(req.params.gerenteId);
-        const lojaId = parseInt(req.params.lojaId);
+        const gerenteId = req.params.gerenteId; // Keep as string
+        const lojaId = parseInt(req.params.lojaId); // Keep as number
         await storage.removeGerenteFromLoja(gerenteId, lojaId);
         res.json({ message: 'Manager removed from store successfully' });
       } catch (error) {
@@ -3320,6 +3372,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { lojas } = await import('../shared/schema');
         const { count } = await import('drizzle-orm');
 
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
+
         const { isNull } = await import('drizzle-orm');
         const result = await db
           .select({ count: count() })
@@ -3345,6 +3401,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { db } = await import('../server/lib/supabase');
         const { lojas } = await import('../shared/schema');
         const { eq } = await import('drizzle-orm');
+
+        if (!db) {
+          return res.status(500).json({ message: 'Database connection not available' });
+        }
 
         const parceiroId = parseInt(req.params.parceiroId);
         if (isNaN(parceiroId)) {

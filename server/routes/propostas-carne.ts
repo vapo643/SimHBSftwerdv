@@ -182,6 +182,13 @@ router.get('/:id', jwtAuthMiddleware, async (req, res) => {
         motivoPendencia: propostas.motivoPendencia,
         valorAprovado: propostas.valorAprovado,
         observacoes: propostas.observacoes,
+        // CRITICAL FIX: Add missing CCB fields for frontend consistency
+        ccbGerado: propostas.ccbGerado,
+        caminhoCcb: propostas.caminhoCcb,
+        caminhoCcbAssinado: propostas.caminhoCcbAssinado,
+        ccbGeradoEm: propostas.ccbGeradoEm,
+        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
+        biometriaConcluida: propostas.biometriaConcluida,
       })
       .from(propostas)
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
@@ -252,6 +259,14 @@ router.get('/:id', jwtAuthMiddleware, async (req, res) => {
       // Campos adicionais
       finalidade: proposta.finalidade,
       garantia: proposta.garantia,
+      
+      // CRITICAL FIX: Add CCB fields to response for frontend consistency
+      ccbGerado: proposta.ccbGerado,
+      caminhoCcb: proposta.caminhoCcb,
+      caminhoCcbAssinado: proposta.caminhoCcbAssinado,
+      ccbGeradoEm: proposta.ccbGeradoEm,
+      assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida,
+      biometriaConcluida: proposta.biometriaConcluida,
       jurosModalidade: proposta.jurosModalidade,
       periodicidadeCapitalizacao: proposta.periodicidadeCapitalizacao,
       taxaJurosAnual: proposta.taxaJurosAnual,

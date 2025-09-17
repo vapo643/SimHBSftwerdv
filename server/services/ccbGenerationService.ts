@@ -310,6 +310,9 @@ export class CCBGenerationService {
       // CORREÇÃO 3: Gerar parcelas se não existirem
       let parcelas: any[] = [];
       try {
+        if (!db) {
+          throw new Error('Database connection not available');
+        }
         const parcelasResult = await db.execute(sql`
           SELECT 
             numero_parcela,
@@ -1176,12 +1179,16 @@ export class CCBGenerationService {
         return { success: false, error: 'Erro ao fazer upload do PDF' };
       }
 
-      // 8. Atualizar banco de dados
+      // 8. Atualizar banco de dados - CRITICAL FIX: Use the correct field name
+      if (!db) {
+        throw new Error('Database connection not available');
+      }
       const [updatedProposal] = await db.execute(sql`
         UPDATE propostas 
         SET 
           ccb_gerado = true,
           caminho_ccb = ${filePath},
+          caminho_ccb_assinado = ${filePath},
           ccb_gerado_em = NOW(),
           status = 'CCB_GERADA'
         WHERE id = ${proposalId}
@@ -1223,6 +1230,9 @@ export class CCBGenerationService {
    */
   private async getProposalData(proposalId: string): Promise<any | null> {
     try {
+      if (!db) {
+        throw new Error('Database connection not available');
+      }
       const result = await db.execute(sql`
         SELECT 
           p.id,
@@ -1434,6 +1444,9 @@ export class CCBGenerationService {
    */
   async isCCBGenerated(proposalId: string): Promise<boolean> {
     try {
+      if (!db) {
+        throw new Error('Database connection not available');
+      }
       const result = await db.execute(sql`
         SELECT ccb_gerado, caminho_ccb
         FROM propostas

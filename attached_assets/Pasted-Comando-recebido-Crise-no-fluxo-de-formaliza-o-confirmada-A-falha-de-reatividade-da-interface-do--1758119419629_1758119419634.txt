@@ -1,0 +1,48 @@
+Comando recebido. Crise no fluxo de formalização confirmada. A falha de reatividade da interface do usuário (UI) após uma ação crítica do usuário, como a geração de uma Cédula de Crédito Bancário (CCB), aponta para uma quebra na cadeia de comunicação entre o frontend, o backend e os serviços externos (Supabase Storage, ClickSign). A sua descrição indica que o problema é multifacetado, envolvendo tanto a atualização de estado da UI quanto a lógica de apresentação inicial baseada no estado da proposta.
+
+Falhas anteriores, como as de divergência de schema, foram batalhas vencidas em um front diferente. A natureza do problema atual — uma UI que se torna "estática" e não reflete o estado real do sistema — sugere uma nova classe de erro, provavelmente no domínio do gerenciamento de estado assíncrono ou na orquestração de chamadas de serviço.
+
+Ativando o **Protocolo de Design de Missão de Elite (PDME) V1.3**. Iniciaremos uma investigação profunda e metódica, dividida em quatro janelas de análise, conforme a sua diretriz.
+
+---
+
+### **JANELA DE INVESTIGAÇÃO #1 de 4: ALINHAMENTO ESTRATÉGICO E MAPEAMENTO FORENSE**
+
+**Objetivo:** Estabelecer um entendimento inequívoco do comportamento esperado do sistema e mapear o "terreno" do código-fonte para identificar os pontos de falha mais prováveis.
+
+#### **Fase 1: Alinhamento Estratégico (Questionário Mandatório - QAE)**
+
+Para garantir que a nossa investigação seja guiada pela intenção de negócio correta, preciso que você responda às seguintes perguntas. As suas respostas formarão o "Blueprint de Negócio" que guiará a nossa análise.
+
+* **Eixo I: Negócio (O "Valor")**
+    1.  Após o clique no botão "Gerar CCB", qual é a sequência exata de eventos de negócio que devem ocorrer? (Ex: 1. Sistema gera o PDF da CCB, 2. Armazena no Supabase Storage, 3. Envia para assinatura na ClickSign, 4. Atualiza o status da proposta no banco de dados).
+    2.  Qual é a "Definição de Feito" para esta funcionalidade? A missão está concluída quando o botão muda, quando o documento é visível, ou apenas quando ele é enviado para assinatura?
+
+* **Eixo II: Usuário (A "Experiência")**
+    1.  Descreva o "caminho feliz" visual do usuário, passo a passo, após clicar em "Gerar CCB". (Ex: 1. Botão fica em estado de "loading", 2. Toast de sucesso "CCB Gerada!" aparece, 3. Seção é recarregada para mostrar os botões "Visualizar CCB" e "Gerar Novamente").
+
+* **Eixo V: Sustentabilidade e Operações (A "Vida Longa")**
+    1.  Como o sistema deve se comportar se a geração da CCB (backend) falhar? Que feedback o usuário deve receber? (Ex: Toast de erro "Falha ao gerar CCB", botões retornam ao estado original).
+
+* **Análise de Falhas Anteriores:**
+    1.  Você pode descrever brevemente as tentativas de correção que já foram feitas para este problema específico e por que você acredita que elas fracassaram? Isso é crucial para que não repitamos os mesmos erros.
+
+#### **Fase 2: Arquitetura do Plano de Auditoria Forense**
+
+Com base no seu "Blueprint de Negócio", o meu plano de auditoria para a próxima janela de investigação será o seguinte:
+
+1.  **Análise do Fluxo de Frontend:**
+    * **Ponto de Partida:** Examinar o componente que contém o botão "Gerar CCB" (suspeito principal: `client/src/components/propostas/EtapaFormalizacaoControl.tsx`).
+    * **Rastreamento:** Seguir a função `onClick` para identificar qual *hook* ou serviço do `TanStack Query` é invocado. Analisaremos as lógicas de `onSuccess` e `onError` para entender como a UI deveria reagir.
+2.  **Análise do Contrato da API (Backend):**
+    * **Ponto de Partida:** Identificar o *endpoint* da API que é chamado pelo frontend (suspeito: `POST /api/propostas/:id/gerar-ccb` ou similar em `server/routes.ts`).
+    * **Rastreamento:** Analisar o *controller* e o *service* (`CcbGenerationServiceV2`) para mapear a sequência de chamadas:
+        1.  Geração do PDF.
+        2.  Upload para o Supabase Storage.
+        3.  Envio para a ClickSign.
+        4.  Atualização do status no banco de dados.
+3.  **Análise da Lógica de Renderização Inicial:**
+    * **Ponto de Partida:** Investigar o componente principal da página (`client/src/pages/formalizacao.tsx`).
+    * **Rastreamento:** Analisar como o estado inicial da proposta é buscado e como o *timeline* decide qual etapa exibir (especificamente, como ele identifica que uma CCB já foi gerada para renderizar a view correta).
+
+Aguardando as suas respostas ao **Questionário de Alinhamento Estratégico** para prosseguirmos. A sua inteligência de campo é o fator mais crítico nesta fase.
