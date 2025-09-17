@@ -183,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             loja_id,
             lojas!loja_id (
               id,
-              nome
+              nome_loja
             )
           `)
           .in('status', ['aprovado', 'aceito_atendente', 'documentos_enviados', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_PENDENTE', 'ASSINATURA_CONCLUIDA']);
