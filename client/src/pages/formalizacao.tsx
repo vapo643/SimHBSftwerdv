@@ -158,36 +158,62 @@ function FormalizacaoList() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // PAM V1.0: SSE connection for real-time updates
+  // 🚀 PAM V1.0: SSE connection for real-time updates with JWT authentication
   useEffect(() => {
-    const eventSource = new EventSource('/api/events');
+    let eventSource: EventSource | null = null;
 
-    eventSource.onopen = () => {
-      console.log('[SSE] 📡 Connected to real-time events');
-    };
-
-    eventSource.onmessage = (event) => {
+    const connectSSE = async () => {
       try {
-        const data = JSON.parse(event.data);
-        console.log('[SSE] 📨 Event received:', data);
+        // Importar TokenManager dinamicamente
+        const { TokenManager } = await import('@/lib/apiClient');
+        const tokenManager = TokenManager.getInstance();
+        const token = await tokenManager.getValidToken();
 
-        if (data.type === 'PROPOSAL_SIGNED' && data.proposalId) {
-          // Invalidate formalizacao queries to refresh data
-          queryClient.invalidateQueries({ queryKey: queryKeys.propostas.formalizacao() });
-          console.log('[SSE] 🔄 Proposta atualizada em tempo real:', data.proposalId);
+        if (!token) {
+          console.warn('[SSE] ⚠️ Não foi possível obter token JWT para SSE');
+          return;
         }
+
+        // Conectar SSE com token JWT via query parameter
+        eventSource = new EventSource(`/api/events?token=${encodeURIComponent(token)}`);
+
+        eventSource.onopen = () => {
+          console.log('[SSE] 📡 ✅ Conectado ao servidor de eventos em tempo real');
+        };
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('[SSE] 📨 Evento recebido:', data);
+
+            if (data.type === 'PROPOSAL_SIGNED' && data.proposalId) {
+              // Invalidate formalizacao queries to refresh data
+              queryClient.invalidateQueries({ queryKey: queryKeys.propostas.formalizacao() });
+              console.log('[SSE] 🔄 Proposta atualizada em tempo real:', data.proposalId);
+            }
+          } catch (error) {
+            console.error('[SSE] ❌ Erro ao processar evento:', error);
+          }
+        };
+
+        eventSource.onerror = (error) => {
+          console.error('[SSE] ❌ Erro de conexão:', error);
+          // Eventualmente pode tentar reconectar aqui
+        };
+
       } catch (error) {
-        console.error('[SSE] ❌ Error parsing event data:', error);
+        console.error('[SSE] ❌ Erro ao configurar conexão SSE:', error);
       }
     };
 
-    eventSource.onerror = (error) => {
-      console.error('[SSE] ❌ Connection error:', error);
-    };
+    // Conectar SSE
+    connectSSE();
 
     return () => {
-      eventSource.close();
-      console.log('[SSE] 🔌 Connection closed');
+      if (eventSource) {
+        eventSource.close();
+        console.log('[SSE] 🔌 Conexão fechada');
+      }
     };
   }, [queryClient]);
 

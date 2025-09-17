@@ -10,17 +10,76 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { realtimeService } from '../services/realtimeService.js';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
-import { AuthenticatedRequest } from '../../shared/types/express.js';
+import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
 import { logInfo, logError } from '../lib/logger.js';
 
 const router = express.Router();
 
 /**
+ * 🔧 SSE JWT Middleware - Aceita token via query parameter ou header
+ * Necessário pois EventSource não suporta headers customizados
+ */
+async function sseJwtAuthMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+  try {
+    // Tentar extrair token do query parameter primeiro (para SSE)
+    let token = req.query.token as string;
+    
+    // Se não tem token na query, tentar header (fallback)
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
+    
+    if (!token) {
+      logError('[SSE AUTH] ❌ Token não encontrado em query param nem header', new Error('No token provided'), {
+        ip: req.ip,
+        userAgent: req.headers['user-agent']
+      });
+      
+      return res.status(401).json({ 
+        error: 'Token de acesso requerido via query parameter ou header' 
+      });
+    }
+    
+    // Criar requisição temporária com token no header para usar o middleware existente
+    const tempReq = {
+      ...req,
+      headers: {
+        ...req.headers,
+        authorization: `Bearer ${token}`
+      }
+    } as express.Request;
+    
+    // Usar o middleware JWT existente
+    jwtAuthMiddleware(tempReq, res, (error?: any) => {
+      if (error) {
+        return next(error);
+      }
+      
+      // Copiar dados do usuário autenticado
+      (req as AuthenticatedRequest).user = (tempReq as AuthenticatedRequest).user;
+      next();
+    });
+    
+  } catch (error) {
+    logError('[SSE AUTH] ❌ Erro no middleware SSE JWT', error as Error, {
+      ip: req.ip
+    });
+    
+    res.status(500).json({ 
+      error: 'Erro interno de autenticação SSE' 
+    });
+  }
+}
+
+/**
  * GET /api/events
  * Estabelece conexão SSE para atualizações em tempo real
+ * Aceita JWT via ?token=JWT_TOKEN ou header Authorization: Bearer JWT_TOKEN
  */
-router.get('/', jwtAuthMiddleware, (req: AuthenticatedRequest, res) => {
+router.get('/', sseJwtAuthMiddleware, (req: AuthenticatedRequest, res) => {
   try {
     const clientId = uuidv4();
     const userId = req.user?.id;
