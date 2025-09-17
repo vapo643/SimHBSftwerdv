@@ -1,6 +1,6 @@
 import { useRoute, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -1227,57 +1227,33 @@ export default function Formalizacao() {
     return <FormalizacaoList />;
   }
 
-  // 🚨 PRODUÇÃO IMEDIATA - CORREÇÃO FORÇADA BASEADA NOS LOGS DE BACKEND
-  const hasCCBGenerated = (proposta: Proposta): boolean => {
-    // 🚀 FORÇA DETECÇÃO: Se status é CCB_GERADA, SEMPRE é completed
-    if (proposta.status === 'CCB_GERADA') {
-      console.log('🚨 [CCB FORÇADO] Status CCB_GERADA detectado - FORÇANDO completed=true');
-      return true;
-    }
-
-    // ✅ PRIMARY INDICATOR: ccbGerado field (todos os formatos possíveis)
-    const ccbGeradoVariants = [
-      (proposta as any).ccbGerado,
-      (proposta as any).ccb_gerado,
-      (proposta as any).ccbGenerated,
-      (proposta as any).ccb_generated
-    ];
-    const ccbGeradoPrimary = ccbGeradoVariants.some(field => field === true);
-
-    // ✅ SECONDARY: Status progression
-    const statusIndicatesCCB = [
-      'CCB_GERADA',
-      'AGUARDANDO_ASSINATURA', 
-      'ASSINATURA_CONCLUIDA',
-      'BOLETOS_EMITIDOS',
-      'PAGAMENTO_PENDENTE',
-      'PAGAMENTO_PARCIAL', 
-      'PAGAMENTO_CONFIRMADO'
-    ].includes(proposta.status);
-
-    // ✅ TERTIARY: Paths/URLs
-    const hasCCBPath = !!(
-      proposta.caminhoCcbAssinado ||
-      (proposta as any).caminho_ccb ||
-      proposta.clicksignSignUrl ||
-      proposta.clicksignDocumentKey
-    );
-
-    const result = ccbGeradoPrimary || statusIndicatesCCB || hasCCBPath;
+  // 🚨 CORREÇÃO DO CICLO DE VIDA - DETECÇÃO CONECTADA AO RENDER
+  const hasCCB = useMemo(() => {
+    if (!proposta) return false;
     
-    // 🔍 LOGGING COMPLETO SEMPRE
-    console.log('🔍 [CCB DETECTION COMPLETA]', {
-      propostaId: proposta.id,
-      status: proposta.status,
-      ccbGeradoVariants,
-      ccbGeradoPrimary,
-      statusIndicatesCCB, 
-      hasCCBPath,
-      FINAL_RESULT: result
-    });
-
+    const result = Boolean(
+      (proposta as any).ccbGerado || 
+      (proposta as any).ccb_gerado ||
+      (proposta as any).caminho_ccb ||
+      proposta.caminhoCcbAssinado ||
+      proposta.clicksignSignUrl ||
+      proposta.status === 'CCB_GERADA'
+    );
+    
     return result;
-  };
+  }, [proposta?.id, proposta?.status, (proposta as any)?.ccbGerado, (proposta as any)?.ccb_gerado]);
+
+  // 🔍 LOGS DE DEBUG CONECTADOS AO LIFECYCLE
+  useEffect(() => {
+    console.log('🔍 [FORMALIZACAO] Mount/Update Detection', {
+      propostaId: proposta?.id,
+      status: proposta?.status,
+      ccbGerado: (proposta as any)?.ccbGerado,
+      ccb_gerado: (proposta as any)?.ccb_gerado,
+      hasCCB_computed: hasCCB,
+      proposta_completa: proposta
+    });
+  }, [hasCCB, proposta?.id]);
 
   const getFormalizationSteps = (proposta: Proposta) => [
     {
@@ -1294,9 +1270,9 @@ export default function Formalizacao() {
       title: 'CCB Gerada',
       description: 'Cédula de Crédito Bancário gerada automaticamente',
       icon: FileText,
-      status: hasCCBGenerated(proposta) ? 'completed' : 'current',
-      date: hasCCBGenerated(proposta) ? formatDate(proposta.createdAt) : 'Pendente',
-      completed: hasCCBGenerated(proposta),
+      status: hasCCB ? 'completed' : 'current',
+      date: hasCCB ? formatDate(proposta.createdAt) : 'Pendente',
+      completed: hasCCB,
       interactive: true,
       etapa: 'ccb_gerado' as const,
     },
