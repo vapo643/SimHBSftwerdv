@@ -488,6 +488,20 @@ export class DatabaseStorage implements IStorage {
       ccbDocumentoUrl: data.ccb_documento_url,
       analistaId: data.analista_id,
       dataAnalise: data.data_analise,
+      // CCB Fields
+      ccbGerado: data.ccb_gerado,
+      caminhoCcb: data.caminho_ccb,
+      ccbGeradoEm: data.ccb_gerado_em,
+      caminhoCcbAssinado: data.caminho_ccb_assinado,
+      assinaturaEletronicaConcluida: data.assinatura_eletronica_concluida,
+      biometriaConcluida: data.biometria_concluida,
+      // ClickSign Fields
+      clicksignDocumentKey: data.clicksign_document_key,
+      clicksignSignerKey: data.clicksign_signer_key,
+      clicksignListKey: data.clicksign_list_key,
+      clicksignStatus: data.clicksign_status,
+      clicksignSignUrl: data.clicksign_sign_url,
+      clicksignSentAt: data.clicksign_sent_at,
       // Related entities (handling Supabase responses)
       loja: data.lojas
         ? {
