@@ -3282,7 +3282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res) => {
       try {
         const lojaId = parseInt(req.params.lojaId);
-        const gerenteIds = await storage.getGerentesForLoja(lojaId.toString());
+        const gerenteIds = await storage.getGerentesForLoja(lojaId);
         res.json(gerenteIds);
       } catch (error) {
         console.error('Get gerentes for loja error:', error);
