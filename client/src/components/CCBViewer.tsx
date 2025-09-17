@@ -3,7 +3,7 @@
  * PAM V1.0 - Refatorado com dois botões distintos: CCB Original e CCB Assinada
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Download, RefreshCw, Eye, CheckCircle, Shield, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { queryKeys, invalidationPatterns } from '@/hooks/queries/queryKeys';
 
 interface CCBViewerProps {
   proposalId: string;
@@ -29,17 +30,18 @@ interface CCBStatus {
 
 export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [shouldPoll, setShouldPoll] = useState(false);
   const queryClient = useQueryClient();
   const { user } = useAuth(); // PAM V1.0: Obter informações do usuário para verificar role
 
-  // Query para buscar status do CCB - PAM V1.0: Endpoint corrigido
+  // 🔥 CORREÇÃO DA RACE CONDITION: Query com polling inteligente
   const {
     data: proposalData,
     isLoading,
     error,
   } = useQuery({
-    queryKey: [`/api/propostas/${proposalId}`],
-    refetchInterval: isGenerating ? 2000 : false, // Poll enquanto gera
+    queryKey: queryKeys.proposta.all(proposalId), // 🔧 Query keys padronizadas
+    refetchInterval: (isGenerating || shouldPoll) ? 2000 : false, // 🔄 Poll até confirmar CCB presente
     select: (data: any) => {
       console.log('🔍 [CCBViewer] Raw API data:', data);
       const result = {
@@ -52,10 +54,24 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         ccbGerado: data?.data?.ccb_gerado || data?.ccbGerado || data?.ccb_gerado
       };
       console.log('🔍 [CCBViewer] Mapped data:', result);
+      
+      // 🎯 CORREÇÃO PRINCIPAL: Parar polling apenas quando CCB fields estão presentes
+      if (shouldPoll && (result.ccbPath || result.ccbGerado)) {
+        console.log('✅ [CCBViewer] CCB detectada, parando polling automático');
+        setShouldPoll(false);
+      }
+      
       return result;
     }
   });
 
+  // 📱 AUTO-OPEN: Se CCB já existe no mount, pode abrir viewer diretamente
+  useEffect(() => {
+    if (proposalData && (proposalData.ccbPath || proposalData.ccbGerado)) {
+      console.log('🔍 [CCBViewer] CCB detectada no mount - interface pronta');
+    }
+  }, [proposalData]);
+  
   // PAM V1.0: Compatibilidade - criar ccbStatus para não quebrar código existente
   const ccbStatus = proposalData ? {
     ccbPath: proposalData.ccbPath,
@@ -67,36 +83,41 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   const caminhoCcbAssinado = proposalData?.caminhoCcbAssinado;
   const dataAssinatura = proposalData?.dataAssinatura;
 
-  // Mutation para gerar CCB - PAM V1.0: Endpoint corrigido
+  // 🔥 CORREÇÃO: Mutation com polling inteligente para prevenir race condition
   const generateCCBMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
+      setShouldPoll(true); // 🎯 Iniciar polling inteligente
       return apiRequest(`/api/propostas/${proposalId}/gerar-ccb`, {
         method: 'POST',
       });
     },
     onSuccess: () => {
       toast({
-        title: 'CCB Gerado!',
-        description: 'O documento foi gerado com sucesso.',
+        title: 'CCB em processamento...',
+        description: 'O documento está sendo gerado. Aguarde alguns momentos.',
         variant: 'default',
       });
 
-      // Invalidar queries relacionadas - PAM V1.0: Chaves corretas
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}`] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas', proposalId, 'formalizacao'] });
-
-      setIsGenerating(false);
-      onCCBGenerated?.();
-
-      // Forçar refetch após 500ms
+      // 🔧 Invalidar usando padrões padronizados
+      invalidationPatterns.onFormalizacaoChange(proposalId).forEach(queryKey => {
+        queryClient.invalidateQueries({ queryKey });
+      });
+      
+      // 🚨 CORREÇÃO PRINCIPAL: NÃO parar isGenerating imediatamente
+      // setIsGenerating(false); // ❌ REMOVIDO - causava race condition
+      
+      // Parar isGenerating após delay, mas manter shouldPoll ativo
       setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: [`/api/propostas/${proposalId}`] });
-      }, 500);
+        console.log('⏰ [CCBViewer] Parando indicador de geração, mantendo polling ativo');
+        setIsGenerating(false);
+      }, 3000); // Delay mais longo para UX melhor
+      
+      onCCBGenerated?.();
     },
     onError: (error: unknown) => {
       setIsGenerating(false);
+      setShouldPoll(false);
       const errorMessage =
         error instanceof Error ? error.message : 'Ocorreu um erro ao gerar o documento.';
       toast({
@@ -107,35 +128,36 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     },
   });
 
-  // Mutation para regenerar CCB
+  // 🔥 CORREÇÃO: Mutation de regeneração com polling inteligente
   const regenerateCCBMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
+      setShouldPoll(true); // 🎯 Iniciar polling inteligente
       return apiRequest(`/api/propostas/${proposalId}/gerar-ccb`, {
         method: 'POST',
       });
     },
     onSuccess: () => {
       toast({
-        title: 'CCB Regenerado!',
-        description: 'O documento foi regenerado com sucesso com o novo template.',
+        title: 'CCB sendo regenerado...',
+        description: 'O documento está sendo regenerado com o novo template. Aguarde.',
         variant: 'default',
       });
 
-      // Invalidar queries - PAM V1.0: Chaves corretas
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}`] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas', proposalId, 'formalizacao'] });
-
-      setIsGenerating(false);
-
-      // Forçar refetch após 500ms para garantir atualização
+      // 🔧 Invalidar usando padrões padronizados
+      invalidationPatterns.onFormalizacaoChange(proposalId).forEach(queryKey => {
+        queryClient.invalidateQueries({ queryKey });
+      });
+      
+      // 🚨 CORREÇÃO: NÃO parar isGenerating imediatamente
       setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: [`/api/propostas/${proposalId}`] });
-      }, 500);
+        console.log('⏰ [CCBViewer] Parando indicador de regeneração, mantendo polling ativo');
+        setIsGenerating(false);
+      }, 3000); // Delay para UX melhor
     },
     onError: (error: unknown) => {
       setIsGenerating(false);
+      setShouldPoll(false);
       const errorMessage =
         error instanceof Error ? error.message : 'Ocorreu um erro ao regenerar o documento.';
       toast({
