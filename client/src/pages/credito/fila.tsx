@@ -109,7 +109,7 @@ const FilaAnalise: React.FC = () => {
     data: propostasResponse,
     isLoading,
     error,
-  } = useQuery<{ success: boolean; data: Proposta[]; total: number }>({
+  } = useQuery<Proposta[]>({
     queryKey: [queryUrl],
     queryFn: async () => {
       const { api } = await import('@/lib/apiClient');
@@ -119,7 +119,8 @@ const FilaAnalise: React.FC = () => {
   });
 
   // Extract the actual proposals array from the response
-  const propostas = propostasResponse?.data || [];
+  // CORREÇÃO CRÍTICA: apiClient.get() já retorna os dados unwrapped (não precisa de .data)
+  const propostas = propostasResponse || [];
 
   // Fetch partners data
   const { data: parceiros } = useQuery<Array<{ id: number; razaoSocial: string }>>({

@@ -278,7 +278,7 @@ const Dashboard: React.FC = () => {
     error,
     isError,
     refetch,
-  } = useQuery<{ success: boolean; data: any[]; total: number }>({
+  } = useQuery<any[]>({
     queryKey: queryKeys.propostas.all,
     queryFn: async () => {
       const { api } = await import('@/lib/apiClient');
@@ -298,8 +298,9 @@ const Dashboard: React.FC = () => {
   });
 
   // UX-002: Extract propostas - cálculo baseado nos dados da query
-  const propostas = Array.isArray(propostasResponse?.data)
-    ? propostasResponse.data.map((p: any) => ({
+  // CORREÇÃO CRÍTICA: apiClient.get() já retorna os dados unwrapped (não precisa de .data)
+  const propostas = Array.isArray(propostasResponse)
+    ? propostasResponse.map((p: any) => ({
         id: p.id,
         status: p.status,
         // Use camelCase properties directly (added by dual-key transformation)
