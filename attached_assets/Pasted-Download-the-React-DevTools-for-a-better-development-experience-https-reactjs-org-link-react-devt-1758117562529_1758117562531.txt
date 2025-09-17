@@ -1,0 +1,71 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+AuthContext.tsx:190 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:101 🔐 [AUTH START] Iniciando fetchUserProfile
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:240 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+formalizacao.tsx:296 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:217 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+formalizacao.tsx:225 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:217 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+formalizacao.tsx:296 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+AuthContext.tsx:97 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+formalizacao.tsx:296 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+AuthContext.tsx:190 🔐 [AUTH EVENT] INITIAL_SESSION Object
+formalizacao.tsx:296 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+apiClient.ts:262 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-17T14:19:19.000Z
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+/api/events:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+formalizacao.tsx:185 [SSE] ❌ Connection error: Event
+eventSource.onerror @ formalizacao.tsx:185Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+formalizacao.tsx:227 Resposta do endpoint formalizacao: Array(4)
+formalizacao.tsx:231 🔧 [MAPPER] Antes: Object
+formalizacao.tsx:233 ✅ [MAPPER] Depois: Object
+formalizacao.tsx:231 🔧 [MAPPER] Antes: Object
+formalizacao.tsx:233 ✅ [MAPPER] Depois: Object
+formalizacao.tsx:231 🔧 [MAPPER] Antes: Object
+formalizacao.tsx:233 ✅ [MAPPER] Depois: Object
+formalizacao.tsx:231 🔧 [MAPPER] Antes: Object
+formalizacao.tsx:233 ✅ [MAPPER] Depois: Object
+formalizacao.tsx:237 ✅ [MAPPER] Propostas normalizadas: Array(4)
+formalizacao.tsx:296 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+AuthContext.tsx:118 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:138 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+formalizacao.tsx:296 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:190 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:101 🔐 [AUTH START] Iniciando fetchUserProfile
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:296 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+formalizacao.tsx:390 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+AuthContext.tsx:118 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:138 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock

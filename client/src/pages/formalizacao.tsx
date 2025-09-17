@@ -544,6 +544,14 @@ export default function Formalizacao() {
   });
 
   const propostaId = params?.id;
+  
+  // 🚨 DEBUG CRÍTICO - ROTEAMENTO
+  console.log('🔍 [FORMALIZACAO DEBUG] Route parsing', {
+    params,
+    propostaId,
+    window_location: window.location.href,
+    window_pathname: window.location.pathname
+  });
 
   // Função para verificar automaticamente status do carnê
   const checkCarneStatus = async () => {
