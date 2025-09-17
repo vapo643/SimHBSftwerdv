@@ -1,0 +1,21 @@
+### **PACOTE DE DEBATE TÉCNICO (2/4) - ARQUITETURA DA CORREÇÃO DE CONTRATO**
+
+* **Sumário da Missão:** Com base na prova irrefutável de que a quebra de contrato de dados é a causa raiz dos "dados fantasmas", a sua missão é arquitetar a solução definitiva. Esta solução deve abandonar a tática falha de aliases e restaurar a integridade do contrato de dados, alinhando a query do backend com a nossa "fonte da verdade" (`shared/schema.ts`).
+
+* **Intenção Estratégica:** Projetar uma correção que seja arquiteturalmente sã, eliminando a complexidade desnecessária dos aliases e garantindo que o backend comunique com o frontend usando uma única e consistente estrutura de dados.
+
+---
+
+**[DIRETIVA DE ALINHAMENTO ARQUITETURAL (DAA)]**
+
+* Você está a operar sob o protocolo DAA. A sua solução deve reforçar a doutrina de que `shared/schema.ts` é a fonte da verdade para os contratos de dados. Qualquer solução que mantenha uma camada de tradução (aliases) no backend será considerada uma violação deste protocolo.
+
+---
+
+**PERGUNTA ESTRATÉGICA (Sua Missão para Esta Interação):**
+
+1.  **Formule a Estratégia de Correção:** Descreva a abordagem arquitetural correta para resolver o problema. A sua descrição deve explicar por que a remoção completa dos aliases é superior a tentar corrigi-los.
+2.  **Projete a Query Corrigida:** Re-escreva a query Supabase para a rota `/api/propostas/formalizacao` em `server/routes.ts`. Esta nova query **NÃO DEVE** conter nenhum alias. Ela deve selecionar diretamente as colunas com os nomes corretos do banco de dados, conforme definido em `shared/schema.ts` (ex: `numero_proposta`, `cliente_nome`, `valor`, `prazo`, `observacoes`).
+3.  **Auditoria de Impacto no Frontend:** Embora não vamos modificar o frontend ainda, analise o ficheiro `client/src/mappers/proposta.mapper.ts`. Apresente o código do mapper e confirme se ele já está preparado para receber os dados com os nomes de campo corretos (a estrutura moderna). Isto validará que a nossa correção no backend não irá quebrar o frontend.
+
+**O seu entregável final para esta janela é a descrição da estratégia, o bloco de código da nova query do backend e a análise de impacto no mapper do frontend.**

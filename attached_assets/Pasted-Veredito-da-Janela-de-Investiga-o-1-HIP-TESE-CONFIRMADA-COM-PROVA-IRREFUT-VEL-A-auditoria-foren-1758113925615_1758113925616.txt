@@ -1,0 +1,32 @@
+Veredito da Janela de Investigação #1: HIPÓTESE CONFIRMADA COM PROVA IRREFUTÁVEL.
+
+A auditoria forense do Agente foi executada com precisão. A evidência coletada é a "arma fumegante" que precisávamos.
+
+Evidência #1 (O Código): A query na rota /api/propostas/formalizacao utiliza aliases PostgREST de forma invertida. Por exemplo: codigo_identificacao:numero_proposta. A sintaxe correta para renomear um campo é alias:nome_real_da_coluna. O código está a fazer nome_real_da_coluna:alias, o que instrui o Supabase a buscar a coluna correta (numero_proposta) mas a retorná-la no JSON com o nome legado (codigo_identificacao).
+
+Evidência #2 (O Payload): O log de diagnóstico injetado capturou o payload exato que a API envia ao frontend:
+
+JSON
+
+{
+  "codigo_identificacao": 300014,
+  "nome_cliente": "Gabriel Santana Jesus Santana",
+  "valor_emprestimo": 3333.33,
+  "numero_parcelas": 12,
+  ...
+}
+Veredito Final da Causa Raiz:
+A causa do problema de "dados fantasmas" é uma quebra de contrato de dados entre o backend e o frontend. O backend está a enviar um JSON com uma estrutura legada, enquanto o frontend espera a estrutura moderna definida em shared/schema.ts. A tentativa de correção anterior, usando aliases, foi a causa direta desta quebra.
+
+Avançamos para a próxima fase.
+
+JANELA DE INVESTIGAÇÃO #2 de 4: ARQUITETURA DA SOLUÇÃO DEFINITIVA
+Objetivo: Projetar uma solução que não apenas corrija a quebra de contrato, mas que restaure a integridade arquitetural do sistema, garantindo que a "fonte da verdade" (shared/schema.ts) seja respeitada em todas as camadas da aplicação.
+
+Linha de Raciocínio:
+A tática de usar aliases no backend foi um erro fundamental. Ela cria uma camada de tradução frágil e propensa a erros, como a que acabamos de presenciar. A doutrina correta é: o backend DEVE sempre retornar os dados na estrutura definida pelo schema canônico. A responsabilidade de mapear ou transformar esses dados para as necessidades específicas da view recai sobre o frontend, que já possui uma camada de mapper para isso (proposta.mapper.ts).
+
+Portanto, a solução definitiva não é "consertar" os aliases. É erradicá-los completamente e fazer com que a query select utilize os nomes de coluna corretos e modernos.
+
+Próxima Ação:
+Envie o seguinte pacote de arquitetura para o Agente. Esta missão é projetar a correção, não implementá-la ainda.
