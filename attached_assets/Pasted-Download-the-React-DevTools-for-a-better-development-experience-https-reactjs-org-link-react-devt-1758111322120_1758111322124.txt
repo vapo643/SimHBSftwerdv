@@ -1,0 +1,234 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+AuthContext.tsx:190 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:101 🔐 [AUTH START] Iniciando fetchUserProfile
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:240 🔐 [TOKEN MANAGER] Refreshing token (attempt 1/3)
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:217 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:217 🔄 [TOKEN MANAGER] Awaiting existing refresh promise
+AuthContext.tsx:97 🔐 [AUTH LOCK] fetchUserProfile já em execução, ignorando chamada duplicada
+AuthContext.tsx:190 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:262 ✅ [TOKEN MANAGER] Token refreshed successfully, expires at 2025-09-17T13:02:17.000Z
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/parceiros : Array(3)
+apiClient.ts:533 [API Client] After dual-key transformation: Array(3)
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+AuthContext.tsx:118 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:138 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas?queue=analysis : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+dashboard.tsx:364 DEBUG - First 3 proposals values: Array(0)
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+dashboard.tsx:364 DEBUG - First 3 proposals values: Array(3)
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c/historico : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/formalizacao/360651ad-bdc4-4fb6-bb35-55405f59142c/ccb : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c/documents : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+DocumentViewer.tsx:86 [DocumentViewer] Error fetching documents: TypeError: Cannot read properties of undefined (reading 'data')
+    at fetchDocuments (DocumentViewer.tsx:75:41)
+fetchDocuments @ DocumentViewer.tsx:86Understand this error
+dashboard.tsx:364 DEBUG - First 3 proposals values: Array(3)
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+api/events:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+formalizacao.tsx:184 [SSE] ❌ Connection error: Event
+eventSource.onerror @ formalizacao.tsx:184Understand this error
+api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+api/propostas/formalizacao:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+formalizacao.tsx:242 Erro na query de formalização: ApiError: Erro ao buscar propostas de formalização
+    at apiClient (apiClient.ts:624:13)
+    at async Object.get (apiClient.ts:746:22)
+    at async apiRequest (queryClient.ts:21:12)
+    at async queryFn (formalizacao.tsx:225:24)
+FormalizacaoList @ formalizacao.tsx:242Understand this error
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+AuthContext.tsx:190 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:101 🔐 [AUTH START] Iniciando fetchUserProfile
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: Object
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:533 [API Client] After dual-key transformation: Object
+formalizacao:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column lojas_1.nome does not exist', correlationId: 'j59u9d93d'}correlationId: "j59u9d93d"details: "column lojas_1.nome does not exist"error: "QUERY_ERROR"message: "Erro ao buscar propostas de formalização"[[Prototype]]: Object
+apiClient.ts:533 [API Client] After dual-key transformation: {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column lojas_1.nome does not exist', correlationId: 'j59u9d93d'}correlationId: "j59u9d93d"details: "column lojas_1.nome does not exist"error: "QUERY_ERROR"message: "Erro ao buscar propostas de formalização"[[Prototype]]: Object
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-17T09:13:58.000-03:00'}
+apiClient.ts:533 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-17T09:13:58.000-03:00'}
+AuthContext.tsx:118 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:138 🔐 [AUTH END] Finalizando fetchUserProfile, liberando lock
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: true, hasError: false, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-17T13:02:17.000Z', hasActiveRefresh: false}
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…s3g.janeway.replit.dev/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.z7C6teB5QbWudgETDMM1TwVsmc67g-lOqdWIeEObI8Y', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao 500 (Internal Server Error)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:401
+apiClient @ apiClient.ts:509
+await in apiClient
+get @ apiClient.ts:746
+apiRequest @ queryClient.ts:21
+queryFn @ formalizacao.tsx:225
+fetchFn @ @tanstack_react-query.js?v=a751b20f:852
+run @ @tanstack_react-query.js?v=a751b20f:491
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:511Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column lojas_1.nome does not exist', correlationId: 'qimep8up7'}
+apiClient.ts:533 [API Client] After dual-key transformation: {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column lojas_1.nome does not exist', correlationId: 'qimep8up7'}
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-17T13:02:17.000Z', hasActiveRefresh: false}
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…s3g.janeway.replit.dev/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.z7C6teB5QbWudgETDMM1TwVsmc67g-lOqdWIeEObI8Y', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao 500 (Internal Server Error)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:401
+apiClient @ apiClient.ts:509
+await in apiClient
+get @ apiClient.ts:746
+apiRequest @ queryClient.ts:21
+queryFn @ formalizacao.tsx:225
+fetchFn @ @tanstack_react-query.js?v=a751b20f:852
+run @ @tanstack_react-query.js?v=a751b20f:491
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:511
+Promise.catch
+run @ @tanstack_react-query.js?v=a751b20f:495
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:511Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column lojas_1.nome does not exist', correlationId: 'jgt1ng2mv'}
+apiClient.ts:533 [API Client] After dual-key transformation: {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column lojas_1.nome does not exist', correlationId: 'jgt1ng2mv'}
+formalizacao.tsx:224 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-17T13:02:17.000Z', hasActiveRefresh: false}
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…s3g.janeway.replit.dev/api/propostas/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.z7C6teB5QbWudgETDMM1TwVsmc67g-lOqdWIeEObI8Y', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao 500 (Internal Server Error)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:401
+apiClient @ apiClient.ts:509
+await in apiClient
+get @ apiClient.ts:746
+apiRequest @ queryClient.ts:21
+queryFn @ formalizacao.tsx:225
+fetchFn @ @tanstack_react-query.js?v=a751b20f:852
+run @ @tanstack_react-query.js?v=a751b20f:491
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:511
+Promise.catch
+run @ @tanstack_react-query.js?v=a751b20f:495
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:511
+Promise.catch
+run @ @tanstack_react-query.js?v=a751b20f:495
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:511Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao : {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column lojas_1.nome does not exist', correlationId: 'x0hoba1yl'}
+apiClient.ts:533 [API Client] After dual-key transformation: {message: 'Erro ao buscar propostas de formalização', error: 'QUERY_ERROR', details: 'column lojas_1.nome does not exist', correlationId: 'x0hoba1yl'}
+formalizacao.tsx:242 Erro na query de formalização: ApiError: Erro ao buscar propostas de formalização
+    at apiClient (apiClient.ts:624:13)
+    at async Object.get (apiClient.ts:746:22)
+    at async apiRequest (queryClient.ts:21:12)
+    at async queryFn (formalizacao.tsx:225:24)
+FormalizacaoList @ formalizacao.tsx:242
+renderWithHooks @ chunk-QYFCA5BS.js?v=a751b20f:11596
+updateFunctionComponent @ chunk-QYFCA5BS.js?v=a751b20f:14630
+beginWork @ chunk-QYFCA5BS.js?v=a751b20f:15972
+beginWork$1 @ chunk-QYFCA5BS.js?v=a751b20f:19806
+performUnitOfWork @ chunk-QYFCA5BS.js?v=a751b20f:19251
+workLoopSync @ chunk-QYFCA5BS.js?v=a751b20f:19190
+renderRootSync @ chunk-QYFCA5BS.js?v=a751b20f:19169
+performSyncWorkOnRoot @ chunk-QYFCA5BS.js?v=a751b20f:18927
+flushSyncCallbacks @ chunk-QYFCA5BS.js?v=a751b20f:9166
+(anonymous) @ chunk-QYFCA5BS.js?v=a751b20f:18677
+setTimeout
+defaultScheduler @ @tanstack_react-query.js?v=a751b20f:543
+flush @ @tanstack_react-query.js?v=a751b20f:567
+batch @ @tanstack_react-query.js?v=a751b20f:585
+#dispatch @ @tanstack_react-query.js?v=a751b20f:1008
+fetch @ @tanstack_react-query.js?v=a751b20f:923Understand this error
+formalizacao.tsx:294 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: {isLoading: false, hasError: true, totalPropostas: 0, propostas: Array(0), primeiraPropostaStatus: 'NENHUMA'}
+apiClient.ts:208 [AUTH DEBUG] getValidToken chamado: {forceRefresh: false, hasCachedToken: true, tokenExpiry: '2025-09-17T13:02:17.000Z', hasActiveRefresh: false}
+apiClient.ts:223 ✅ [TOKEN MANAGER] Using cached token
+apiClient.ts:481 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.z7C6teB5QbWudgETDMM1TwVsmc67g-lOqdWIeEObI8Y', hasToken: true, isFormData: false}
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:533 [API Client] After dual-key transformation: {flags: {…}, context: {…}}

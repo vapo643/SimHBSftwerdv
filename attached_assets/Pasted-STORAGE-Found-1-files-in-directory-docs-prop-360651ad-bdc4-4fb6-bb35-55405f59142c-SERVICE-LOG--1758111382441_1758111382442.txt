@@ -1,0 +1,569 @@
+STORAGE] Found 1 files in directory 'docs-prop/360651ad-bdc4-4fb6-bb35-55405f59142c'
+[SERVICE LOG] Resultado bruto da operação .listFiles(): [
+  '1757959476275-Simpix Fintech Landing Page - Google Chrome 14_07_2025 14_57_35.png'
+]
+[SERVICE LOG] Número de ficheiros encontrados no STORAGE: 1
+[SERVICE LOG] Arquivos encontrados no storage: [
+  '1757959476275-Simpix Fintech Landing Page - Google Chrome 14_07_2025 14_57_35.png'
+]
+--- FIM DO DIAGNÓSTICO DE SERVIÇO ---
+[DOCUMENTS_SERVICE] Generating signed URL for: docs-prop/360651ad-bdc4-4fb6-bb35-55405f59142c/1757959476275-Simpix Fintech Landing Page - Google Chrome 14_07_2025 14_57_35.png
+[DOCUMENTS_REPO] Generating signed URL for 'docs-prop/360651ad-bdc4-4fb6-bb35-55405f59142c/1757959476275-Simpix Fintech Landing Page - Google Chrome 14_07_2025 14_57_35.png' using storage abstraction
+[STORAGE] Generating signed URL for 'docs-prop/360651ad-bdc4-4fb6-bb35-55405f59142c/1757959476275-Simpix Fintech Landing Page - Google Chrome 14_07_2025 14_57_35.png' in bucket 'documents' (expires in 604800s)
+[STORAGE] Signed URL generated successfully
+[DOCUMENTS_REPO] Signed URL generated successfully
+2025-09-17 12:11:52 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"61bdd247-bb81-4eb6-a26a-b199406fb0fc","method":"GET","url":"/api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c/documents","statusCode":200,"duration":2605,"responseSize":939}
+2025-09-17 12:11:52 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"61bdd247-bb81-4eb6-a26a-b199406fb0fc","url":"/api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c/documents","duration":2605,"threshold":1000}
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c/documents {
+  correlationId: 'perf-1758111109808-4rqn7nix4',
+  duration: 2602,
+  memoryDeltaMB: 4,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/360651ad-bdc4-4fb6-bb35-55405f59142c/documents {
+  correlationId: 'perf-1758111109808-r29ovtchy',
+  duration: 2602,
+  memoryDeltaMB: 4,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+2025-09-17 12:12:12 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"83cc6519-5acc-4476-b41f-44a08d131e0d","method":"GET","url":"/api/propostas/formalizacao","path":"/api/propostas/formalizacao","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Original URL: /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+2025-09-17 12:12:12 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"72ed4428-d328-485c-80ab-05c62b9e37e5","method":"GET","url":"/api/events","path":"/api/events","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: false
+[JWT DEBUG] Header começa com Bearer: undefined
+[CIRCUIT BREAKER] ⚠️ IP 187.36.168.240 falha 1/999999999
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/events
+2025-09-17 12:12:12 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"72ed4428-d328-485c-80ab-05c62b9e37e5","method":"GET","url":"/","statusCode":401,"duration":11,"responseSize":45}
+2025-09-17 12:12:12 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"72ed4428-d328-485c-80ab-05c62b9e37e5","method":"GET","url":"/","statusCode":401,"duration":11,"error":"{\"message\":\"Token de acesso requerido\"}"}
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758114137,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T12:12:13.160Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+🎯 [FORMALIZATION_EXEC] Handler executing with correlation: srx6kw5qu
+🔧 [FORMALIZATION_EXEC] Loading Supabase module...
+✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...
+📡 [FORMALIZATION_EXEC] Executing Supabase query...
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column lojas_1.nome does not exist'
+}
+2025-09-17 12:12:14 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"83cc6519-5acc-4476-b41f-44a08d131e0d","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1407,"responseSize":171}
+2025-09-17 12:12:14 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"83cc6519-5acc-4476-b41f-44a08d131e0d","url":"/api/propostas/formalizacao","duration":1407,"threshold":1000}
+2025-09-17 12:12:14 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"83cc6519-5acc-4476-b41f-44a08d131e0d","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1407,"error":"{\"message\":\"Erro ao buscar propostas de formalização\",\"error\":\"QUERY_ERROR\",\"details\":\"column lojas_1.nome does not exist\",\"correlationId\":\"srx6kw5qu\"}"}
+2025-09-17 12:12:15 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"9aad8628-4095-4cbe-a559-0ab0c4d1cfb2","method":"GET","url":"/api/propostas/formalizacao","path":"/api/propostas/formalizacao","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Original URL: /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758114137,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T12:12:15.970Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+🎯 [FORMALIZATION_EXEC] Handler executing with correlation: ms2ak34lx
+🔧 [FORMALIZATION_EXEC] Loading Supabase module...
+✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...
+📡 [FORMALIZATION_EXEC] Executing Supabase query...
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column lojas_1.nome does not exist'
+}
+2025-09-17 12:12:16 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"9aad8628-4095-4cbe-a559-0ab0c4d1cfb2","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1340,"responseSize":171}
+2025-09-17 12:12:16 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"9aad8628-4095-4cbe-a559-0ab0c4d1cfb2","url":"/api/propostas/formalizacao","duration":1340,"threshold":1000}
+2025-09-17 12:12:16 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"9aad8628-4095-4cbe-a559-0ab0c4d1cfb2","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1340,"error":"{\"message\":\"Erro ao buscar propostas de formalização\",\"error\":\"QUERY_ERROR\",\"details\":\"column lojas_1.nome does not exist\",\"correlationId\":\"ms2ak34lx\"}"}
+2025-09-17 12:12:19 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"09a23b55-2985-4fbd-a1e0-761610cbbb79","method":"GET","url":"/api/propostas/formalizacao","path":"/api/propostas/formalizacao","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Original URL: /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758114137,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T12:12:20.082Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+🎯 [FORMALIZATION_EXEC] Handler executing with correlation: kqxr3gjzm
+🔧 [FORMALIZATION_EXEC] Loading Supabase module...
+✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...
+📡 [FORMALIZATION_EXEC] Executing Supabase query...
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column lojas_1.nome does not exist'
+}
+2025-09-17 12:12:21 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"09a23b55-2985-4fbd-a1e0-761610cbbb79","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1353,"responseSize":171}
+2025-09-17 12:12:21 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"09a23b55-2985-4fbd-a1e0-761610cbbb79","url":"/api/propostas/formalizacao","duration":1353,"threshold":1000}
+2025-09-17 12:12:21 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"09a23b55-2985-4fbd-a1e0-761610cbbb79","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1353,"error":"{\"message\":\"Erro ao buscar propostas de formalização\",\"error\":\"QUERY_ERROR\",\"details\":\"column lojas_1.nome does not exist\",\"correlationId\":\"kqxr3gjzm\"}"}
+2025-09-17 12:12:26 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f9af9b80-c4fe-4e0b-a3b2-be839ce141db","method":"GET","url":"/api/propostas/formalizacao","path":"/api/propostas/formalizacao","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Original URL: /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758114137,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T12:12:27.186Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+🎯 [FORMALIZATION_EXEC] Handler executing with correlation: zt6xo281o
+🔧 [FORMALIZATION_EXEC] Loading Supabase module...
+✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...
+📡 [FORMALIZATION_EXEC] Executing Supabase query...
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column lojas_1.nome does not exist'
+}
+2025-09-17 12:12:28 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f9af9b80-c4fe-4e0b-a3b2-be839ce141db","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1464,"responseSize":171}
+2025-09-17 12:12:28 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f9af9b80-c4fe-4e0b-a3b2-be839ce141db","url":"/api/propostas/formalizacao","duration":1464,"threshold":1000}
+2025-09-17 12:12:28 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f9af9b80-c4fe-4e0b-a3b2-be839ce141db","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1464,"error":"{\"message\":\"Erro ao buscar propostas de formalização\",\"error\":\"QUERY_ERROR\",\"details\":\"column lojas_1.nome does not exist\",\"correlationId\":\"zt6xo281o\"}"}
+2025-09-17 12:12:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f4d25137-74ae-47e3-9374-9bff306d0c9a","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-17 12:12:35 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f4d25137-74ae-47e3-9374-9bff306d0c9a","method":"GET","url":"/api/features","statusCode":200,"duration":3,"responseSize":262}
+2025-09-17 12:12:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2ad0247e-c347-4076-be33-4d04a43f174e","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-17 12:12:35 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2ad0247e-c347-4076-be33-4d04a43f174e","method":"GET","url":"/api/features","statusCode":200,"duration":1,"responseSize":262}
+2025-09-17 12:13:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"71441f24-1f01-4fe8-8713-339014455f90","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-17 12:13:36 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"71441f24-1f01-4fe8-8713-339014455f90","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+2025-09-17 12:13:56 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"703b5c7b-14ec-49e9-b084-64f6a7ecf1ec","method":"GET","url":"/api/propostas/formalizacao","path":"/api/propostas/formalizacao","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Original URL: /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+2025-09-17 12:13:56 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"5c398826-0130-4e3c-a4f3-26fa517ae6c1","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+2025-09-17 12:13:56 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1fd588db-5045-4c65-89b4-f80be278de79","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-17 12:13:56 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1fd588db-5045-4c65-89b4-f80be278de79","method":"GET","url":"/api/features","statusCode":200,"duration":3,"responseSize":262}
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758114137,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T12:13:56.623Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758114137,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T12:13:56.633Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+🎯 [FORMALIZATION_EXEC] Handler executing with correlation: j59u9d93d
+🔧 [FORMALIZATION_EXEC] Loading Supabase module...
+✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...
+📡 [FORMALIZATION_EXEC] Executing Supabase query...
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column lojas_1.nome does not exist'
+}
+2025-09-17 12:13:58 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"703b5c7b-14ec-49e9-b084-64f6a7ecf1ec","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":2246,"responseSize":171}
+2025-09-17 12:13:58 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"703b5c7b-14ec-49e9-b084-64f6a7ecf1ec","url":"/api/propostas/formalizacao","duration":2246,"threshold":1000}
+2025-09-17 12:13:58 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"703b5c7b-14ec-49e9-b084-64f6a7ecf1ec","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":2246,"error":"{\"message\":\"Erro ao buscar propostas de formalização\",\"error\":\"QUERY_ERROR\",\"details\":\"column lojas_1.nome does not exist\",\"correlationId\":\"j59u9d93d\"}"}
+2025-09-17 12:13:58 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"5c398826-0130-4e3c-a4f3-26fa517ae6c1","method":"GET","url":"/api/debug/me","statusCode":200,"duration":2615,"responseSize":314}
+2025-09-17 12:13:58 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"5c398826-0130-4e3c-a4f3-26fa517ae6c1","url":"/api/debug/me","duration":2615,"threshold":1000}
+[PERFORMANCE] ⚠️  SLOW GET /api/debug/me {
+  correlationId: 'perf-1758111236251-xjgw1k565',
+  duration: 2614,
+  memoryDeltaMB: 0,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/debug/me {
+  correlationId: 'perf-1758111236251-1ia9s58mc',
+  duration: 2615,
+  memoryDeltaMB: 0,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+2025-09-17 12:14:00 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"07e80f71-ebda-4484-8408-3c7735a8e8eb","method":"GET","url":"/api/propostas/formalizacao","path":"/api/propostas/formalizacao","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Original URL: /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758114137,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T12:14:00.700Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+🎯 [FORMALIZATION_EXEC] Handler executing with correlation: qimep8up7
+🔧 [FORMALIZATION_EXEC] Loading Supabase module...
+✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...
+📡 [FORMALIZATION_EXEC] Executing Supabase query...
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column lojas_1.nome does not exist'
+}
+2025-09-17 12:14:01 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"07e80f71-ebda-4484-8408-3c7735a8e8eb","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1083,"responseSize":171}
+2025-09-17 12:14:01 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"07e80f71-ebda-4484-8408-3c7735a8e8eb","url":"/api/propostas/formalizacao","duration":1083,"threshold":1000}
+2025-09-17 12:14:01 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"07e80f71-ebda-4484-8408-3c7735a8e8eb","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1083,"error":"{\"message\":\"Erro ao buscar propostas de formalização\",\"error\":\"QUERY_ERROR\",\"details\":\"column lojas_1.nome does not exist\",\"correlationId\":\"qimep8up7\"}"}
+2025-09-17 12:14:04 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4d6ff779-f8a4-4c45-87c3-569e9fb0ba9a","method":"GET","url":"/api/propostas/formalizacao","path":"/api/propostas/formalizacao","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Original URL: /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758114137,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T12:14:04.818Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+🎯 [FORMALIZATION_EXEC] Handler executing with correlation: jgt1ng2mv
+🔧 [FORMALIZATION_EXEC] Loading Supabase module...
+✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...
+📡 [FORMALIZATION_EXEC] Executing Supabase query...
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column lojas_1.nome does not exist'
+}
+2025-09-17 12:14:05 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4d6ff779-f8a4-4c45-87c3-569e9fb0ba9a","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1080,"responseSize":171}
+2025-09-17 12:14:05 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4d6ff779-f8a4-4c45-87c3-569e9fb0ba9a","url":"/api/propostas/formalizacao","duration":1080,"threshold":1000}
+2025-09-17 12:14:05 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4d6ff779-f8a4-4c45-87c3-569e9fb0ba9a","method":"GET","url":"/api/propostas/formalizacao","statusCode":500,"duration":1080,"error":"{\"message\":\"Erro ao buscar propostas de formalização\",\"error\":\"QUERY_ERROR\",\"details\":\"column lojas_1.nome does not exist\",\"correlationId\":\"jgt1ng2mv\"}"}
+2025-09-17 12:14:09 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1da3f3ea-cba9-485b-9264-5e5efbda9a46","method":"GET","url":"/api/propostas/formalizacao","path":"/api/propostas/formalizacao","query":{},"ip":"172.31.118.226","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao"}
+✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Original URL: /api/propostas/formalizacao
+✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=999999999, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] FORCE LOCAL JWT - Supabase DISABLED for this environment
+[JWT DEBUG] Using local JWT validation
+[CONFIG] ✅ Segredo JWT carregado com sucesso (Length: 88)
+[PHOENIX DEBUG] JWT_SECRET length: 88
+[PHOENIX DEBUG] Token first 50 chars: eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3...
+[PHOENIX DEBUG] Token claims (unverified): {
+  iss: 'https://dvglgxrvhmtsixaabxha.supabase.co/auth/v1',
+  aud: 'authenticated',
+  exp: 1758114137,
+  sub: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  algorithm: 'not specified'
+}
+[PHOENIX DEBUG] 🚨 FRONTEND PROJECT ID: dvglgxrvhmtsixaabxha
+[PHOENIX DEBUG] 🚨 VERIFIQUE SE O SUPABASE_JWT_SECRET É DESTE PROJETO!
+[PHOENIX DEBUG] ✅ JWT verification SUCCESS: {
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  email: 'ramon.barbosa@eellevepromotora.com.br',
+  role: 'authenticated'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '2c3feed3-6b45-4a47-8031-96cdab09fbe9',
+  timestamp: '2025-09-17T12:14:10.116Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["2c3feed3-6b45-4a47-8031-96cdab09fbe9", 1]
+🎯 [FORMALIZATION_EXEC] Handler executing with correlation: x0hoba1yl
+🔧 [FORMALIZATION_EXEC] Loading Supabase module...
+✅ [FORMALIZATION_EXEC] Supabase client created, querying proposals...
+📡 [FORMALIZATION_EXEC] Executing Supabase query...
+❌ [FORMALIZATION_EXEC] Supabase query error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column lojas_1.nome does not exist'
+}
