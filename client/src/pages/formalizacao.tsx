@@ -2868,54 +2868,11 @@ export default function Formalizacao() {
                                     </div>
 
                                     <Button
-                                      onClick={async () => {
-                                        setLoadingClickSign(true);
-                                        try {
-                                          console.log(
-                                            '🚀 [CLICKSIGN] Enviando CCB com biometria:',
-                                            useBiometricAuth
-                                          );
-                                          const response = (await apiRequest(
-                                            `/api/propostas/${proposta.id}/clicksign/enviar`,
-                                            {
-                                              method: 'POST',
-                                              body: JSON.stringify({
-                                                useBiometricAuth: useBiometricAuth,
-                                              }),
-                                            }
-                                          )) as ClickSignData;
-
-                                          console.log(
-                                            '✅ [CLICKSIGN] Resposta com biometria:',
-                                            response
-                                          );
-                                          setClickSignData(response);
-
-                                          toast({
-                                            title: 'Sucesso',
-                                            description:
-                                              'Contrato enviado para ClickSign com sucesso!',
-                                          });
-                                        } catch (error: any) {
-                                          console.error(
-                                            '❌ [CLICKSIGN] Erro no envio com biometria:',
-                                            error
-                                          );
-                                          toast({
-                                            title: 'Erro',
-                                            description:
-                                              error.response?.data?.message ||
-                                              'Erro ao enviar para ClickSign',
-                                            variant: 'destructive',
-                                          });
-                                        } finally {
-                                          setLoadingClickSign(false);
-                                        }
-                                      }}
-                                      disabled={loadingClickSign}
+                                      onClick={() => enviarClickSignMutation.mutate()}
+                                      disabled={enviarClickSignMutation.isPending}
                                       className="w-full bg-blue-600 hover:bg-blue-700"
                                     >
-                                      {loadingClickSign ? (
+                                      {enviarClickSignMutation.isPending ? (
                                         <div className="flex items-center">
                                           <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                                           Enviando para ClickSign...
