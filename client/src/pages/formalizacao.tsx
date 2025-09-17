@@ -1253,21 +1253,67 @@ export default function Formalizacao() {
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
-  // 🚨 CORREÇÃO DO CICLO DE VIDA - TODOS OS HOOKS ANTES DE QUALQUER RETURN
+  // ✅ PAM V1.0: ENHANCED CCB DETECTION LOGIC - TODOS OS HOOKS ANTES DE QUALQUER RETURN
   const hasCCB = useMemo(() => {
     if (!proposta) return false;
     
+    // ✅ CRITICAL FIX: Comprehensive CCB detection using all mapped fields
     const result = Boolean(
+      // Primary CCB flags
       (proposta as any).ccbGerado || 
       (proposta as any).ccb_gerado ||
+      
+      // CCB file paths (most reliable indicator)
       (proposta as any).caminho_ccb ||
+      (proposta as any).caminhoCcb ||
       proposta.caminhoCcbAssinado ||
+      (proposta as any).caminho_ccb_assinado ||
+      
+      // Status-based detection
+      proposta.status === 'CCB_GERADA' ||
+      proposta.status === 'AGUARDANDO_ASSINATURA' ||
+      proposta.status === 'ASSINATURA_CONCLUIDA' ||
+      proposta.status === 'BOLETOS_EMITIDOS' ||
+      
+      // ClickSign integration (indicates CCB was sent)
       proposta.clicksignSignUrl ||
-      proposta.status === 'CCB_GERADA'
+      (proposta as any).clicksign_sign_url ||
+      (proposta as any).clicksignDocumentKey ||
+      
+      // Contract generation flags
+      proposta.contratoGerado ||
+      (proposta as any).contrato_gerado ||
+      
+      // Timestamp indicators
+      (proposta as any).ccb_gerado_em ||
+      (proposta as any).ccbGeradoEm
     );
     
+    console.log('🔍 [hasCCB] Enhanced CCB Detection Results:', {
+      propostaId: proposta?.id,
+      status: proposta?.status,
+      ccbGerado: (proposta as any)?.ccbGerado,
+      ccb_gerado: (proposta as any)?.ccb_gerado,
+      caminho_ccb: (proposta as any)?.caminho_ccb,
+      caminhoCcb: (proposta as any)?.caminhoCcb,
+      caminhoCcbAssinado: proposta?.caminhoCcbAssinado,
+      clicksignSignUrl: proposta?.clicksignSignUrl,
+      contratoGerado: proposta?.contratoGerado,
+      result: result
+    });
+    
     return result;
-  }, [proposta?.id, proposta?.status, (proposta as any)?.ccbGerado, (proposta as any)?.ccb_gerado]);
+  }, [
+    proposta?.id, 
+    proposta?.status, 
+    (proposta as any)?.ccbGerado, 
+    (proposta as any)?.ccb_gerado,
+    (proposta as any)?.caminho_ccb,
+    (proposta as any)?.caminhoCcb,
+    proposta?.caminhoCcbAssinado,
+    proposta?.clicksignSignUrl,
+    proposta?.contratoGerado
+  ]);
 
   // 🔍 LOGS DE DEBUG CONECTADOS AO LIFECYCLE
   useEffect(() => {

@@ -316,7 +316,49 @@ export class PropostaMapper {
       } : undefined,
       
       // Preserve existing JSONB fields if present
-      condicoes_data: row.condicoes_data || {}
+      condicoes_data: row.condicoes_data || {},
+
+      // ✅ PAM V1.0: CRITICAL CCB FIELDS FOR TIMELINE DETECTION
+      // Map all possible CCB field variants for proper timeline detection
+      ccb_gerado: row.ccb_gerado || false,
+      ccbGerado: row.ccb_gerado || row.ccbGerado || false,
+      caminho_ccb: row.caminho_ccb || row.caminhoCcb || null,
+      caminhoCcb: row.caminho_ccb || row.caminhoCcb || null,
+      caminho_ccb_assinado: row.caminho_ccb_assinado || row.caminhoCcbAssinado || null,
+      caminhoCcbAssinado: row.caminho_ccb_assinado || row.caminhoCcbAssinado || null,
+      ccb_gerado_em: row.ccb_gerado_em || row.ccbGeradoEm || null,
+      ccbGeradoEm: row.ccb_gerado_em || row.ccbGeradoEm || null,
+
+      // ✅ PAM V1.0: FORMALIZATION FLOW FIELDS 
+      biometria_concluida: row.biometria_concluida || row.biometriaConcluida || false,
+      biometriaConcluida: row.biometria_concluida || row.biometriaConcluida || false,
+      assinatura_eletronica_concluida: row.assinatura_eletronica_concluida || row.assinaturaEletronicaConcluida || false,
+      assinaturaEletronicaConcluida: row.assinatura_eletronica_concluida || row.assinaturaEletronicaConcluida || false,
+
+      // ✅ PAM V1.0: CLICKSIGN INTEGRATION FIELDS
+      clicksignSignUrl: row.clicksign_sign_url || row.clicksignSignUrl || null,
+      clicksign_sign_url: row.clicksign_sign_url || row.clicksignSignUrl || null,
+      clicksignDocumentKey: row.clicksign_document_key || row.clicksignDocumentKey || null,
+      clicksignSignerKey: row.clicksign_signer_key || row.clicksignSignerKey || null,
+      clicksignStatus: row.clicksign_status || row.clicksignStatus || null,
+
+      // ✅ PAM V1.0: BOLETO/INTER FIELDS
+      interBoletoGerado: row.inter_boleto_gerado || row.interBoletoGerado || false,
+      inter_boleto_gerado: row.inter_boleto_gerado || row.interBoletoGerado || false,
+      interBoletoGeradoEm: row.inter_boleto_gerado_em || row.interBoletoGeradoEm || null,
+      interCodigoSolicitacao: row.inter_codigo_solicitacao || row.interCodigoSolicitacao || null,
+
+      // ✅ PAM V1.0: ADDITIONAL FORMALIZATION METADATA
+      contratoGerado: row.contrato_gerado || row.contratoGerado || false,
+      contrato_gerado: row.contrato_gerado || row.contratoGerado || false,
+      contratoAssinado: row.contrato_assinado || row.contratoAssinado || false,
+      contrato_assinado: row.contrato_assinado || row.contratoAssinado || false,
+      dataAssinatura: row.data_assinatura || row.dataAssinatura || null,
+      data_assinatura: row.data_assinatura || row.dataAssinatura || null,
+      dataPagamento: row.data_pagamento || row.dataPagamento || null,
+      data_pagamento: row.data_pagamento || row.dataPagamento || null,
+      observacoesFormalização: row.observacoes_formalizacao || row.observacoesFormalização || null,
+      observacoes_formalizacao: row.observacoes_formalizacao || row.observacoesFormalização || null
     };
   }
 }
