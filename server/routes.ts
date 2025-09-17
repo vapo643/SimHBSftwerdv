@@ -171,15 +171,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .from('propostas')
           .select(`
             id,
-            codigo_identificacao,
-            nome_cliente,
-            cpf_cnpj,
-            valor_emprestimo,
-            numero_parcelas,
+            codigo_identificacao:numero_proposta,
+            nome_cliente:cliente_nome,
+            cliente_cpf,
+            cliente_cnpj,
+            tipo_pessoa,
+            valor_emprestimo:valor,
+            numero_parcelas:prazo,
             status,
-            observacao_status,
+            observacao_status:observacoes,
             created_at,
-            updated_at,
             loja_id,
             lojas!loja_id (
               id,
@@ -197,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           query = query.eq('loja_id', req.user.loja_id);
         }
         
-        query = query.order('updated_at', { ascending: false });
+        query = query.order('created_at', { ascending: false });
         
         console.log('📡 [FORMALIZATION_EXEC] Executing Supabase query...');
         
