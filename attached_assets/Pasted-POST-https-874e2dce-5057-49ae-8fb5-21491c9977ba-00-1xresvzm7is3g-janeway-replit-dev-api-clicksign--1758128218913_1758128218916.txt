@@ -1,0 +1,40 @@
+POST https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/clicksign/send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103 400 (Bad Request)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:401
+apiClient @ apiClient.ts:509
+await in apiClient
+post @ apiClient.ts:763
+apiRequest @ queryClient.ts:23
+mutationFn @ formalizacao.tsx:916
+fn @ @tanstack_react-query.js?v=a751b20f:1200
+run @ @tanstack_react-query.js?v=a751b20f:491
+start @ @tanstack_react-query.js?v=a751b20f:533
+execute @ @tanstack_react-query.js?v=a751b20f:1235
+await in execute
+mutate @ @tanstack_react-query.js?v=a751b20f:2642
+(anonymous) @ @tanstack_react-query.js?v=a751b20f:3356
+onClick @ formalizacao.tsx:1608
+callCallback2 @ chunk-QYFCA5BS.js?v=a751b20f:3680
+invokeGuardedCallbackDev @ chunk-QYFCA5BS.js?v=a751b20f:3705
+invokeGuardedCallback @ chunk-QYFCA5BS.js?v=a751b20f:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-QYFCA5BS.js?v=a751b20f:3742
+executeDispatch @ chunk-QYFCA5BS.js?v=a751b20f:7046
+processDispatchQueueItemsInOrder @ chunk-QYFCA5BS.js?v=a751b20f:7066
+processDispatchQueue @ chunk-QYFCA5BS.js?v=a751b20f:7075
+dispatchEventsForPlugins @ chunk-QYFCA5BS.js?v=a751b20f:7083
+(anonymous) @ chunk-QYFCA5BS.js?v=a751b20f:7206
+batchedUpdates$1 @ chunk-QYFCA5BS.js?v=a751b20f:18966
+batchedUpdates @ chunk-QYFCA5BS.js?v=a751b20f:3585
+dispatchEventForPluginEventSystem @ chunk-QYFCA5BS.js?v=a751b20f:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-QYFCA5BS.js?v=a751b20f:5484
+dispatchEvent @ chunk-QYFCA5BS.js?v=a751b20f:5478
+dispatchDiscreteEvent @ chunk-QYFCA5BS.js?v=a751b20f:5455Understand this error
+apiClient.ts:529 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/clicksign/send-ccb/ed2b393a-8bcc-4ef7-80da-419a26c79103 : {error: 'CCB deve estar gerado antes do envio ao ClickSign'}
+apiClient.ts:533 [API Client] After dual-key transformation: {error: 'CCB deve estar gerado antes do envio ao ClickSign'}
+formalizacao.tsx:956 ❌ [MUTATION] ClickSign failed: ApiError: HTTP Error 400
+    at apiClient (apiClient.ts:624:13)
+    at async Object.post (apiClient.ts:763:22)
+    at async apiRequest (queryClient.ts:23:12)
+    at async Object.mutationFn (formalizacao.tsx:916:24)
