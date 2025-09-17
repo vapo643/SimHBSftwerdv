@@ -1039,65 +1039,7 @@ export default function Formalizacao() {
     }
   };
 
-  // 🚀 FUNÇÃO CORRIGIDA: Enviar CCB para ClickSign com invalidação robusta de cache
-  const sendToClickSign = async (propostaId: string) => {
-    setLoadingClickSign(true);
-    try {
-      toast({
-        title: 'Enviando para ClickSign',
-        description: 'Preparando CCB para assinatura eletrônica...',
-      });
-
-      const response = (await apiRequest(`/api/clicksign/send-ccb/${propostaId}`, {
-        method: 'POST',
-      })) as { success?: boolean; signUrl?: string; envelopeId?: string };
-
-      if (response.success) {
-        toast({
-          title: 'Sucesso',
-          description: 'CCB enviada para ClickSign! Link de assinatura gerado.',
-        });
-        
-        console.log('🚀 [FRONTEND-FIX] Iniciando invalidação de cache após ClickSign');
-        
-        // 🎯 SOLUÇÃO 1: Invalidar cache específica (mais robusta que refetch)
-        await queryClient.invalidateQueries({ queryKey: queryKeys.proposta.all(propostaId) });
-        await queryClient.invalidateQueries({ queryKey: queryKeys.propostas.all });
-        
-        // 🎯 SOLUÇÃO 2: Forçar atualização imediata do estado local
-        queryClient.setQueryData(['/api/propostas', propostaId], (oldData: any) => {
-          if (oldData) {
-            console.log('🔄 [FRONTEND-FIX] Atualizando status local para AGUARDANDO_ASSINATURA');
-            return {
-              ...oldData,
-              status: 'AGUARDANDO_ASSINATURA'
-            };
-          }
-          return oldData;
-        });
-        
-        // Atualizar dados ClickSign
-        await checkClickSignStatus(propostaId);
-        
-        // 🎯 SOLUÇÃO 3: Aguardar e refetch para evitar race conditions
-        setTimeout(() => {
-          console.log('⏰ [FRONTEND-FIX] Refetch tardio executado');
-          refetch();
-        }, 500);
-        
-        console.log('✅ [FRONTEND-FIX] Todas as invalidações executadas');
-      }
-    } catch (error: any) {
-      console.error('Erro ao enviar para ClickSign:', error);
-      toast({
-        title: 'Erro',
-        description: error.message || 'Erro ao enviar CCB para ClickSign.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingClickSign(false);
-    }
-  };
+  // ✅ FUNÇÃO REMOVIDA: sendToClickSign duplicada - usar apenas enviarClickSignMutation
 
   // Função para consultar status ClickSign
   const checkClickSignStatus = async (propostaId: string): Promise<ClickSignData | null> => {
