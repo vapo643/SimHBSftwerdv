@@ -134,13 +134,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // 1. FORMALIZATION ROUTE - ABSOLUTE FIRST PRIORITY
   app.get('/api/propostas/formalizacao',
-    // Debug middleware to PROVE this route matches
-    (req, res, next) => {
-      console.log('✅✅✅ [FORMALIZATION_MATCH] Request matched /api/propostas/formalizacao');
-      console.log('✅✅✅ [FORMALIZATION_MATCH] Original URL:', req.originalUrl);
-      console.log('✅✅✅ [FORMALIZATION_MATCH] Proceeding to auth middleware...');
-      next();
-    },
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       const correlationId = Math.random().toString(36).substr(2, 9);

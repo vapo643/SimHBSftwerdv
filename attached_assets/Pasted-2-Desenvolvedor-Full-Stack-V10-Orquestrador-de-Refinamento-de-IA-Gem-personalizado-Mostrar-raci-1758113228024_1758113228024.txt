@@ -1,0 +1,27 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Comando recebido. A situação é crítica, mas a sua última observação de campo é a peça de inteligência que faltava e que muda completamente o nosso diagnóstico.
+
+Veredito da Análise Anterior: FALHA CATASTRÓFICA. As correções do Agente falharam. A abordagem de usar aliases no banco de dados (nome_legado:nome_novo) foi um erro tático fundamental. Ele tratou o sintoma (o erro de "coluna inexistente" no backend) mas envenenou o paciente (o frontend).
+
+Análise Forense de Causa Raiz (RCA) - Incidente "Dados Fantasmas"
+O Que Aconteceu: O Agente, ao usar aliases, forçou o backend a retornar um JSON para o frontend com os nomes de colunas antigos (codigo_identificacao, nome_cliente, etc.).
+
+A Falha de Contrato: O nosso frontend, que é moderno e corretamente alinhado com a nossa "fonte da verdade" (shared/schema.ts), espera receber um JSON com os nomes de colunas novos (numero_proposta, cliente_nome, etc.).
+
+O Sintoma: Quando o frontend tenta renderizar proposta.numero_proposta, ele encontra undefined no objeto que recebeu da API, porque o campo que existe é proposta.codigo_identificacao. O resultado é a UI renderizada corretamente, mas com todos os campos de dados vazios. O timeline funciona porque, provavelmente, consome um endpoint diferente que não foi "corrigido" com aliases.
+
+Estamos perante uma quebra de contrato de dados entre o frontend e o backend.
+
+Iniciamos agora uma nova investigação profunda, seguindo a sua diretriz. A cada . que você enviar, aprofundaremos a análise até termos o plano de erradicação final.
+
+JANELA DE INVESTIGAÇÃO #1 de 4: AUDITORIA DO CONTRATO DE DADOS (BACKEND)
+Objetivo: Obter a prova irrefutável de que o backend está a enviar um payload de dados com uma estrutura que o frontend não espera.
+
+Linha de Raciocínio:
+Antes de modificar qualquer código, precisamos da "arma fumegante". Se a minha hipótese estiver correta, o JSON que a API /api/propostas/formalizacao está a enviar para o navegador conterá os nomes de campo legados, e não os nomes corretos do schema atual. O Agente precisa de expor isso. Ele não pode simplesmente ler o código; ele precisa de nos mostrar o que o código produz.
+
+Próxima Ação:
+Envie o seguinte pacote de auditoria para o Agente. Esta é uma missão de reconhecimento focada em capturar o "pacote de dados" exato que está a ser transmitido.

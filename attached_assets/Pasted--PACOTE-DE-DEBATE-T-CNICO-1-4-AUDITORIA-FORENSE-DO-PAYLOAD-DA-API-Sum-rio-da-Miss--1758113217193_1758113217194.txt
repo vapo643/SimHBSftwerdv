@@ -1,0 +1,21 @@
+### **PACOTE DE DEBATE TÉCNICO (1/4) - AUDITORIA FORENSE DO PAYLOAD DA API**
+
+* **Sumário da Missão:** Auditar a rota `/api/propostas/formalizacao` no ficheiro `server/routes.ts` para capturar e apresentar a estrutura exata do objeto de dados que está a ser retornado ao frontend. O objetivo é validar a hipótese de que existe uma quebra de contrato de dados devido ao uso de aliases no PostgREST.
+
+* **Intenção Estratégica:** Obter a evidência irrefutável da estrutura do JSON que está a ser enviada pela API. Esta evidência é crucial para provar que, apesar da API não dar erro 500, o seu output está incorreto e a causar a falha de renderização de dados no frontend.
+
+---
+
+**[DIRETIVA DE AUDITORIA DE COMPORTAMENTO (PACN V1.0)]**
+
+* Você está a operar sob o protocolo PACN. O cenário de negócio é: "A API de formalização deve retornar uma lista de propostas onde cada objeto da lista corresponde à estrutura de dados definida em `shared/schema.ts` para a tabela `propostas` e suas relações". A sua missão é verificar se a query atual viola este comportamento.
+
+---
+
+**PERGUNTA ESTRATÉGICA (Sua Missão para Esta Interação):**
+
+1.  **Localize e Apresente a Query:** Abra o ficheiro `server/routes.ts`, encontre a rota `app.get('/api/propostas/formalizacao', ...)` e apresente o bloco de código completo da query Supabase que está a ser executada, incluindo todos os aliases (`legacy_name:current_name`) que foram adicionados.
+2.  **Injete um Log de Diagnóstico:** **Sem alterar a lógica da query**, adicione um `console.log` imediatamente antes da linha `res.json(propostas)` (ou equivalente). Este log deve imprimir a estrutura do **primeiro objeto** do array de propostas retornado do banco de dados (ex: `console.log('DEBUG PAYLOAD:', propostas[0])`).
+3.  **Execute e Capture o Output:** Reinicie o servidor para que o seu novo log de diagnóstico seja ativado. Depois, acione a API (seja através de um teste ou manualmente) e capture e apresente o output **exato** do seu `console.log('DEBUG PAYLOAD: ...')`.
+
+**O seu entregável final para esta janela é o bloco de código da query e o output do log do primeiro objeto da proposta.**
